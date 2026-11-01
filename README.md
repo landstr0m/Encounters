@@ -10,6 +10,7 @@ Player characters can be synced from a [Kanka](https://kanka.io) campaign throug
 - Initiative order with round and turn tracking. A sticky turn card shows the current creature's attacks, statuses and death saves.
 - A compact combat table: tap rows to select one or more combatants.
 - A bottom action pad with a number wheel to apply damage, healing, temp HP or statuses to the selection.
+- **Damage types:** pick a type (fire, cold, …) before Damage or Half. Each target takes the right amount: halved if it resists (round down), 0 if immune, doubled if vulnerable. Monster defences come from their stat blocks, player defences from Kanka; Raging and Petrified add their resistances. A note shows what each target took.
 - AC, HP, temp HP and death saves (with stable/dead handling). Remove, revive and edit combatants in place.
 
 **Monsters**
@@ -21,11 +22,12 @@ Player characters can be synced from a [Kanka](https://kanka.io) campaign throug
 **Players**
 - A reusable party library. Tick who is at the table and add them in one go.
 - Add characters by hand: `Thorn, AC 15, HP 28, init +3`.
-- **Update from Kanka** loads `players.json`. It fills name, class, species, ability scores, initiative modifier, passive Perception and saving throws. Max HP is auto-filled with the estimate (see below). If a hand-set HP differs from the latest Kanka estimate (for example after a level-up in another game), the party list shows both values with a **Use Kanka HP** button, plus a **Use Kanka HP for all** button. AC still has to be entered (`Name, AC 16`).
+- **Update from Kanka** loads `players.json`. It fills name, class and subclass, species, ability scores, initiative modifier, passive Perception, saving throws, resistances and species/class traits. Tap ⓘ on a player to see this as a stat block, including how the class text was read. Max HP is auto-filled with the estimate (see below). If a hand-set HP differs from the latest Kanka estimate (for example after a level-up in another game), the party list shows both values with a **Use Kanka HP** button, plus a **Use Kanka HP for all** button. AC still has to be entered (`Name, AC 16`).
 
 **Statuses and saving throws**
-- Conditions and spell or class effects (Hasted, Slowed, Raging, cover, Bless and others) with rule text. Mechanical effects such as AC, speed and save modifiers are applied automatically.
-- The **Saves** button shows one chosen saving throw for every combatant, players and monsters alike. Shaded means proficient. Statuses add notes such as `adv.`, `+2` or `auto-fail`. Player saves need Kanka data.
+- Conditions and spell or class effects (Hasted, Slowed, Raging, cover, Bless, Sleep and others) with rule text. Mechanical effects such as AC, speed and save modifiers are applied automatically.
+- **Condition immunities:** applying a status to a group skips creatures immune to it (from monster stat blocks and player traits) and lists who was skipped. Spell statuses count the condition they impose: Hypnotic Pattern = Charmed, Fear and Turn Undead = Frightened, Stinking Cloud = Poisoned, Sleep = Exhaustion or Unconscious.
+- The **Saves** button shows one chosen saving throw for every combatant, players and monsters alike. Shaded means proficient. Statuses and species traits add notes such as `adv.`, `+2` or `auto-fail`. Player saves need Kanka data.
 
 **Encounter prep and table view**
 - Effects: lair actions, hazards or timers placed at a fixed initiative, either visible to players or hidden.
@@ -38,9 +40,11 @@ Player characters can be synced from a [Kanka](https://kanka.io) campaign throug
 
 `tools/kanka_players.py` uses only the Python standard library. It reads the player characters of the Blackrock campaign (`CAMPAIGN` at the top of the script) and writes `players.json`.
 
-- Ability scores, modifiers, saving throws and proficiencies come from the character's Kanka attributes.
+- The class field is read leniently: `Cleric, Forge Domain - 2`, `Fighter, Runemaster - 3`, `College of Glamour Bard - 3` and `Fighter 3 / Wizard 2` all work. Each class name starts a block, and the subclass and level are taken from that block. Anything not understood is printed in the workflow log and shown on the player's stat block.
+- Ability scores and modifiers come from Kanka. Saving throws listed in Kanka are used as-is. If none are listed, proficiencies are inferred from the first class (plus proficiency bonus by level).
+- Species and class/subclass features that affect saves or damage are added as traits: for example Gnomish Cunning, Dwarven Resilience, Dual Mind, Fey Ancestry, Soul of the Forge and Heart of the Storm. The tables are at the top of the script and are easy to extend.
 - **Estimated HP** (`hpEst`) uses the class hit die: max at level 1, average after that, plus the Con modifier per level. It ignores HP bonuses from feats or species (such as Tough), so override HP by hand where needed.
-- Damage resistances come from the species. To add class, feat or item resistances, give the character a Kanka property `Resistances`, `Immunities` or `Vulnerabilities` (comma-separated).
+- To add resistances from feats, items or choices the script can't know (such as a draconic damage type), give the character a Kanka property `Resistances`, `Immunities` or `Vulnerabilities` (comma-separated).
 
 To update, open **Actions → Update players from Kanka → Run workflow** on GitHub. The workflow needs a repository secret `KANKA_API_KEY` and commits `players.json` only if it changed. Then press **Update from Kanka** in the app's party tab.
 

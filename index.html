@@ -177,6 +177,10 @@ tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 
 .amtrow{display:flex;gap:8px;align-items:center}
 .amtin{width:110px;text-align:center;font-family:var(--display);font-size:2.2rem;font-weight:700;min-height:52px;padding:0}
 .amtrow span{font-size:.8rem;color:var(--muted)}
+#dtype{min-height:40px;margin-left:auto;font:inherit;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:0 6px}
+.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translate(-50%,-150%);max-width:min(92vw,560px);background:var(--ink);color:var(--surface);padding:10px 14px;border-radius:10px;z-index:60;transition:transform .2s;font-size:.95rem;cursor:pointer}
+.toast.on{transform:translate(-50%,0)}
+.toast small{opacity:.8}
 .pacts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .pacts button{font-weight:700;padding:0 4px;min-height:42px}
 .pacts .d{color:var(--bad)}.pacts .h{color:var(--ok)}
@@ -360,6 +364,7 @@ var SPELLS=[
  ['Fear','😨','Fear: Frightened, drops what it holds, and must Dash away from the caster on its turns.'],
  ['Spirit Guardians','👼','Spirit Guardians: speed halved in the 15-ft emanation; 3d8 radiant or necrotic when it enters or starts its turn there (Wis half).',{mul:.5}],
  ['Stinking Cloud','☁️','Stinking Cloud: on a failed Con save, Poisoned and loses its action and bonus action while in the cloud.'],
+ ['Sleeping','💤','Sleep: Incapacitated until the end of its next turn on a failed Wis save, then Unconscious (repeat the save). Creatures that don\u2019t sleep, or are immune to Exhaustion, succeed automatically. Ends if it takes damage or is shaken awake (action).'],
  ['Laughing','😂','Hideous Laughter: Prone and Incapacitated; Wis save at end of each turn and when it takes damage.'],
  ['Confused','🎲','Confusion: no reactions; d10 each turn: 1 moves randomly, 2–6 does nothing, 7–8 attacks a random creature in reach, 9–10 acts normally.'],
  ['Levitating','🎈','Levitate: floats in place; can move only by pushing or pulling on objects (speed 0).',{zero:1}],
@@ -500,6 +505,31 @@ function maxDown(c,n){if(c.base==null)c.base=c.max;c.max=Math.max(0,c.max-n);c.h
 function maxReset(c){if(c.base!=null){c.max=c.base;c.base=null;}}
 function setDead(c){if(c.conds.indexOf('Dead')<0)c.conds.push('Dead');}
 function addFail(c,n){var ds=dsOf(c);ds.f=Math.min(3,ds.f+n);if(ds.f>=3)setDead(c);}
+var DTYPES=['acid','bludgeoning','cold','fire','force','lightning','necrotic','piercing','poison','psychic','radiant','slashing','thunder'];
+// Spell statuses blocked by immunity to the condition they impose.
+var CIM={'Entranced':['charmed'],'Fear':['frightened'],'Turned':['frightened'],'Stinking Cloud':['poisoned'],'Sleeping':['exhaustion','unconscious']};
+function monLine(c,re){var m=c.kind==='mon'&&MON.find(function(x){return x.id===c.monId;});return m?((m.extra.find(function(e){return re.test(e[0]);})||[])[1]||'').toLowerCase():'';}
+function defs(c){
+  var d={res:[],imm:[],vul:[],cimm:[]};
+  if(c.kind==='pc'){var l=S.lib.find(function(x){return x.id===c.libId;})||{};d.res=(l.res||[]).slice();d.imm=(l.imm||[]).slice();d.vul=(l.vul||[]).slice();d.cimm=(l.cimm||[]).slice();}
+  else if(c.kind==='mon'){
+    var R=monLine(c,/^res/i),I=monLine(c,/^imm/i),V=monLine(c,/^vul/i),has=function(t,w){return new RegExp('\\b'+w+'\\b').test(t);};
+    DTYPES.forEach(function(t){if(has(R,t))d.res.push(t);if(has(I,t))d.imm.push(t);if(has(V,t))d.vul.push(t);});
+    CONDS.concat(['Exhaustion']).forEach(function(x){if(has(I,x.toLowerCase()))d.cimm.push(x.toLowerCase());});
+  }
+  if(c.conds.indexOf('Raging')>=0)d.res.push('bludgeoning','piercing','slashing');
+  if(c.conds.indexOf('Petrified')>=0)d.res=DTYPES.slice();
+  return d;
+}
+// Damage after resistance (half, round down), immunity (0) and vulnerability (double).
+function typed(c,n,t){
+  if(!t)return [n,''];var d=defs(c),r=d.res.indexOf(t)>=0,v=d.vul.indexOf(t)>=0;
+  if(d.imm.indexOf(t)>=0)return [0,'immune'];
+  if(r&&v)return [n,''];if(r)return [Math.floor(n/2),'resists'];if(v)return [n*2,'vulnerable'];return [n,''];
+}
+function condBlocked(c,x){var d=defs(c).cimm;return (CIM[x]||[x.toLowerCase()]).some(function(k){return d.indexOf(k)>=0;});}
+function toast(h){var t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';t.setAttribute('role','status');document.body.appendChild(t);}
+  t.innerHTML=h;t.classList.add('on');clearTimeout(toast.tm);toast.tm=setTimeout(function(){t.classList.remove('on');},6000);t.onclick=function(){t.classList.remove('on');};}
 function dmg(c,n){
   var before=c.hp;
   var t=Math.min(c.temp,n);c.temp-=t;n-=t;
@@ -631,7 +661,7 @@ function saveOf(c,i){
   if(c.kind==='pc'){
     var l=S.lib.find(function(x){return x.id===c.libId;}),k=AB[i].toLowerCase();
     if(!l||!l.saves||l.saves[k]==null)return null;
-    n=l.saves[k];r=(l.saveProf||[]).indexOf(k)>=0;
+    n=l.saves[k];r=(l.saveProf||[]).indexOf(k)>=0;var spAdv=(l.adv||[]).indexOf(k)>=0;
   }else{
     var m=MON.find(function(x){return x.id===c.monId;});if(!m)return null;
     var sv=(m.extra.find(function(e){return /^sav/i.test(e[0]);})||[])[1]||'';
@@ -640,7 +670,7 @@ function saveOf(c,i){
   }
   var has=function(x){return c.conds.indexOf(x)>=0;},notes=[];
   if(i<2&&(has('Paralyzed')||has('Stunned')||has('Unconscious')||has('Petrified')))notes.push('auto-fail');
-  else{if(i===1&&has('Restrained'))notes.push('disadv.');c.conds.forEach(function(x){var f=(SPX[x]||{}).sv;if(f&&(f[0]==='all'||f[0]===i))notes.push(f[1]);});}
+  else{if(spAdv)notes.push('adv.');if(i===1&&has('Restrained'))notes.push('disadv.');c.conds.forEach(function(x){var f=(SPX[x]||{}).sv;if(f&&(f[0]==='all'||f[0]===i))notes.push(f[1]);});}
   var note=notes.map(function(t){return '<small'+(/^(\+|adv)/.test(t)?'':' class="b"')+'>'+t+'</small>';}).join('');
   return '<span class="sv'+(r?' svp':'')+'" title="'+(r?'Proficient':'Ability modifier')+'">'+AB[i]+' '+sgn(n)+note+'</span>';
 }
@@ -717,7 +747,7 @@ function renderPad(){
   var names=T.map(function(c){return esc(c.name);}).join(', ');
   pad.innerHTML='<div class="pi"><div class="pt"><div class="who"><b>'+T.length+' selected</b> · '+names+'</div><button data-act="desel">Deselect</button></div>'+
    '<div class="pmain"><div class="wheelbox"><div class="wheel" id="wheel" aria-label="Amount wheel">'+WHEEL+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div></div>'+
-   '<div class="pr"><div class="amtrow"><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount, tap to type"><span>Spin the wheel or tap the number to type</span></div>'+
+   '<div class="pr"><div class="amtrow"><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount, tap to type"><span>Spin the wheel or tap the number to type</span><select id="dtype" aria-label="Damage type"><option value="">Untyped</option>'+DTYPES.map(function(t){return '<option value="'+t+'"'+(ui.dtype===t?' selected':'')+'>'+t[0].toUpperCase()+t.slice(1)+'</option>';}).join('')+'</select></div>'+
    '<div class="pacts"><button class="d" data-act="padhp" data-k="dmg">Damage</button><button class="d" data-act="padhp" data-k="half">Half</button><button class="h" data-act="padhp" data-k="heal">Heal</button>'+
    '<button data-act="padhp" data-k="temp">Temp HP</button><button data-act="padstatus">Status ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove">'+(ui.confirmRemove?'Sure?':'Remove')+'</button><button class="d" data-act="padhp" data-k="maxdn">Max HP \u2212</button><button data-act="padhp" data-k="maxreset">Reset max</button><button data-act="padgroup">'+(T.some(function(c){return c.cg;})&&T.every(function(c){return c.cg&&c.cg===T[0].cg;})?'Ungroup':'Group\u2026')+'</button></div></div></div>'+
    (ui.menu?menuHTML(T):'')+'</div>';
@@ -742,6 +772,11 @@ function statHTML(){
     return '<h3>'+esc(kl.name)+'</h3><p>'+esc(kl.cls||'')+(kl.race?' · '+esc(kl.race):'')+'</p>'+
       '<p>'+['str','dex','con','int','wis','cha'].map(function(k){var v=ab[k];return '<b>'+k.toUpperCase()+'</b> '+(v==null?'?':v+' ('+sgn(Math.floor((v-10)/2))+')');}).join(' · ')+'</p>'+
       '<p>Passive Perception '+(kl.pp==null?'?':kl.pp)+(kl.hpEst?' · Estimated max HP '+kl.hpEst:'')+'</p>'+
+      (kl.parsed&&kl.parsed.length?'<p><b>Read as</b> '+kl.parsed.map(function(x){return esc(x.class)+(x.subclass?' ('+esc(x.subclass)+')':'')+' '+(x.level||'?');}).join(' / ')+'</p>':'')+
+      (kl.notes&&kl.notes.length?'<p class="muted">'+esc(kl.notes.join('; '))+'</p>':'')+
+      (kl.saves?'<p><b>Saves</b> '+['str','dex','con','int','wis','cha'].map(function(k){var p=(kl.saveProf||[]).indexOf(k)>=0;return (p?'<b>':'')+k.toUpperCase()+' '+sgn(kl.saves[k])+(p?'</b>':'')+((kl.adv||[]).indexOf(k)>=0?' (adv.)':'');}).join(' · ')+' <span class="muted">(bold = proficient)</span></p>':'')+
+      [['Resistances',kl.res],['Immunities',kl.imm],['Vulnerabilities',kl.vul],['Condition immunities',kl.cimm]].map(function(x){return x[1]&&x[1].length?'<p><b>'+x[0]+'</b> '+esc(x[1].join(', '))+'</p>':'';}).join('')+
+      (kl.traits||[]).map(function(t){return '<p><b><i>'+esc(t.name)+'.</i></b> '+esc(t.text)+' <span class="muted">('+esc(t.src)+')</span></p>';}).join('')+
       '<p><a href="'+esc(kl.url)+'" target="_blank" rel="noopener">Open in Kanka</a></p>';
   }
   var m=MON.find(function(x){return x.id===S.stat;});
@@ -934,7 +969,7 @@ function parseChar(t){
 }
 function findC(id){return S.list.find(function(x){return x.id===+id;});}
 function pruneSel(){Object.keys(ui.sel).forEach(function(k){if(!findC(k))delete ui.sel[k];});}
-function finishPad(){ui.sel={};ui.amt=0;ui.menu=false;ui.pend={};ui.mq='';ui.confirmRemove=false;}
+function finishPad(){ui.dtype='';ui.sel={};ui.amt=0;ui.menu=false;ui.pend={};ui.mq='';ui.confirmRemove=false;}
 function nextIdExcluding(T){
   var ids={};T.forEach(function(c){ids[c.id]=true;});
   var O=order();var idx=O.findIndex(function(c){return c.id===S.turnId;});
@@ -1011,6 +1046,7 @@ $('#tbl').addEventListener('change',function(e){
   save();renderBoard();
 });
 var padEl=$('#pad');
+padEl.addEventListener('change',function(e){if(e.target.id==='dtype')ui.dtype=e.target.value;});
 padEl.addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;
   var a=b.dataset.act;
@@ -1027,9 +1063,12 @@ padEl.addEventListener('click',function(e){
     var k=b.dataset.k;
     if(k==='maxreset'){T.forEach(maxReset);finishPad();}
     else if(v>0){
+      var out=[];
       T.forEach(function(c){
-        if(k==='dmg')dmg(c,v);else if(k==='half')dmg(c,Math.floor(v/2));else if(k==='heal')heal(c,v);else if(k==='maxdn')maxDown(c,v);else c.temp=Math.max(c.temp,v);
+        if(k==='dmg'||k==='half'){var r=typed(c,k==='half'?Math.floor(v/2):v,ui.dtype);dmg(c,r[0]);out.push(esc(c.name)+' '+r[0]+(r[1]?' <small>('+r[1]+')</small>':''));}
+        else if(k==='heal')heal(c,v);else if(k==='maxdn')maxDown(c,v);else c.temp=Math.max(c.temp,v);
       });
+      if(out.length&&(ui.dtype||out.length>1))toast('<b>'+(ui.dtype?ui.dtype[0].toUpperCase()+ui.dtype.slice(1)+' ':'')+'damage:</b> '+out.join(' · '));
       finishPad();
     }
   }
@@ -1052,14 +1091,17 @@ padEl.addEventListener('click',function(e){
   }
   else if(a==='mcancel'){ui.menu=false;ui.pend={};ui.mq='';}
   else if(a==='mapply'){
+    var skip=[];
     Object.keys(ui.pend).forEach(function(x){
       T.forEach(function(c){
         var i=c.conds.indexOf(x);
+        if(ui.pend[x]&&condBlocked(c,x)){skip.push(esc(c.name)+' ('+esc(x)+')');return;}
         if(ui.pend[x]){if(i<0)c.conds.push(x);}
         else if(i>=0){c.conds.splice(i,1);if(x==='Dead'&&c.kind==='pc'&&c.hp<=0&&c.ds&&c.ds.f>=3)c.ds.f=2;}
       });
     });
     T.forEach(function(c){incSync(c,true);});
+    if(skip.length)toast('<b>Immune, not applied:</b> '+skip.join(' · '));
     finishPad();
   }
   else if(a==='padremove'){
@@ -1140,7 +1182,7 @@ dr.addEventListener('click',function(e){
         var l=S.lib.find(function(x){return x.k===p.id;})||S.lib.find(function(x){return !x.k&&x.name.toLowerCase()===p.name.toLowerCase();});
         if(!l){l={id:'l'+(S.libNext++),ac:10,hp:p.hpEst||10,chk:true};S.lib.push(l);nw++;}else up++;
         l.k=p.id;l.name=p.name;l.ib=p.initMod!=null?p.initMod:(p.mods&&p.mods.dex!=null?p.mods.dex:(l.ib||0));
-        if(p.hpEst&&!l.hpMan&&(l.chk||l.hp===l.hpEst))l.hp=p.hpEst;else if(p.hpEst&&l.hp!==p.hpEst)df++;l.saves=p.saves;l.saveProf=p.saveProf;
+        if(p.hpEst&&!l.hpMan&&(l.chk||l.hp===l.hpEst))l.hp=p.hpEst;else if(p.hpEst&&l.hp!==p.hpEst)df++;l.saves=p.saves;l.saveProf=p.saveProf;l.res=p.resist||[];l.imm=p.immune||[];l.vul=p.vulnerable||[];l.cimm=p.condImmune||[];l.adv=p.advSaves||[];l.traits=p.traits||[];l.parsed=p.parsed||[];l.notes=p.notes||[];
         l.cls=p.classes;l.race=p.race;l.abil=p.abilities;l.pp=p.passivePerception;l.hpEst=p.hpEst;l.url=p.url;
       });
       S.lib.sort(function(a,b){return a.name.localeCompare(b.name);});
