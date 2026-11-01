@@ -4,7 +4,7 @@ Newest first. Run `python tests/run_tests.py` after every change (see the README
 
 ## 2026-11-01 — pre-live-test polish
 
-### Test battery (tests/run_tests.py, 32 tests)
+### Test battery (tests/run_tests.py, now 35 tests)
 First run: 24/30. No app bugs were found; the failures were in the test harness:
 - Monster images (`img/*.webp`) are kept locally and are not in the repo, so their 404s were counted as errors. The harness now ignores `/img/` 404s. The app already hides missing images.
 - On a phone (390 px) the open drawer covers the whole screen, so the action pad is behind it until the drawer is closed. This is the intended phone layout, so the test now closes the drawer first at phone width.
