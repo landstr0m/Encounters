@@ -5,7 +5,15 @@
   "title": null,
   "race": "Tiefling (Mephistopheles)",
   "classes": "Bard - 2",
+  "parsed": [
+   {
+    "class": "bard",
+    "subclass": "",
+    "level": 2
+   }
+  ],
   "level": 2,
+  "notes": [],
   "abilities": {
    "str": 8,
    "dex": 15,
@@ -41,6 +49,15 @@
   ],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Hellish Resistance",
+    "text": "Resistance to fire.",
+    "src": "species"
+   }
+  ],
   "hpEst": 15,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/10017493"
@@ -51,7 +68,15 @@
   "title": "Luminary (Lum.)",
   "race": "Gnome (Forest)",
   "classes": "Illusion Wizard - 3",
+  "parsed": [
+   {
+    "class": "wizard",
+    "subclass": "illusion",
+    "level": 3
+   }
+  ],
   "level": 3,
+  "notes": [],
   "abilities": {
    "str": 8,
    "dex": 16,
@@ -85,6 +110,19 @@
   "resist": [],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [
+   "cha",
+   "int",
+   "wis"
+  ],
+  "traits": [
+   {
+    "name": "Gnomish Cunning",
+    "text": "Advantage on Int, Wis and Cha saves.",
+    "src": "species"
+   }
+  ],
   "hpEst": 14,
   "image": "https://th.kanka.io/fpPcDPZZAjkUnJh0QGuD2py9h3g=/40x40/filters:focal(607x568:627x588)/src/campaigns/227292/01a0974e-d9ab-725d-a6cb-86b6f76aa559/1.jpg",
   "url": "https://app.kanka.io/w/227292/entities/9864074"
@@ -95,7 +133,15 @@
   "title": null,
   "race": "Half-Elf (Drow)",
   "classes": "College of Glamour Bard - 3",
+  "parsed": [
+   {
+    "class": "bard",
+    "subclass": "glamour",
+    "level": 3
+   }
+  ],
   "level": 3,
+  "notes": [],
   "abilities": {
    "str": 10,
    "dex": 14,
@@ -129,6 +175,15 @@
   "resist": [],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Fey Ancestry",
+    "text": "Advantage on saves to avoid or end Charmed; magic can't put it to sleep.",
+    "src": "species"
+   }
+  ],
   "hpEst": 21,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9850236"
@@ -139,7 +194,15 @@
   "title": "Blacksmith",
   "race": "Dwarf (Hill)",
   "classes": "Cleric, Forge Domain - 2",
-  "level": null,
+  "parsed": [
+   {
+    "class": "cleric",
+    "subclass": "forge",
+    "level": 2
+   }
+  ],
+  "level": 2,
+  "notes": [],
   "abilities": {
    "str": 13,
    "dex": 8,
@@ -175,7 +238,16 @@
   ],
   "immune": [],
   "vulnerable": [],
-  "hpEst": null,
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Dwarven Resilience",
+    "text": "Resistance to poison; advantage on saves to avoid or end Poisoned.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 19,
   "image": "https://th.kanka.io/xizQqgUA9j4OXhQRWwW381xhFLI=/40x40/smart/src/campaigns/227292/01a06b14-40c3-73c7-b813-196997fa7afd/1.png",
   "url": "https://app.kanka.io/w/227292/entities/9810697"
  },
@@ -185,7 +257,15 @@
   "title": "Graver Robber",
   "race": "Dhampir with Winged Tiefling Origin",
   "classes": "Ranger - 1",
+  "parsed": [
+   {
+    "class": "ranger",
+    "subclass": "",
+    "level": 1
+   }
+  ],
   "level": 1,
+  "notes": [],
   "abilities": {
    "str": 12,
    "dex": 14,
@@ -223,6 +303,9 @@
   "resist": [],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [],
   "hpEst": 12,
   "image": "https://th.kanka.io/zC6PxCBk8DayL7raG_xQ1JQFsyU=/40x40/filters:focal(231x136:251x156)/src/campaigns/227292/01a172e6-bde1-73a6-a3d1-cb839f954f9d/1.png",
   "url": "https://app.kanka.io/w/227292/entities/10079510"
@@ -233,7 +316,15 @@
   "title": null,
   "race": "Dwarf (Mark of Warding)",
   "classes": "Artificer - 2",
+  "parsed": [
+   {
+    "class": "artificer",
+    "subclass": "",
+    "level": 2
+   }
+  ],
   "level": 2,
+  "notes": [],
   "abilities": {
    "str": 10,
    "dex": 14,
@@ -269,6 +360,15 @@
   ],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Dwarven Resilience",
+    "text": "Resistance to poison; advantage on saves to avoid or end Poisoned.",
+    "src": "species"
+   }
+  ],
   "hpEst": 19,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/10023006"
@@ -279,7 +379,15 @@
   "title": "Dr.",
   "race": "Gnome (Rock)",
   "classes": "Knowledge Cleric - 2",
+  "parsed": [
+   {
+    "class": "cleric",
+    "subclass": "knowledge",
+    "level": 2
+   }
+  ],
   "level": 2,
+  "notes": [],
   "abilities": {
    "str": 8,
    "dex": 10,
@@ -313,6 +421,19 @@
   "resist": [],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [
+   "cha",
+   "int",
+   "wis"
+  ],
+  "traits": [
+   {
+    "name": "Gnomish Cunning",
+    "text": "Advantage on Int, Wis and Cha saves.",
+    "src": "species"
+   }
+  ],
   "hpEst": 17,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9854904"
@@ -323,7 +444,15 @@
   "title": null,
   "race": "Genasi (Water)",
   "classes": "Storm Sorcerer - 2",
+  "parsed": [
+   {
+    "class": "sorcerer",
+    "subclass": "storm",
+    "level": 2
+   }
+  ],
   "level": 2,
+  "notes": [],
   "abilities": {
    "str": 8,
    "dex": 13,
@@ -359,6 +488,15 @@
   ],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Acid Resistance",
+    "text": "Resistance to acid.",
+    "src": "species"
+   }
+  ],
   "hpEst": 16,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9888695"
@@ -369,7 +507,15 @@
   "title": "Criminal Playboy",
   "race": "Halfling",
   "classes": "Rogue - 1",
+  "parsed": [
+   {
+    "class": "rogue",
+    "subclass": "",
+    "level": 1
+   }
+  ],
   "level": 1,
+  "notes": [],
   "abilities": {
    "str": 8,
    "dex": 17,
@@ -403,6 +549,15 @@
   "resist": [],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Brave",
+    "text": "Advantage on saves to avoid or end Frightened.",
+    "src": "species"
+   }
+  ],
   "hpEst": 9,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/10056489"
@@ -413,7 +568,15 @@
   "title": "Tree Gardener",
   "race": "Elf (Wood)",
   "classes": "Shepherd Druid - 3",
+  "parsed": [
+   {
+    "class": "druid",
+    "subclass": "shepherd",
+    "level": 3
+   }
+  ],
   "level": 3,
+  "notes": [],
   "abilities": {
    "str": 10,
    "dex": 16,
@@ -447,6 +610,15 @@
   "resist": [],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Fey Ancestry",
+    "text": "Advantage on saves to avoid or end Charmed; magic can't put it to sleep.",
+    "src": "species"
+   }
+  ],
   "hpEst": 24,
   "image": "https://th.kanka.io/v6rRZ3ksVCe9Q1WaU_jjsiW-oEI=/40x40/filters:focal(1086x1350:1106x1370)/src/campaigns/227292/01a0a167-53d4-71a0-ac96-85e22c8e38d7/1.jpg",
   "url": "https://app.kanka.io/w/227292/entities/9815497"
@@ -457,7 +629,15 @@
   "title": "The Duke",
   "race": "Giff",
   "classes": "Rogue - 2",
+  "parsed": [
+   {
+    "class": "rogue",
+    "subclass": "",
+    "level": 2
+   }
+  ],
   "level": 2,
+  "notes": [],
   "abilities": {
    "str": 10,
    "dex": 16,
@@ -491,6 +671,9 @@
   "resist": [],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [],
   "hpEst": 15,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9899034"
@@ -501,7 +684,15 @@
   "title": null,
   "race": "Half-Elf",
   "classes": "Barbarian - 1",
+  "parsed": [
+   {
+    "class": "barbarian",
+    "subclass": "",
+    "level": 1
+   }
+  ],
   "level": 1,
+  "notes": [],
   "abilities": {
    "str": 16,
    "dex": 8,
@@ -535,6 +726,20 @@
   "resist": [],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Fey Ancestry",
+    "text": "Advantage on saves to avoid or end Charmed; magic can't put it to sleep.",
+    "src": "species"
+   },
+   {
+    "name": "Rage",
+    "text": "While raging: resistance to bludgeoning, piercing and slashing; advantage on Str checks and saves.",
+    "src": "barbarian"
+   }
+  ],
   "hpEst": 15,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9815472"
@@ -545,7 +750,15 @@
   "title": null,
   "race": "Human",
   "classes": "Wizard - 1",
+  "parsed": [
+   {
+    "class": "wizard",
+    "subclass": "",
+    "level": 1
+   }
+  ],
   "level": 1,
+  "notes": [],
   "abilities": {
    "str": 8,
    "dex": 10,
@@ -579,6 +792,9 @@
   "resist": [],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [],
   "hpEst": 8,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9815460"
@@ -589,7 +805,15 @@
   "title": null,
   "race": "Human (Variant)",
   "classes": "Paladin - 2",
+  "parsed": [
+   {
+    "class": "paladin",
+    "subclass": "",
+    "level": 2
+   }
+  ],
   "level": 2,
+  "notes": [],
   "abilities": {
    "str": 16,
    "dex": 10,
@@ -623,6 +847,9 @@
   "resist": [],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [],
   "hpEst": 20,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9850209"
@@ -633,7 +860,15 @@
   "title": "Shaman",
   "race": "Goblin",
   "classes": "Druid - 2",
+  "parsed": [
+   {
+    "class": "druid",
+    "subclass": "",
+    "level": 2
+   }
+  ],
   "level": 2,
+  "notes": [],
   "abilities": {
    "str": 10,
    "dex": 16,
@@ -667,6 +902,15 @@
   "resist": [],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Fey Ancestry",
+    "text": "Advantage on saves to avoid or end Charmed.",
+    "src": "species"
+   }
+  ],
   "hpEst": 17,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/10022982"
@@ -677,7 +921,15 @@
   "title": null,
   "race": "Tiefling (Zariel)",
   "classes": "Warlock - 2",
+  "parsed": [
+   {
+    "class": "warlock",
+    "subclass": "",
+    "level": 2
+   }
+  ],
   "level": 2,
+  "notes": [],
   "abilities": {
    "str": 9,
    "dex": 14,
@@ -713,6 +965,15 @@
   ],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Hellish Resistance",
+    "text": "Resistance to fire.",
+    "src": "species"
+   }
+  ],
   "hpEst": 17,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/10056511"
@@ -723,7 +984,15 @@
   "title": "Occult Consultant | Fortune Teller | Prize Fighter",
   "race": "Kalashtar (Half-Elf Origin)",
   "classes": "Fighter, Rune Knight - 3",
-  "level": null,
+  "parsed": [
+   {
+    "class": "fighter",
+    "subclass": "rune",
+    "level": 3
+   }
+  ],
+  "level": 3,
+  "notes": [],
   "abilities": {
    "str": 16,
    "dex": 13,
@@ -759,7 +1028,18 @@
   ],
   "immune": [],
   "vulnerable": [],
-  "hpEst": null,
+  "condImmune": [],
+  "advSaves": [
+   "wis"
+  ],
+  "traits": [
+   {
+    "name": "Dual Mind",
+    "text": "Advantage on all Wis saves; resistance to psychic.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 28,
   "image": "https://th.kanka.io/hVpeZacQnWVYO67fxWrlK9_nd0E=/40x40/filters:focal(250x167:270x187)/src/campaigns/227292/01a16902-df12-73aa-8470-332e41a576a2/1.png",
   "url": "https://app.kanka.io/w/227292/entities/9799958"
  },
@@ -769,7 +1049,15 @@
   "title": null,
   "race": "Firbolg",
   "classes": "Ranger - 2",
+  "parsed": [
+   {
+    "class": "ranger",
+    "subclass": "",
+    "level": 2
+   }
+  ],
   "level": 2,
+  "notes": [],
   "abilities": {
    "str": 10,
    "dex": 16,
@@ -803,6 +1091,9 @@
   "resist": [],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [],
   "hpEst": 18,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9938950"
@@ -813,7 +1104,15 @@
   "title": null,
   "race": "Genasi (Fire)",
   "classes": "Artificer - 2",
+  "parsed": [
+   {
+    "class": "artificer",
+    "subclass": "",
+    "level": 2
+   }
+  ],
   "level": 2,
+  "notes": [],
   "abilities": {
    "str": 10,
    "dex": 14,
@@ -849,6 +1148,15 @@
   ],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Fire Resistance",
+    "text": "Resistance to fire.",
+    "src": "species"
+   }
+  ],
   "hpEst": 17,
   "image": "https://th.kanka.io/pIrDX7ABFgw16t31Sk8oX8R5gGk=/40x40/filters:focal(823x476:843x496)/src/campaigns/227292/01a0a613-d240-7151-8106-135df706749b/1.png",
   "url": "https://app.kanka.io/w/227292/entities/9888842"
@@ -859,7 +1167,15 @@
   "title": null,
   "race": "Tabaxi",
   "classes": "Ranger - 2",
+  "parsed": [
+   {
+    "class": "ranger",
+    "subclass": "",
+    "level": 2
+   }
+  ],
   "level": 2,
+  "notes": [],
   "abilities": {
    "str": 10,
    "dex": 16,
@@ -893,6 +1209,9 @@
   "resist": [],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [],
   "hpEst": 18,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9996654"
@@ -903,7 +1222,15 @@
   "title": null,
   "race": "Changeling",
   "classes": "Rogue - 3",
+  "parsed": [
+   {
+    "class": "rogue",
+    "subclass": "",
+    "level": 3
+   }
+  ],
   "level": 3,
+  "notes": [],
   "abilities": {
    "str": 8,
    "dex": 14,
@@ -937,6 +1264,9 @@
   "resist": [],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [],
   "hpEst": 21,
   "image": "https://th.kanka.io/uv-4nLmZ5gGuKM3TifrCDkytb1I=/40x40/smart/src/campaigns/227292/01a06b12-c948-7295-a774-4a4e26d679d1/1.png",
   "url": "https://app.kanka.io/w/227292/entities/9815450"
@@ -947,7 +1277,15 @@
   "title": "Son of Chicken Jr.",
   "race": "Hobgoblin",
   "classes": "Monk - 1",
+  "parsed": [
+   {
+    "class": "monk",
+    "subclass": "",
+    "level": 1
+   }
+  ],
   "level": 1,
+  "notes": [],
   "abilities": {
    "str": 10,
    "dex": 16,
@@ -981,6 +1319,15 @@
   "resist": [],
   "immune": [],
   "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Fey Ancestry",
+    "text": "Advantage on saves to avoid or end Charmed.",
+    "src": "species"
+   }
+  ],
   "hpEst": 10,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9824051"
