@@ -789,10 +789,12 @@ function addPanelHTML(){
   }else if(S.sub==='effects'){
     h+=fxPanelHTML();
   }else{
-    h+='<div class="row"><button data-act="kanka" style="flex:1">Update from Kanka</button></div>';
+    var nd=S.lib.filter(khpDiff).length;
+    h+='<div class="row"><button data-act="kanka" style="flex:1">Update from Kanka</button>'+(nd?'<button data-act="usekhp" data-l="all">Use Kanka HP for all ('+nd+')</button>':'')+'</div>';
     h+=S.lib.map(function(l){
       var inEnc=S.list.some(function(c){return c.libId===l.id;});
-      return '<div class="lib"><label><input type="checkbox" data-act="at" data-l="'+l.id+'"'+(S.atTable[l.id]?' checked':'')+(inEnc?' disabled':'')+'><span><b>'+esc(l.name)+'</b><br><span class="meta">'+(l.chk?'<b>set AC</b> · ':'')+'AC '+l.ac+' · HP '+l.hp+' · init '+sgn(l.ib)+(l.cls?' · '+esc(l.cls):'')+(inEnc?' · in encounter':'')+'</span></span></label>'+
+      return '<div class="lib"><label><input type="checkbox" data-act="at" data-l="'+l.id+'"'+(S.atTable[l.id]?' checked':'')+(inEnc?' disabled':'')+'><span><b>'+esc(l.name)+'</b><br><span class="meta">'+(l.chk?'<b>set AC</b> · ':'')+'AC '+l.ac+' · HP '+l.hp+(khpDiff(l)?' (Kanka '+l.hpEst+')':'')+' · init '+sgn(l.ib)+(l.cls?' · '+esc(l.cls):'')+(inEnc?' · in encounter':'')+'</span></span></label>'+
+        (khpDiff(l)?'<button data-act="usekhp" data-l="'+l.id+'" title="Set max HP to the Kanka estimate">Use Kanka HP</button>':'')+
         '<button class="x" data-act="dellib" data-l="'+l.id+'" aria-label="Delete '+esc(l.name)+' from library">×</button></div>';
     }).join('');
     h+='<div class="row"><button class="add" data-act="addparty" style="flex:1">Add ticked to encounter</button></div>'+
@@ -923,6 +925,7 @@ function renderAll(){
   document.body.classList.toggle('present',ui.present);
   renderBoard();renderDrawer();
 }
+function khpDiff(l){return !!(l.k&&l.hpEst&&l.hp!==l.hpEst);}
 function parseChar(t){
   var name=t.split(',')[0].trim();if(!name)return null;
   var ac=(t.match(/AC\s*(\d+)/i)||[])[1],hp=(t.match(/HP\s*(\d+)/i)||[])[1],ini=(t.match(/init\w*\s*([+-]?\d+)/i)||[])[1];
@@ -1132,18 +1135,19 @@ dr.addEventListener('click',function(e){
   else if(act==='kanka'){
     ui.msg='Loading players.json…';
     fetch('players.json?t='+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(P){
-      var nw=0,up=0;
+      var nw=0,up=0,df=0;
       P.forEach(function(p){
         var l=S.lib.find(function(x){return x.k===p.id;})||S.lib.find(function(x){return !x.k&&x.name.toLowerCase()===p.name.toLowerCase();});
         if(!l){l={id:'l'+(S.libNext++),ac:10,hp:p.hpEst||10,chk:true};S.lib.push(l);nw++;}else up++;
         l.k=p.id;l.name=p.name;l.ib=p.initMod!=null?p.initMod:(p.mods&&p.mods.dex!=null?p.mods.dex:(l.ib||0));
-        if(p.hpEst&&!l.hpMan&&(l.chk||l.hp===l.hpEst))l.hp=p.hpEst;l.saves=p.saves;l.saveProf=p.saveProf;
+        if(p.hpEst&&!l.hpMan&&(l.chk||l.hp===l.hpEst))l.hp=p.hpEst;else if(p.hpEst&&l.hp!==p.hpEst)df++;l.saves=p.saves;l.saveProf=p.saveProf;
         l.cls=p.classes;l.race=p.race;l.abil=p.abilities;l.pp=p.passivePerception;l.hpEst=p.hpEst;l.url=p.url;
       });
       S.lib.sort(function(a,b){return a.name.localeCompare(b.name);});
-      ui.msg=nw+' new, '+up+' updated from Kanka. HP is estimated from class and level; type “Name, AC 15” (optionally “, HP 28”) below to set AC or override HP.';save();renderDrawer();
+      ui.msg=nw+' new, '+up+' updated from Kanka.'+(df?' '+df+' with hand-set HP that differs from Kanka: tap “Use Kanka HP” to take the estimate.':'')+' Type “Name, AC 15” (optionally “, HP 28”) below to set AC or override HP.';save();renderDrawer();
     }).catch(function(){ui.msg='Could not load players.json. Run the Kanka workflow on GitHub first.';renderDrawer();});
   }
+  else if(act==='usekhp'){S.lib.forEach(function(l){if(khpDiff(l)&&(b.dataset.l==='all'||l.id===b.dataset.l)){l.hp=l.hpEst;l.hpMan=false;}});ui.msg='Max HP set to the Kanka estimate.';}
   else if(act==='dellib'){S.lib=S.lib.filter(function(l){return l.id!==b.dataset.l;});}
   else if(act==='addfx'){
     var f=ui.fx,nm=f.name.trim(),iv=f.init===''?NaN:Math.floor(+f.init);
