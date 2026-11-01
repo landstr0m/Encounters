@@ -179,6 +179,8 @@ tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 
 .amtrow span{font-size:.8rem;color:var(--muted)}
 #dtype{min-height:40px;margin-left:auto;font:inherit;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:0 6px}
 .toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translate(-50%,-150%);max-width:min(92vw,560px);background:var(--ink);color:var(--surface);padding:10px 14px;border-radius:10px;z-index:60;transition:transform .2s;font-size:.95rem;cursor:pointer}
+.ab6{grid-template-columns:repeat(3,1fr)!important}
+.svp6{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:8px 0}.svp6 label{display:flex;gap:4px;align-items:center}
 .toast.on{transform:translate(-50%,0)}
 .toast small{opacity:.8}
 .pacts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
@@ -771,17 +773,17 @@ function resultsHTML(){
 function statHTML(){
   if(S.stat==='pc'){
     var pc=findC(S.statC),kl=pc&&S.lib.find(function(l){return l.id===pc.libId;});
-    if(!kl||!kl.k)return '<p class="muted">No Kanka sheet for this character. Use Party → Update from Kanka.</p>';
+    if(!kl)return '<p class="muted">This character is not in the party library.</p>';
     var ab=kl.abil||{};
     return '<h3>'+esc(kl.name)+'</h3><p>'+esc(kl.cls||'')+(kl.race?' · '+esc(kl.race):'')+'</p>'+
       '<p>'+['str','dex','con','int','wis','cha'].map(function(k){var v=ab[k];return '<b>'+k.toUpperCase()+'</b> '+(v==null?'?':v+' ('+sgn(Math.floor((v-10)/2))+')');}).join(' · ')+'</p>'+
       '<p>Passive Perception '+(kl.pp==null?'?':kl.pp)+(kl.hpEst?' · Estimated max HP '+kl.hpEst:'')+'</p>'+
       (kl.parsed&&kl.parsed.length?'<p><b>Read as</b> '+kl.parsed.map(function(x){return esc(x.class)+(x.subclass?' ('+esc(x.subclass)+')':'')+' '+(x.level||'?');}).join(' / ')+'</p>':'')+
       (kl.notes&&kl.notes.length?'<p class="muted">'+esc(kl.notes.join('; '))+'</p>':'')+
-      (kl.saves?'<p><b>Saves</b> '+['str','dex','con','int','wis','cha'].map(function(k){var p=(kl.saveProf||[]).indexOf(k)>=0;return (p?'<b>':'')+k.toUpperCase()+' '+sgn(kl.saves[k])+(p?'</b>':'')+((kl.adv||[]).indexOf(k)>=0?' (adv.)':'');}).join(' · ')+' <span class="muted">(bold = proficient)</span></p>':'')+
+      (kl.saves?'<p><b>Saves</b> '+['str','dex','con','int','wis','cha'].map(function(k){var p=(kl.saveProf||[]).indexOf(k)>=0;return (p?'<b>':'')+k.toUpperCase()+' '+(kl.saves[k]==null?'?':sgn(kl.saves[k]))+(p?'</b>':'')+((kl.adv||[]).indexOf(k)>=0?' (adv.)':'');}).join(' · ')+' <span class="muted">(bold = proficient)</span></p>':'')+
       [['Resistances',kl.res],['Immunities',kl.imm],['Vulnerabilities',kl.vul],['Condition immunities',kl.cimm]].map(function(x){return x[1]&&x[1].length?'<p><b>'+x[0]+'</b> '+esc(x[1].join(', '))+'</p>':'';}).join('')+
       (kl.traits||[]).map(function(t){return '<p><b><i>'+esc(t.name)+'.</i></b> '+esc(t.text)+' <span class="muted">('+esc(t.src)+')</span></p>';}).join('')+
-      '<p><a href="'+esc(kl.url)+'" target="_blank" rel="noopener">Open in Kanka</a></p>';
+      (kl.url?'<p><a href="'+esc(kl.url)+'" target="_blank" rel="noopener">Open in Kanka</a></p>':'<p class="muted">Not linked to Kanka. Add scores and defences with ✎ Edit.</p>');
   }
   var m=MON.find(function(x){return x.id===S.stat;});
   if(!m)return '<p class="muted">Tap ⓘ on a monster in the table, or a name in the search list, to open its stat block here.</p>';
@@ -901,6 +903,35 @@ function dataHTML(){
    '<div class="msg">'+esc(ui.msg||'')+'</div>'+
    '<p class="muted">Monsters: '+MON.length+' stat blocks ('+BUILTIN+' built-in SRD 5.2'+(CUSTOM.length?', '+MERGE.rep+' replaced by yours, '+MERGE.add+' added':'')+'). Works offline.</p></div>';
 }
+function uniq(a){return a.filter(function(x,i){return x&&a.indexOf(x)===i;});}
+var AK=['str','dex','con','int','wis','cha'],DLBL=[['res','Resistances'],['imm','Immunities'],['vul','Vulnerabilities'],['cimm','Condition immunities']];
+function libOf(c){return c&&c.kind==='pc'?S.lib.find(function(x){return x.id===c.libId;}):null;}
+function pcPb(l){return l.pb||(l.parsed&&l.parsed.length?2+Math.floor(((l.parsed.reduce(function(a,x){return a+(x.level||0);},0)||1)-1)/4):2);}
+function pcSheetHTML(c){
+  var l=libOf(c);if(!l)return '';var ab=l.abil||{},pf=l.saveProf||[];
+  return '</div><h3>Character sheet</h3><div class="muted">Saved with '+esc(l.name)+' for future sessions.'+(l.k?' Update from Kanka replaces ability scores and saves; defences you add here are kept.':'')+'</div>'+
+   '<div class="eg ab6">'+AK.map(function(k){var v=ab[k];return '<label><span>'+k.toUpperCase()+' <span data-mod="'+k+'">'+(v==null?'':sgn(Math.floor((v-10)/2)))+'</span></span><input data-pe="abil" data-k="'+k+'" type="number" inputmode="numeric" min="1" max="30" value="'+(v==null?'':v)+'"></label>';}).join('')+'</div>'+
+   '<div class="svp6"><b>Save proficiencies</b>'+AK.map(function(k){return '<label><input type="checkbox" data-pe="prof" data-k="'+k+'"'+(pf.indexOf(k)>=0?' checked':'')+'>'+k.toUpperCase()+'</label>';}).join('')+
+   '<label>Prof. bonus <input data-pe="pb" type="number" inputmode="numeric" min="2" max="6" value="'+pcPb(l)+'" style="width:4em"></label></div>'+
+   '<div class="eg">'+DLBL.map(function(d){return '<label class="w">'+d[1]+'<input data-pe="'+d[0]+'" type="text" placeholder="'+(d[0]==='cimm'?'e.g. charmed, frightened':'e.g. fire, poison')+'" value="'+esc((l[d[0]]||[]).join(', '))+'"></label>';}).join('');
+}
+function pcSheetChange(t,c){
+  var l=libOf(c);if(!l)return;var f=t.dataset.pe,k=t.dataset.k;
+  if(f==='abil'){l.abil=l.abil||{};var n=t.value===''?null:Math.max(1,Math.min(30,Math.floor(+t.value)));l.abil[k]=n;if(n!=null)t.value=n;
+    var md=dr.querySelector('[data-mod="'+k+'"]');if(md)md.textContent=n==null?'':sgn(Math.floor((n-10)/2));}
+  else if(f==='prof'){l.saveProf=AK.filter(function(a){var b=dr.querySelector('[data-pe="prof"][data-k="'+a+'"]');return b&&b.checked;});}
+  else if(f==='pb'){var pb=Math.floor(+t.value);if(pb>=2&&pb<=6)l.pb=pb;else t.value=pcPb(l);}
+  else{
+    var ok=f==='cimm'?CONDS.concat(['Exhaustion']).map(function(x){return x.toLowerCase();}):DTYPES;
+    var words=t.value.toLowerCase().split(/[,;\/]+/).map(function(w){return w.trim();}).filter(Boolean),bad=words.filter(function(w){return ok.indexOf(w)<0;});
+    l[f]=uniq(words.filter(function(w){return ok.indexOf(w)>=0;}));l['x'+f]=l[f].filter(function(w){return (l['k'+f]||[]).indexOf(w)<0;});
+    t.value=l[f].join(', ');ui.msg=bad.length?'Not recognised, left out: '+bad.join(', ')+'.':'Saved.';var mg=dr.querySelector('.ed .msg');if(mg)mg.textContent=ui.msg;
+    return;
+  }
+  {var mods={};AK.forEach(function(a){var v=(l.abil||{})[a];mods[a]=v==null?null:Math.floor((v-10)/2);});
+    if(AK.some(function(a){return mods[a]!=null;})){l.saves={};AK.forEach(function(a){l.saves[a]=mods[a]==null?null:mods[a]+((l.saveProf||[]).indexOf(a)>=0?pcPb(l):0);});}
+    if(f==='abil'&&k==='dex'&&mods.dex!=null){l.ib=mods.dex;c.ib=mods.dex;}}
+}
 function editHTML(){
   var c=S.edit!=null?findC(S.edit):null;
   if(!c||c.kind==='fx')return '<p class="muted">Tap ✎ on a row in the table to rename a combatant, change its AC or hit points, or give it extra actions, spells or traits.</p>';
@@ -913,6 +944,7 @@ function editHTML(){
    '<label>Initiative<input data-ed="init" type="number" inputmode="numeric" value="'+(c.init==null?'':c.init)+'"></label>'+
    '<label>Max HP<input data-ed="max" type="number" inputmode="numeric" min="1" value="'+c.max+'"></label>'+
    '<label>Current HP<input data-ed="hp" type="number" inputmode="numeric" min="0" value="'+c.hp+'"></label>'+
+   (c.kind==='pc'?pcSheetHTML(c):'')+
    (c.kind==='mon'?'<label class="w">Custom group (blank = none)<input data-ed="cg" type="text" maxlength="30" placeholder="e.g. Bandits" value="'+esc(c.cg||'')+'"></label>':'')+'</div>'+
    (m?'<div class="lib"><label><input type="checkbox" data-ed="hideBase"'+(c.hideBase?' checked':'')+'><span>Hide the stat block\u2019s actions on the turn card, use only the extras below (e.g. a different weapon set)</span></label></div>':'')+
    '<h3>Extra actions, spells and traits</h3>'+
@@ -1186,7 +1218,7 @@ dr.addEventListener('click',function(e){
         var l=S.lib.find(function(x){return x.k===p.id;})||S.lib.find(function(x){return !x.k&&x.name.toLowerCase()===p.name.toLowerCase();});
         if(!l){l={id:'l'+(S.libNext++),ac:10,hp:p.hpEst||10,chk:true};S.lib.push(l);nw++;}else up++;
         l.k=p.id;l.name=p.name;l.ib=p.initMod!=null?p.initMod:(p.mods&&p.mods.dex!=null?p.mods.dex:(l.ib||0));
-        if(p.hpEst&&!l.hpMan&&(l.chk||l.hp===l.hpEst))l.hp=p.hpEst;else if(p.hpEst&&l.hp!==p.hpEst)df++;l.saves=p.saves;l.saveProf=p.saveProf;l.res=p.resist||[];l.imm=p.immune||[];l.vul=p.vulnerable||[];l.cimm=p.condImmune||[];l.adv=p.advSaves||[];l.traits=p.traits||[];l.parsed=p.parsed||[];l.notes=p.notes||[];
+        if(p.hpEst&&!l.hpMan&&(l.chk||l.hp===l.hpEst))l.hp=p.hpEst;else if(p.hpEst&&l.hp!==p.hpEst)df++;l.saves=p.saves;l.saveProf=p.saveProf;['res','imm','vul','cimm'].forEach(function(f,i){var kv=p[['resist','immune','vulnerable','condImmune'][i]]||[];l['k'+f]=kv;l[f]=uniq(kv.concat(l['x'+f]||[]));});l.adv=p.advSaves||[];l.traits=p.traits||[];l.parsed=p.parsed||[];l.notes=p.notes||[];
         l.cls=p.classes;l.race=p.race;l.abil=p.abilities;l.pp=p.passivePerception;l.hpEst=p.hpEst;l.url=p.url;
       });
       S.lib.sort(function(a,b){return a.name.localeCompare(b.name);});
@@ -1216,6 +1248,7 @@ dr.addEventListener('input',function(e){
 });
 dr.addEventListener('change',function(e){
   var t=e.target;
+  if(t.dataset.pe){var pc=findC(S.edit);if(pc)pcSheetChange(t,pc);save();renderBoard();return;}
   if(t.dataset.ed||t.dataset.ex){
     var c=findC(S.edit);if(!c)return;
     var f=t.dataset.ed,n=t.value===''?NaN:Math.floor(+t.value);
