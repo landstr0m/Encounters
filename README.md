@@ -1,83 +1,79 @@
 # Encounters
 
-Encounters is a lightweight browser-based Dungeons & Dragons encounter tracker for running combat at the table. It helps you manage initiative order, monster and player stats, hit points, conditions, and encounter flow without requiring a server or a build step.
+A lightweight, browser-based D&D 5e encounter tracker for running combat at the table. It is a static single-page app with no server, no build step and no dependencies. Everything is saved in the browser (`localStorage`), and it works offline as an installable PWA.
 
-The app is a static web app: open it in a browser, add monsters or party members, and keep play data saved in the browser using local storage.
+Player characters can be synced from a [Kanka](https://kanka.io) campaign through a GitHub Action.
 
 ## Features
 
-- Initiative tracking with round and turn flow
-- Add monsters from the built-in SRD-compatible database
-- Add custom party members and reusable saved characters
-- Group monsters together for shared initiative and bulk management
-- Track AC, HP, temp HP, conditions, and death saves
-- Apply damage, healing, and temporary HP in bulk
-- Remove, revive, and edit combatants directly from the tracker
-- Show/hide condition and status details from player-facing table view
-- Export and import encounter data as JSON
-- Open a separate read-only table window for a second screen
-- Import custom monster JSON files to extend or override the built-in library
-- Offline-friendly service worker cache and installable PWA support
+**Combat flow**
+- Initiative order with round and turn tracking. A sticky turn card shows the current creature's attacks, statuses and death saves.
+- A compact combat table: tap rows to select one or more combatants.
+- A bottom action pad with a number wheel to apply damage, healing, temp HP or statuses to the selection.
+- AC, HP, temp HP and death saves (with stable/dead handling). Remove, revive and edit combatants in place.
+
+**Monsters**
+- A built-in SRD 5.2 monster library (`monsters.json`) with full stat blocks in the drawer.
+- Add several at once. Grouped monsters share initiative and can be selected and managed in bulk.
+- Per-creature edits (✎): extra actions, traits or notes, which can be copied to every creature of the same type.
+- Import your own monster JSON files. They are kept on the device and merged with the SRD data, overriding entries with the same id.
+
+**Players**
+- A reusable party library. Tick who is at the table and add them in one go.
+- Add characters by hand: `Thorn, AC 15, HP 28, init +3`.
+- **Update from Kanka** loads `players.json`. It fills name, class, species, ability scores, initiative modifier, passive Perception and saving throws. Max HP is auto-filled with the estimate (see below). HP you type yourself (`Name, HP 30`) is kept on later updates. AC still has to be entered (`Name, AC 16`).
+
+**Statuses and saving throws**
+- Conditions and spell or class effects (Hasted, Slowed, Raging, cover, Bless and others) with rule text. Mechanical effects such as AC, speed and save modifiers are applied automatically.
+- The **Saves** button shows one chosen saving throw for every combatant, players and monsters alike. Shaded means proficient. Statuses add notes such as `adv.`, `+2` or `auto-fail`. Player saves need Kanka data.
+
+**Encounter prep and table view**
+- Effects: lair actions, hazards or timers placed at a fixed initiative, either visible to players or hidden.
+- An environment banner for terrain, light or weather.
+- Prepared encounters: save a built encounter with notes, then **Load** it (replaces the monsters and keeps the players) or **Add** it as reinforcements.
+- A separate read-only table window for a second screen, with options for what players can see.
+- Export and import the whole app state (encounter, saved encounters, party, settings) as JSON.
+
+## Kanka player sync
+
+`tools/kanka_players.py` uses only the Python standard library. It reads the player characters of the Blackrock campaign (`CAMPAIGN` at the top of the script) and writes `players.json`.
+
+- Ability scores, modifiers, saving throws and proficiencies come from the character's Kanka attributes.
+- **Estimated HP** (`hpEst`) uses the class hit die: max at level 1, average after that, plus the Con modifier per level. It ignores HP bonuses from feats or species (such as Tough), so override HP by hand where needed.
+- Damage resistances come from the species. To add class, feat or item resistances, give the character a Kanka property `Resistances`, `Immunities` or `Vulnerabilities` (comma-separated).
+
+To update, open **Actions → Update players from Kanka → Run workflow** on GitHub. The workflow needs a repository secret `KANKA_API_KEY` and commits `players.json` only if it changed. Then press **Update from Kanka** in the app's party tab.
+
+To run it locally:
+
+```bash
+KANKA_TOKEN=your_token python tools/kanka_players.py
+```
 
 ## Project structure
 
-- `index.html` — main app UI, logic, and combat management
-- `statuses.js` — condition and status definitions for the tracker UI
-- `monsters.json` — built-in monster stat block data
-- `manifest.webmanifest` — installable web app metadata
-- `sw.js` — service worker for offline caching
-- `fonts.css` — custom fonts used by the interface
-- `icon-180.png` and `icon-512.png` — app icons
-- `README.md` — project documentation
+| File | Purpose |
+|---|---|
+| `index.html` | The whole app: UI, styles and logic |
+| `statuses.js` | Condition and status definitions with their mechanics |
+| `monsters.json` | Built-in SRD 5.2 monster data |
+| `players.json` | Player characters generated from Kanka |
+| `tools/kanka_players.py` | Kanka → `players.json` script |
+| `.github/workflows/kanka-players.yml` | Manual GitHub Action that runs the script and commits the result |
+| `sw.js` | Service worker for offline caching (bump `CACHE` when you publish changes) |
+| `manifest.webmanifest`, `icon-*.png`, `fonts.css` | PWA metadata, icons and fonts |
 
-## How to run
+## Running it
 
-Because this is a static web app, you can run it in either of these ways:
-
-1. Open `index.html` directly in a browser, or
-2. Serve the folder with a local static web server, for example:
+Serve the folder with any static server so that `fetch` works for the JSON files:
 
 ```bash
 python -m http.server 8000
+# then open http://localhost:8000
 ```
 
-Then visit:
+It can also be hosted as-is on GitHub Pages. Opening `index.html` directly from disk works for most things, but the browser may block loading the JSON files.
 
-```text
-http://localhost:8000
-```
+## Data and licence
 
-## How to use
-
-1. Open the app and choose Add to add monsters or party members.
-2. Set initiative values for each creature or use a grouped roll for monster packs.
-3. Start combat to advance turns round by round.
-4. Use the action pad to apply damage, healing, temp HP, or conditions.
-5. Use the drawer to inspect stat blocks, manage saved characters, or export/import encounter data.
-6. Open the table view for a clean read-only display on a second monitor or shared screen.
-
-## Recent app improvements
-
-The tracker now includes a few quality-of-life features added throughout recent updates:
-
-- monster grouping and bulk selection controls
-- save/restore data handling for encounter state
-- visibility options for effects and table-view info
-- more flexible status handling and condition descriptions
-- support for adding custom monster files as local libraries
-- better control over player and monster management in the main encounter list
-
-## Notes
-
-- App data is stored in the browser using `localStorage`.
-- The app is designed for desktop and mobile browser use during live gameplay.
-- The bundled monster database and status rules are stored locally so the app can work without a server-side API.
-- Custom monster files are kept on the current device and are merged with the built-in SRD data.
-
-## License and data source
-
-This project includes monster data and rules references based on the SRD 5.2 material, with the game data embedded in the app for offline use.
-
-## Repository status
-
-This project is a single-page app focused on fast, in-session D&D encounter management for a DM or GM running the table. It is intentionally lightweight, runs without a build step, and is designed to stay easy to open and use during play.
+Monster data and rules references are based on the SRD 5.2, embedded for offline use. App data stays in your browser on the current device. Export it before and after each session as a backup.

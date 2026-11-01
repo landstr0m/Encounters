@@ -627,10 +627,17 @@ function renderTurn(){
 }
 var AB=['STR','DEX','CON','INT','WIS','CHA'];
 function saveOf(c,i){
-  var m=MON.find(function(x){return x.id===c.monId;});if(!m)return null;
-  var sv=(m.extra.find(function(e){return /^sav/i.test(e[0]);})||[])[1]||'';
-  var r=new RegExp('\\b'+AB[i]+'\\w*\\s*([+\u2212-]\\s*\\d+)','i').exec(sv);
-  var n=r?+r[1].replace('\u2212','-').replace(/\s/g,''):mod(+m.abil[i]);
+  var r,n;
+  if(c.kind==='pc'){
+    var l=S.lib.find(function(x){return x.id===c.libId;}),k=AB[i].toLowerCase();
+    if(!l||!l.saves||l.saves[k]==null)return null;
+    n=l.saves[k];r=(l.saveProf||[]).indexOf(k)>=0;
+  }else{
+    var m=MON.find(function(x){return x.id===c.monId;});if(!m)return null;
+    var sv=(m.extra.find(function(e){return /^sav/i.test(e[0]);})||[])[1]||'';
+    r=new RegExp('\\b'+AB[i]+'\\w*\\s*([+\u2212-]\\s*\\d+)','i').exec(sv);
+    n=r?+r[1].replace('\u2212','-').replace(/\s/g,''):mod(+m.abil[i]);
+  }
   var has=function(x){return c.conds.indexOf(x)>=0;},notes=[];
   if(i<2&&(has('Paralyzed')||has('Stunned')||has('Unconscious')||has('Petrified')))notes.push('auto-fail');
   else{if(i===1&&has('Restrained'))notes.push('disadv.');c.conds.forEach(function(x){var f=(SPX[x]||{}).sv;if(f&&(f[0]==='all'||f[0]===i))notes.push(f[1]);});}
@@ -646,7 +653,7 @@ function rowHTML(c){
   var ph=c.kind==='pc'&&c.ib!=null?'d20'+sgn(c.ib):'—';
   return '<tr class="r'+(c.id===S.turnId?' turn':'')+(down?' down':'')+(ui.sel[c.id]?' sel':'')+'" data-id="'+c.id+'">'+
    '<td class="c-in"><input class="num" type="number" inputmode="numeric" data-act="init" placeholder="'+esc(ph)+'" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
-   '<td><span class="name">'+esc(c.name)+'</span>'+(c.kind==='pc'?'':'<span class="tag">CR '+esc(c.cr)+'</span>'+(ui.sv>=0?(saveOf(c,ui.sv)||''):''))+'<div class="conds">'+chips+'</div>'+fxHTML(c)+'</td>'+
+   '<td><span class="name">'+esc(c.name)+'</span>'+(c.kind==='pc'?'':'<span class="tag">CR '+esc(c.cr)+'</span>')+(ui.sv>=0?(saveOf(c,ui.sv)||''):'')+'<div class="conds">'+chips+'</div>'+fxHTML(c)+'</td>'+
    '<td class="c-ac"><input class="num" type="number" inputmode="numeric" data-act="ac" value="'+c.ac+'" aria-label="Armor class for '+esc(c.name)+'"></td>'+
    '<td class="c-hp"><div class="hpnum"><span class="cur">'+c.hp+'</span><span class="max">/ '+c.max+'</span>'+(c.base!=null?'<span class="mred">max \u2212'+(c.base-c.max)+'</span>':'')+(c.temp>0?'<span class="temp">+'+c.temp+'</span>':'')+(down?'<span class="state">'+(pcDead?'Dead':'Down')+'</span>':'')+'</div>'+
      '<div class="track"><div class="fill '+lvl+'" style="width:'+pct+'%"></div></div>'+(pcDead?'<div class="dsd">Heal 1+ HP to revive</div>':dsHTML(c))+'</td>'+
@@ -663,7 +670,7 @@ function renderTable(){
   var ev=$('#env');ev.hidden=!String(S.envNote||'').trim();
   if(!ev.hidden)ev.innerHTML='<div><b>'+esc(S.envName||'Notes')+'</b>\n'+esc(S.envNote)+'</div><button data-act="envx" aria-label="Hide encounter notes">Hide</button>';
   var sb=$('#svb');sb.hidden=ui.sv<0;
-  if(ui.sv>=0)sb.innerHTML='<b>Saving throw:</b>'+AB.map(function(a,i){return '<button data-act="sv" data-n="'+i+'" class="'+(i===ui.sv?'on':'')+'">'+a+'</button>';}).join('')+'<button data-act="sv" data-n="-1" aria-label="Hide saves">Hide</button><span class="muted" style="font-size:.8rem">Shaded = proficient</span>';
+  if(ui.sv>=0)sb.innerHTML='<b>Saving throw:</b>'+AB.map(function(a,i){return '<button data-act="sv" data-n="'+i+'" class="'+(i===ui.sv?'on':'')+'">'+a+'</button>';}).join('')+'<button data-act="sv" data-n="-1" aria-label="Hide saves">Hide</button><span class="muted" style="font-size:.8rem">Shaded = proficient · players need Kanka data</span>';
   var pcs=S.list.filter(function(c){return c.kind==='pc';});
   if(pcs.length){h+='<tr class="grp"><th colspan="5">Players · '+pcs.length+'<button class="gb" data-act="selgrp" data-g="pc">Select all</button></th></tr>'+pcs.map(rowHTML).join('');}
   var seen=[],groups={};
@@ -785,7 +792,7 @@ function addPanelHTML(){
     h+='<div class="row"><button data-act="kanka" style="flex:1">Update from Kanka</button></div>';
     h+=S.lib.map(function(l){
       var inEnc=S.list.some(function(c){return c.libId===l.id;});
-      return '<div class="lib"><label><input type="checkbox" data-act="at" data-l="'+l.id+'"'+(S.atTable[l.id]?' checked':'')+(inEnc?' disabled':'')+'><span><b>'+esc(l.name)+'</b><br><span class="meta">'+(l.chk?'<b>set AC/HP</b> · ':'')+'AC '+l.ac+' · HP '+l.hp+' · init '+sgn(l.ib)+(l.cls?' · '+esc(l.cls):'')+(inEnc?' · in encounter':'')+'</span></span></label>'+
+      return '<div class="lib"><label><input type="checkbox" data-act="at" data-l="'+l.id+'"'+(S.atTable[l.id]?' checked':'')+(inEnc?' disabled':'')+'><span><b>'+esc(l.name)+'</b><br><span class="meta">'+(l.chk?'<b>set AC</b> · ':'')+'AC '+l.ac+' · HP '+l.hp+' · init '+sgn(l.ib)+(l.cls?' · '+esc(l.cls):'')+(inEnc?' · in encounter':'')+'</span></span></label>'+
         '<button class="x" data-act="dellib" data-l="'+l.id+'" aria-label="Delete '+esc(l.name)+' from library">×</button></div>';
     }).join('');
     h+='<div class="row"><button class="add" data-act="addparty" style="flex:1">Add ticked to encounter</button></div>'+
@@ -919,8 +926,8 @@ function renderAll(){
 function parseChar(t){
   var name=t.split(',')[0].trim();if(!name)return null;
   var ac=(t.match(/AC\s*(\d+)/i)||[])[1],hp=(t.match(/HP\s*(\d+)/i)||[])[1],ini=(t.match(/init\w*\s*([+-]?\d+)/i)||[])[1];
-  if(!ac||!hp)return null;
-  return {name:name,ac:+ac,hp:+hp,ib:ini?+ini:0};
+  if(!ac&&!hp)return null;
+  return {name:name,ac:ac?+ac:null,hp:hp?+hp:null,ib:ini?+ini:0};
 }
 function findC(id){return S.list.find(function(x){return x.id===+id;});}
 function pruneSel(){Object.keys(ui.sel).forEach(function(k){if(!findC(k))delete ui.sel[k];});}
@@ -1117,7 +1124,8 @@ dr.addEventListener('click',function(e){
   else if(act==='newchar'){
     var inp=$('#newchar');var p=parseChar(inp?inp.value:'');
     var ex=p&&S.lib.find(function(l){return l.name.toLowerCase()===p.name.toLowerCase();});
-    if(ex){ex.ac=p.ac;ex.hp=p.hp;if(/init/i.test(inp.value))ex.ib=p.ib;ex.chk=false;ui.msg='Updated '+ex.name+'.';}
+    if(ex){if(p.ac!=null){ex.ac=p.ac;ex.chk=false;}if(p.hp!=null){ex.hp=p.hp;ex.hpMan=true;}if(/init/i.test(inp.value))ex.ib=p.ib;ui.msg='Updated '+ex.name+'.';}
+    else if(p&&(p.ac==null||p.hp==null)){ui.msg='New characters need both AC and HP: Name, AC 15, HP 28, init +3';}
     else if(p){S.lib.push({id:'l'+(S.libNext++),name:p.name,ac:p.ac,hp:p.hp,ib:p.ib});ui.msg='Saved '+p.name+'.';}
     else{ui.msg='Use the form: Name, AC 15, HP 28, init +3';}
   }
@@ -1128,11 +1136,12 @@ dr.addEventListener('click',function(e){
       P.forEach(function(p){
         var l=S.lib.find(function(x){return x.k===p.id;})||S.lib.find(function(x){return !x.k&&x.name.toLowerCase()===p.name.toLowerCase();});
         if(!l){l={id:'l'+(S.libNext++),ac:10,hp:p.hpEst||10,chk:true};S.lib.push(l);nw++;}else up++;
-        l.k=p.id;l.name=p.name;l.ib=p.mods&&p.mods.dex!=null?p.mods.dex:(l.ib||0);
+        l.k=p.id;l.name=p.name;l.ib=p.initMod!=null?p.initMod:(p.mods&&p.mods.dex!=null?p.mods.dex:(l.ib||0));
+        if(p.hpEst&&!l.hpMan&&(l.chk||l.hp===l.hpEst))l.hp=p.hpEst;l.saves=p.saves;l.saveProf=p.saveProf;
         l.cls=p.classes;l.race=p.race;l.abil=p.abilities;l.pp=p.passivePerception;l.hpEst=p.hpEst;l.url=p.url;
       });
       S.lib.sort(function(a,b){return a.name.localeCompare(b.name);});
-      ui.msg=nw+' new, '+up+' updated from Kanka. Type “Name, AC 15, HP 28” below to set AC/HP.';save();renderDrawer();
+      ui.msg=nw+' new, '+up+' updated from Kanka. HP is estimated from class and level; type “Name, AC 15” (optionally “, HP 28”) below to set AC or override HP.';save();renderDrawer();
     }).catch(function(){ui.msg='Could not load players.json. Run the Kanka workflow on GitHub first.';renderDrawer();});
   }
   else if(act==='dellib'){S.lib=S.lib.filter(function(l){return l.id!==b.dataset.l;});}
