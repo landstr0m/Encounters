@@ -181,6 +181,7 @@ tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 
 .toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translate(-50%,-150%);max-width:min(92vw,560px);background:var(--ink);color:var(--surface);padding:10px 14px;border-radius:10px;z-index:60;transition:transform .2s;font-size:.95rem;cursor:pointer}
 .ab6{grid-template-columns:repeat(3,1fr)!important}
 .svp6{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:8px 0}.svp6 label{display:flex;gap:4px;align-items:center}
+td.empty p{margin:0 0 10px}
 .toast.on{transform:translate(-50%,0)}
 .toast small{opacity:.8}
 .pacts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
@@ -532,6 +533,9 @@ function typed(c,n,t){
   if(r&&v)return [n,''];if(r)return [Math.floor(n/2),'resists'];if(v)return [n*2,'vulnerable'];return [n,''];
 }
 function condBlocked(c,x){var d=defs(c).cimm;return (CIM[x]||[x.toLowerCase()]).some(function(k){return d.indexOf(k)>=0;});}
+// One-step undo: snapshot the encounter before any change made from the bar, pad, chips or death saves.
+function snap(label){ui.undo={label:label,s:JSON.stringify({list:S.list,round:S.round,turnId:S.turnId})};}
+function undo(){if(!ui.undo)return;var o=JSON.parse(ui.undo.s);S.list=o.list;S.round=o.round;S.turnId=o.turnId;toast('Undid: '+esc(ui.undo.label));ui.undo=null;pruneSel();finishPad();}
 function toast(h){var t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';t.setAttribute('role','status');document.body.appendChild(t);}
   t.innerHTML=h;t.classList.add('on');clearTimeout(toast.tm);toast.tm=setTimeout(function(){t.classList.remove('on');},6000);t.onclick=function(){t.classList.remove('on');};}
 function dmg(c,n){
@@ -576,6 +580,7 @@ function renderBar(){
   $('#bar').innerHTML=
    '<div class="round"><small>Round</small>'+S.round+'</div>'+
    '<button class="primary" data-act="next">'+(started?'Next turn ▸':'Start combat')+'</button>'+
+   (ui.undo?'<button data-act="undo" title="Undo: '+esc(ui.undo.label)+'">↶ Undo</button>':'')+
    '<span class="spacer"></span>'+
    '<button class="dmonly" data-act="openadd">+ Add</button>'+
    '<button class="dmonly'+(ui.sv>=0?' on':'')+'" data-act="saves" title="Show saving throw modifiers">Saves</button>'+
@@ -683,11 +688,11 @@ function rowHTML(c){
   var lvl=pct>50?'ok':(pct>25?'warn':'bad');
   var pcDead=isPcDead(c);
   var down=c.hp<=0||pcDead;
-  var chips=c.conds.map(function(x){return '<button class="chip" data-act="cond" data-c="'+esc(x)+'" title="Remove '+esc(x)+'">'+esc(x)+' ×</button>';}).join('');
+  var chips=c.conds.map(function(x){return '<button class="chip" data-act="cond" data-c="'+esc(x)+'" title="'+esc(FX[x]||x)+' (tap to remove)">'+esc(x)+' ×</button>';}).join('');
   var ph=c.kind==='pc'&&c.ib!=null?'d20'+sgn(c.ib):'—';
   return '<tr class="r'+(c.id===S.turnId?' turn':'')+(down?' down':'')+(ui.sel[c.id]?' sel':'')+'" data-id="'+c.id+'">'+
    '<td class="c-in"><input class="num" type="number" inputmode="numeric" data-act="init" placeholder="'+esc(ph)+'" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
-   '<td><span class="name">'+esc(c.name)+'</span>'+(c.kind==='pc'?'':'<span class="tag">CR '+esc(c.cr)+'</span>')+(ui.sv>=0?(saveOf(c,ui.sv)||''):'')+'<div class="conds">'+chips+'</div>'+fxHTML(c)+'</td>'+
+   '<td><span class="name">'+esc(c.name)+'</span>'+(c.kind==='pc'?'':'<span class="tag">CR '+esc(c.cr)+'</span>')+(ui.sv>=0?(saveOf(c,ui.sv)||''):'')+'<div class="conds">'+chips+'</div>'+(ui.sel[c.id]?fxHTML(c):'')+'</td>'+
    '<td class="c-ac"><input class="num" type="number" inputmode="numeric" data-act="ac" value="'+c.ac+'" aria-label="Armor class for '+esc(c.name)+'"></td>'+
    '<td class="c-hp"><div class="hpnum"><span class="cur">'+c.hp+'</span><span class="max">/ '+c.max+'</span>'+(c.base!=null?'<span class="mred">max \u2212'+(c.base-c.max)+'</span>':'')+(c.temp>0?'<span class="temp">+'+c.temp+'</span>':'')+(down?'<span class="state">'+(pcDead?'Dead':'Down')+'</span>':'')+'</div>'+
      '<div class="track"><div class="fill '+lvl+'" style="width:'+pct+'%"></div></div>'+(pcDead?'<div class="dsd">Heal 1+ HP to revive</div>':dsHTML(c))+'</td>'+
@@ -719,7 +724,7 @@ function renderTable(){
   });
   var fxs=S.list.filter(function(c){return c.kind==='fx';});
   if(fxs.length)h+='<tr class="grp"><th colspan="5">Effects \u00B7 '+fxs.length+'</th></tr>'+fxs.map(fxRow).join('');
-  $('#tbl').innerHTML=h||'<tr><td class="empty">No combatants yet. Tap + Add to search monsters or add your party.</td></tr>';
+  $('#tbl').innerHTML=h||'<tr><td class="empty"><p>No combatants yet.</p><button class="add" data-act="start" data-s="party">Add your party</button> <button class="add" data-act="start" data-s="monsters">Add monsters</button></td></tr>';
 }
 var WHEEL='';
 (function(){var s='<div class="sp"></div>';for(var i=0;i<=WMAX;i++)s+='<div class="wi" data-act="wi" data-n="'+i+'">'+i+'</div>';WHEEL=s+'<div class="sp"></div>';})();
@@ -754,7 +759,8 @@ function renderPad(){
    '<div class="pmain"><div class="wheelbox"><div class="wheel" id="wheel" aria-label="Amount wheel">'+WHEEL+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div></div>'+
    '<div class="pr"><div class="amtrow"><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount, tap to type"><span>Spin the wheel or tap the number to type</span><select id="dtype" aria-label="Damage type"><option value="">Untyped</option>'+DTYPES.map(function(t){return '<option value="'+t+'"'+(ui.dtype===t?' selected':'')+'>'+t[0].toUpperCase()+t.slice(1)+'</option>';}).join('')+'</select></div>'+
    '<div class="pacts"><button class="d" data-act="padhp" data-k="dmg">Damage</button><button class="d" data-act="padhp" data-k="half">Half</button><button class="h" data-act="padhp" data-k="heal">Heal</button>'+
-   '<button data-act="padhp" data-k="temp">Temp HP</button><button data-act="padstatus">Status ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove">'+(ui.confirmRemove?'Sure?':'Remove')+'</button><button class="d" data-act="padhp" data-k="maxdn">Max HP \u2212</button><button data-act="padhp" data-k="maxreset">Reset max</button><button data-act="padgroup">'+(T.some(function(c){return c.cg;})&&T.every(function(c){return c.cg&&c.cg===T[0].cg;})?'Ungroup':'Group\u2026')+'</button></div></div></div>'+
+   '<button data-act="padhp" data-k="temp">Temp HP</button><button data-act="padstatus">Status ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove">'+(ui.confirmRemove?'Sure?':'Remove')+'</button><button data-act="padmore" aria-expanded="'+!!ui.more+'">'+(ui.more?'Less \u25b4':'More \u25be')+'</button>'+
+   (ui.more?'<button class="d" data-act="padhp" data-k="maxdn">Max HP \u2212</button><button data-act="padhp" data-k="maxreset">Reset max</button><button data-act="padgroup">'+(T.some(function(c){return c.cg;})&&T.every(function(c){return c.cg&&c.cg===T[0].cg;})?'Ungroup':'Group\u2026')+'</button>':'')+'</div></div></div>'+
    (ui.menu?menuHTML(T):'')+'</div>';
   var mn=pad.querySelector('.menu');if(mn){mn.style.maxHeight='';mn.style.maxHeight=Math.max(200,mn.getBoundingClientRect().bottom-8)+'px';}
   var w=$('#wheel');
@@ -1018,12 +1024,13 @@ function nextIdExcluding(T){
 $('#bar').addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;
   var a=b.dataset.act;
-  if(a==='next'){nextTurn();ui.confirmClear=false;}
+  if(a==='undo'){undo();}
+  else if(a==='next'){snap('next turn');nextTurn();ui.confirmClear=false;}
   else if(a==='openadd'){ui.drawer=true;S.tab='add';}
   else if(a==='saves'){ui.sv=ui.sv>=0?-1:ui.svLast;renderBar();renderTable();return;}
   else if(a==='present'){ui.present=!ui.present;if(ui.present)ui.drawer=false;document.body.classList.toggle('present',ui.present);try{sessionStorage.setItem('et-present',ui.present?'1':'0');}catch(e){}renderBoard();renderDrawer();return;}
   else if(a==='clear'){
-    if(ui.confirmClear){S.list=[];S.turnId=null;S.round=1;S.envName=S.envNote='';ui.confirmClear=false;S.atTable={};ui.sel={};}else{ui.confirmClear=true;}
+    if(ui.confirmClear){snap('clear all');S.list=[];S.turnId=null;S.round=1;S.envName=S.envNote='';ui.confirmClear=false;S.atTable={};ui.sel={};}else{ui.confirmClear=true;}
   }
   save();renderBoard();renderDrawer();
 });
@@ -1036,8 +1043,8 @@ $('#turn').addEventListener('click',function(e){
   else if(a==='tinfo'){S.stat=c.monId;S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
   else if(a==='tedit'){S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
   else if(a==='spent'){c.spent=c.spent||{};c.spent[b.dataset.i]=!c.spent[b.dataset.i];}
-  else if(a==='cond'){var i=c.conds.indexOf(b.dataset.c);if(i>=0)c.conds.splice(i,1);incSync(c,false);}
-  else if(a.indexOf('ds')===0){dsAct(c,a,b);}
+  else if(a==='cond'){snap('remove '+b.dataset.c);var i=c.conds.indexOf(b.dataset.c);if(i>=0)c.conds.splice(i,1);incSync(c,false);}
+  else if(a.indexOf('ds')===0){snap('death save');dsAct(c,a,b);}
   save();renderBoard();
 });
 $('#turn').addEventListener('toggle',function(e){if(e.target.tagName==='DETAILS')ui.traitsOpen=e.target.open;},true);
@@ -1050,6 +1057,7 @@ $('#tbl').addEventListener('click',function(e){
   if(e.target.closest('input'))return;
   var b=e.target.closest('[data-act]');
   var act=b?b.dataset.act:null;
+  if(act==='start'){ui.drawer=true;S.tab='add';S.sub=b.dataset.s;ui.msg='';save();renderDrawer();return;}
   if(act==='viewgrp'){S.stat=b.dataset.m;S.statC=null;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
   if(act==='selgrp'){
     var g=b.dataset.g;
@@ -1064,8 +1072,8 @@ $('#tbl').addEventListener('click',function(e){
   var row=e.target.closest('tr.r');if(!row)return;
   var c=findC(row.dataset.id);if(!c)return;
   if(c.kind==='fx'){if(act==='fxvis')c.vis=!c.vis;else if(act==='fxrm')rmComb(c);save();renderBoard();return;}
-  if(act==='cond'){var i=c.conds.indexOf(b.dataset.c);if(i>=0)c.conds.splice(i,1);incSync(c,false);save();renderBoard();return;}
-  if(act&&act.indexOf('ds')===0){dsAct(c,act,b);save();renderBoard();return;}
+  if(act==='cond'){snap('remove '+b.dataset.c);var i=c.conds.indexOf(b.dataset.c);if(i>=0)c.conds.splice(i,1);incSync(c,false);save();renderBoard();return;}
+  if(act&&act.indexOf('ds')===0){snap('death save');dsAct(c,act,b);save();renderBoard();return;}
   if(act==='info'){S.stat=c.kind==='mon'?c.monId:'pc';S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
   if(act==='edit'){S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
   if(ui.sel[c.id])delete ui.sel[c.id];else ui.sel[c.id]=true;
@@ -1096,14 +1104,19 @@ padEl.addEventListener('click',function(e){
   if(a==='desel'){finishPad();}
   else if(a==='padhp'){
     var k=b.dataset.k;
-    if(k==='maxreset'){T.forEach(maxReset);finishPad();}
+    if(k==='maxreset'){snap('reset max HP');T.forEach(maxReset);finishPad();}
     else if(v>0){
-      var out=[];
+      snap(({dmg:'damage',half:'half damage',heal:'heal',maxdn:'max HP down',temp:'temp HP'})[k]||k);
+      var out=[],conc=[];
       T.forEach(function(c){
-        if(k==='dmg'||k==='half'){var r=typed(c,k==='half'?Math.floor(v/2):v,ui.dtype);dmg(c,r[0]);out.push(esc(c.name)+' '+r[0]+(r[1]?' <small>('+r[1]+')</small>':''));}
+        if(k==='dmg'||k==='half'){var r=typed(c,k==='half'?Math.floor(v/2):v,ui.dtype);dmg(c,r[0]);out.push(esc(c.name)+' '+r[0]+(r[1]?' <small>('+r[1]+')</small>':''));
+          var ci=c.conds.indexOf('Concentrating');
+          if(ci>=0&&r[0]>0){if(c.hp<=0){c.conds.splice(ci,1);conc.push(esc(c.name)+' loses concentration (0 HP)');}else conc.push(esc(c.name)+': Con save DC '+Math.min(30,Math.max(10,Math.floor(r[0]/2))));}}
         else if(k==='heal')heal(c,v);else if(k==='maxdn')maxDown(c,v);else c.temp=Math.max(c.temp,v);
       });
-      if(out.length&&(ui.dtype||out.length>1))toast('<b>'+(ui.dtype?ui.dtype[0].toUpperCase()+ui.dtype.slice(1)+' ':'')+'damage:</b> '+out.join(' · '));
+      var msg=out.length&&(ui.dtype||out.length>1)?'<b>'+(ui.dtype?ui.dtype[0].toUpperCase()+ui.dtype.slice(1)+' ':'')+'damage:</b> '+out.join(' · '):'';
+      if(conc.length)msg+=(msg?'<br>':'')+'<b>Concentration:</b> '+conc.join(' · ');
+      if(msg)toast(msg);
       finishPad();
     }
   }
@@ -1117,6 +1130,7 @@ padEl.addEventListener('click',function(e){
       finishPad();
     }
   }
+  else if(a==='padmore'){ui.more=!ui.more;}
   else if(a==='padstatus'){ui.menu=!ui.menu;ui.pend={};ui.mq='';}
   else if(a==='mi'){
     var x=b.dataset.c,base=condState(T,x),cur=effState(T,x);
@@ -1126,7 +1140,7 @@ padEl.addEventListener('click',function(e){
   }
   else if(a==='mcancel'){ui.menu=false;ui.pend={};ui.mq='';}
   else if(a==='mapply'){
-    var skip=[];
+    snap('statuses');var skip=[];
     Object.keys(ui.pend).forEach(function(x){
       T.forEach(function(c){
         var i=c.conds.indexOf(x);
@@ -1141,6 +1155,7 @@ padEl.addEventListener('click',function(e){
   }
   else if(a==='padremove'){
     if(ui.confirmRemove){
+      snap('remove '+T.length);
       if(T.some(function(c){return c.id===S.turnId;}))S.turnId=nextIdExcluding(T);
       S.list=S.list.filter(function(c){return !ui.sel[c.id];});
       finishPad();renderDrawer();

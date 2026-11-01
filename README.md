@@ -8,8 +8,10 @@ Player characters can be synced from a [Kanka](https://kanka.io) campaign throug
 
 **Combat flow**
 - Initiative order with round and turn tracking. A sticky turn card shows the current creature's attacks, statuses and death saves.
-- A compact combat table: tap rows to select one or more combatants.
-- A bottom action pad with a number wheel to apply damage, healing, temp HP or statuses to the selection.
+- A compact combat table: tap rows to select one or more combatants. Status chips stay small; their rule text appears on selected rows and on the turn card.
+- A bottom action pad with a number wheel to apply damage, healing, temp HP or statuses to the selection. Rarely used actions (Max HP −, Reset max, Group) sit behind **More**.
+- **Undo** (↶ next to Next turn) reverses the last damage, heal, status change, death save, removal, turn change or Clear.
+- **Concentration reminders:** when a Concentrating creature takes damage, a note gives the Con save DC (half the damage, min 10, max 30). At 0 HP, Concentrating is removed automatically.
 - **Damage types:** pick a type (fire, cold, …) before Damage or Half. Each target takes the right amount: halved if it resists (round down), 0 if immune, doubled if vulnerable. Monster defences come from their stat blocks, player defences from Kanka; Raging and Petrified add their resistances. A note shows what each target took.
 - AC, HP, temp HP and death saves (with stable/dead handling). Remove, revive and edit combatants in place.
 
@@ -54,6 +56,18 @@ To run it locally:
 KANKA_TOKEN=your_token python tools/kanka_players.py
 ```
 
+## Testing
+
+`tests/run_tests.py` is a browser test battery (Playwright, about 35 tests). It covers combat flow, damage and death saves, typed damage, statuses and immunities, saves, groups, editing, the party library and Kanka import, prepared encounters, export/import, persistence, the table window, homebrew monster files, and layouts from phone to desktop. Run it before pushing changes:
+
+```bash
+pip install playwright && playwright install chromium
+python tests/run_tests.py            # all tests
+python tests/run_tests.py typed undo # only tests whose names contain these words
+```
+
+Bugs found and fixed are logged in `BUGS.md`.
+
 ## Project structure
 
 | File | Purpose |
@@ -64,6 +78,8 @@ KANKA_TOKEN=your_token python tools/kanka_players.py
 | `players.json` | Player characters generated from Kanka |
 | `tools/kanka_players.py` | Kanka → `players.json` script |
 | `.github/workflows/kanka-players.yml` | Manual GitHub Action that runs the script and commits the result |
+| `tests/run_tests.py` | Browser test battery |
+| `BUGS.md` | Bug report log |
 | `sw.js` | Service worker for offline caching (bump `CACHE` when you publish changes) |
 | `manifest.webmanifest`, `icon-*.png`, `fonts.css` | PWA metadata, icons and fonts |
 
