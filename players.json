@@ -4,8 +4,8 @@
   "name": "Aeliana the Eloquent",
   "title": null,
   "race": "Tiefling (Mephistopheles)",
-  "classes": "",
-  "level": null,
+  "classes": "Bard - 2",
+  "level": 2,
   "abilities": {
    "str": 8,
    "dex": 15,
@@ -24,7 +24,24 @@
   },
   "initMod": 2,
   "passivePerception": 10,
-  "hpEst": null,
+  "saves": {
+   "str": -1,
+   "dex": 4,
+   "con": 1,
+   "int": 1,
+   "wis": 0,
+   "cha": 5
+  },
+  "saveProf": [
+   "dex",
+   "cha"
+  ],
+  "resist": [
+   "fire"
+  ],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 15,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/10017493"
  },
@@ -33,8 +50,8 @@
   "name": "Aer Prismray",
   "title": "Luminary (Lum.)",
   "race": "Gnome (Forest)",
-  "classes": "",
-  "level": null,
+  "classes": "Illusion Wizard - 3",
+  "level": 3,
   "abilities": {
    "str": 8,
    "dex": 16,
@@ -53,7 +70,22 @@
   },
   "initMod": 3,
   "passivePerception": 14,
-  "hpEst": null,
+  "saves": {
+   "str": -1,
+   "dex": 3,
+   "con": 0,
+   "int": 5,
+   "wis": 4,
+   "cha": 0
+  },
+  "saveProf": [
+   "int",
+   "wis"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 14,
   "image": "https://th.kanka.io/fpPcDPZZAjkUnJh0QGuD2py9h3g=/40x40/filters:focal(607x568:627x588)/src/campaigns/227292/01a0974e-d9ab-725d-a6cb-86b6f76aa559/1.jpg",
   "url": "https://app.kanka.io/w/227292/entities/9864074"
  },
@@ -62,8 +94,8 @@
   "name": "Alystra Arabana",
   "title": null,
   "race": "Half-Elf (Drow)",
-  "classes": "",
-  "level": null,
+  "classes": "College of Glamour Bard - 3",
+  "level": 3,
   "abilities": {
    "str": 10,
    "dex": 14,
@@ -82,7 +114,22 @@
   },
   "initMod": 2,
   "passivePerception": 13,
-  "hpEst": null,
+  "saves": {
+   "str": 0,
+   "dex": 4,
+   "con": 1,
+   "int": 0,
+   "wis": 1,
+   "cha": 5
+  },
+  "saveProf": [
+   "dex",
+   "cha"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 21,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9850236"
  },
@@ -91,7 +138,7 @@
   "name": "Cromsuns Blacknose",
   "title": "Blacksmith",
   "race": "Dwarf (Hill)",
-  "classes": "",
+  "classes": "Cleric, Forge Domain - 2",
   "level": null,
   "abilities": {
    "str": 13,
@@ -111,6 +158,23 @@
   },
   "initMod": -1,
   "passivePerception": 13,
+  "saves": {
+   "str": 1,
+   "dex": -1,
+   "con": 3,
+   "int": 1,
+   "wis": 4,
+   "cha": 2
+  },
+  "saveProf": [
+   "wis",
+   "cha"
+  ],
+  "resist": [
+   "poison"
+  ],
+  "immune": [],
+  "vulnerable": [],
   "hpEst": null,
   "image": "https://th.kanka.io/xizQqgUA9j4OXhQRWwW381xhFLI=/40x40/smart/src/campaigns/227292/01a06b14-40c3-73c7-b813-196997fa7afd/1.png",
   "url": "https://app.kanka.io/w/227292/entities/9810697"
@@ -120,8 +184,8 @@
   "name": "Daeva Duzakh",
   "title": "Graver Robber",
   "race": "Dhampir with Winged Tiefling Origin",
-  "classes": "",
-  "level": null,
+  "classes": "Ranger - 1",
+  "level": 1,
   "abilities": {
    "str": 12,
    "dex": 14,
@@ -140,7 +204,26 @@
   },
   "initMod": 2,
   "passivePerception": 15,
-  "hpEst": null,
+  "saves": {
+   "str": 3,
+   "dex": 4,
+   "con": 2,
+   "int": -1,
+   "wis": 3,
+   "cha": 0
+  },
+  "saveProf": [
+   "str",
+   "dex",
+   "con",
+   "int",
+   "wis",
+   "cha"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 12,
   "image": "https://th.kanka.io/zC6PxCBk8DayL7raG_xQ1JQFsyU=/40x40/filters:focal(231x136:251x156)/src/campaigns/227292/01a172e6-bde1-73a6-a3d1-cb839f954f9d/1.png",
   "url": "https://app.kanka.io/w/227292/entities/10079510"
  },
@@ -149,8 +232,8 @@
   "name": "Darlock Flintberg",
   "title": null,
   "race": "Dwarf (Mark of Warding)",
-  "classes": "",
-  "level": null,
+  "classes": "Artificer - 2",
+  "level": 2,
   "abilities": {
    "str": 10,
    "dex": 14,
@@ -169,7 +252,24 @@
   },
   "initMod": 2,
   "passivePerception": 10,
-  "hpEst": null,
+  "saves": {
+   "str": 0,
+   "dex": 2,
+   "con": 5,
+   "int": 5,
+   "wis": 0,
+   "cha": -1
+  },
+  "saveProf": [
+   "con",
+   "int"
+  ],
+  "resist": [
+   "poison"
+  ],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 19,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/10023006"
  },
@@ -178,8 +278,8 @@
   "name": "Dora Maira",
   "title": "Dr.",
   "race": "Gnome (Rock)",
-  "classes": "",
-  "level": null,
+  "classes": "Knowledge Cleric - 2",
+  "level": 2,
   "abilities": {
    "str": 8,
    "dex": 10,
@@ -198,7 +298,22 @@
   },
   "initMod": 0,
   "passivePerception": 12,
-  "hpEst": null,
+  "saves": {
+   "str": -1,
+   "dex": 0,
+   "con": 2,
+   "int": 3,
+   "wis": 4,
+   "cha": 3
+  },
+  "saveProf": [
+   "wis",
+   "cha"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 17,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9854904"
  },
@@ -207,8 +322,8 @@
   "name": "Enya Anahita",
   "title": null,
   "race": "Genasi (Water)",
-  "classes": "",
-  "level": null,
+  "classes": "Storm Sorcerer - 2",
+  "level": 2,
   "abilities": {
    "str": 8,
    "dex": 13,
@@ -227,7 +342,24 @@
   },
   "initMod": 1,
   "passivePerception": 10,
-  "hpEst": null,
+  "saves": {
+   "str": -1,
+   "dex": 1,
+   "con": 5,
+   "int": 1,
+   "wis": 0,
+   "cha": 4
+  },
+  "saveProf": [
+   "con",
+   "cha"
+  ],
+  "resist": [
+   "acid"
+  ],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 16,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9888695"
  },
@@ -236,8 +368,8 @@
   "name": "Fritjof Små",
   "title": "Criminal Playboy",
   "race": "Halfling",
-  "classes": "",
-  "level": null,
+  "classes": "Rogue - 1",
+  "level": 1,
   "abilities": {
    "str": 8,
    "dex": 17,
@@ -256,7 +388,22 @@
   },
   "initMod": 3,
   "passivePerception": 12,
-  "hpEst": null,
+  "saves": {
+   "str": -1,
+   "dex": 4,
+   "con": 1,
+   "int": 3,
+   "wis": 0,
+   "cha": 2
+  },
+  "saveProf": [
+   "dex",
+   "int"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 9,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/10056489"
  },
@@ -265,8 +412,8 @@
   "name": "Gidion Monkshood",
   "title": "Tree Gardener",
   "race": "Elf (Wood)",
-  "classes": "",
-  "level": null,
+  "classes": "Shepherd Druid - 3",
+  "level": 3,
   "abilities": {
    "str": 10,
    "dex": 16,
@@ -285,7 +432,22 @@
   },
   "initMod": 3,
   "passivePerception": 15,
-  "hpEst": null,
+  "saves": {
+   "str": 0,
+   "dex": 3,
+   "con": 2,
+   "int": 2,
+   "wis": 5,
+   "cha": -1
+  },
+  "saveProf": [
+   "int",
+   "wis"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 24,
   "image": "https://th.kanka.io/v6rRZ3ksVCe9Q1WaU_jjsiW-oEI=/40x40/filters:focal(1086x1350:1106x1370)/src/campaigns/227292/01a0a167-53d4-71a0-ac96-85e22c8e38d7/1.jpg",
   "url": "https://app.kanka.io/w/227292/entities/9815497"
  },
@@ -294,8 +456,8 @@
   "name": "Gunther Murdock",
   "title": "The Duke",
   "race": "Giff",
-  "classes": "",
-  "level": null,
+  "classes": "Rogue - 2",
+  "level": 2,
   "abilities": {
    "str": 10,
    "dex": 16,
@@ -314,7 +476,22 @@
   },
   "initMod": 3,
   "passivePerception": 14,
-  "hpEst": null,
+  "saves": {
+   "str": 0,
+   "dex": 5,
+   "con": 1,
+   "int": 4,
+   "wis": 2,
+   "cha": -1
+  },
+  "saveProf": [
+   "dex",
+   "int"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 15,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9899034"
  },
@@ -323,8 +500,8 @@
   "name": "Harold 'Hal' Sorofield",
   "title": null,
   "race": "Half-Elf",
-  "classes": "",
-  "level": null,
+  "classes": "Barbarian - 1",
+  "level": 1,
   "abilities": {
    "str": 16,
    "dex": 8,
@@ -343,7 +520,22 @@
   },
   "initMod": -1,
   "passivePerception": 9,
-  "hpEst": null,
+  "saves": {
+   "str": 5,
+   "dex": -1,
+   "con": 5,
+   "int": 0,
+   "wis": -1,
+   "cha": 3
+  },
+  "saveProf": [
+   "str",
+   "con"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 15,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9815472"
  },
@@ -352,8 +544,8 @@
   "name": "Isis",
   "title": null,
   "race": "Human",
-  "classes": "",
-  "level": null,
+  "classes": "Wizard - 1",
+  "level": 1,
   "abilities": {
    "str": 8,
    "dex": 10,
@@ -372,7 +564,22 @@
   },
   "initMod": 0,
   "passivePerception": 12,
-  "hpEst": null,
+  "saves": {
+   "str": -1,
+   "dex": 0,
+   "con": 2,
+   "int": 5,
+   "wis": 4,
+   "cha": 1
+  },
+  "saveProf": [
+   "int",
+   "wis"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 8,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9815460"
  },
@@ -381,8 +588,8 @@
   "name": "Lorenz Ravencrest",
   "title": null,
   "race": "Human (Variant)",
-  "classes": "",
-  "level": null,
+  "classes": "Paladin - 2",
+  "level": 2,
   "abilities": {
    "str": 16,
    "dex": 10,
@@ -401,7 +608,22 @@
   },
   "initMod": 0,
   "passivePerception": 9,
-  "hpEst": null,
+  "saves": {
+   "str": 3,
+   "dex": 0,
+   "con": 2,
+   "int": -1,
+   "wis": 1,
+   "cha": 5
+  },
+  "saveProf": [
+   "wis",
+   "cha"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 20,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9850209"
  },
@@ -410,8 +632,8 @@
   "name": "Malenka Mudclaw",
   "title": "Shaman",
   "race": "Goblin",
-  "classes": "",
-  "level": null,
+  "classes": "Druid - 2",
+  "level": 2,
   "abilities": {
    "str": 10,
    "dex": 16,
@@ -430,7 +652,22 @@
   },
   "initMod": 3,
   "passivePerception": 14,
-  "hpEst": null,
+  "saves": {
+   "str": 0,
+   "dex": 3,
+   "con": 2,
+   "int": 3,
+   "wis": 4,
+   "cha": -1
+  },
+  "saveProf": [
+   "int",
+   "wis"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 17,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/10022982"
  },
@@ -439,8 +676,8 @@
   "name": "Miria Ashfall",
   "title": null,
   "race": "Tiefling (Zariel)",
-  "classes": "",
-  "level": null,
+  "classes": "Warlock - 2",
+  "level": 2,
   "abilities": {
    "str": 9,
    "dex": 14,
@@ -459,7 +696,24 @@
   },
   "initMod": 2,
   "passivePerception": 10,
-  "hpEst": null,
+  "saves": {
+   "str": -1,
+   "dex": 2,
+   "con": 2,
+   "int": 1,
+   "wis": 2,
+   "cha": 5
+  },
+  "saveProf": [
+   "wis",
+   "cha"
+  ],
+  "resist": [
+   "fire"
+  ],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 17,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/10056511"
  },
@@ -468,7 +722,7 @@
   "name": "Mortimer Blackwell",
   "title": "Occult Consultant | Fortune Teller | Prize Fighter",
   "race": "Kalashtar (Half-Elf Origin)",
-  "classes": "",
+  "classes": "Fighter, Rune Knight - 3",
   "level": null,
   "abilities": {
    "str": 16,
@@ -488,6 +742,23 @@
   },
   "initMod": 1,
   "passivePerception": 12,
+  "saves": {
+   "str": 5,
+   "dex": 1,
+   "con": 4,
+   "int": 2,
+   "wis": 0,
+   "cha": -1
+  },
+  "saveProf": [
+   "str",
+   "con"
+  ],
+  "resist": [
+   "psychic"
+  ],
+  "immune": [],
+  "vulnerable": [],
   "hpEst": null,
   "image": "https://th.kanka.io/hVpeZacQnWVYO67fxWrlK9_nd0E=/40x40/filters:focal(250x167:270x187)/src/campaigns/227292/01a16902-df12-73aa-8470-332e41a576a2/1.png",
   "url": "https://app.kanka.io/w/227292/entities/9799958"
@@ -497,8 +768,8 @@
   "name": "Petris Elderdew",
   "title": null,
   "race": "Firbolg",
-  "classes": "",
-  "level": null,
+  "classes": "Ranger - 2",
+  "level": 2,
   "abilities": {
    "str": 10,
    "dex": 16,
@@ -517,7 +788,22 @@
   },
   "initMod": 3,
   "passivePerception": 15,
-  "hpEst": null,
+  "saves": {
+   "str": 2,
+   "dex": 5,
+   "con": 1,
+   "int": -1,
+   "wis": 3,
+   "cha": 1
+  },
+  "saveProf": [
+   "str",
+   "dex"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 18,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9938950"
  },
@@ -526,8 +812,8 @@
   "name": "Phaeanna Nyx",
   "title": null,
   "race": "Genasi (Fire)",
-  "classes": "",
-  "level": null,
+  "classes": "Artificer - 2",
+  "level": 2,
   "abilities": {
    "str": 10,
    "dex": 14,
@@ -546,7 +832,24 @@
   },
   "initMod": 2,
   "passivePerception": 9,
-  "hpEst": null,
+  "saves": {
+   "str": 0,
+   "dex": 2,
+   "con": 4,
+   "int": 5,
+   "wis": -1,
+   "cha": 1
+  },
+  "saveProf": [
+   "con",
+   "int"
+  ],
+  "resist": [
+   "fire"
+  ],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 17,
   "image": "https://th.kanka.io/pIrDX7ABFgw16t31Sk8oX8R5gGk=/40x40/filters:focal(823x476:843x496)/src/campaigns/227292/01a0a613-d240-7151-8106-135df706749b/1.png",
   "url": "https://app.kanka.io/w/227292/entities/9888842"
  },
@@ -555,8 +858,8 @@
   "name": "Scent of the Moon",
   "title": null,
   "race": "Tabaxi",
-  "classes": "",
-  "level": null,
+  "classes": "Ranger - 2",
+  "level": 2,
   "abilities": {
    "str": 10,
    "dex": 16,
@@ -575,7 +878,22 @@
   },
   "initMod": 3,
   "passivePerception": 14,
-  "hpEst": null,
+  "saves": {
+   "str": 2,
+   "dex": 5,
+   "con": 1,
+   "int": 1,
+   "wis": 2,
+   "cha": -1
+  },
+  "saveProf": [
+   "str",
+   "dex"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 18,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9996654"
  },
@@ -584,8 +902,8 @@
   "name": "Se Untrum",
   "title": null,
   "race": "Changeling",
-  "classes": "",
-  "level": null,
+  "classes": "Rogue - 3",
+  "level": 3,
   "abilities": {
    "str": 8,
    "dex": 14,
@@ -604,7 +922,22 @@
   },
   "initMod": 2,
   "passivePerception": 15,
-  "hpEst": null,
+  "saves": {
+   "str": -1,
+   "dex": 4,
+   "con": 1,
+   "int": 2,
+   "wis": 3,
+   "cha": 2
+  },
+  "saveProf": [
+   "dex",
+   "int"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 21,
   "image": "https://th.kanka.io/uv-4nLmZ5gGuKM3TifrCDkytb1I=/40x40/smart/src/campaigns/227292/01a06b12-c948-7295-a774-4a4e26d679d1/1.png",
   "url": "https://app.kanka.io/w/227292/entities/9815450"
  },
@@ -613,8 +946,8 @@
   "name": "Trash",
   "title": "Son of Chicken Jr.",
   "race": "Hobgoblin",
-  "classes": "",
-  "level": null,
+  "classes": "Monk - 1",
+  "level": 1,
   "abilities": {
    "str": 10,
    "dex": 16,
@@ -633,7 +966,22 @@
   },
   "initMod": 3,
   "passivePerception": 12,
-  "hpEst": null,
+  "saves": {
+   "str": 2,
+   "dex": 5,
+   "con": 2,
+   "int": -1,
+   "wis": 2,
+   "cha": -1
+  },
+  "saveProf": [
+   "str",
+   "dex"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "hpEst": 10,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
   "url": "https://app.kanka.io/w/227292/entities/9824051"
  }
