@@ -33,7 +33,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16p
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
 body.padon{padding-bottom:345px}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
-button,input{font:inherit;color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 12px;min-height:44px}
 button:hover{border-color:var(--accent)}
 button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -57,6 +57,15 @@ input{background:var(--surface);border:1px solid var(--line);border-radius:8px;p
 .tok.now .lab,.tok.next .lab{color:var(--accent)}
 .tok.next{border:2px dashed var(--accent);padding:5px 8px}
 .tok.down{opacity:.6}
+.tok.sel{box-shadow:inset 0 0 0 3px var(--ok);background:color-mix(in srgb,var(--ok) 24%,var(--surface))}
+.tok.sel .lab{color:var(--ok)}
+.svb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
+.svb b{font-size:.9rem}
+.svb button{min-height:38px;padding:2px 12px;font-weight:700}
+.svb button.on,.bar button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.sv{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:8px;border:2px solid var(--accent);font-family:var(--display);font-size:1.15rem;font-weight:700;vertical-align:middle;white-space:nowrap}
+.sv.svp{background:color-mix(in srgb,var(--accent) 18%,var(--surface))}
+.sv small{font-family:var(--body);font-size:.7rem;margin-left:4px;color:var(--bad);text-transform:uppercase;letter-spacing:.06em}
 .tok.pc .in::after{content:" \00B7 PC";font-size:.7rem;letter-spacing:.1em;color:var(--muted);font-family:var(--body);font-weight:700}
 .mini{display:flex;flex-wrap:wrap;gap:3px}
 .mini span{font-size:.7rem;font-weight:700;padding:1px 6px;border-radius:999px;background:color-mix(in srgb,var(--accent) 20%,var(--surface));border:1px solid var(--accent)}
@@ -118,7 +127,7 @@ tr.dead td{font-size:.85rem;color:var(--muted);padding:4px 8px;border-top:1px so
 tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 0}
 .c-in,.c-ac{width:66px;text-align:center}
 .c-hp{width:170px}
-.c-i{width:50px}
+.c-i{width:92px;white-space:nowrap;text-align:right}
 .num{width:54px;text-align:center;font-family:var(--display);font-size:1.3rem;font-weight:700;padding:0;min-height:40px}
 .name{font-family:var(--display);font-size:1.35rem;font-weight:600;line-height:1.1;overflow-wrap:anywhere}
 .tag{margin-left:6px;font-size:.7rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-weight:600}
@@ -191,7 +200,7 @@ tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 
 .qty{width:58px;text-align:center}
 .lib{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}
 .lib label{flex:1;display:flex;gap:10px;align-items:center;min-width:0;min-height:44px}
-.lib input[type=checkbox]{width:24px;height:24px;min-height:0;accent-color:var(--accent)}
+.lib input[type=checkbox]{flex:none;width:24px;height:24px;min-height:0;accent-color:var(--accent)}
 .lib .meta{font-size:.82rem;color:var(--muted)}
 .x{border:0;background:none;color:var(--muted);padding:4px 10px;font-size:1.3rem}
 .row{display:flex;gap:6px;margin-top:10px}
@@ -230,6 +239,36 @@ button{touch-action:manipulation}
 .tok.fx .in::after{content:" \00B7 EFFECT";font-size:.7rem;letter-spacing:.1em;color:var(--muted);font-family:var(--body);font-weight:700}
 .data p{margin:10px 0 4px;font-size:.92rem}
 .data .row{margin-top:4px}.data .row button{flex:1}
+/* Edit panel */
+.ed h2{font-family:var(--display);font-size:1.7rem;margin:0}
+.ed h3{font-family:var(--display);font-size:1.1rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:14px 0 4px;border-bottom:1px solid var(--line)}
+.eg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.eg label{display:flex;flex-direction:column;gap:2px;font-size:.8rem;font-weight:700;color:var(--muted)}
+.eg label.w{grid-column:1/-1}
+.eg label{min-width:0}.eg input{width:100%;color:var(--ink);font-size:1rem;font-weight:400}
+.ex{border:1px solid var(--line);border-radius:10px;padding:6px;margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.ex .er{display:flex;gap:6px}.ex .er input{flex:1}
+.ex select,.ex textarea{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:6px;min-height:44px}
+.ex textarea{width:100%;resize:vertical;font-size:.92rem}
+.cx{border:2px dashed var(--accent);border-radius:10px;padding:4px 10px;margin-bottom:10px}
+.a .sec.cu{color:var(--ok)}
+/* Wide screens: selection pad docks bottom-right so the table stays tappable */
+@media (min-width:1000px){
+  body.padon{padding-bottom:40px}
+  body.padon .tw{margin-right:396px}
+  .pad{left:auto;right:16px;bottom:16px;width:376px;border:2px solid var(--ok);border-radius:14px;padding:8px 10px 10px}
+  .pad .pi{max-width:none}
+  .pad .wheelbox{width:84px}
+  .pad .amtrow span{display:none}
+  .pad .amtin{width:100%}
+  .pad .pacts{grid-template-columns:1fr 1fr}
+  .pad .pacts button{min-height:38px;font-size:.9rem}
+  .pad .menu{right:calc(100% + 12px);bottom:0;width:540px}
+  body.drawon .tw{margin-right:446px}
+  body.drawon .pad{right:462px}
+  body.drawon.padon{padding-bottom:345px}
+  body.drawon .pad .menu{right:auto;left:0;bottom:calc(100% + 12px)}
+}
 </style>
 </head>
 <body>
@@ -239,6 +278,7 @@ button{touch-action:manipulation}
   <div class="turn dmonly" id="turn" hidden></div>
 </div>
 <div class="big" id="big"></div>
+<div class="svb dmonly" id="svb" hidden></div>
 <div class="tw dmonly"><table id="tbl" aria-label="Combatants"></table></div>
 <div class="pad dmonly" id="pad" hidden></div>
 <aside class="drawer" id="drawer" hidden aria-label="Add combatants and stat blocks"></aside>
@@ -267,10 +307,12 @@ var isOut=function(c){return isDead(c)||isPcDead(c);};
 var S={round:1,turnId:null,list:[],next:1,libNext:7,tab:'add',sub:'monsters',stat:null,atTable:{},initMode:'each',hpMode:'roll',
  lib:[{id:'l1',name:'Aria (example)',ac:16,hp:31,ib:2},{id:'l2',name:'Brom (example)',ac:18,hp:38,ib:1},{id:'l3',name:'Wren (example)',ac:14,hp:24,ib:3},
       {id:'l4',name:'Tolliver (example)',ac:12,hp:20,ib:1},{id:'l5',name:'Sable (example)',ac:15,hp:27,ib:4},{id:'l6',name:'Marek (example)',ac:17,hp:34,ib:0}]};
-var ui={fx:{name:'',init:'',desc:'',vis:true},fType:'',fMin:'',fMax:'',q:'',qty:{},sel:{},amt:0,menu:false,pend:{},confirmRemove:false,confirmClear:false,msg:'',drawer:false,present:false,cardOpen:true,traitsOpen:false,ignoreUntil:0};
+var ui={fx:{name:'',init:'',desc:'',vis:true},fType:'',fMin:'',fMax:'',q:'',qty:{},sel:{},amt:0,menu:false,pend:{},confirmRemove:false,confirmClear:false,msg:'',drawer:false,present:false,cardOpen:true,sv:-1,svLast:1,traitsOpen:false,ignoreUntil:0};
 var loaded=false;try{if(RO||sessionStorage.getItem('et-present')==='1')ui.present=true;}catch(e){}
 try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.list){S=Object.assign(S,p);loaded=true;}}}catch(e){}
-function save(){if(RO)return;try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function save(){if(RO)return;try{localStorage.setItem(KEY,JSON.stringify(S));ui.saveErr=false;}catch(e){if(!ui.saveErr){ui.saveErr=true;alert('This device\u2019s storage is full, so changes are NOT being saved. Export your encounter (Data tab), then remove a monster file you no longer need.');}}}
+function fixIds(){var mx=0;S.list.forEach(function(c){c.id=+c.id;if(c.id>mx)mx=c.id;['ac','hp','max'].forEach(function(k){c[k]=Math.floor(+c[k])||0;});c.temp=Math.floor(+c.temp)||0;if(c.init!=null&&isNaN(+c.init))c.init=null;if(!Array.isArray(c.conds))c.conds=[];});if(!(S.next>mx))S.next=mx+1;}
+fixIds();
 
 function order(){
   return S.list.map(function(c,i){return [c,i];}).sort(function(a,b){
@@ -307,7 +349,7 @@ function nextId(){
   return null;
 }
 function rollHP(dice,fallback){
-  var m=/^(\d+)d(\d+)(?:([+-])(\d+))?$/.exec(dice);if(!m)return fallback;
+  var m=/^(\d+)d(\d+)(?:([+-])(\d+))?$/.exec(String(dice||'').replace(/\s+/g,'').replace('\u2212','-'));if(!m)return fallback;
   var t=0;for(var i=0;i<+m[1];i++)t+=d(+m[2]);
   if(m[3])t+=(m[3]==='+'?1:-1)*(+m[4]);
   return Math.max(1,t);
@@ -317,6 +359,7 @@ function addMon(id,qty){
   var existing=S.list.filter(function(c){return c.monId===id;});
   var n0=existing.length;
   if(n0===1&&existing[0].name===m.name)existing[0].name=m.name+' 1';
+  var pre=m.name+' ';existing.forEach(function(c){var k=c.name.indexOf(pre)===0?+c.name.slice(pre.length):NaN;if(k>n0)n0=k;});
   var im=mod(m.abil[1]);
   var shared=d(20)+im,grp=qty>1?'g'+S.next:null;
   for(var i=1;i<=qty;i++){
@@ -324,6 +367,23 @@ function addMon(id,qty){
     var init=S.initMode==='group'?shared:d(20)+im;
     S.list.push({id:S.next++,kind:'mon',monId:id,name:(qty>1||n0>0)?m.name+' '+(n0+i):m.name,init:init,ac:m.ac,hp:hp,max:hp,temp:0,conds:[],cr:m.cr,spent:{},grp:grp});
   }
+}
+function gkey(c){return c.cg?'cg:'+c.cg.toLowerCase():c.monId;}
+function setGroup(T,name){
+  T=T.filter(function(c){return c.kind==='mon';});
+  name=(name||'').trim();
+  if(!name){T.forEach(function(c){delete c.cg;if(c.grp&&c.grp.indexOf('c:')===0)delete c.grp;});return T.length;}
+  var key='c:'+name.toLowerCase();
+  var old=S.list.filter(function(c){return c.grp===key&&c.cg&&T.indexOf(c)<0&&!isDead(c);});
+  var ins=T.map(function(c){return c.init;}).filter(function(v){return v!=null;});
+  var init=old.length?old[0].init:(ins.length?Math.max.apply(null,ins):null);
+  if(old.length)name=old[0].cg;
+  T.forEach(function(c){c.cg=name;c.grp=key;c.init=init;});
+  var mem=S.list.filter(function(c){return c.grp===key;}),at=S.list.indexOf(mem[0]);
+  var rest=S.list.filter(function(c){return c.grp!==key;});
+  rest.splice(S.list.slice(0,at).filter(function(c){return c.grp!==key;}).length,0,mem[0]);
+  rest.splice.apply(rest,[rest.indexOf(mem[0])+1,0].concat(mem.slice(1)));
+  S.list=rest;return T.length;
 }
 function addPc(l){
   if(S.list.some(function(c){return c.libId===l.id;}))return false;
@@ -388,6 +448,7 @@ function renderBar(){
    '<button class="primary" data-act="next">'+(started?'Next turn ▸':'Start combat')+'</button>'+
    '<span class="spacer"></span>'+
    '<button class="dmonly" data-act="openadd">+ Add</button>'+
+   '<button class="dmonly'+(ui.sv>=0?' on':'')+'" data-act="saves" title="Show saving throw modifiers">Saves</button>'+
    '<button data-act="present">'+(ui.present?'Exit table view':'Table view')+'</button>'+
    '<button class="danger dmonly'+(ui.confirmClear?' armed':'')+'" data-act="clear">'+(ui.confirmClear?'Tap again to clear all':'Clear')+'</button>';
 }
@@ -402,7 +463,7 @@ function tokHTML(c,isNext){
   else if(c.hp<=0)tags.unshift('<span class="dn">'+(c.kind==='pc'?'Down':'Dead')+'</span>');
   else if(c.kind==='mon'&&c.hp*2<=c.max)tags.unshift('<span class="bl">Bloodied</span>');
   var showBar=c.kind==='pc'||!ui.present;
-  return '<div class="tok '+c.kind+(now?' now':'')+(isNext?' next':'')+(down?' down':'')+'">'+
+  return '<div class="tok '+c.kind+(now?' now':'')+(isNext?' next':'')+(down?' down':'')+(ui.sel[c.id]&&!ui.present?' sel':'')+'">'+
     '<div class="lab">'+(now?'Up now':(isNext?'Next':''))+'</div>'+
     '<div class="in">'+(c.init==null?'—':c.init)+'</div>'+
     '<div class="nm">'+esc(c.name)+'</div>'+
@@ -414,9 +475,10 @@ function grpTokHTML(g,nid){
   var cur=g.find(function(c){return c.id===S.turnId;}),nx=!cur&&g.some(function(c){return c.id===nid;});
   var up=g.filter(function(c){return c.hp>0;}),bl=up.filter(function(c){return c.hp*2<=c.max;}).length;
   var hp=0,mx=0;g.forEach(function(c){hp+=Math.max(0,c.hp);mx+=c.max;});var pct=mx?hp/mx*100:0,lvl=pct>50?'ok':(pct>25?'warn':'bad');
-  var nm=(MON.find(function(m){return m.id===g[0].monId;})||{name:g[0].name}).name;
-  return '<div class="tok mon'+(cur?' now':'')+(nx?' next':'')+'"><div class="lab">'+(cur?'Up: '+esc(cur.name):(nx?'Next':''))+'</div><div class="in">'+g[0].init+'</div><div class="nm">'+esc(nm)+' Group</div>'+
-   '<div class="mini"><span>×'+up.length+'</span>'+(bl?'<span class="bl">'+bl+' bloodied</span>':'')+(g.length>up.length?'<span class="dn">'+(g.length-up.length)+' down</span>':'')+'</div>'+
+  var nm=g[0].cg||(MON.find(function(m){return m.id===g[0].monId;})||{name:g[0].name}).name+' Group';
+  var ns=ui.present?0:g.filter(function(c){return ui.sel[c.id];}).length;
+  return '<div class="tok mon'+(cur?' now':'')+(nx?' next':'')+(ns?' sel':'')+'"><div class="lab">'+(cur?'Up: '+esc(cur.name):(nx?'Next':''))+'</div><div class="in">'+g[0].init+'</div><div class="nm">'+esc(nm)+'</div>'+
+   '<div class="mini"><span>×'+up.length+'</span>'+(ns&&ns<g.length?'<span>'+ns+' selected</span>':'')+(bl?'<span class="bl">'+bl+' bloodied</span>':'')+(g.length>up.length?'<span class="dn">'+(g.length-up.length)+' down</span>':'')+'</div>'+
    (ui.present?'':'<div class="track"><div class="fill '+lvl+'" style="width:'+pct+'%"></div></div>')+'</div>';
 }
 function renderStrip(){
@@ -444,25 +506,39 @@ function renderTurn(){
   var chips=c.conds.map(function(x){return '<button class="chip" data-act="cond" data-c="'+esc(x)+'" title="Remove '+esc(x)+'">'+esc(x)+' ×</button>';}).join('');
   var h='<div class="th"><span class="tn">'+esc(c.name)+'</span>'+
     '<span class="st"><i>AC</i>'+c.ac+'</span><span class="st"><i>HP</i>'+c.hp+'/'+c.max+(c.base!=null?' (max \u2212'+(c.base-c.max)+')':'')+(c.temp>0?' +'+c.temp:'')+'</span>'+
-    (m?'<span class="st"><i>SPEED</i>'+esc(m.speed)+'</span><span class="st"><i>CR</i>'+m.cr+'</span>':'<span class="st muted">Player turn</span>')+
-    '<span class="sp"></span>'+(m?'<button data-act="tinfo">Full stat block</button>':'')+
+    (m?'<span class="st"><i>SPEED</i>'+esc(m.speed)+'</span><span class="st"><i>CR</i>'+esc(m.cr)+'</span>':'<span class="st muted">'+(c.kind==='pc'?'Player turn':'Stat block not loaded')+'</span>')+
+    '<span class="sp"></span>'+'<button data-act="tedit">Edit</button>'+(m?'<button data-act="tinfo">Full stat block</button>':'')+
     '<button data-act="tcol">'+(ui.cardOpen?'Hide':'Show')+'</button></div>';
   if(chips)h+='<div class="tc">'+chips+'</div>';
   h+=fxHTML(c,'fxs');
   h+=dsHTML(c);
-  if(ui.cardOpen&&m){
+  var X=c.x||[];
+  if(ui.cardOpen&&(m||X.length)){
     var acts=[];
-    [['a','',m.actions],['b','Bonus',m.bonus],['r','Reaction',m.react]].forEach(function(g){(g[2]||[]).forEach(function(a,i){acts.push([g[0]+i,g[1],a]);});});
+    if(m&&!c.hideBase)[['a','',m.actions],['b','Bonus',m.bonus],['r','Reaction',m.react]].forEach(function(g){(g[2]||[]).forEach(function(a,i){acts.push([g[0]+i,g[1],a]);});});
+    X.forEach(function(x,i){if(x.t!=='t'&&(x.n||x.d))acts.push(['x'+i,{a:'Extra',b:'Bonus · extra',r:'Reaction · extra'}[x.t]||'Extra',[x.n||'Extra',x.d||''],1]);});
     h+='<div class="acts2">'+acts.map(function(x){
       var a=x[2],rech=/Recharge/.test(a[0]);var sp=rech&&c.spent&&c.spent[x[0]];
-      return '<div class="a'+(sp?' spent':'')+'">'+(rech?'<button class="tg" data-act="spent" data-i="'+x[0]+'">'+(sp?'Spent':'Ready')+'</button>':'')+'<b>'+esc(a[0])+(x[1]?'<span class="sec">'+x[1]+'</span>':'')+'</b>'+esc(short(a[1]))+'</div>';
+      return '<div class="a'+(sp?' spent':'')+'">'+(rech?'<button class="tg" data-act="spent" data-i="'+x[0]+'">'+(sp?'Spent':'Ready')+'</button>':'')+'<b>'+esc(a[0])+(x[1]?'<span class="sec'+(x[3]?' cu':'')+'">'+x[1]+'</span>':'')+'</b>'+esc(short(a[1]))+'</div>';
     }).join('')+'</div>';
-    var more=(m.traits||[]).concat((m.leg||[]).map(function(t){return ['Legendary: '+t[0],t[1]];}));
+    var leg=m?(m.leg||[]):[];
+    var more=X.filter(function(x){return x.t==='t'&&(x.n||x.d);}).map(function(x){return [x.n||'Extra',x.d||''];}).concat(m?(m.traits||[]):[],leg.map(function(t){return ['Legendary: '+t[0],t[1]];}));
     if(more.length){
-      h+='<details'+(ui.traitsOpen?' open':'')+'><summary>Traits'+((m.leg||[]).length?' and legendary actions':'')+' ('+more.length+')</summary>'+more.map(function(t){return '<p><b>'+esc(t[0])+'.</b> '+esc(t[1])+'</p>';}).join('')+'</details>';
+      h+='<details'+(ui.traitsOpen?' open':'')+'><summary>Traits'+(leg.length?' and legendary actions':'')+' ('+more.length+')</summary>'+more.map(function(t){return '<p><b>'+esc(t[0])+'.</b> '+esc(t[1])+'</p>';}).join('')+'</details>';
     }
   }
   el.innerHTML=h;
+}
+var AB=['STR','DEX','CON','INT','WIS','CHA'];
+function saveOf(c,i){
+  var m=MON.find(function(x){return x.id===c.monId;});if(!m)return null;
+  var sv=(m.extra.find(function(e){return /^sav/i.test(e[0]);})||[])[1]||'';
+  var r=new RegExp('\\b'+AB[i]+'\\w*\\s*([+\u2212-]\\s*\\d+)','i').exec(sv);
+  var n=r?+r[1].replace('\u2212','-').replace(/\s/g,''):mod(+m.abil[i]);
+  var has=function(x){return c.conds.indexOf(x)>=0;},note='';
+  if(i<2&&(has('Paralyzed')||has('Stunned')||has('Unconscious')||has('Petrified')))note='auto-fail';
+  else if(i===1&&has('Restrained'))note='disadv.';
+  return '<span class="sv'+(r?' svp':'')+'" title="'+(r?'Proficient':'Ability modifier')+'">'+AB[i]+' '+sgn(n)+(note?'<small>'+note+'</small>':'')+'</span>';
 }
 function rowHTML(c){
   var pct=c.max?Math.max(0,Math.min(100,c.hp/c.max*100)):0;
@@ -473,11 +549,11 @@ function rowHTML(c){
   var ph=c.kind==='pc'&&c.ib!=null?'d20'+sgn(c.ib):'—';
   return '<tr class="r'+(c.id===S.turnId?' turn':'')+(down?' down':'')+(ui.sel[c.id]?' sel':'')+'" data-id="'+c.id+'">'+
    '<td class="c-in"><input class="num" type="number" inputmode="numeric" data-act="init" placeholder="'+esc(ph)+'" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
-   '<td><span class="name">'+esc(c.name)+'</span>'+(c.kind==='pc'?'':'<span class="tag">CR '+esc(c.cr)+'</span>')+'<div class="conds">'+chips+'</div>'+fxHTML(c)+'</td>'+
+   '<td><span class="name">'+esc(c.name)+'</span>'+(c.kind==='pc'?'':'<span class="tag">CR '+esc(c.cr)+'</span>'+(ui.sv>=0?(saveOf(c,ui.sv)||''):''))+'<div class="conds">'+chips+'</div>'+fxHTML(c)+'</td>'+
    '<td class="c-ac"><input class="num" type="number" inputmode="numeric" data-act="ac" value="'+c.ac+'" aria-label="Armor class for '+esc(c.name)+'"></td>'+
    '<td class="c-hp"><div class="hpnum"><span class="cur">'+c.hp+'</span><span class="max">/ '+c.max+'</span>'+(c.base!=null?'<span class="mred">max \u2212'+(c.base-c.max)+'</span>':'')+(c.temp>0?'<span class="temp">+'+c.temp+'</span>':'')+(down?'<span class="state">'+(pcDead?'Dead':'Down')+'</span>':'')+'</div>'+
      '<div class="track"><div class="fill '+lvl+'" style="width:'+pct+'%"></div></div>'+(pcDead?'<div class="dsd">Heal 1+ HP to revive</div>':dsHTML(c))+'</td>'+
-   '<td class="c-i"><button class="ib" data-act="info" aria-label="Stat block for '+esc(c.name)+'">ⓘ</button></td>'+
+   '<td class="c-i"><button class="ib" data-act="edit" aria-label="Edit '+esc(c.name)+'" title="Edit">✎</button><button class="ib" data-act="info" aria-label="Stat block for '+esc(c.name)+'">ⓘ</button></td>'+
   '</tr>';
 }
 function fxRow(c){
@@ -487,16 +563,18 @@ function fxRow(c){
 }
 function renderTable(){
   var h='';
+  var sb=$('#svb');sb.hidden=ui.sv<0;
+  if(ui.sv>=0)sb.innerHTML='<b>Saving throw:</b>'+AB.map(function(a,i){return '<button data-act="sv" data-n="'+i+'" class="'+(i===ui.sv?'on':'')+'">'+a+'</button>';}).join('')+'<button data-act="sv" data-n="-1" aria-label="Hide saves">Hide</button><span class="muted" style="font-size:.8rem">Shaded = proficient</span>';
   var pcs=S.list.filter(function(c){return c.kind==='pc';});
   if(pcs.length){h+='<tr class="grp"><th colspan="5">Players · '+pcs.length+'<button class="gb" data-act="selgrp" data-g="pc">Select all</button></th></tr>'+pcs.map(rowHTML).join('');}
   var seen=[],groups={};
-  S.list.forEach(function(c){if(c.kind==='mon'){if(!groups[c.monId]){groups[c.monId]=[];seen.push(c.monId);}groups[c.monId].push(c);}});
+  S.list.forEach(function(c){if(c.kind==='mon'){var k=gkey(c);if(!groups[k]){groups[k]=[];seen.push(k);}groups[k].push(c);}});
   seen.forEach(function(id){
-    var m=MON.find(function(x){return x.id===id;});var g=groups[id];
+    var g=groups[id],cg=id.indexOf('cg:')===0,m=cg?{name:g[0].cg}:MON.find(function(x){return x.id===id;});
     var alive=g.filter(function(c){return !isDead(c);}),dead=g.filter(isDead);
-    h+='<tr class="grp"><th colspan="5">'+esc(m?m.name:id)+' · '+alive.length+' alive'+(alive.length?'<button class="gb" data-act="selgrp" data-g="'+id+'">Select all</button>':'')+'<button class="gb" data-act="viewgrp" data-m="'+id+'">Stat block</button></th></tr>'+alive.map(rowHTML).join('');
+    h+='<tr class="grp"><th colspan="5">'+esc(m?m.name:id)+' · '+alive.length+' alive'+(alive.length?'<button class="gb" data-act="selgrp" data-g="'+esc(id)+'">Select all</button>':'')+(cg?'':'<button class="gb" data-act="viewgrp" data-m="'+id+'">Stat block</button>')+'</th></tr>'+alive.map(rowHTML).join('');
     if(dead.length){
-      h+='<tr class="dead"><td colspan="5">Defeated: '+dead.map(function(c){return '<button data-act="revive" data-id="'+c.id+'" title="Restore at 1 HP">'+esc(c.name)+' ↺</button>';}).join('')+'<button data-act="purge" data-m="'+id+'">Remove defeated</button></td></tr>';
+      h+='<tr class="dead"><td colspan="5">Defeated: '+dead.map(function(c){return '<button data-act="revive" data-id="'+c.id+'" title="Restore at 1 HP">'+esc(c.name)+' ↺</button>';}).join('')+'<button data-act="purge" data-m="'+esc(id)+'">Remove defeated</button></td></tr>';
     }
   });
   var fxs=S.list.filter(function(c){return c.kind==='fx';});
@@ -527,7 +605,7 @@ function renderPad(){
    '<div class="pmain"><div class="wheelbox"><div class="wheel" id="wheel" aria-label="Amount wheel">'+WHEEL+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div></div>'+
    '<div class="pr"><div class="amtrow"><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount, tap to type"><span>Spin the wheel or tap the number to type</span></div>'+
    '<div class="pacts"><button class="d" data-act="padhp" data-k="dmg">Damage</button><button class="d" data-act="padhp" data-k="half">Half</button><button class="h" data-act="padhp" data-k="heal">Heal</button>'+
-   '<button data-act="padhp" data-k="temp">Temp HP</button><button data-act="padstatus">Status ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove">'+(ui.confirmRemove?'Sure?':'Remove')+'</button><button class="d" data-act="padhp" data-k="maxdn">Max HP \u2212</button><button data-act="padhp" data-k="maxreset">Reset max</button></div></div></div>'+
+   '<button data-act="padhp" data-k="temp">Temp HP</button><button data-act="padstatus">Status ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove">'+(ui.confirmRemove?'Sure?':'Remove')+'</button><button class="d" data-act="padhp" data-k="maxdn">Max HP \u2212</button><button data-act="padhp" data-k="maxreset">Reset max</button><button data-act="padgroup">'+(T.some(function(c){return c.cg;})&&T.every(function(c){return c.cg&&c.cg===T[0].cg;})?'Ungroup':'Group\u2026')+'</button></div></div></div>'+
    (ui.menu?menuHTML(T):'')+'</div>';
   var w=$('#wheel');
   if(w){ui.ignoreUntil=Date.now()+250;w.style.scrollSnapType='none';w.scrollTop=Math.min(ui.amt,WMAX)*IH;w.style.scrollSnapType='';}
@@ -537,7 +615,7 @@ function resultsHTML(){
   var lo=ui.fMin===''?-1:crv(ui.fMin),hi=ui.fMax===''?99:crv(ui.fMax);
   var all=MON.filter(function(m){return (!q||m.name.toLowerCase().indexOf(q)>=0||m.type.toLowerCase().indexOf(q)>=0)&&(!ui.fType||m.ctype===ui.fType)&&crv(m.cr)>=lo&&crv(m.cr)<=hi;});var r=all.slice(0,40);
   return r.map(function(m){
-    return '<div class="res"><button class="resname" data-act="view" data-m="'+m.id+'"><b>'+esc(m.name)+'</b><span>CR '+m.cr+' · AC '+m.ac+' · HP '+m.dice+' · init '+sgn(mod(m.abil[1]))+(m.ed==='2014'?' · SRD 5.1':'')+'</span></button>'+
+    return '<div class="res"><button class="resname" data-act="view" data-m="'+m.id+'"><b>'+esc(m.name)+'</b><span>CR '+esc(m.cr)+' · AC '+esc(m.ac)+' · HP '+esc(m.dice)+' · init '+sgn(mod(m.abil[1]))+(m.ed==='2014'?' · SRD 5.1':'')+'</span></button>'+
      '<input class="qty" type="number" min="1" max="20" inputmode="numeric" value="'+(ui.qty[m.id]||1)+'" data-act="qty" data-m="'+m.id+'" aria-label="Quantity of '+esc(m.name)+'">'+
      '<button class="add" data-act="addmon" data-m="'+m.id+'">Add</button></div>';
   }).join('')+(all.length>r.length?'<p class="muted">Showing '+r.length+' of '+all.length+'. Type to narrow the list.</p>':'')||'<p class="muted">No monster matches.</p>';
@@ -547,12 +625,17 @@ function statHTML(){
   var m=MON.find(function(x){return x.id===S.stat;});
   if(!m)return '<p class="muted">Tap ⓘ on a monster in the table, or a name in the search list, to open its stat block here.</p>';
   var names=['STR','DEX','CON','INT','WIS','CHA'];
-  var ab=m.abil.map(function(v,i){return '<div><b>'+names[i]+'</b><span>'+v+' ('+sgn(mod(v))+')</span></div>';}).join('');
+  var ab=m.abil.map(function(v,i){return '<div><b>'+names[i]+'</b><span>'+esc(v)+' ('+sgn(mod(+v))+')</span></div>';}).join('');
+  var sc=S.statC!=null?findC(S.statC):null,cx='';
+  if(sc&&sc.monId===m.id&&(sc.name!==m.name||sc.hideBase||(sc.x||[]).length)){
+    var TL={a:'Action',b:'Bonus action',r:'Reaction',t:'Trait'};
+    cx='<div class="cx"><h3>'+esc(sc.name)+'</h3>'+(sc.hideBase?'<p><i>Uses only the extras below instead of the actions in this stat block.</i></p>':'')+(sc.x||[]).map(function(x){return '<p><b>'+esc(x.n||'Extra')+'.</b> <span class="muted">('+TL[x.t]+')</span> '+esc(x.d||'')+'</p>';}).join('')+'<p><button data-act="sedit">Edit '+esc(sc.name)+'</button></p></div>';
+  }
   var ex=m.extra.map(function(e){return '<dt>'+esc(e[0])+'</dt><dd>'+esc(e[1])+'</dd>';}).join('');
   var tr=m.traits.map(function(t){return '<p><b>'+esc(t[0])+'.</b> '+esc(t[1])+'</p>';}).join('');
   var sec=function(h,a){return a&&a.length?'<h3>'+h+'</h3>'+a.map(function(t){return '<p><b>'+esc(t[0])+'.</b> '+esc(t[1])+'</p>';}).join(''):'';};
-  return '<div class="sb"><img class="thumb" src="img/'+esc(m.srcId||m.id)+'.webp" alt="" onerror="this.remove()"><h2>'+esc(m.name)+'</h2><div class="type">'+esc(m.type)+'</div>'+
-   '<dl><dt>AC</dt><dd>'+m.ac+(m.acn?' ('+esc(m.acn)+')':'')+'</dd><dt>HP</dt><dd>'+m.hp+' ('+m.dice+')</dd><dt>Speed</dt><dd>'+esc(m.speed)+'</dd><dt>CR</dt><dd>'+m.cr+'</dd></dl>'+
+  return '<div class="sb">'+cx+'<img class="thumb" src="img/'+esc(m.srcId||m.id)+'.webp" alt="" onerror="this.remove()"><h2>'+esc(m.name)+'</h2><div class="type">'+esc(m.type)+'</div>'+
+   '<dl><dt>AC</dt><dd>'+esc(m.ac)+(m.acn?' ('+esc(m.acn)+')':'')+'</dd><dt>HP</dt><dd>'+esc(m.hp)+' ('+esc(m.dice)+')</dd><dt>Speed</dt><dd>'+esc(m.speed)+'</dd><dt>CR</dt><dd>'+esc(m.cr)+'</dd></dl>'+
    '<div class="abil">'+ab+'</div><dl>'+ex+'</dl>'+(tr?'<h3>Traits</h3>'+tr:'')+sec('Actions',m.actions)+sec('Bonus actions',m.bonus)+sec('Reactions',m.react)+sec('Legendary actions',m.leg)+'</div>';
 }
 function segHTML(label,key,opts){
@@ -602,12 +685,33 @@ function dataHTML(){
    '<div class="row"><button data-act="import">Import file…</button><input id="impfile" type="file" accept=".json,application/json" hidden></div>'+
    '<p><b>Table window</b> opens a read-only player view that follows this one live. Any other window of this app in the same browser follows too, so you can also just open the app in a second window and tap Table view there.</p>'+
    '<div class="row"><button data-act="tablewin">Open table window</button></div>'+
-   '<div class="msg">'+esc(ui.msg||'')+'</div>'+
    '<p><b>Monster files</b> add your own stat blocks (e.g. your Monster Manual file). Where a name matches a built-in monster, yours replaces it. Kept on this device only.</p>'+
    '<div class="row"><button data-act="addmonfile">Add monster file…</button><input id="monfile" type="file" accept=".json,application/json" hidden></div>'+
    CUSTOM.map(function(f,i){return '<div class="lib"><span style="flex:1"><b>'+esc(f.name)+'</b><br><span class="meta">'+f.monsters.length+' stat blocks</span></span><button class="x" data-act="rmmonfile" data-i="'+i+'" aria-label="Remove '+esc(f.name)+'">×</button></div>';}).join('')+
    '<div class="msg">'+esc(ui.msg||'')+'</div>'+
    '<p class="muted">Monsters: '+MON.length+' stat blocks ('+BUILTIN+' built-in SRD 5.2'+(CUSTOM.length?', '+MERGE.rep+' replaced by yours, '+MERGE.add+' added':'')+'). Works offline.</p></div>';
+}
+function editHTML(){
+  var c=S.edit!=null?findC(S.edit):null;
+  if(!c||c.kind==='fx')return '<p class="muted">Tap ✎ on a row in the table to rename a combatant, change its AC or hit points, or give it extra actions, spells or traits.</p>';
+  var m=c.kind==='mon'?MON.find(function(x){return x.id===c.monId;}):null,X=c.x||[];
+  var sib=c.kind==='mon'?S.list.filter(function(o){return o.monId===c.monId&&o.id!==c.id;}).length:0;
+  var TY=[['a','Action'],['b','Bonus action'],['r','Reaction'],['t','Trait']];
+  return '<div class="ed"><h2 id="edh">'+esc(c.name)+'</h2>'+(m?'<div class="muted">'+esc(m.name)+' · CR '+esc(m.cr)+' · stat block HP '+esc(m.hp)+'</div>':'')+
+   '<div class="eg"><label class="w">Display name<input data-ed="name" type="text" maxlength="40" value="'+esc(c.name)+'"></label>'+
+   '<label>AC<input data-ed="ac" type="number" inputmode="numeric" min="0" value="'+c.ac+'"></label>'+
+   '<label>Initiative<input data-ed="init" type="number" inputmode="numeric" value="'+(c.init==null?'':c.init)+'"></label>'+
+   '<label>Max HP<input data-ed="max" type="number" inputmode="numeric" min="1" value="'+c.max+'"></label>'+
+   '<label>Current HP<input data-ed="hp" type="number" inputmode="numeric" min="0" value="'+c.hp+'"></label>'+
+   (c.kind==='mon'?'<label class="w">Custom group (blank = none)<input data-ed="cg" type="text" maxlength="30" placeholder="e.g. Bandits" value="'+esc(c.cg||'')+'"></label>':'')+'</div>'+
+   (m?'<div class="lib"><label><input type="checkbox" data-ed="hideBase"'+(c.hideBase?' checked':'')+'><span>Hide the stat block\u2019s actions on the turn card, use only the extras below (e.g. a different weapon set)</span></label></div>':'')+
+   '<h3>Extra actions, spells and traits</h3>'+
+   X.map(function(x,i){return '<div class="ex"><div class="er"><select data-ex="t" data-i="'+i+'" aria-label="Type">'+TY.map(function(t){return '<option value="'+t[0]+'"'+(x.t===t[0]?' selected':'')+'>'+t[1]+'</option>';}).join('')+'</select>'+
+     '<input data-ex="n" data-i="'+i+'" type="text" maxlength="60" placeholder="Name, e.g. Longbow" value="'+esc(x.n||'')+'"><button class="x" data-act="exrm" data-i="'+i+'" aria-label="Delete entry">×</button></div>'+
+     '<textarea data-ex="d" data-i="'+i+'" rows="2" maxlength="1000" placeholder="e.g. +4, range 150/600 ft. Hit: 6 (1d8+2) piercing. Write Recharge 5-6 in the name to get a Ready/Spent toggle.">'+esc(x.d||'')+'</textarea></div>';}).join('')+
+   '<div class="row"><button class="add" data-act="exadd" style="flex:1">+ Add entry</button></div>'+
+   (sib?'<div class="row"><button data-act="excopy" style="flex:1">Copy extras to the other '+sib+' '+esc(m?m.name:'')+'</button></div>':'')+
+   '<div class="msg">'+esc(ui.msg||'Changes save when you leave a field.')+'</div></div>';
 }
 function doExport(){
   var obj={app:'encounter-tracker',version:1,edition:'2024',exported:new Date().toISOString(),state:S};
@@ -629,7 +733,7 @@ function doImport(f){
       var o=JSON.parse(r.result);var st=o&&o.app==='encounter-tracker'?o.state:null;
       if(!st||!Array.isArray(st.list)||!Array.isArray(st.lib))throw new Error('bad');
       st.list.forEach(function(c){if(typeof c.id!=='number'||typeof c.name!=='string'||!Array.isArray(c.conds)||isNaN(+c.hp)||isNaN(+c.max))throw new Error('bad');});
-      S=Object.assign(S,st);ui.sel={};ui.drawer=true;S.tab='data';
+      S=Object.assign(S,st);fixIds();ui.sel={};ui.drawer=true;S.tab='data';
       ui.msg='Imported '+st.list.length+' combatants and '+st.lib.length+' saved characters.';
       save();renderAll();
     }catch(e){ui.msg='That file is not a valid encounter export. Nothing was changed.';renderDrawer();}
@@ -640,9 +744,10 @@ function doImport(f){
 function renderDrawer(){
   var dr=$('#drawer');
   dr.hidden=!ui.drawer;
+  document.body.classList.toggle('drawon',ui.drawer);
   if(!ui.drawer)return;
-  dr.innerHTML='<div class="dh"><button class="tab'+(S.tab==='add'?' on':'')+'" data-act="tab" data-t="add">Add</button><button class="tab'+(S.tab==='stat'?' on':'')+'" data-act="tab" data-t="stat">Stat block</button><button class="tab'+(S.tab==='data'?' on':'')+'" data-act="tab" data-t="data">Data</button><button data-act="close" aria-label="Close panel">Close</button></div>'+
-    (S.tab==='add'?addPanelHTML():(S.tab==='data'?dataHTML():statHTML()));
+  dr.innerHTML='<div class="dh"><button class="tab'+(S.tab==='add'?' on':'')+'" data-act="tab" data-t="add">Add</button><button class="tab'+(S.tab==='stat'?' on':'')+'" data-act="tab" data-t="stat">Stat block</button>'+(S.edit!=null&&findC(S.edit)?'<button class="tab'+(S.tab==='edit'?' on':'')+'" data-act="tab" data-t="edit">Edit</button>':'')+'<button class="tab'+(S.tab==='data'?' on':'')+'" data-act="tab" data-t="data">Data</button><button data-act="close" aria-label="Close panel">Close</button></div>'+
+    (S.tab==='add'?addPanelHTML():S.tab==='data'?dataHTML():S.tab==='edit'?editHTML():statHTML());
 }
 function renderBoard(){renderBar();renderStrip();renderTurn();renderTable();renderPad();}
 function renderAll(){
@@ -673,6 +778,7 @@ $('#bar').addEventListener('click',function(e){
   var a=b.dataset.act;
   if(a==='next'){nextTurn();ui.confirmClear=false;}
   else if(a==='openadd'){ui.drawer=true;S.tab='add';}
+  else if(a==='saves'){ui.sv=ui.sv>=0?-1:ui.svLast;renderBar();renderTable();return;}
   else if(a==='present'){ui.present=!ui.present;if(ui.present)ui.drawer=false;document.body.classList.toggle('present',ui.present);try{sessionStorage.setItem('et-present',ui.present?'1':'0');}catch(e){}renderBoard();renderDrawer();return;}
   else if(a==='clear'){
     if(ui.confirmClear){S.list=[];S.turnId=null;S.round=1;ui.confirmClear=false;S.atTable={};ui.sel={};}else{ui.confirmClear=true;}
@@ -685,26 +791,31 @@ $('#turn').addEventListener('click',function(e){
   var c=findC(S.turnId);if(!c)return;
   if(c.kind==='fx'){if(a==='fxvis')c.vis=!c.vis;else if(a==='fxrm')rmComb(c);save();renderBoard();return;}
   if(a==='tcol'){ui.cardOpen=!ui.cardOpen;}
-  else if(a==='tinfo'){S.stat=c.monId;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
+  else if(a==='tinfo'){S.stat=c.monId;S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
+  else if(a==='tedit'){S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
   else if(a==='spent'){c.spent=c.spent||{};c.spent[b.dataset.i]=!c.spent[b.dataset.i];}
   else if(a==='cond'){var i=c.conds.indexOf(b.dataset.c);if(i>=0)c.conds.splice(i,1);incSync(c,false);}
   else if(a.indexOf('ds')===0){dsAct(c,a,b);}
   save();renderBoard();
 });
 $('#turn').addEventListener('toggle',function(e){if(e.target.tagName==='DETAILS')ui.traitsOpen=e.target.open;},true);
+$('#svb').addEventListener('click',function(e){
+  var b=e.target.closest('[data-act="sv"]');if(!b)return;
+  ui.sv=+b.dataset.n;if(ui.sv>=0)ui.svLast=ui.sv;renderBar();renderTable();
+});
 $('#tbl').addEventListener('click',function(e){
   if(e.target.closest('input'))return;
   var b=e.target.closest('[data-act]');
   var act=b?b.dataset.act:null;
-  if(act==='viewgrp'){S.stat=b.dataset.m;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
+  if(act==='viewgrp'){S.stat=b.dataset.m;S.statC=null;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
   if(act==='selgrp'){
     var g=b.dataset.g;
-    S.list.forEach(function(c){if(!isDead(c)&&(g==='pc'?c.kind==='pc':c.monId===g))ui.sel[c.id]=true;});
-    renderTable();renderPad();return;
+    S.list.forEach(function(c){if(!isDead(c)&&(g==='pc'?c.kind==='pc':(c.kind==='mon'&&gkey(c)===g)))ui.sel[c.id]=true;});
+    renderTable();renderStrip();renderPad();return;
   }
   if(act==='revive'){var rc=findC(b.dataset.id);if(rc){rc.hp=1;}save();renderBoard();return;}
   if(act==='purge'){
-    S.list=S.list.filter(function(c){return !(c.monId===b.dataset.m&&isDead(c)&&c.id!==S.turnId);});
+    S.list=S.list.filter(function(c){return !(c.kind==='mon'&&gkey(c)===b.dataset.m&&isDead(c)&&c.id!==S.turnId);});
     pruneSel();save();renderBoard();return;
   }
   var row=e.target.closest('tr.r');if(!row)return;
@@ -712,10 +823,11 @@ $('#tbl').addEventListener('click',function(e){
   if(c.kind==='fx'){if(act==='fxvis')c.vis=!c.vis;else if(act==='fxrm')rmComb(c);save();renderBoard();return;}
   if(act==='cond'){var i=c.conds.indexOf(b.dataset.c);if(i>=0)c.conds.splice(i,1);incSync(c,false);save();renderBoard();return;}
   if(act&&act.indexOf('ds')===0){dsAct(c,act,b);save();renderBoard();return;}
-  if(act==='info'){S.stat=c.kind==='mon'?c.monId:'pc';S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
+  if(act==='info'){S.stat=c.kind==='mon'?c.monId:'pc';S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
+  if(act==='edit'){S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
   if(ui.sel[c.id])delete ui.sel[c.id];else ui.sel[c.id]=true;
   ui.confirmRemove=false;ui.menu=false;ui.pend={};
-  renderTable();renderPad();
+  renderTable();renderStrip();renderPad();
 });
 $('#tbl').addEventListener('change',function(e){
   var t=e.target,act=t.dataset.act;if(act!=='init'&&act!=='ac')return;
@@ -745,6 +857,16 @@ padEl.addEventListener('click',function(e){
       T.forEach(function(c){
         if(k==='dmg')dmg(c,v);else if(k==='half')dmg(c,Math.floor(v/2));else if(k==='heal')heal(c,v);else if(k==='maxdn')maxDown(c,v);else c.temp=Math.max(c.temp,v);
       });
+      finishPad();
+    }
+  }
+  else if(a==='padgroup'){
+    if(T.length&&T.every(function(c){return c.cg&&c.cg===T[0].cg;})){setGroup(T,'');finishPad();}
+    else{
+      var sug=(T.find(function(c){return c.cg;})||{}).cg||'';
+      var nm=prompt('Name for this group (monsters only, they share one initiative):',sug);
+      if(nm===null)return;
+      if(!setGroup(T,nm))alert('Select at least one monster to group.');
       finishPad();
     }
   }
@@ -805,7 +927,17 @@ dr.addEventListener('click',function(e){
   else if(act==='tab'){S.tab=b.dataset.t;ui.msg='';}
   else if(act==='sub'){S.sub=b.dataset.s;ui.msg='';}
   else if(act==='set'){S[b.dataset.k]=b.dataset.v;}
-  else if(act==='view'){S.stat=b.dataset.m;S.tab='stat';}
+  else if(act==='view'){S.stat=b.dataset.m;S.statC=null;S.tab='stat';}
+  else if(act==='sedit'){S.edit=S.statC;S.tab='edit';ui.msg='';}
+  else if(act==='exadd'||act==='exrm'||act==='excopy'){
+    var ec=findC(S.edit);if(!ec)return;ec.x=ec.x||[];
+    if(act==='exadd'){ec.x.push({t:'a',n:'',d:''});ui.msg='';}
+    else if(act==='exrm'){ec.x.splice(+b.dataset.i,1);ui.msg='';}
+    else{var nn=0;S.list.forEach(function(o){if(o.monId===ec.monId&&o.id!==ec.id){o.x=JSON.parse(JSON.stringify(ec.x));o.hideBase=!!ec.hideBase;nn++;}});ui.msg='Copied to '+nn+' others.';}
+    save();renderBoard();renderDrawer();
+    if(act==='exadd'){var ni=dr.querySelectorAll('[data-ex="n"]');if(ni.length)ni[ni.length-1].focus();}
+    return;
+  }
   else if(act==='addmon'){
     var q=Math.max(1,Math.min(20,Math.floor(+ui.qty[b.dataset.m]||1)));
     addMon(b.dataset.m,q);ui.qty[b.dataset.m]=1;
@@ -828,6 +960,7 @@ dr.addEventListener('click',function(e){
   }
   save();renderBoard();renderDrawer();
 });
+dr.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='newchar'){var sb=dr.querySelector('[data-act="newchar"]');if(sb)sb.click();}});
 dr.addEventListener('input',function(e){
   var t=e.target;
   if(t.id==='search'){ui.q=t.value;$('#results').innerHTML=resultsHTML();}
@@ -838,6 +971,19 @@ dr.addEventListener('input',function(e){
 });
 dr.addEventListener('change',function(e){
   var t=e.target;
+  if(t.dataset.ed||t.dataset.ex){
+    var c=findC(S.edit);if(!c)return;
+    var f=t.dataset.ed,n=t.value===''?NaN:Math.floor(+t.value);
+    if(t.dataset.ex){var x=(c.x||[])[+t.dataset.i];if(x)x[t.dataset.ex]=t.value;}
+    else if(f==='name'){var v=t.value.trim();if(v){c.name=v;var hh=$('#edh');if(hh)hh.textContent=v;}else t.value=c.name;}
+    else if(f==='ac'){if(n>=0)c.ac=n;else t.value=c.ac;}
+    else if(f==='init'){c.init=isNaN(n)?null:n;delete c.grp;}
+    else if(f==='max'){if(n>=1){var full=c.hp>=c.max;c.max=n;c.base=null;c.hp=full?n:Math.min(c.hp,n);var hi=dr.querySelector('[data-ed="hp"]');if(hi)hi.value=c.hp;}else t.value=c.max;}
+    else if(f==='hp'){if(n>=0){c.hp=Math.min(n,c.max);t.value=c.hp;if(c.hp>0){c.ds=null;var di=c.conds.indexOf('Dead');if(di>=0)c.conds.splice(di,1);}}else t.value=c.hp;}
+    else if(f==='hideBase'){c.hideBase=t.checked;}
+    else if(f==='cg'){setGroup([c],t.value);var ii=dr.querySelector('[data-ed="init"]');if(ii)ii.value=c.init==null?'':c.init;}
+    save();renderBoard();return;
+  }
   if(t.dataset.act==='at'){S.atTable[t.dataset.l]=t.checked;save();}
   if(t.id==='fxvis')ui.fx.vis=t.checked;
   if(t.dataset.act==='ftype'||t.dataset.act==='fmin'||t.dataset.act==='fmax'){ui[t.dataset.act==='ftype'?'fType':(t.dataset.act==='fmin'?'fMin':'fMax')]=t.value;$('#results').innerHTML=resultsHTML();}
@@ -846,7 +992,7 @@ dr.addEventListener('change',function(e){
 });
 function pull(){
   var ae=document.activeElement;if(!RO&&ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'))return;
-  try{var r2=localStorage.getItem(KEY);if(r2){var p2=JSON.parse(r2);if(p2&&p2.list){S=Object.assign(S,p2);pruneSel();renderAll();}}}catch(x){}
+  try{var r2=localStorage.getItem(KEY);if(r2){var p2=JSON.parse(r2);if(p2&&p2.list){S=Object.assign(S,p2);fixIds();pruneSel();renderAll();}}}catch(x){}
 }
 window.addEventListener('storage',function(e){if(e.key===KEY)pull();});
 // Any tap elsewhere (or 4 s) cancels a pending "Tap again to clear" / "Sure?" confirmation
