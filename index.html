@@ -61,6 +61,18 @@ input{background:var(--surface);border:1px solid var(--line);border-radius:8px;p
 .tok.sel .lab{color:var(--ok)}
 .svb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
 .svb b{font-size:.9rem}
+.env{margin-top:10px;padding:8px 12px;border:2px solid var(--warn);border-radius:10px;background:color-mix(in srgb,var(--warn) 12%,var(--surface));display:flex;gap:10px;align-items:flex-start}
+.env div{flex:1;white-space:pre-wrap;font-size:.95rem}
+.env b{font-family:var(--display);font-size:1.15rem}
+.env button{min-height:34px;padding:0 10px}
+.enc{border:1px solid var(--line);border-radius:10px;padding:8px;margin-top:8px}
+.enc .eh{display:flex;gap:6px;align-items:center}
+.enc .eh b{flex:1;font-family:var(--display);font-size:1.2rem}
+.enc .eh button{min-height:38px;padding:0 12px}
+.enc .meta{font-size:.82rem;color:var(--muted)}
+.enc .nt{font-size:.85rem;white-space:pre-wrap;margin-top:4px}
+.data textarea{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:8px;min-height:64px;resize:vertical;font-size:.95rem;margin-top:6px}
+.data .search{margin:6px 0 0}
 .svb button{min-height:38px;padding:2px 12px;font-weight:700}
 .svb button.on,.bar button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .sv{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:8px;border:2px solid var(--accent);font-family:var(--display);font-size:1.15rem;font-weight:700;vertical-align:middle;white-space:nowrap}
@@ -264,7 +276,7 @@ button{touch-action:manipulation}
   .pad .pacts{grid-template-columns:1fr 1fr}
   .pad .pacts button{min-height:38px;font-size:.9rem}
   .pad .menu{right:calc(100% + 12px);bottom:0;width:540px}
-  body.drawon .tw{margin-right:446px}
+  body.drawon .tw,body.drawon .env,body.drawon .svb{margin-right:446px}
   body.drawon .pad{right:462px}
   body.drawon.padon{padding-bottom:345px}
   body.drawon .pad .menu{right:auto;left:0;bottom:calc(100% + 12px)}
@@ -278,6 +290,7 @@ button{touch-action:manipulation}
   <div class="turn dmonly" id="turn" hidden></div>
 </div>
 <div class="big" id="big"></div>
+<div class="env dmonly" id="env" hidden></div>
 <div class="svb dmonly" id="svb" hidden></div>
 <div class="tw dmonly"><table id="tbl" aria-label="Combatants"></table></div>
 <div class="pad dmonly" id="pad" hidden></div>
@@ -304,10 +317,10 @@ var isDead=function(c){return c.kind==='mon'&&c.hp<=0;};
 var isPcDead=function(c){return c.kind==='pc'&&c.conds.indexOf('Dead')>=0;};
 var isOut=function(c){return isDead(c)||isPcDead(c);};
 
-var S={round:1,turnId:null,list:[],next:1,libNext:7,tab:'add',sub:'monsters',stat:null,atTable:{},initMode:'each',hpMode:'roll',
+var S={enc:[],encRoll:true,envName:'',envNote:'',round:1,turnId:null,list:[],next:1,libNext:7,tab:'add',sub:'monsters',stat:null,atTable:{},initMode:'each',hpMode:'roll',
  lib:[{id:'l1',name:'Aria (example)',ac:16,hp:31,ib:2},{id:'l2',name:'Brom (example)',ac:18,hp:38,ib:1},{id:'l3',name:'Wren (example)',ac:14,hp:24,ib:3},
       {id:'l4',name:'Tolliver (example)',ac:12,hp:20,ib:1},{id:'l5',name:'Sable (example)',ac:15,hp:27,ib:4},{id:'l6',name:'Marek (example)',ac:17,hp:34,ib:0}]};
-var ui={fx:{name:'',init:'',desc:'',vis:true},fType:'',fMin:'',fMax:'',q:'',qty:{},sel:{},amt:0,menu:false,pend:{},confirmRemove:false,confirmClear:false,msg:'',drawer:false,present:false,cardOpen:true,sv:-1,svLast:1,traitsOpen:false,ignoreUntil:0};
+var ui={fx:{name:'',init:'',desc:'',vis:true},fType:'',fMin:'',fMax:'',q:'',qty:{},sel:{},amt:0,menu:false,pend:{},confirmRemove:false,confirmClear:false,msg:'',drawer:false,present:false,cardOpen:true,sv:-1,encName:'',encNote:'',svLast:1,traitsOpen:false,ignoreUntil:0};
 var loaded=false;try{if(RO||sessionStorage.getItem('et-present')==='1')ui.present=true;}catch(e){}
 try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.list){S=Object.assign(S,p);loaded=true;}}}catch(e){}
 function save(){if(RO)return;try{localStorage.setItem(KEY,JSON.stringify(S));ui.saveErr=false;}catch(e){if(!ui.saveErr){ui.saveErr=true;alert('This device\u2019s storage is full, so changes are NOT being saved. Export your encounter (Data tab), then remove a monster file you no longer need.');}}}
@@ -563,6 +576,8 @@ function fxRow(c){
 }
 function renderTable(){
   var h='';
+  var ev=$('#env');ev.hidden=!(S.envName||S.envNote);
+  if(!ev.hidden)ev.innerHTML='<div><b>'+esc(S.envName||'Notes')+'</b>'+(S.envNote?'\n'+esc(S.envNote):'')+'</div><button data-act="envx" aria-label="Hide encounter notes">Hide</button>';
   var sb=$('#svb');sb.hidden=ui.sv<0;
   if(ui.sv>=0)sb.innerHTML='<b>Saving throw:</b>'+AB.map(function(a,i){return '<button data-act="sv" data-n="'+i+'" class="'+(i===ui.sv?'on':'')+'">'+a+'</button>';}).join('')+'<button data-act="sv" data-n="-1" aria-label="Hide saves">Hide</button><span class="muted" style="font-size:.8rem">Shaded = proficient</span>';
   var pcs=S.list.filter(function(c){return c.kind==='pc';});
@@ -678,8 +693,54 @@ function addPanelHTML(){
   }
   return h;
 }
+function encSave(){
+  var nm=ui.encName.trim();if(!nm)return 'Give the encounter a name first.';
+  var L=S.list.filter(function(c){return c.kind!=='pc';});if(!L.length)return 'Add monsters or effects to the tracker first, then save.';
+  var snap=JSON.parse(JSON.stringify(L)).map(function(c){c.spent={};delete c.base;return c;});
+  var old=S.enc.find(function(e){return e.name.toLowerCase()===nm.toLowerCase();});
+  if(old&&!confirm('Overwrite the saved encounter \u201c'+old.name+'\u201d?'))return '';
+  var e={id:old?old.id:'e'+Date.now(),name:nm,note:ui.encNote.trim(),list:snap,saved:new Date().toISOString().slice(0,10)};
+  if(old)S.enc[S.enc.indexOf(old)]=e;else S.enc.push(e);
+  ui.encName=ui.encNote='';
+  return 'Saved \u201c'+nm+'\u201d ('+snap.length+' entries).';
+}
+function encLoad(e,add){
+  if(!add&&S.list.some(function(c){return c.kind!=='pc';})&&!confirm('Replace the current monsters and effects with \u201c'+e.name+'\u201d? Players stay.'))return '';
+  if(!add){S.list=S.list.filter(function(c){return c.kind==='pc';});S.list.forEach(function(c){c.init=null;});S.turnId=null;S.round=1;}
+  var names={},gmap={},roll={};S.list.forEach(function(c){names[c.name]=1;});
+  JSON.parse(JSON.stringify(e.list)).forEach(function(c){
+    c.id=S.next++;
+    if(c.grp&&c.grp.indexOf('g')===0){gmap[c.grp]=gmap[c.grp]||'g'+c.id;c.grp=gmap[c.grp];}
+    if(names[c.name]){var mm=/^(.*) (\d+)$/.exec(c.name),base=mm?mm[1]:c.name,k=mm?+mm[2]:1;while(names[base+' '+k])k++;c.name=base+' '+k;}
+    names[c.name]=1;
+    if(c.kind==='mon'&&S.encRoll){
+      var m=MON.find(function(x){return x.id===c.monId;});
+      if(m){var r=d(20)+mod(+m.abil[1]);if(c.grp){if(roll[c.grp]==null)roll[c.grp]=r;r=roll[c.grp];}c.init=r;}
+    }
+    S.list.push(c);
+  });
+  if(!add||e.note){S.envName=e.name;S.envNote=e.note||'';}
+  pruneSel();
+  return (add?'Added ':'Loaded ')+'\u201c'+e.name+'\u201d. '+(S.list.some(function(c){return c.kind==='pc'&&c.init==null;})?'Enter player initiatives, then Start combat.':'');
+}
+function encHTML(){
+  return '<p><b>Prepared encounters</b> Build an encounter in the tracker (monsters, ✎ edits, groups, lair actions or hazards as Effects), then save it here with notes on terrain, light, weather or tactics. <b>Load</b> keeps your players and replaces the monsters; <b>Add</b> brings them in as reinforcements.</p>'+
+   '<input class="search" id="encname" type="text" maxlength="50" placeholder="Encounter name, e.g. Bandit ambush" value="'+esc(ui.encName)+'">'+
+   '<textarea id="encnote" maxlength="1500" placeholder="Environment and notes (shown above the table when loaded): difficult terrain, dim light, collapsing bridge DC 12 Dex…">'+esc(ui.encNote)+'</textarea>'+
+   '<div class="row"><button class="add" data-act="encsave">Save current encounter</button></div>'+
+   '<div class="lib"><label><input type="checkbox" id="encroll"'+(S.encRoll?' checked':'')+'><span>Reroll monster initiative when loading</span></label></div>'+
+   (S.enc.length?'':'<p class="muted">No saved encounters yet.</p>')+
+   S.enc.map(function(e,i){
+     var mon=e.list.filter(function(c){return c.kind==='mon';}),fx=e.list.length-mon.length,cnt={};
+     mon.forEach(function(c){var m=MON.find(function(x){return x.id===c.monId;});var n=c.cg||(m?m.name:c.name);cnt[n]=(cnt[n]||0)+1;});
+     var sum=Object.keys(cnt).map(function(k){return cnt[k]+'\u00d7 '+k;}).join(', ')+(fx?(mon.length?', ':'')+fx+' effect'+(fx>1?'s':''):'');
+     return '<div class="enc"><div class="eh"><b>'+esc(e.name)+'</b><button class="add" data-act="encload" data-i="'+i+'">Load</button><button data-act="encadd" data-i="'+i+'">Add</button><button class="x" data-act="encdel" data-i="'+i+'" aria-label="Delete '+esc(e.name)+'">×</button></div>'+
+       '<div class="meta">'+esc(sum)+' · saved '+esc(e.saved||'')+'</div>'+(e.note?'<div class="nt">'+esc(e.note)+'</div>':'')+'</div>';
+   }).join('')+
+   '<div class="msg">'+esc(ui.emsg||'')+'</div><hr style="border:0;border-top:1px solid var(--line);margin:14px 0 4px">';
+}
 function dataHTML(){
-  return '<div class="data"><p><b>Export</b> saves the whole encounter, party and settings to a file. Do it before and after each session.</p>'+
+  return '<div class="data">'+encHTML()+'<p><b>Export</b> saves the whole encounter, saved encounters, party and settings to a file. Do it before and after each session.</p>'+
    '<div class="row"><button class="add" data-act="export">Export file</button></div>'+
    '<p><b>Import</b> replaces everything in the app with a saved file.</p>'+
    '<div class="row"><button data-act="import">Import file…</button><input id="impfile" type="file" accept=".json,application/json" hidden></div>'+
@@ -781,7 +842,7 @@ $('#bar').addEventListener('click',function(e){
   else if(a==='saves'){ui.sv=ui.sv>=0?-1:ui.svLast;renderBar();renderTable();return;}
   else if(a==='present'){ui.present=!ui.present;if(ui.present)ui.drawer=false;document.body.classList.toggle('present',ui.present);try{sessionStorage.setItem('et-present',ui.present?'1':'0');}catch(e){}renderBoard();renderDrawer();return;}
   else if(a==='clear'){
-    if(ui.confirmClear){S.list=[];S.turnId=null;S.round=1;ui.confirmClear=false;S.atTable={};ui.sel={};}else{ui.confirmClear=true;}
+    if(ui.confirmClear){S.list=[];S.turnId=null;S.round=1;S.envName=S.envNote='';ui.confirmClear=false;S.atTable={};ui.sel={};}else{ui.confirmClear=true;}
   }
   save();renderBoard();renderDrawer();
 });
@@ -799,6 +860,7 @@ $('#turn').addEventListener('click',function(e){
   save();renderBoard();
 });
 $('#turn').addEventListener('toggle',function(e){if(e.target.tagName==='DETAILS')ui.traitsOpen=e.target.open;},true);
+$('#env').addEventListener('click',function(e){if(e.target.closest('[data-act="envx"]')){S.envName=S.envNote='';save();renderTable();}});
 $('#svb').addEventListener('click',function(e){
   var b=e.target.closest('[data-act="sv"]');if(!b)return;
   ui.sv=+b.dataset.n;if(ui.sv>=0)ui.svLast=ui.sv;renderBar();renderTable();
@@ -924,10 +986,13 @@ dr.addEventListener('click',function(e){
   if(act==='rmmonfile'){CUSTOM.splice(+b.dataset.i,1);saveCustom();location.reload();return;}
   if(act==='tablewin'){window.open(location.pathname+'?view=table','_blank');return;}
   if(act==='close'){ui.drawer=false;}
-  else if(act==='tab'){S.tab=b.dataset.t;ui.msg='';}
+  else if(act==='tab'){S.tab=b.dataset.t;ui.msg=ui.emsg='';}
   else if(act==='sub'){S.sub=b.dataset.s;ui.msg='';}
   else if(act==='set'){S[b.dataset.k]=b.dataset.v;}
   else if(act==='view'){S.stat=b.dataset.m;S.statC=null;S.tab='stat';}
+  else if(act==='encsave'){ui.emsg=encSave();}
+  else if(act==='encload'||act==='encadd'){var en=S.enc[+b.dataset.i];if(en){var r0=encLoad(en,act==='encadd');if(r0)ui.emsg=r0;}}
+  else if(act==='encdel'){var ed=S.enc[+b.dataset.i];if(ed&&confirm('Delete the saved encounter \u201c'+ed.name+'\u201d?')){S.enc.splice(+b.dataset.i,1);ui.emsg='Deleted.';}}
   else if(act==='sedit'){S.edit=S.statC;S.tab='edit';ui.msg='';}
   else if(act==='exadd'||act==='exrm'||act==='excopy'){
     var ec=findC(S.edit);if(!ec)return;ec.x=ec.x||[];
@@ -968,6 +1033,8 @@ dr.addEventListener('input',function(e){
   else if(t.id==='fxname')ui.fx.name=t.value;
   else if(t.id==='fxinit')ui.fx.init=t.value;
   else if(t.id==='fxdesc')ui.fx.desc=t.value;
+  else if(t.id==='encname')ui.encName=t.value;
+  else if(t.id==='encnote')ui.encNote=t.value;
 });
 dr.addEventListener('change',function(e){
   var t=e.target;
@@ -986,6 +1053,7 @@ dr.addEventListener('change',function(e){
   }
   if(t.dataset.act==='at'){S.atTable[t.dataset.l]=t.checked;save();}
   if(t.id==='fxvis')ui.fx.vis=t.checked;
+  if(t.id==='encroll'){S.encRoll=t.checked;save();}
   if(t.dataset.act==='ftype'||t.dataset.act==='fmin'||t.dataset.act==='fmax'){ui[t.dataset.act==='ftype'?'fType':(t.dataset.act==='fmin'?'fMin':'fMax')]=t.value;$('#results').innerHTML=resultsHTML();}
   if(t.id==='impfile'&&t.files&&t.files[0]){doImport(t.files[0]);t.value='';}
   if(t.id==='monfile'&&t.files&&t.files[0]){readMonFile(t.files[0],function(msg){ui.msg=msg;renderDrawer();});t.value='';}
