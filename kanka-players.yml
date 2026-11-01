@@ -1,0 +1,27 @@
+name: Update players from Kanka
+
+on:
+  workflow_dispatch:   # "Run workflow" button in the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch player characters
+        env:
+          KANKA_TOKEN: ${{ secrets.KANKA_API_KEY }}
+        run: python tools/kanka_players.py
+      - name: Commit players.json if changed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add players.json
+          git diff --cached --quiet || git commit -m "Update players from Kanka"
+          git push

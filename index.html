@@ -728,7 +728,15 @@ function resultsHTML(){
   }).join('')+(all.length>r.length?'<p class="muted">Showing '+r.length+' of '+all.length+'. Type to narrow the list.</p>':'')||'<p class="muted">No monster matches.</p>';
 }
 function statHTML(){
-  if(S.stat==='pc')return '<p class="muted">Player characters have no stat block here. A later stage will pull the character sheet from Kanka.</p>';
+  if(S.stat==='pc'){
+    var pc=findC(S.statC),kl=pc&&S.lib.find(function(l){return l.id===pc.libId;});
+    if(!kl||!kl.k)return '<p class="muted">No Kanka sheet for this character. Use Party → Update from Kanka.</p>';
+    var ab=kl.abil||{};
+    return '<h3>'+esc(kl.name)+'</h3><p>'+esc(kl.cls||'')+(kl.race?' · '+esc(kl.race):'')+'</p>'+
+      '<p>'+['str','dex','con','int','wis','cha'].map(function(k){var v=ab[k];return '<b>'+k.toUpperCase()+'</b> '+(v==null?'?':v+' ('+sgn(Math.floor((v-10)/2))+')');}).join(' · ')+'</p>'+
+      '<p>Passive Perception '+(kl.pp==null?'?':kl.pp)+(kl.hpEst?' · Estimated max HP '+kl.hpEst:'')+'</p>'+
+      '<p><a href="'+esc(kl.url)+'" target="_blank" rel="noopener">Open in Kanka</a></p>';
+  }
   var m=MON.find(function(x){return x.id===S.stat;});
   if(!m)return '<p class="muted">Tap ⓘ on a monster in the table, or a name in the search list, to open its stat block here.</p>';
   var names=['STR','DEX','CON','INT','WIS','CHA'];
@@ -774,9 +782,10 @@ function addPanelHTML(){
   }else if(S.sub==='effects'){
     h+=fxPanelHTML();
   }else{
+    h+='<div class="row"><button data-act="kanka" style="flex:1">Update from Kanka</button></div>';
     h+=S.lib.map(function(l){
       var inEnc=S.list.some(function(c){return c.libId===l.id;});
-      return '<div class="lib"><label><input type="checkbox" data-act="at" data-l="'+l.id+'"'+(S.atTable[l.id]?' checked':'')+(inEnc?' disabled':'')+'><span><b>'+esc(l.name)+'</b><br><span class="meta">AC '+l.ac+' · HP '+l.hp+' · init '+sgn(l.ib)+(inEnc?' · in encounter':'')+'</span></span></label>'+
+      return '<div class="lib"><label><input type="checkbox" data-act="at" data-l="'+l.id+'"'+(S.atTable[l.id]?' checked':'')+(inEnc?' disabled':'')+'><span><b>'+esc(l.name)+'</b><br><span class="meta">'+(l.chk?'<b>set AC/HP</b> · ':'')+'AC '+l.ac+' · HP '+l.hp+' · init '+sgn(l.ib)+(l.cls?' · '+esc(l.cls):'')+(inEnc?' · in encounter':'')+'</span></span></label>'+
         '<button class="x" data-act="dellib" data-l="'+l.id+'" aria-label="Delete '+esc(l.name)+' from library">×</button></div>';
     }).join('');
     h+='<div class="row"><button class="add" data-act="addparty" style="flex:1">Add ticked to encounter</button></div>'+
@@ -1107,8 +1116,24 @@ dr.addEventListener('click',function(e){
   }
   else if(act==='newchar'){
     var inp=$('#newchar');var p=parseChar(inp?inp.value:'');
-    if(p){S.lib.push({id:'l'+(S.libNext++),name:p.name,ac:p.ac,hp:p.hp,ib:p.ib});ui.msg='Saved '+p.name+'.';}
+    var ex=p&&S.lib.find(function(l){return l.name.toLowerCase()===p.name.toLowerCase();});
+    if(ex){ex.ac=p.ac;ex.hp=p.hp;if(/init/i.test(inp.value))ex.ib=p.ib;ex.chk=false;ui.msg='Updated '+ex.name+'.';}
+    else if(p){S.lib.push({id:'l'+(S.libNext++),name:p.name,ac:p.ac,hp:p.hp,ib:p.ib});ui.msg='Saved '+p.name+'.';}
     else{ui.msg='Use the form: Name, AC 15, HP 28, init +3';}
+  }
+  else if(act==='kanka'){
+    ui.msg='Loading players.json…';
+    fetch('players.json?t='+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(P){
+      var nw=0,up=0;
+      P.forEach(function(p){
+        var l=S.lib.find(function(x){return x.k===p.id;})||S.lib.find(function(x){return !x.k&&x.name.toLowerCase()===p.name.toLowerCase();});
+        if(!l){l={id:'l'+(S.libNext++),ac:10,hp:p.hpEst||10,chk:true};S.lib.push(l);nw++;}else up++;
+        l.k=p.id;l.name=p.name;l.ib=p.mods&&p.mods.dex!=null?p.mods.dex:(l.ib||0);
+        l.cls=p.classes;l.race=p.race;l.abil=p.abilities;l.pp=p.passivePerception;l.hpEst=p.hpEst;l.url=p.url;
+      });
+      S.lib.sort(function(a,b){return a.name.localeCompare(b.name);});
+      ui.msg=nw+' new, '+up+' updated from Kanka. Type “Name, AC 15, HP 28” below to set AC/HP.';save();renderDrawer();
+    }).catch(function(){ui.msg='Could not load players.json. Run the Kanka workflow on GitHub first.';renderDrawer();});
   }
   else if(act==='dellib'){S.lib=S.lib.filter(function(l){return l.id!==b.dataset.l;});}
   else if(act==='addfx'){
