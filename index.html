@@ -29,6 +29,7 @@
   --accent:#8c9bff; --accent-ink:#0e1226; --ok:#4cc38a; --warn:#e0a84a; --bad:#ff7a6b; color-scheme:dark;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.4;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
 body.padon{padding-bottom:345px}
@@ -576,8 +577,8 @@ function fxRow(c){
 }
 function renderTable(){
   var h='';
-  var ev=$('#env');ev.hidden=!(S.envName||S.envNote);
-  if(!ev.hidden)ev.innerHTML='<div><b>'+esc(S.envName||'Notes')+'</b>'+(S.envNote?'\n'+esc(S.envNote):'')+'</div><button data-act="envx" aria-label="Hide encounter notes">Hide</button>';
+  var ev=$('#env');ev.hidden=!String(S.envNote||'').trim();
+  if(!ev.hidden)ev.innerHTML='<div><b>'+esc(S.envName||'Notes')+'</b>\n'+esc(S.envNote)+'</div><button data-act="envx" aria-label="Hide encounter notes">Hide</button>';
   var sb=$('#svb');sb.hidden=ui.sv<0;
   if(ui.sv>=0)sb.innerHTML='<b>Saving throw:</b>'+AB.map(function(a,i){return '<button data-act="sv" data-n="'+i+'" class="'+(i===ui.sv?'on':'')+'">'+a+'</button>';}).join('')+'<button data-act="sv" data-n="-1" aria-label="Hide saves">Hide</button><span class="muted" style="font-size:.8rem">Shaded = proficient</span>';
   var pcs=S.list.filter(function(c){return c.kind==='pc';});
