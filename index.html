@@ -31,7 +31,7 @@
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.4;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
-body.padon{padding-bottom:290px}
+body.padon{padding-bottom:345px}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
 button,input{font:inherit;color:inherit}
 button{cursor:pointer;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 12px;min-height:44px}
@@ -222,6 +222,10 @@ html{-webkit-text-size-adjust:100%}
 button{touch-action:manipulation}
 .thumb{float:right;width:88px;height:88px;object-fit:cover;border-radius:10px;margin:0 0 6px 10px;background:var(--surface2)}
 .a .sec{font-family:var(--body);font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-left:6px}
+.hpnum .mred{font-size:.75rem;font-weight:700;color:var(--bad);border:1px solid var(--bad);border-radius:6px;padding:0 4px}
+.flt{display:flex;gap:6px;margin:0 0 8px}.flt select{flex:1;min-width:0;min-height:40px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:0 6px;font:inherit;font-size:.9rem}
+.tok.fx{background:color-mix(in srgb,var(--warn) 12%,var(--surface))}
+.tok.fx .in::after{content:" \00B7 EFFECT";font-size:.7rem;letter-spacing:.1em;color:var(--muted);font-family:var(--body);font-weight:700}
 .data p{margin:10px 0 4px;font-size:.92rem}
 .data .row{margin-top:4px}.data .row button{flex:1}
 </style>
@@ -237,27 +241,14 @@ button{touch-action:manipulation}
 <div class="pad dmonly" id="pad" hidden></div>
 <aside class="drawer" id="drawer" hidden aria-label="Add combatants and stat blocks"></aside>
 
+<script src="statuses.js"></script>
 <script>
 function boot(MON){
-var CONDS=['Blinded','Charmed','Deafened','Frightened','Grappled','Incapacitated','Invisible','Paralyzed','Petrified','Poisoned','Prone','Restrained','Stunned','Unconscious','Concentrating'];
-var FX={
- 'Blinded':'Can’t see and fails sight checks. Attacks against it have advantage; its attacks have disadvantage.',
- 'Charmed':'Can’t attack the charmer or target it with harmful effects. Charmer has advantage on social checks against it.',
- 'Deafened':'Can’t hear and fails hearing checks.',
- 'Frightened':'Disadvantage on ability checks and attacks while the source is in sight. Can’t willingly move closer to it.',
- 'Grappled':'Speed is 0 and gets no speed bonuses. Disadvantage on attacks against any target except the grappler. Ends if the grappler is incapacitated or the target is moved out of reach.',
- 'Incapacitated':'Can’t take actions, bonus actions, or reactions. Concentration is broken. Can’t speak. Disadvantage on initiative',
- 'Invisible':'Attacks against it have disadvantage; its attacks have advantage. Unaffected by any effect that requires the target to be seen, unless they can somehow see you. Advantage on initiative.',
- 'Paralyzed':'Incapacitated, can’t move or speak. Fails Str and Dex saves. Attacks have advantage; hits within 5 ft. are critical hits.',
- 'Petrified':'Turned to stone, incapacitated, can’t move or speak. Fails Str and Dex saves. Attacks have advantage. Resists all damage; immune to poison and disease.',
- 'Poisoned':'Disadvantage on attack rolls and ability checks.',
- 'Prone':'Crawls only, or stands using half its speed. Its attacks have disadvantage. Melee attacks against it have advantage; ranged attacks have disadvantage.',
- 'Restrained':'Speed is 0. Attacks against it have advantage; its attacks have disadvantage. Disadvantage on Dex saves.',
- 'Stunned':'Incapacitated. Fails Str and Dex saves. Attacks against it have advantage.',
- 'Unconscious':'Incapacitated, drops what it holds and falls prone. Speed is 0 and it is unaware of surroundings. Fails Str and Dex saves. Attacks have advantage; hits within 5 ft. are critical hits.',
- 'Concentrating':'Taking damage means a Con save: DC 10 or half the damage, whichever is higher, or the spell ends. Ends if incapacitated or killed.',
- 'Dead':'Out of initiative. Healing for 1 HP or more brings them back and resets death saves.'
-};
+var TYPES=Array.from(new Set(MON.map(function(m){return m.ctype;}))).sort();
+var CRS=['0','1/8','1/4','1/2'];for(var q=1;q<=30;q++)CRS.push(String(q));
+var crv=function(x){return x==='1/8'?0.125:x==='1/4'?0.25:x==='1/2'?0.5:+x;};
+var CONDS=['Blinded','Charmed','Deafened','Exhaustion','Frightened','Grappled','Incapacitated','Invisible','Paralyzed','Petrified','Poisoned','Prone','Restrained','Stunned','Unconscious','Concentrating'];
+var FX=window.STATUS_FX||{};
 var KEY='encounter-tracker-app-v1';var RO=/[?&]view=table\b/.test(location.search);
 var WMAX=200,IH=44;
 var $=function(s){return document.querySelector(s);};
@@ -272,8 +263,8 @@ var isOut=function(c){return isDead(c)||isPcDead(c);};
 var S={round:1,turnId:null,list:[],next:1,libNext:7,tab:'add',sub:'monsters',stat:null,atTable:{},initMode:'each',hpMode:'roll',
  lib:[{id:'l1',name:'Aria (example)',ac:16,hp:31,ib:2},{id:'l2',name:'Brom (example)',ac:18,hp:38,ib:1},{id:'l3',name:'Wren (example)',ac:14,hp:24,ib:3},
       {id:'l4',name:'Tolliver (example)',ac:12,hp:20,ib:1},{id:'l5',name:'Sable (example)',ac:15,hp:27,ib:4},{id:'l6',name:'Marek (example)',ac:17,hp:34,ib:0}]};
-var ui={q:'',qty:{},sel:{},amt:0,menu:false,pend:{},confirmRemove:false,confirmClear:false,msg:'',drawer:false,present:false,cardOpen:true,traitsOpen:false,ignoreUntil:0};
-var loaded=false;if(RO)ui.present=true;
+var ui={fx:{name:'',init:'',desc:'',vis:true},fType:'',fMin:'',fMax:'',q:'',qty:{},sel:{},amt:0,menu:false,pend:{},confirmRemove:false,confirmClear:false,msg:'',drawer:false,present:false,cardOpen:true,traitsOpen:false,ignoreUntil:0};
+var loaded=false;try{if(RO||sessionStorage.getItem('et-present')==='1')ui.present=true;}catch(e){}
 try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.list){S=Object.assign(S,p);loaded=true;}}}catch(e){}
 function save(){if(RO)return;try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 
@@ -303,8 +294,13 @@ function nextTurn(){
 function nextId(){
   var O=order();var idx=O.findIndex(function(c){return c.id===S.turnId;});
   if(idx<0)return null;
-  var r=stepFrom(O,idx);if(!r)return null;
-  return O[r.i].id!==S.turnId?O[r.i].id:null;
+  for(var k=0;k<O.length;k++){
+    var r=stepFrom(O,idx);if(!r)return null;
+    var c=O[r.i];if(c.id===S.turnId)return null;
+    if(!shown(c)){idx=r.i;continue;}
+    return c.id;
+  }
+  return null;
 }
 function rollHP(dice,fallback){
   var m=/^(\d+)d(\d+)(?:([+-])(\d+))?$/.exec(dice);if(!m)return fallback;
@@ -331,6 +327,17 @@ function addPc(l){
   return true;
 }
 function dsOf(c){if(!c.ds)c.ds={s:0,f:0};return c.ds;}
+var CAUSE=['Paralyzed','Petrified','Stunned','Unconscious'];
+function incSync(c,added){
+  var has=CAUSE.some(function(x){return c.conds.indexOf(x)>=0;}),i=c.conds.indexOf('Incapacitated');
+  if(i<0)c.autoInc=false;
+  if(has&&i<0&&added){c.conds.push('Incapacitated');c.autoInc=true;}
+  else if(!has&&c.autoInc&&i>=0){c.conds.splice(i,1);c.autoInc=false;}
+}
+function shown(c){return c.kind!=='fx'||c.vis||!ui.present;}
+function rmComb(c){if(c.id===S.turnId)S.turnId=nextIdExcluding([c]);S.list=S.list.filter(function(x){return x.id!==c.id;});pruneSel();}
+function maxDown(c,n){if(c.base==null)c.base=c.max;c.max=Math.max(0,c.max-n);c.hp=Math.min(c.hp,c.max);if(c.max<=0){c.hp=0;if(c.kind==='pc')setDead(c);}}
+function maxReset(c){if(c.base!=null){c.max=c.base;c.base=null;}}
 function setDead(c){if(c.conds.indexOf('Dead')<0)c.conds.push('Dead');}
 function addFail(c,n){var ds=dsOf(c);ds.f=Math.min(3,ds.f+n);if(ds.f>=3)setDead(c);}
 function dmg(c,n){
@@ -381,10 +388,12 @@ function renderBar(){
    '<button class="danger dmonly'+(ui.confirmClear?' armed':'')+'" data-act="clear">'+(ui.confirmClear?'Tap again to clear all':'Clear')+'</button>';
 }
 function tokHTML(c,isNext){
+  if(c.kind==='fx'){var nw=c.id===S.turnId;return '<div class="tok fx'+(nw?' now':'')+(isNext?' next':'')+'"><div class="lab">'+(nw?'Up now':(isNext?'Next':''))+'</div><div class="in">'+(c.init==null?'\u2014':c.init)+'</div><div class="nm">'+esc(c.name)+'</div><div class="mini">'+(c.vis?'':'<span>Hidden</span>')+'</div></div>';}
   var now=c.id===S.turnId,down=c.hp<=0||isPcDead(c);
   var pct=c.max?Math.max(0,Math.min(100,c.hp/c.max*100)):0;
   var lvl=pct>50?'ok':(pct>25?'warn':'bad');
   var tags=c.conds.filter(function(x){return x!=='Dead';}).map(function(x){return '<span>'+esc(x)+'</span>';});
+  if(c.base!=null&&c.max>0)tags.push('<span>Max HP \u2212'+(c.base-c.max)+'</span>');
   if(isPcDead(c))tags.unshift('<span class="dn">Dead</span>');
   else if(c.hp<=0)tags.unshift('<span class="dn">'+(c.kind==='pc'?'Down':'Dead')+'</span>');
   else if(c.kind==='mon'&&c.hp*2<=c.max)tags.unshift('<span class="bl">Bloodied</span>');
@@ -398,26 +407,29 @@ function tokHTML(c,isNext){
   '</div>';
 }
 function renderStrip(){
-  var O=order().filter(function(c){return !isOut(c)||c.id===S.turnId;}),nid=nextId();
+  var O=order().filter(function(c){return shown(c)&&(!isOut(c)||c.id===S.turnId);}),nid=nextId();
   var strip=$('#strip');
   strip.innerHTML=O.length?O.map(function(c){return tokHTML(c,c.id===nid);}).join(''):'<div class="muted" style="padding:12px">Add combatants to build the initiative order.</div>';
   var cur=strip.querySelector('.now');
   if(cur){strip.scrollLeft=Math.max(0,cur.offsetLeft-(strip.clientWidth-cur.offsetWidth)/2);}
   var c1=S.list.find(function(c){return c.id===S.turnId;}),c2=S.list.find(function(c){return c.id===nid;});
-  $('#big').innerHTML=c1?'<div class="u">'+esc(c1.name)+' is up</div>'+(c2?'<div class="n">Next: '+esc(c2.name)+'</div>':''):'<div class="n">Combat is about to begin</div>';
+  $('#big').innerHTML=(c1&&!shown(c1))?'':c1?'<div class="u">'+esc(c1.name)+' is up</div>'+(c2?'<div class="n">Next: '+esc(c2.name)+'</div>':''):'<div class="n">Combat is about to begin</div>';
 }
 function short(t){
-  return t.replace('Melee or Ranged Attack Roll: ','Melee/ranged ').replace('Melee Attack Roll: ','Melee ').replace('Ranged Attack Roll: ','Ranged ').replace(' Hit: ',' \u2192 ');
+  return t.replace('Melee or Ranged Attack Roll: ','Melee/ranged ').replace('Melee Attack Roll: ','Melee ').replace('Ranged Attack Roll: ','Ranged ')
+   .replace('Melee or Ranged Weapon Attack: ','Melee/ranged ').replace('Melee Weapon Attack: ','Melee ').replace('Ranged Weapon Attack: ','Ranged ')
+   .replace(' to hit','').replace(', one target. Hit: ',' \u2192 ').replace(' Hit: ',' \u2192 ');
 }
 function renderTurn(){
   var el=$('#turn');
   var c=S.list.find(function(x){return x.id===S.turnId;});
   if(!c){el.hidden=true;el.innerHTML='';return;}
   el.hidden=false;
+  if(c.kind==='fx'){el.innerHTML='<div class="th"><span class="tn">'+esc(c.name)+'</span><span class="st"><i>EFFECT</i>init '+c.init+'</span><span class="sp"></span><button data-act="fxvis">'+(c.vis?'Visible to players':'Hidden from players')+'</button><button data-act="fxrm">Remove</button></div>'+(c.desc?'<p style="margin:6px 0 0">'+esc(c.desc)+'</p>':'');return;}
   var m=c.kind==='mon'?MON.find(function(x){return x.id===c.monId;}):null;
   var chips=c.conds.map(function(x){return '<button class="chip" data-act="cond" data-c="'+esc(x)+'" title="Remove '+esc(x)+'">'+esc(x)+' ×</button>';}).join('');
   var h='<div class="th"><span class="tn">'+esc(c.name)+'</span>'+
-    '<span class="st"><i>AC</i>'+c.ac+'</span><span class="st"><i>HP</i>'+c.hp+'/'+c.max+(c.temp>0?' +'+c.temp:'')+'</span>'+
+    '<span class="st"><i>AC</i>'+c.ac+'</span><span class="st"><i>HP</i>'+c.hp+'/'+c.max+(c.base!=null?' (max \u2212'+(c.base-c.max)+')':'')+(c.temp>0?' +'+c.temp:'')+'</span>'+
     (m?'<span class="st"><i>SPEED</i>'+esc(m.speed)+'</span><span class="st"><i>CR</i>'+m.cr+'</span>':'<span class="st muted">Player turn</span>')+
     '<span class="sp"></span>'+(m?'<button data-act="tinfo">Full stat block</button>':'')+
     '<button data-act="tcol">'+(ui.cardOpen?'Hide':'Show')+'</button></div>';
@@ -449,10 +461,15 @@ function rowHTML(c){
    '<td class="c-in"><input class="num" type="number" inputmode="numeric" data-act="init" placeholder="'+esc(ph)+'" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
    '<td><span class="name">'+esc(c.name)+'</span>'+(c.kind==='pc'?'':'<span class="tag">CR '+esc(c.cr)+'</span>')+'<div class="conds">'+chips+'</div>'+fxHTML(c)+'</td>'+
    '<td class="c-ac"><input class="num" type="number" inputmode="numeric" data-act="ac" value="'+c.ac+'" aria-label="Armor class for '+esc(c.name)+'"></td>'+
-   '<td class="c-hp"><div class="hpnum"><span class="cur">'+c.hp+'</span><span class="max">/ '+c.max+'</span>'+(c.temp>0?'<span class="temp">+'+c.temp+'</span>':'')+(down?'<span class="state">'+(pcDead?'Dead':'Down')+'</span>':'')+'</div>'+
+   '<td class="c-hp"><div class="hpnum"><span class="cur">'+c.hp+'</span><span class="max">/ '+c.max+'</span>'+(c.base!=null?'<span class="mred">max \u2212'+(c.base-c.max)+'</span>':'')+(c.temp>0?'<span class="temp">+'+c.temp+'</span>':'')+(down?'<span class="state">'+(pcDead?'Dead':'Down')+'</span>':'')+'</div>'+
      '<div class="track"><div class="fill '+lvl+'" style="width:'+pct+'%"></div></div>'+(pcDead?'<div class="dsd">Heal 1+ HP to revive</div>':dsHTML(c))+'</td>'+
    '<td class="c-i"><button class="ib" data-act="info" aria-label="Stat block for '+esc(c.name)+'">ⓘ</button></td>'+
   '</tr>';
+}
+function fxRow(c){
+  return '<tr class="r fxr'+(c.id===S.turnId?' turn':'')+'" data-id="'+c.id+'"><td class="c-in"><input class="num" type="number" inputmode="numeric" data-act="init" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
+   '<td colspan="4"><span class="name">'+esc(c.name)+'</span><span class="tag">Effect</span>'+(c.desc?'<div class="fx" style="margin-top:2px">'+esc(c.desc)+'</div>':'')+
+   '<div class="dsb" style="margin-top:4px"><button data-act="fxvis">'+(c.vis?'Visible to players':'Hidden from players')+'</button><button data-act="fxrm">Remove</button></div></td></tr>';
 }
 function renderTable(){
   var h='';
@@ -468,6 +485,8 @@ function renderTable(){
       h+='<tr class="dead"><td colspan="5">Defeated: '+dead.map(function(c){return '<button data-act="revive" data-id="'+c.id+'" title="Restore at 1 HP">'+esc(c.name)+' ↺</button>';}).join('')+'<button data-act="purge" data-m="'+id+'">Remove defeated</button></td></tr>';
     }
   });
+  var fxs=S.list.filter(function(c){return c.kind==='fx';});
+  if(fxs.length)h+='<tr class="grp"><th colspan="5">Effects \u00B7 '+fxs.length+'</th></tr>'+fxs.map(fxRow).join('');
   $('#tbl').innerHTML=h||'<tr><td class="empty">No combatants yet. Tap + Add to search monsters or add your party.</td></tr>';
 }
 var WHEEL='';
@@ -477,7 +496,7 @@ function effState(T,x){if(Object.prototype.hasOwnProperty.call(ui.pend,x))return
 function menuHTML(T){
   var list=CONDS.slice();if(T.every(function(c){return c.kind==='pc';}))list.push('Dead');
   var n=Object.keys(ui.pend).length;
-  return '<div class="menu"><div class="mh">Status for '+T.length+' selected</div><div class="mg">'+list.map(function(x){
+  return '<div class="menu"><div class="mh">Status for '+T.length+' selected</div><div class="muted" style="font-size:.8rem">Paralyzed, Petrified, Stunned and Unconscious also apply Incapacitated.</div><div class="mg">'+list.map(function(x){
     var s=effState(T,x);
     return '<button class="mi '+s+'" data-act="mi" data-c="'+esc(x)+'"><span class="bx">'+(s==='all'?'☑':(s==='some'?'▣':'☐'))+'</span>'+esc(x)+'</button>';
   }).join('')+'</div><div class="mf"><button data-act="mcancel">Cancel</button><button class="add" data-act="mapply">Apply'+(n?' ('+n+')':'')+'</button></div></div>';
@@ -494,16 +513,17 @@ function renderPad(){
    '<div class="pmain"><div class="wheelbox"><div class="wheel" id="wheel" aria-label="Amount wheel">'+WHEEL+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div></div>'+
    '<div class="pr"><div class="amtrow"><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount, tap to type"><span>Spin the wheel or tap the number to type</span></div>'+
    '<div class="pacts"><button class="d" data-act="padhp" data-k="dmg">Damage</button><button class="d" data-act="padhp" data-k="half">Half</button><button class="h" data-act="padhp" data-k="heal">Heal</button>'+
-   '<button data-act="padhp" data-k="temp">Temp HP</button><button data-act="padstatus">Status ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove">'+(ui.confirmRemove?'Sure?':'Remove')+'</button></div></div></div>'+
+   '<button data-act="padhp" data-k="temp">Temp HP</button><button data-act="padstatus">Status ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove">'+(ui.confirmRemove?'Sure?':'Remove')+'</button><button class="d" data-act="padhp" data-k="maxdn">Max HP \u2212</button><button data-act="padhp" data-k="maxreset">Reset max</button></div></div></div>'+
    (ui.menu?menuHTML(T):'')+'</div>';
   var w=$('#wheel');
   if(w){ui.ignoreUntil=Date.now()+250;w.style.scrollSnapType='none';w.scrollTop=Math.min(ui.amt,WMAX)*IH;w.style.scrollSnapType='';}
 }
 function resultsHTML(){
   var q=ui.q.trim().toLowerCase();
-  var all=MON.filter(function(m){return !q||m.name.toLowerCase().indexOf(q)>=0||m.type.toLowerCase().indexOf(q)>=0;});var r=all.slice(0,40);
+  var lo=ui.fMin===''?-1:crv(ui.fMin),hi=ui.fMax===''?99:crv(ui.fMax);
+  var all=MON.filter(function(m){return (!q||m.name.toLowerCase().indexOf(q)>=0||m.type.toLowerCase().indexOf(q)>=0)&&(!ui.fType||m.ctype===ui.fType)&&crv(m.cr)>=lo&&crv(m.cr)<=hi;});var r=all.slice(0,40);
   return r.map(function(m){
-    return '<div class="res"><button class="resname" data-act="view" data-m="'+m.id+'"><b>'+esc(m.name)+'</b><span>CR '+m.cr+' · AC '+m.ac+' · HP '+m.dice+' · init '+sgn(mod(m.abil[1]))+'</span></button>'+
+    return '<div class="res"><button class="resname" data-act="view" data-m="'+m.id+'"><b>'+esc(m.name)+'</b><span>CR '+m.cr+' · AC '+m.ac+' · HP '+m.dice+' · init '+sgn(mod(m.abil[1]))+(m.ed==='2014'?' · SRD 5.1':'')+'</span></button>'+
      '<input class="qty" type="number" min="1" max="20" inputmode="numeric" value="'+(ui.qty[m.id]||1)+'" data-act="qty" data-m="'+m.id+'" aria-label="Quantity of '+esc(m.name)+'">'+
      '<button class="add" data-act="addmon" data-m="'+m.id+'">Add</button></div>';
   }).join('')+(all.length>r.length?'<p class="muted">Showing '+r.length+' of '+all.length+'. Type to narrow the list.</p>':'')||'<p class="muted">No monster matches.</p>';
@@ -524,11 +544,31 @@ function statHTML(){
 function segHTML(label,key,opts){
   return '<div class="seg"><b>'+label+'</b>'+opts.map(function(o){return '<button data-act="set" data-k="'+key+'" data-v="'+o[0]+'" class="'+(S[key]===o[0]?'on':'')+'">'+o[1]+'</button>';}).join('')+'</div>';
 }
+function selHTML(id,act,first,opts,cur){
+  return '<select id="'+id+'" data-act="'+act+'" aria-label="'+first+'"><option value="">'+first+'</option>'+opts.map(function(o){return '<option value="'+esc(o[0])+'"'+(o[0]===cur?' selected':'')+'>'+esc(o[1])+'</option>';}).join('')+'</select>';
+}
+function filtHTML(){
+  var cap=function(t){return t.charAt(0).toUpperCase()+t.slice(1);};
+  var crs=CRS.map(function(x){return [x,'CR '+x];});
+  return '<div class="flt">'+selHTML('ftype','ftype','All types',TYPES.map(function(t){return [t,cap(t)];}),ui.fType)+selHTML('fmin','fmin','CR from',crs,ui.fMin)+selHTML('fmax','fmax','CR to',crs,ui.fMax)+'</div>';
+}
+function fxPanelHTML(){
+  var f=ui.fx;
+  return '<p class="muted" style="font-size:.9rem;margin:0 0 8px">An effect acts at a fixed point in the initiative order, such as a lair action or a timed spell. It is never selected for damage or healing.</p>'+
+   '<input class="search" id="fxname" type="text" maxlength="40" placeholder="Name, e.g. Lair action" value="'+esc(f.name)+'" aria-label="Effect name">'+
+   '<input class="search" id="fxinit" type="number" inputmode="numeric" placeholder="Initiative number, e.g. 20" value="'+esc(f.init)+'" aria-label="Effect initiative">'+
+   '<input class="search" id="fxdesc" type="text" maxlength="200" placeholder="Note for you (players never see it)" value="'+esc(f.desc)+'" aria-label="Note for the DM">'+
+   '<div class="lib"><label><input type="checkbox" id="fxvis"'+(f.vis?' checked':'')+'><span>Show the name to players in the initiative order</span></label></div>'+
+   '<div class="row"><button class="add" data-act="addfx" style="flex:1">Add effect</button></div>'+
+   '<div class="msg">'+esc(ui.msg||'')+'</div>';
+}
 function addPanelHTML(){
-  var h='<div class="sub"><button data-act="sub" data-s="monsters" class="'+(S.sub==='monsters'?'on':'')+'">Monsters</button><button data-act="sub" data-s="party" class="'+(S.sub==='party'?'on':'')+'">Party</button></div>';
+  var h='<div class="sub"><button data-act="sub" data-s="monsters" class="'+(S.sub==='monsters'?'on':'')+'">Monsters</button><button data-act="sub" data-s="party" class="'+(S.sub==='party'?'on':'')+'">Party</button><button data-act="sub" data-s="effects" class="'+(S.sub==='effects'?'on':'')+'">Effects</button></div>';
   if(S.sub==='monsters'){
     h+=segHTML('Initiative','initMode',[['each','Roll each'],['group','One per group']])+segHTML('Hit points','hpMode',[['roll','Roll HD'],['avg','Average']]);
-    h+='<input class="search" id="search" type="search" placeholder="Search monsters" value="'+esc(ui.q)+'" aria-label="Search monsters"><div id="results">'+resultsHTML()+'</div>';
+    h+='<input class="search" id="search" type="search" placeholder="Search monsters" value="'+esc(ui.q)+'" aria-label="Search monsters">'+filtHTML()+'<div id="results">'+resultsHTML()+'</div>';
+  }else if(S.sub==='effects'){
+    h+=fxPanelHTML();
   }else{
     h+=S.lib.map(function(l){
       var inEnc=S.list.some(function(c){return c.libId===l.id;});
@@ -546,7 +586,7 @@ function dataHTML(){
    '<div class="row"><button class="add" data-act="export">Export file</button></div>'+
    '<p><b>Import</b> replaces everything in the app with a saved file.</p>'+
    '<div class="row"><button data-act="import">Import file…</button><input id="impfile" type="file" accept=".json,application/json" hidden></div>'+
-   '<p><b>Table window</b> opens a read-only player view that follows this one live. It works in the same browser on the same device (for example a laptop with a second screen).</p>'+
+   '<p><b>Table window</b> opens a read-only player view that follows this one live. Any other window of this app in the same browser follows too, so you can also just open the app in a second window and tap Table view there.</p>'+
    '<div class="row"><button data-act="tablewin">Open table window</button></div>'+
    '<div class="msg">'+esc(ui.msg||'')+'</div>'+
    '<p class="muted">Monsters: SRD 5.2 (2024), '+MON.length+' stat blocks, stored in the app so it works offline.</p></div>';
@@ -615,7 +655,7 @@ $('#bar').addEventListener('click',function(e){
   var a=b.dataset.act;
   if(a==='next'){nextTurn();ui.confirmClear=false;}
   else if(a==='openadd'){ui.drawer=true;S.tab='add';}
-  else if(a==='present'){ui.present=!ui.present;if(ui.present)ui.drawer=false;document.body.classList.toggle('present',ui.present);}
+  else if(a==='present'){ui.present=!ui.present;if(ui.present)ui.drawer=false;document.body.classList.toggle('present',ui.present);try{sessionStorage.setItem('et-present',ui.present?'1':'0');}catch(e){}renderBoard();renderDrawer();return;}
   else if(a==='clear'){
     if(ui.confirmClear){S.list=[];S.turnId=null;S.round=1;ui.confirmClear=false;S.atTable={};ui.sel={};}else{ui.confirmClear=true;}
   }
@@ -625,10 +665,11 @@ $('#turn').addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;
   var a=b.dataset.act;
   var c=findC(S.turnId);if(!c)return;
+  if(c.kind==='fx'){if(a==='fxvis')c.vis=!c.vis;else if(a==='fxrm')rmComb(c);save();renderBoard();return;}
   if(a==='tcol'){ui.cardOpen=!ui.cardOpen;}
   else if(a==='tinfo'){S.stat=c.monId;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
   else if(a==='spent'){c.spent=c.spent||{};c.spent[b.dataset.i]=!c.spent[b.dataset.i];}
-  else if(a==='cond'){var i=c.conds.indexOf(b.dataset.c);if(i>=0)c.conds.splice(i,1);}
+  else if(a==='cond'){var i=c.conds.indexOf(b.dataset.c);if(i>=0)c.conds.splice(i,1);incSync(c,false);}
   else if(a.indexOf('ds')===0){dsAct(c,a,b);}
   save();renderBoard();
 });
@@ -650,7 +691,8 @@ $('#tbl').addEventListener('click',function(e){
   }
   var row=e.target.closest('tr.r');if(!row)return;
   var c=findC(row.dataset.id);if(!c)return;
-  if(act==='cond'){var i=c.conds.indexOf(b.dataset.c);if(i>=0)c.conds.splice(i,1);save();renderBoard();return;}
+  if(c.kind==='fx'){if(act==='fxvis')c.vis=!c.vis;else if(act==='fxrm')rmComb(c);save();renderBoard();return;}
+  if(act==='cond'){var i=c.conds.indexOf(b.dataset.c);if(i>=0)c.conds.splice(i,1);incSync(c,false);save();renderBoard();return;}
   if(act&&act.indexOf('ds')===0){dsAct(c,act,b);save();renderBoard();return;}
   if(act==='info'){S.stat=c.kind==='mon'?c.monId:'pc';S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
   if(ui.sel[c.id])delete ui.sel[c.id];else ui.sel[c.id]=true;
@@ -680,9 +722,10 @@ padEl.addEventListener('click',function(e){
   if(a==='desel'){finishPad();}
   else if(a==='padhp'){
     var k=b.dataset.k;
-    if(v>0){
+    if(k==='maxreset'){T.forEach(maxReset);finishPad();}
+    else if(v>0){
       T.forEach(function(c){
-        if(k==='dmg')dmg(c,v);else if(k==='half')dmg(c,Math.floor(v/2));else if(k==='heal')heal(c,v);else c.temp=Math.max(c.temp,v);
+        if(k==='dmg')dmg(c,v);else if(k==='half')dmg(c,Math.floor(v/2));else if(k==='heal')heal(c,v);else if(k==='maxdn')maxDown(c,v);else c.temp=Math.max(c.temp,v);
       });
       finishPad();
     }
@@ -702,6 +745,7 @@ padEl.addEventListener('click',function(e){
         else if(i>=0){c.conds.splice(i,1);if(x==='Dead'&&c.kind==='pc'&&c.hp<=0&&c.ds&&c.ds.f>=3)c.ds.f=2;}
       });
     });
+    T.forEach(function(c){incSync(c,true);});
     finishPad();
   }
   else if(a==='padremove'){
@@ -756,20 +800,35 @@ dr.addEventListener('click',function(e){
     else{ui.msg='Use the form: Name, AC 15, HP 28, init +3';}
   }
   else if(act==='dellib'){S.lib=S.lib.filter(function(l){return l.id!==b.dataset.l;});}
+  else if(act==='addfx'){
+    var f=ui.fx,nm=f.name.trim(),iv=f.init===''?NaN:Math.floor(+f.init);
+    if(!nm)ui.msg='Give the effect a name.';
+    else if(isNaN(iv))ui.msg='Enter the initiative number it acts on.';
+    else{S.list.push({id:S.next++,kind:'fx',name:nm,desc:f.desc.trim(),init:iv,vis:!!f.vis,ac:0,hp:0,max:0,temp:0,conds:[],cr:'',spent:{}});ui.fx={name:'',init:'',desc:'',vis:f.vis};ui.msg='Added '+nm+' at initiative '+iv+'.';}
+  }
   save();renderBoard();renderDrawer();
 });
 dr.addEventListener('input',function(e){
   var t=e.target;
   if(t.id==='search'){ui.q=t.value;$('#results').innerHTML=resultsHTML();}
   else if(t.dataset.act==='qty'){ui.qty[t.dataset.m]=t.value;}
+  else if(t.id==='fxname')ui.fx.name=t.value;
+  else if(t.id==='fxinit')ui.fx.init=t.value;
+  else if(t.id==='fxdesc')ui.fx.desc=t.value;
 });
 dr.addEventListener('change',function(e){
   var t=e.target;
   if(t.dataset.act==='at'){S.atTable[t.dataset.l]=t.checked;save();}
+  if(t.id==='fxvis')ui.fx.vis=t.checked;
+  if(t.dataset.act==='ftype'||t.dataset.act==='fmin'||t.dataset.act==='fmax'){ui[t.dataset.act==='ftype'?'fType':(t.dataset.act==='fmin'?'fMin':'fMax')]=t.value;$('#results').innerHTML=resultsHTML();}
   if(t.id==='impfile'&&t.files&&t.files[0]){doImport(t.files[0]);t.value='';}
 });
-function pull(){try{var r2=localStorage.getItem(KEY);if(r2){var p2=JSON.parse(r2);if(p2&&p2.list){S=Object.assign(S,p2);renderAll();}}}catch(x){}}
-if(RO){window.addEventListener('storage',function(e){if(e.key===KEY)pull();});document.addEventListener('visibilitychange',pull);}
+function pull(){
+  var ae=document.activeElement;if(!RO&&ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'))return;
+  try{var r2=localStorage.getItem(KEY);if(r2){var p2=JSON.parse(r2);if(p2&&p2.list){S=Object.assign(S,p2);pruneSel();renderAll();}}}catch(x){}
+}
+window.addEventListener('storage',function(e){if(e.key===KEY)pull();});
+document.addEventListener('visibilitychange',function(){if(!document.hidden)pull();});
 renderAll();save();
 }
 fetch('monsters.json').then(function(r){return r.json();}).then(function(j){boot(j.monsters);}).catch(function(){
