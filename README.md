@@ -21,7 +21,7 @@ Player characters can be synced from a [Kanka](https://kanka.io) campaign throug
 
 **Players**
 - A reusable party library. Tick who is at the table and add them in one go.
-- Add characters by hand: `Thorn, AC 15, HP 28, init +3`. Then use ✎ Edit on the player in the tracker to fill in the character sheet: ability scores (modifiers are calculated), save proficiencies and proficiency bonus (saves are recalculated), resistances, immunities, vulnerabilities and condition immunities. These are saved with the character for future sessions.
+- Add characters by hand with just a name (`Thorn`); AC and HP default to 10. You can also type `Thorn, AC 15, HP 28, init +3`. Then use ✎ Edit on the player in the tracker to fill in the character sheet: ability scores (modifiers are calculated), save proficiencies and proficiency bonus (saves are recalculated), resistances, immunities, vulnerabilities and condition immunities. These, and AC and Max HP changed on that page, are saved with the character for future sessions. Current HP stays with the encounter.
 - **Update from Kanka** loads `players.json`. It fills name, class and subclass, species, ability scores, initiative modifier, passive Perception, saving throws, resistances and species/class traits. Tap ⓘ on a player to see this as a stat block, including how the class text was read. Max HP is auto-filled with the estimate (see below). If a hand-set HP differs from the latest Kanka estimate (for example after a level-up in another game), the party list shows both values with a **Use Kanka HP** button, plus a **Use Kanka HP for all** button. AC still has to be entered (`Name, AC 16`).
 
 **Statuses and saving throws**

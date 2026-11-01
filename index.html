@@ -834,12 +834,12 @@ function addPanelHTML(){
     h+='<div class="row"><button data-act="kanka" style="flex:1">Update from Kanka</button>'+(nd?'<button data-act="usekhp" data-l="all">Use Kanka HP for all ('+nd+')</button>':'')+'</div>';
     h+=S.lib.map(function(l){
       var inEnc=S.list.some(function(c){return c.libId===l.id;});
-      return '<div class="lib"><label><input type="checkbox" data-act="at" data-l="'+l.id+'"'+(S.atTable[l.id]?' checked':'')+(inEnc?' disabled':'')+'><span><b>'+esc(l.name)+'</b><br><span class="meta">'+(l.chk?'<b>set AC</b> · ':'')+'AC '+l.ac+' · HP '+l.hp+(khpDiff(l)?' (Kanka '+l.hpEst+')':'')+' · init '+sgn(l.ib)+(l.cls?' · '+esc(l.cls):'')+(inEnc?' · in encounter':'')+'</span></span></label>'+
+      return '<div class="lib"><label><input type="checkbox" data-act="at" data-l="'+l.id+'"'+(S.atTable[l.id]?' checked':'')+(inEnc?' disabled':'')+'><span><b>'+esc(l.name)+'</b><br><span class="meta">'+(l.chk?'<b>set AC/HP</b> · ':'')+'AC '+l.ac+' · HP '+l.hp+(khpDiff(l)?' (Kanka '+l.hpEst+')':'')+' · init '+sgn(l.ib)+(l.cls?' · '+esc(l.cls):'')+(inEnc?' · in encounter':'')+'</span></span></label>'+
         (khpDiff(l)?'<button data-act="usekhp" data-l="'+l.id+'" title="Set max HP to the Kanka estimate">Use Kanka HP</button>':'')+
         '<button class="x" data-act="dellib" data-l="'+l.id+'" aria-label="Delete '+esc(l.name)+' from library">×</button></div>';
     }).join('');
     h+='<div class="row"><button class="add" data-act="addparty" style="flex:1">Add ticked to encounter</button></div>'+
-       '<div class="row"><input id="newchar" type="text" placeholder="Thorn, AC 15, HP 28, init +3" aria-label="New character"><button data-act="newchar">Save</button></div>'+
+       '<div class="row"><input id="newchar" type="text" placeholder="Name (optional: , AC 15, HP 28, init +3)" aria-label="New character"><button data-act="newchar">Save</button></div>'+
        '<div class="msg">'+esc(ui.msg||'Saved characters are reused every session. Tick who is at the table today.')+'</div>';
   }
   return h;
@@ -1000,7 +1000,6 @@ function khpDiff(l){return !!(l.k&&l.hpEst&&l.hp!==l.hpEst);}
 function parseChar(t){
   var name=t.split(',')[0].trim();if(!name)return null;
   var ac=(t.match(/AC\s*(\d+)/i)||[])[1],hp=(t.match(/HP\s*(\d+)/i)||[])[1],ini=(t.match(/init\w*\s*([+-]?\d+)/i)||[])[1];
-  if(!ac&&!hp)return null;
   return {name:name,ac:ac?+ac:null,hp:hp?+hp:null,ib:ini?+ini:0};
 }
 function findC(id){return S.list.find(function(x){return x.id===+id;});}
@@ -1206,9 +1205,8 @@ dr.addEventListener('click',function(e){
     var inp=$('#newchar');var p=parseChar(inp?inp.value:'');
     var ex=p&&S.lib.find(function(l){return l.name.toLowerCase()===p.name.toLowerCase();});
     if(ex){if(p.ac!=null){ex.ac=p.ac;ex.chk=false;}if(p.hp!=null){ex.hp=p.hp;ex.hpMan=true;}if(/init/i.test(inp.value))ex.ib=p.ib;ui.msg='Updated '+ex.name+'.';}
-    else if(p&&(p.ac==null||p.hp==null)){ui.msg='New characters need both AC and HP: Name, AC 15, HP 28, init +3';}
-    else if(p){S.lib.push({id:'l'+(S.libNext++),name:p.name,ac:p.ac,hp:p.hp,ib:p.ib});ui.msg='Saved '+p.name+'.';}
-    else{ui.msg='Use the form: Name, AC 15, HP 28, init +3';}
+    else if(p){S.lib.push({id:'l'+(S.libNext++),name:p.name,ac:p.ac==null?10:p.ac,hp:p.hp==null?10:p.hp,ib:p.ib,chk:p.ac==null,hpMan:p.hp!=null});ui.msg='Saved '+p.name+(p.ac==null||p.hp==null?' (AC/HP default 10; change them with ✎ Edit once added).':'.');}
+    else{ui.msg='Type at least a name, e.g. Thorn (optionally , AC 15, HP 28, init +3)';}
   }
   else if(act==='kanka'){
     ui.msg='Loading players.json…';
@@ -1254,9 +1252,9 @@ dr.addEventListener('change',function(e){
     var f=t.dataset.ed,n=t.value===''?NaN:Math.floor(+t.value);
     if(t.dataset.ex){var x=(c.x||[])[+t.dataset.i];if(x)x[t.dataset.ex]=t.value;}
     else if(f==='name'){var v=t.value.trim();if(v){c.name=v;var hh=$('#edh');if(hh)hh.textContent=v;}else t.value=c.name;}
-    else if(f==='ac'){if(n>=0)c.ac=n;else t.value=c.ac;}
+    else if(f==='ac'){if(n>=0){c.ac=n;var la=libOf(c);if(la){la.ac=n;la.chk=false;}}else t.value=c.ac;}
     else if(f==='init'){c.init=isNaN(n)?null:n;delete c.grp;}
-    else if(f==='max'){if(n>=1){var full=c.hp>=c.max;c.max=n;c.base=null;c.hp=full?n:Math.min(c.hp,n);var hi=dr.querySelector('[data-ed="hp"]');if(hi)hi.value=c.hp;}else t.value=c.max;}
+    else if(f==='max'){if(n>=1){var full=c.hp>=c.max;c.max=n;c.base=null;c.hp=full?n:Math.min(c.hp,n);var lh=libOf(c);if(lh){lh.hp=n;lh.hpMan=true;}var hi=dr.querySelector('[data-ed="hp"]');if(hi)hi.value=c.hp;}else t.value=c.max;}
     else if(f==='hp'){if(n>=0){c.hp=Math.min(n,c.max);t.value=c.hp;if(c.hp>0){c.ds=null;var di=c.conds.indexOf('Dead');if(di>=0)c.conds.splice(di,1);}}else t.value=c.hp;}
     else if(f==='hideBase'){c.hideBase=t.checked;}
     else if(f==='cg'){setGroup([c],t.value);var ii=dr.querySelector('[data-ed="init"]');if(ii)ii.value=c.init==null?'':c.init;}
