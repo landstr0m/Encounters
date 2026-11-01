@@ -78,7 +78,7 @@ input{background:var(--surface);border:1px solid var(--line);border-radius:8px;p
 .svb button.on,.bar button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .sv{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:8px;border:2px solid var(--accent);font-family:var(--display);font-size:1.15rem;font-weight:700;vertical-align:middle;white-space:nowrap}
 .sv.svp{background:color-mix(in srgb,var(--accent) 18%,var(--surface))}
-.sv small{font-family:var(--body);font-size:.7rem;margin-left:4px;color:var(--bad);text-transform:uppercase;letter-spacing:.06em}
+.sv small{font-family:var(--body);font-size:.7rem;margin-left:4px;color:var(--ok);text-transform:uppercase;letter-spacing:.06em}.sv small.b{color:var(--bad)}
 .tok.pc .in::after{content:" \00B7 PC";font-size:.7rem;letter-spacing:.1em;color:var(--muted);font-family:var(--body);font-weight:700}
 .mini{display:flex;flex-wrap:wrap;gap:3px}
 .mini span{font-size:.7rem;font-weight:700;padding:1px 6px;border-radius:999px;background:color-mix(in srgb,var(--accent) 20%,var(--surface));border:1px solid var(--accent)}
@@ -181,11 +181,14 @@ tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 
 .pacts button{font-weight:700;padding:0 4px;min-height:42px}
 .pacts .d{color:var(--bad)}.pacts .h{color:var(--ok)}
 .pacts .rm.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
-.menu{position:absolute;right:0;bottom:calc(100% + 12px);width:min(560px,100%);background:var(--surface);border:2px solid var(--accent);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.35);padding:10px;display:flex;flex-direction:column;gap:8px}
+.menu{position:absolute;right:0;bottom:calc(100% + 12px);width:min(640px,100%);background:var(--surface);border:2px solid var(--accent);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.35);padding:10px;display:flex;flex-direction:column;gap:8px}
 .mh{font-weight:700}
-.mg{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.mg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.ms.ss{display:flex;align-items:center;gap:10px;margin-bottom:0}.ms.ss input{flex:1;min-height:34px;padding:4px 8px;font-size:.85rem;letter-spacing:0;text-transform:none;font-weight:400}
+.st .em{color:var(--accent)}.st s{color:var(--muted);font-weight:400}
+.ms{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:-4px}
 .mt{display:flex;gap:8px;align-items:center}.mt .mh{flex:1}.mt button{min-height:38px}
-.mi{display:flex;gap:6px;align-items:center;text-align:left;min-height:38px;padding:2px 8px;font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden}
+.mi{display:flex;gap:6px;align-items:center;text-align:left;min-height:36px;padding:2px 6px;font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mi .bx{font-size:1.1rem;line-height:1;filter:grayscale(1);opacity:.6}
 .mi.all .bx,.mi.some .bx{filter:none;opacity:1}
 .mi.some{border-style:dashed;border-color:var(--accent)}
@@ -276,7 +279,7 @@ button{touch-action:manipulation}
   .pad .amtin{width:100%}
   .pad .pacts{grid-template-columns:1fr 1fr}
   .pad .pacts button{min-height:38px;font-size:.9rem}
-  .pad .menu{right:calc(100% + 12px);bottom:0;width:540px}
+  .pad .menu{right:calc(100% + 12px);bottom:0;width:620px}
   body.drawon .tw,body.drawon .env,body.drawon .svb{margin-right:446px}
   body.drawon .pad{right:462px}
   body.drawon.padon{padding-bottom:345px}
@@ -306,7 +309,86 @@ var CRS=['0','1/8','1/4','1/2'];for(var q=1;q<=30;q++)CRS.push(String(q));
 var crv=function(x){return x==='1/8'?0.125:x==='1/4'?0.25:x==='1/2'?0.5:+x;};
 var CONDS=['Blinded','Charmed','Deafened','Exhaustion','Frightened','Grappled','Incapacitated','Invisible','Paralyzed','Petrified','Poisoned','Prone','Restrained','Stunned','Unconscious','Concentrating'];
 var FX=window.STATUS_FX||{};
-var ICON={Blinded:'🙈',Charmed:'💘',Deafened:'🔇',Exhaustion:'😩',Frightened:'😱',Grappled:'🤼',Incapacitated:'💫',Invisible:'👻',Paralyzed:'⚡',Petrified:'🗿',Poisoned:'🤢',Prone:'🛌',Restrained:'⛓️',Stunned:'😵',Unconscious:'💤',Concentrating:'🧠',Dead:'💀'};
+// Temporary spell/class effects (2024 rules unless noted). [name, icon, reminder, mechanics]
+// mechanics: ac=+/-AC, min=AC floor, spd=+/-ft, mul=speed multiplier, zero=speed 0, sv=[ability index or 'all', note on Saves badge]
+var SPELLS=[
+ ['Blessed','✨','Bless: +1d4 to attack rolls and saving throws.',{sv:['all','+d4']}],
+ ['Baned','🥀','Bane: −1d4 to attack rolls and saving throws.',{sv:['all','−d4']}],
+ ['Mind Sliver','🧩','Mind Sliver: −1d4 on its next saving throw before the end of the caster’s next turn.',{sv:['all','−d4 next']}],
+ ['Hexed','🔮','Hex (warlock): caster deals +1d6 necrotic on each hit; disadvantage on checks with one chosen ability.'],
+ ['Marked','🎯','Hunter’s Mark: caster deals +1d6 force on each hit and has advantage on checks to find it.'],
+ ['Faerie Fire','🧚','Faerie Fire: attack rolls against it have advantage; Invisible gives no benefit.'],
+ ['Guiding Bolt','🌟','Guiding Bolt: the next attack roll against it has advantage (until end of caster’s next turn).'],
+ ['Mocked','🗯️','Vicious Mockery: disadvantage on its next attack roll before the end of its next turn.'],
+ ['Chilled','🥶','Ray of Frost: speed −10 ft until the start of the caster’s next turn.',{spd:-10}],
+ ['Hasted','⏩','Haste: +2 AC, advantage on Dex saves, speed doubled, one extra action (one attack, Dash, Disengage, Hide or Utilize). When it ends: Lethargic.',{ac:2,mul:2,sv:[1,'adv.']}],
+ ['Slowed','🐌','Slow: −2 AC and Dex saves, speed halved, no reactions, action or bonus action (not both), one attack per turn. Wis save at end of each of its turns.',{ac:-2,mul:.5,sv:[1,'−2']}],
+ ['Shield of Faith','🛡️','Shield of Faith: +2 AC.',{ac:2}],
+ ['Dodging','🤸','Dodge: attacks against it have disadvantage, advantage on Dex saves (lost if Incapacitated or speed 0).',{sv:[1,'adv.']}],
+ ['Raging','😡','Rage: resistance to bludgeoning, piercing and slashing; +rage damage on Str attacks; advantage on Str checks and saves; no spells or concentration.',{sv:[0,'adv.']}],
+ ['Half cover','🧱','Half cover: +2 AC and Dex saves.',{ac:2,sv:[1,'+2']}],
+ ['3/4 cover','🏰','Three-quarters cover: +5 AC and Dex saves.',{ac:5,sv:[1,'+5']}],
+ // searchable extras
+ ['Shocked','🔌','Shocking Grasp: can’t make Opportunity Attacks until the start of its next turn.'],
+ ['Frostbitten','❄️','Frostbite: disadvantage on its next weapon attack roll before the end of its next turn.'],
+ ['Chill Touch','🖐️','Chill Touch: can’t regain HP until the end of the caster’s next turn.'],
+ ['Starry Wisp','⭐','Starry Wisp: sheds dim light; can’t benefit from Invisible until the end of the caster’s next turn.'],
+ ['Blade Ward','🗡️','Blade Ward: attack rolls against it subtract 1d4.'],
+ ['Resistance','🔰','Resistance (cantrip): once per turn, reduce damage of the chosen type by 1d4.'],
+ ['Guidance','🧭','Guidance: +1d4 to ability checks with the chosen skill.'],
+ ['Shield','🪞','Shield (reaction): +5 AC until the start of its next turn.',{ac:5}],
+ ['Barkskin','🌳','Barkskin: AC can’t be lower than 17.',{min:17}],
+ ['Blurred','🌫️','Blur: attackers have disadvantage unless they don’t rely on sight (Blindsight, Truesight).'],
+ ['Sanctuary','🕊️','Sanctuary: anyone targeting it with an attack or harmful spell makes a Wis save or must pick a new target. Ends if it attacks or harms an enemy.'],
+ ['Heroism','🦸','Heroism: immune to Frightened; temp HP equal to caster’s spell mod at the start of each of its turns.'],
+ ['Inspired','🎵','Bardic Inspiration: may roll the die and add it to one failed d20 test (within 1 hour).'],
+ ['Reckless','🪓','Reckless Attack: advantage on Str attacks this turn; attacks against it have advantage until its next turn.'],
+ ['Enlarged','⬆️','Enlarge: size +1, advantage on Str checks and saves, weapon hits +1d4 damage.',{sv:[0,'adv.']}],
+ ['Reduced','⬇️','Reduce: size −1, disadvantage on Str checks and saves, weapon hits −1d4 damage.',{sv:[0,'disadv.']}],
+ ['Longstrider','👟','Longstrider: speed +10 ft.',{spd:10}],
+ ['Commanded','🫡','Command: follows the one-word command on its next turn.'],
+ ['Dueled','⚔️','Compelled Duel: disadvantage on attacks against anyone but the caster; Wis save to move more than 30 ft from the caster.'],
+ ['Searing Smite','🔥','Searing Smite: 1d6 fire at the start of each of its turns until it succeeds on a Con save.'],
+ ['Burning','🕯️','Burning (e.g. Alchemist’s Fire): 1d4 fire at the start of each of its turns; an action and DC 10 Dex check puts it out.'],
+ ['Ensnared','🌿','Ensnaring Strike: Restrained; 1d6 piercing at the start of each of its turns; Str check to escape.'],
+ ['Shining Smite','🔆','Shining Smite: sheds light; attack rolls against it have advantage; Invisible gives no benefit.'],
+ ['Heat Metal','♨️','Heat Metal: 2d8 fire; if it keeps holding the object, disadvantage on attacks and checks until the start of the caster’s next turn.'],
+ ['Silenced','🤫','Silence: Deafened and can’t cast spells with a Verbal component while inside the sphere.'],
+ ['Protected','🛐','Protection from Evil and Good: aberrations, celestials, elementals, fey, fiends and undead have disadvantage on attacks against it.'],
+ ['Cursed','🪬','Bestow Curse: one of: disadvantage on checks and saves with one ability; disadvantage on attacks vs the caster; Wis save each turn or lose its action; or +1d8 necrotic from the caster.'],
+ ['Entranced','🌀','Hypnotic Pattern: Charmed, Incapacitated, speed 0. Ends if it takes damage or is shaken awake (action).',{zero:1}],
+ ['Fear','😨','Fear: Frightened, drops what it holds, and must Dash away from the caster on its turns.'],
+ ['Spirit Guardians','👼','Spirit Guardians: speed halved in the 15-ft emanation; 3d8 radiant or necrotic when it enters or starts its turn there (Wis half).',{mul:.5}],
+ ['Stinking Cloud','☁️','Stinking Cloud: on a failed Con save, Poisoned and loses its action and bonus action while in the cloud.'],
+ ['Laughing','😂','Hideous Laughter: Prone and Incapacitated; Wis save at end of each turn and when it takes damage.'],
+ ['Confused','🎲','Confusion: no reactions; d10 each turn: 1 moves randomly, 2–6 does nothing, 7–8 attacks a random creature in reach, 9–10 acts normally.'],
+ ['Levitating','🎈','Levitate: floats in place; can move only by pushing or pulling on objects (speed 0).',{zero:1}],
+ ['Polymorphed','🐑','Polymorph: uses the new form’s statistics; reverts when the temp HP is gone.'],
+ ['Banished','🌌','Banishment: removed to a harmless demiplane (Incapacitated) while the caster concentrates.'],
+ ['Lethargic','😴','After Haste ends: can’t move or take actions until after its next turn.',{zero:1}],
+ ['Vowed','😤','Vow of Enmity (paladin): the paladin has advantage on attack rolls against it.'],
+ ['Turned','☀️','Turn Undead: Frightened and Incapacitated; must move away from the cleric. Ends if it takes damage.'],
+ ['Stun saved','🥴','Stunning Strike (succeeded): speed halved and the next attack roll against it has advantage, until the start of the monk’s next turn.',{mul:.5}],
+ ['Open Hand','👋','Open Hand Technique: can’t take reactions until the start of the monk’s next turn.'],
+ ['Hamstrung','🦵','Brutal Strike – Hamstring: speed −15 ft until the start of the barbarian’s next turn.',{spd:-15}],
+ ['Staggered','💢','Brutal Strike – Staggering: disadvantage on its next saving throw and no Opportunity Attacks until the start of the barbarian’s next turn.',{sv:['all','disadv. next']}],
+ ['Goaded','📯','Goading Attack: disadvantage on attacks against anyone but the fighter until the end of the fighter’s next turn.'],
+ ['Distracted','👀','Distracting Strike / Help: the next attack roll against it by someone else has advantage.'],
+ ['Halted','🛑','Sentinel: speed 0 for the rest of the current turn.',{zero:1}],
+ ['Hexblade','🪄','Hexblade’s Curse (2014): warlock adds proficiency bonus to damage and scores a critical hit on 19–20 against it.']];
+var SPX={};SPELLS.forEach(function(x){FX[x[0]]=x[2];SPX[x[0]]=x[3]||{};});
+var COMMON=SPELLS.slice(0,16).map(function(x){return x[0];});
+// Pairs that can't be active together: turning one on turns the other off
+var EXCL=[['Half cover','3/4 cover'],['Raging','Concentrating'],['Enlarged','Reduced'],['Hasted','Lethargic'],['Stunned','Stun saved']];
+var ZERO=['Grappled','Restrained','Paralyzed','Petrified','Unconscious'];
+function effAC(c){var a=+c.ac,mn=0;c.conds.forEach(function(x){var o=SPX[x];if(o){a+=o.ac||0;if(o.min>mn)mn=o.min;}});return Math.max(a,mn);}
+function effSpeed(c,sp){
+  var add=0,mul=1,zero=false;
+  c.conds.forEach(function(x){var o=SPX[x];if(ZERO.indexOf(x)>=0||(o&&o.zero))zero=true;if(o){add+=o.spd||0;mul*=o.mul||1;}});
+  if(!zero&&!add&&mul===1)return sp;
+  return String(sp).replace(/(\d+)(\s*ft)/g,function(m0,n,u){return (zero?0:Math.max(0,Math.floor((+n+add)*mul)))+u;});
+}
+var ICON={Blinded:'🙈',Charmed:'💘',Deafened:'🔇',Exhaustion:'😩',Frightened:'😱',Grappled:'🤼',Incapacitated:'💫',Invisible:'👻',Paralyzed:'⚡',Petrified:'🗿',Poisoned:'🤢',Prone:'🛌',Restrained:'⛓️',Stunned:'😵',Unconscious:'💤',Concentrating:'🧠',Dead:'💀'};SPELLS.forEach(function(x){ICON[x[0]]=x[1];});
 var KEY='encounter-tracker-app-v1';var RO=/[?&]view=table\b/.test(location.search);
 var WMAX=200,IH=44;
 var $=function(s){return document.querySelector(s);};
@@ -321,7 +403,7 @@ var isOut=function(c){return isDead(c)||isPcDead(c);};
 var S={enc:[],encRoll:true,envName:'',envNote:'',round:1,turnId:null,list:[],next:1,libNext:7,tab:'add',sub:'monsters',stat:null,atTable:{},initMode:'each',hpMode:'roll',
  lib:[{id:'l1',name:'Aria (example)',ac:16,hp:31,ib:2},{id:'l2',name:'Brom (example)',ac:18,hp:38,ib:1},{id:'l3',name:'Wren (example)',ac:14,hp:24,ib:3},
       {id:'l4',name:'Tolliver (example)',ac:12,hp:20,ib:1},{id:'l5',name:'Sable (example)',ac:15,hp:27,ib:4},{id:'l6',name:'Marek (example)',ac:17,hp:34,ib:0}]};
-var ui={fx:{name:'',init:'',desc:'',vis:true},fType:'',fMin:'',fMax:'',q:'',qty:{},sel:{},amt:0,menu:false,pend:{},confirmRemove:false,confirmClear:false,msg:'',drawer:false,present:false,cardOpen:true,sv:-1,encName:'',encNote:'',svLast:1,traitsOpen:false,ignoreUntil:0};
+var ui={fx:{name:'',init:'',desc:'',vis:true},fType:'',fMin:'',fMax:'',q:'',qty:{},sel:{},amt:0,menu:false,pend:{},confirmRemove:false,confirmClear:false,msg:'',drawer:false,present:false,cardOpen:true,sv:-1,mq:'',encName:'',encNote:'',svLast:1,traitsOpen:false,ignoreUntil:0};
 var loaded=false;try{if(RO||sessionStorage.getItem('et-present')==='1')ui.present=true;}catch(e){}
 try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.list){S=Object.assign(S,p);loaded=true;}}}catch(e){}
 function save(){if(RO)return;try{localStorage.setItem(KEY,JSON.stringify(S));ui.saveErr=false;}catch(e){if(!ui.saveErr){ui.saveErr=true;alert('This device\u2019s storage is full, so changes are NOT being saved. Export your encounter (Data tab), then remove a monster file you no longer need.');}}}
@@ -519,8 +601,8 @@ function renderTurn(){
   var m=c.kind==='mon'?MON.find(function(x){return x.id===c.monId;}):null;
   var chips=c.conds.map(function(x){return '<button class="chip" data-act="cond" data-c="'+esc(x)+'" title="Remove '+esc(x)+'">'+esc(x)+' ×</button>';}).join('');
   var h='<div class="th"><span class="tn">'+esc(c.name)+'</span>'+
-    '<span class="st"><i>AC</i>'+c.ac+'</span><span class="st"><i>HP</i>'+c.hp+'/'+c.max+(c.base!=null?' (max \u2212'+(c.base-c.max)+')':'')+(c.temp>0?' +'+c.temp:'')+'</span>'+
-    (m?'<span class="st"><i>SPEED</i>'+esc(m.speed)+'</span><span class="st"><i>CR</i>'+esc(m.cr)+'</span>':'<span class="st muted">'+(c.kind==='pc'?'Player turn':'Stat block not loaded')+'</span>')+
+    '<span class="st"><i>AC</i>'+(effAC(c)!==+c.ac?'<s>'+c.ac+'</s> <b class="em">'+effAC(c)+'</b>':c.ac)+'</span><span class="st"><i>HP</i>'+c.hp+'/'+c.max+(c.base!=null?' (max \u2212'+(c.base-c.max)+')':'')+(c.temp>0?' +'+c.temp:'')+'</span>'+
+    (m?'<span class="st"><i>SPEED</i>'+(effSpeed(c,m.speed)!==m.speed?'<s>'+esc(m.speed)+'</s> <b class="em">'+esc(effSpeed(c,m.speed))+'</b>':esc(m.speed))+'</span><span class="st"><i>CR</i>'+esc(m.cr)+'</span>':'<span class="st muted">'+(c.kind==='pc'?'Player turn':'Stat block not loaded')+'</span>')+
     '<span class="sp"></span>'+'<button data-act="tedit">Edit</button>'+(m?'<button data-act="tinfo">Full stat block</button>':'')+
     '<button data-act="tcol">'+(ui.cardOpen?'Hide':'Show')+'</button></div>';
   if(chips)h+='<div class="tc">'+chips+'</div>';
@@ -549,10 +631,11 @@ function saveOf(c,i){
   var sv=(m.extra.find(function(e){return /^sav/i.test(e[0]);})||[])[1]||'';
   var r=new RegExp('\\b'+AB[i]+'\\w*\\s*([+\u2212-]\\s*\\d+)','i').exec(sv);
   var n=r?+r[1].replace('\u2212','-').replace(/\s/g,''):mod(+m.abil[i]);
-  var has=function(x){return c.conds.indexOf(x)>=0;},note='';
-  if(i<2&&(has('Paralyzed')||has('Stunned')||has('Unconscious')||has('Petrified')))note='auto-fail';
-  else if(i===1&&has('Restrained'))note='disadv.';
-  return '<span class="sv'+(r?' svp':'')+'" title="'+(r?'Proficient':'Ability modifier')+'">'+AB[i]+' '+sgn(n)+(note?'<small>'+note+'</small>':'')+'</span>';
+  var has=function(x){return c.conds.indexOf(x)>=0;},notes=[];
+  if(i<2&&(has('Paralyzed')||has('Stunned')||has('Unconscious')||has('Petrified')))notes.push('auto-fail');
+  else{if(i===1&&has('Restrained'))notes.push('disadv.');c.conds.forEach(function(x){var f=(SPX[x]||{}).sv;if(f&&(f[0]==='all'||f[0]===i))notes.push(f[1]);});}
+  var note=notes.map(function(t){return '<small'+(/^(\+|adv)/.test(t)?'':' class="b"')+'>'+t+'</small>';}).join('');
+  return '<span class="sv'+(r?' svp':'')+'" title="'+(r?'Proficient':'Ability modifier')+'">'+AB[i]+' '+sgn(n)+note+'</span>';
 }
 function rowHTML(c){
   var pct=c.max?Math.max(0,Math.min(100,c.hp/c.max*100)):0;
@@ -604,10 +687,18 @@ function effState(T,x){if(Object.prototype.hasOwnProperty.call(ui.pend,x))return
 function menuHTML(T){
   var list=CONDS.slice();if(T.every(function(c){return c.kind==='pc';}))list.push('Dead');
   var n=Object.keys(ui.pend).length;
-  return '<div class="menu"><div class="mt"><div class="mh">Status · '+T.length+' selected</div><button data-act="mcancel">Cancel</button><button class="add" data-act="mapply">Apply'+(n?' ('+n+')':'')+'</button></div><div class="mg">'+list.map(function(x){
-    var s=effState(T,x);
-    return '<button class="mi '+s+'" data-act="mi" data-c="'+esc(x)+'" title="'+esc(FX[x]||'')+'"><span class="bx">'+(ICON[x]||'•')+'</span>'+esc(x)+'</button>';
-  }).join('')+'</div><div class="muted" style="font-size:.75rem">Paralyzed, Petrified, Stunned and Unconscious also apply Incapacitated.</div></div>';
+  return '<div class="menu"><div class="mt"><div class="mh">Status · '+T.length+' selected</div><button data-act="mcancel">Cancel</button><button class="add" data-act="mapply">Apply'+(n?' ('+n+')':'')+'</button></div><div class="ms">Conditions</div><div class="mg">'+list.map(btn).join('')+'</div><div class="ms ss">Spells and effects<input id="msearch" type="search" autocomplete="off" placeholder="Search '+SPELLS.length+' spells and abilities\u2026" value="'+esc(ui.mq)+'" aria-label="Search spells and abilities"></div><div class="mg" id="mres">'+spellGrid(T)+'</div><div class="muted" style="font-size:.75rem">Paralyzed, Petrified, Stunned and Unconscious also apply Incapacitated. Tap a chip on a creature to end an effect.</div></div>';
+  function btn(x){return mbtn(T,x);}
+}
+function mbtn(T,x){
+  var s=effState(T,x);
+  return '<button class="mi '+s+'" data-act="mi" data-c="'+esc(x)+'" title="'+esc(FX[x]||'')+'"><span class="bx">'+(ICON[x]||'•')+'</span>'+esc(x)+'</button>';
+}
+function spellGrid(T){
+  var q=(ui.mq||'').trim().toLowerCase(),L;
+  if(q)L=SPELLS.filter(function(x){return (x[0]+' '+x[2]).toLowerCase().indexOf(q)>=0;}).slice(0,16).map(function(x){return x[0];});
+  else{L=COMMON.slice();SPELLS.forEach(function(x){if(L.indexOf(x[0])<0&&effState(T,x[0])!=='none')L.push(x[0]);});}
+  return L.length?L.map(function(x){return mbtn(T,x);}).join(''):'<div class="muted" style="grid-column:1/-1;font-size:.85rem">No match. Try a spell or ability name.</div>';
 }
 function renderPad(){
   var T=S.list.filter(function(c){return ui.sel[c.id];});
@@ -824,7 +915,7 @@ function parseChar(t){
 }
 function findC(id){return S.list.find(function(x){return x.id===+id;});}
 function pruneSel(){Object.keys(ui.sel).forEach(function(k){if(!findC(k))delete ui.sel[k];});}
-function finishPad(){ui.sel={};ui.amt=0;ui.menu=false;ui.pend={};ui.confirmRemove=false;}
+function finishPad(){ui.sel={};ui.amt=0;ui.menu=false;ui.pend={};ui.mq='';ui.confirmRemove=false;}
 function nextIdExcluding(T){
   var ids={};T.forEach(function(c){ids[c.id]=true;});
   var O=order();var idx=O.findIndex(function(c){return c.id===S.turnId;});
@@ -933,13 +1024,14 @@ padEl.addEventListener('click',function(e){
       finishPad();
     }
   }
-  else if(a==='padstatus'){ui.menu=!ui.menu;ui.pend={};}
+  else if(a==='padstatus'){ui.menu=!ui.menu;ui.pend={};ui.mq='';}
   else if(a==='mi'){
     var x=b.dataset.c,base=condState(T,x),cur=effState(T,x);
     var want=(cur==='all')?false:true;
     if((want&&base==='all')||(!want&&base==='none'))delete ui.pend[x];else ui.pend[x]=want;
+    if(want)EXCL.forEach(function(g){if(g.indexOf(x)>=0)g.forEach(function(p){if(p!==x){if(condState(T,p)!=='none')ui.pend[p]=false;else delete ui.pend[p];}});});
   }
-  else if(a==='mcancel'){ui.menu=false;ui.pend={};}
+  else if(a==='mcancel'){ui.menu=false;ui.pend={};ui.mq='';}
   else if(a==='mapply'){
     Object.keys(ui.pend).forEach(function(x){
       T.forEach(function(c){
@@ -967,7 +1059,8 @@ padEl.addEventListener('scroll',function(e){
   if(i!==ui.amt){ui.amt=i;var inp=$('#amtin');if(inp)inp.value=i;}
 },true);
 padEl.addEventListener('input',function(e){
-  var t=e.target;if(t.id!=='amtin')return;
+  var t=e.target;
+  if(t.id==='msearch'){ui.mq=t.value;var mr=$('#mres');if(mr)mr.innerHTML=spellGrid(S.list.filter(function(c){return ui.sel[c.id];}));return;}if(t.id!=='amtin')return;
   var digits=t.value.replace(/\D/g,'').slice(0,3);
   t.value=digits;
   ui.amt=digits===''?0:parseInt(digits,10);
