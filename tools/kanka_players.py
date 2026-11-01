@@ -1,7 +1,7 @@
 """Pull Player Characters from Kanka into players.json (stdlib only).
 Usage: KANKA_TOKEN=... python tools/kanka_players.py
 """
-import json, os, re, time, urllib.request
+import html, json, os, re, time, urllib.request
 
 CAMPAIGN = 227292  # Blackrock
 API = f"https://api.kanka.io/1.0/campaigns/{CAMPAIGN}"
@@ -10,6 +10,17 @@ HIT_DIE = {"barbarian": 12, "fighter": 10, "paladin": 10, "ranger": 10,
            "bard": 8, "cleric": 8, "druid": 8, "monk": 8, "rogue": 8,
            "warlock": 8, "artificer": 8, "sorcerer": 6, "wizard": 6}
 ABIL = ["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"]
+# Species damage resistances (first match wins). Class/feat/item resistances are not
+# covered: add a Kanka property "Resistances", "Immunities" or "Vulnerabilities"
+# (comma-separated, e.g. "fire, poison") to a character to add or override.
+RACE_RES = [("dhampir", []), ("tiefling", ["fire"]), ("dwarf", ["poison"]),
+            ("genasi (fire)", ["fire"]), ("genasi (water)", ["acid"]),
+            ("genasi (earth)", []), ("genasi (air)", ["lightning"]),
+            ("kalashtar", ["psychic"]), ("aasimar", ["necrotic", "radiant"]),
+            ("yuan-ti", ["poison"]), ("warforged", ["poison"]),
+            ("stout", ["poison"]), ("tortle", [])]
+DMG = ["acid", "bludgeoning", "cold", "fire", "force", "lightning", "necrotic",
+       "piercing", "poison", "psychic", "radiant", "slashing", "thunder"]
 
 
 def get(url):
@@ -55,6 +66,21 @@ def est_hp(classes, con_mod):
     return hp
 
 
+def dmg_list(text):
+    return [d for d in DMG if d in (text or "").lower()]
+
+
+def defenses(race, a):
+    race = (race or "").lower()
+    res = next((r for k, r in RACE_RES if k in race), [])
+    if "dragonborn" in race:
+        res = dmg_list(race)  # e.g. "Dragonborn (Red, fire)"
+    get = lambda k: next((v for n, v in a.items() if n.lower() == k), None)
+    res = sorted(set(res) | set(dmg_list(get("resistances"))))
+    return {"resist": res, "immune": dmg_list(get("immunities")),
+            "vulnerable": dmg_list(get("vulnerabilities"))}
+
+
 def main():
     players, url = [], f"{API}/characters?related=1"
     while url:
@@ -66,12 +92,16 @@ def main():
             if attrs is None:  # fallback if 'related' didn't include them
                 time.sleep(2.5)
                 attrs = get(f"{API}/entities/{c['entity_id']}/attributes")["data"]
-            a = {x["name"].strip(): x.get("value") for x in attrs
+            a = {html.unescape(x["name"]).strip(): x.get("value") for x in attrs
                  if not x.get("is_private") and x.get("name")}
             scores = {k[:3].lower(): num(a.get(k)) for k in ABIL}
             mods = {k: (v - 10) // 2 if v is not None else None for k, v in scores.items()}
             classes_raw = a.get("Class, Subclass & Levels", "")
             classes = parse_classes(classes_raw)
+            # Kanka lists only proficient saves, as "DEX: +4"; others = ability mod
+            saves = {k: num(a[k.upper()]) if num(a.get(k.upper())) is not None else m
+                     for k, m in mods.items()}
+            prof = [k for k in mods if num(a.get(k.upper())) is not None]
             perc = next((num(v) for k, v in a.items() if k.lower().startswith("perception")), None)
             players.append({
                 "id": c["entity_id"], "name": c["name"], "title": c.get("title"),
@@ -79,6 +109,8 @@ def main():
                 "level": sum(l for _, l in classes) or None,
                 "abilities": scores, "mods": mods, "initMod": mods["dex"],
                 "passivePerception": 10 + (perc if perc is not None else (mods["wis"] or 0)),
+                "saves": saves, "saveProf": prof,
+                **defenses(a.get("Race"), a),
                 "hpEst": est_hp(classes, mods["con"]),
                 "image": c.get("image_thumb"),
                 "url": f"https://app.kanka.io/w/{CAMPAIGN}/entities/{c['entity_id']}",
