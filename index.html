@@ -191,7 +191,8 @@ tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 
 .ms.ss{display:flex;align-items:center;gap:10px;margin-bottom:0}.ms.ss input{flex:1;min-height:34px;padding:4px 8px;font-size:.85rem;letter-spacing:0;text-transform:none;font-weight:400}
 .st .em{color:var(--accent)}.st s{color:var(--muted);font-weight:400}
 .ms{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:-4px}
-.mt{display:flex;gap:8px;align-items:center}.mt .mh{flex:1}.mt button{min-height:38px}
+.menu{overflow-y:auto;overscroll-behavior:contain}
+.mt{display:flex;gap:8px;align-items:center;position:sticky;top:-10px;z-index:1;background:var(--surface);margin:-10px -10px 0;padding:10px}.mt .mh{flex:1}.mt button{min-height:38px}
 .mi{display:flex;gap:6px;align-items:center;text-align:left;min-height:36px;padding:2px 6px;font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mi .bx{font-size:1.1rem;line-height:1;filter:grayscale(1);opacity:.6}
 .mi.all .bx,.mi.some .bx{filter:none;opacity:1}
@@ -273,6 +274,7 @@ button{touch-action:manipulation}
 .cx{border:2px dashed var(--accent);border-radius:10px;padding:4px 10px;margin-bottom:10px}
 .a .sec.cu{color:var(--ok)}
 /* Wide screens: selection pad docks bottom-right so the table stays tappable */
+@media (max-width:999px){body.drawon.menuon .pad{z-index:45}}
 @media (min-width:1000px){
   body.padon{padding-bottom:40px}
   body.padon .tw{margin-right:396px}
@@ -287,7 +289,7 @@ button{touch-action:manipulation}
   body.drawon .tw,body.drawon .env,body.drawon .svb{margin-right:446px}
   body.drawon .pad{right:462px}
   body.drawon.padon{padding-bottom:345px}
-  body.drawon .pad .menu{right:auto;left:0;bottom:calc(100% + 12px)}
+  body.drawon .pad .menu{left:auto;right:0;bottom:calc(100% + 12px);width:min(620px,calc(100vw - 494px))}
 }
 </style>
 </head>
@@ -743,6 +745,7 @@ function renderPad(){
   var on=T.length>0&&!ui.present;
   pad.hidden=!on;
   document.body.classList.toggle('padon',on);
+  document.body.classList.toggle('menuon',on&&!!ui.menu);
   if(!on)return;
   var names=T.map(function(c){return esc(c.name);}).join(', ');
   pad.innerHTML='<div class="pi"><div class="pt"><div class="who"><b>'+T.length+' selected</b> · '+names+'</div><button data-act="desel">Deselect</button></div>'+
@@ -751,6 +754,7 @@ function renderPad(){
    '<div class="pacts"><button class="d" data-act="padhp" data-k="dmg">Damage</button><button class="d" data-act="padhp" data-k="half">Half</button><button class="h" data-act="padhp" data-k="heal">Heal</button>'+
    '<button data-act="padhp" data-k="temp">Temp HP</button><button data-act="padstatus">Status ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove">'+(ui.confirmRemove?'Sure?':'Remove')+'</button><button class="d" data-act="padhp" data-k="maxdn">Max HP \u2212</button><button data-act="padhp" data-k="maxreset">Reset max</button><button data-act="padgroup">'+(T.some(function(c){return c.cg;})&&T.every(function(c){return c.cg&&c.cg===T[0].cg;})?'Ungroup':'Group\u2026')+'</button></div></div></div>'+
    (ui.menu?menuHTML(T):'')+'</div>';
+  var mn=pad.querySelector('.menu');if(mn){mn.style.maxHeight='';mn.style.maxHeight=Math.max(200,mn.getBoundingClientRect().bottom-8)+'px';}
   var w=$('#wheel');
   if(w){ui.ignoreUntil=Date.now()+250;w.style.scrollSnapType='none';w.scrollTop=Math.min(ui.amt,WMAX)*IH;w.style.scrollSnapType='';}
 }
