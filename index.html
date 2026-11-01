@@ -551,7 +551,7 @@ function statHTML(){
   var ex=m.extra.map(function(e){return '<dt>'+esc(e[0])+'</dt><dd>'+esc(e[1])+'</dd>';}).join('');
   var tr=m.traits.map(function(t){return '<p><b>'+esc(t[0])+'.</b> '+esc(t[1])+'</p>';}).join('');
   var sec=function(h,a){return a&&a.length?'<h3>'+h+'</h3>'+a.map(function(t){return '<p><b>'+esc(t[0])+'.</b> '+esc(t[1])+'</p>';}).join(''):'';};
-  return '<div class="sb"><img class="thumb" src="img/'+esc(m.id)+'.webp" alt="" onerror="this.remove()"><h2>'+esc(m.name)+'</h2><div class="type">'+esc(m.type)+'</div>'+
+  return '<div class="sb"><img class="thumb" src="img/'+esc(m.srcId||m.id)+'.webp" alt="" onerror="this.remove()"><h2>'+esc(m.name)+'</h2><div class="type">'+esc(m.type)+'</div>'+
    '<dl><dt>AC</dt><dd>'+m.ac+(m.acn?' ('+esc(m.acn)+')':'')+'</dd><dt>HP</dt><dd>'+m.hp+' ('+m.dice+')</dd><dt>Speed</dt><dd>'+esc(m.speed)+'</dd><dt>CR</dt><dd>'+m.cr+'</dd></dl>'+
    '<div class="abil">'+ab+'</div><dl>'+ex+'</dl>'+(tr?'<h3>Traits</h3>'+tr:'')+sec('Actions',m.actions)+sec('Bonus actions',m.bonus)+sec('Reactions',m.react)+sec('Legendary actions',m.leg)+'</div>';
 }
@@ -603,7 +603,11 @@ function dataHTML(){
    '<p><b>Table window</b> opens a read-only player view that follows this one live. Any other window of this app in the same browser follows too, so you can also just open the app in a second window and tap Table view there.</p>'+
    '<div class="row"><button data-act="tablewin">Open table window</button></div>'+
    '<div class="msg">'+esc(ui.msg||'')+'</div>'+
-   '<p class="muted">Monsters: SRD 5.2 (2024), '+MON.length+' stat blocks, stored in the app so it works offline.</p></div>';
+   '<p><b>Monster files</b> add your own stat blocks (e.g. your Monster Manual file). Where a name matches a built-in monster, yours replaces it. Kept on this device only.</p>'+
+   '<div class="row"><button data-act="addmonfile">Add monster file…</button><input id="monfile" type="file" accept=".json,application/json" hidden></div>'+
+   CUSTOM.map(function(f,i){return '<div class="lib"><span style="flex:1"><b>'+esc(f.name)+'</b><br><span class="meta">'+f.monsters.length+' stat blocks</span></span><button class="x" data-act="rmmonfile" data-i="'+i+'" aria-label="Remove '+esc(f.name)+'">×</button></div>';}).join('')+
+   '<div class="msg">'+esc(ui.msg||'')+'</div>'+
+   '<p class="muted">Monsters: '+MON.length+' stat blocks ('+BUILTIN+' built-in SRD 5.2'+(CUSTOM.length?', '+MERGE.rep+' replaced by yours, '+MERGE.add+' added':'')+'). Works offline.</p></div>';
 }
 function doExport(){
   var obj={app:'encounter-tracker',version:1,edition:'2024',exported:new Date().toISOString(),state:S};
@@ -794,6 +798,8 @@ dr.addEventListener('click',function(e){
   if(act==='qty'||act==='at')return;
   if(act==='export'){doExport();renderDrawer();return;}
   if(act==='import'){var pf=$('#impfile');if(pf)pf.click();return;}
+  if(act==='addmonfile'){var mf=$('#monfile');if(mf)mf.click();return;}
+  if(act==='rmmonfile'){CUSTOM.splice(+b.dataset.i,1);saveCustom();location.reload();return;}
   if(act==='tablewin'){window.open(location.pathname+'?view=table','_blank');return;}
   if(act==='close'){ui.drawer=false;}
   else if(act==='tab'){S.tab=b.dataset.t;ui.msg='';}
@@ -836,16 +842,65 @@ dr.addEventListener('change',function(e){
   if(t.id==='fxvis')ui.fx.vis=t.checked;
   if(t.dataset.act==='ftype'||t.dataset.act==='fmin'||t.dataset.act==='fmax'){ui[t.dataset.act==='ftype'?'fType':(t.dataset.act==='fmin'?'fMin':'fMax')]=t.value;$('#results').innerHTML=resultsHTML();}
   if(t.id==='impfile'&&t.files&&t.files[0]){doImport(t.files[0]);t.value='';}
+  if(t.id==='monfile'&&t.files&&t.files[0]){readMonFile(t.files[0],function(msg){ui.msg=msg;renderDrawer();});t.value='';}
 });
 function pull(){
   var ae=document.activeElement;if(!RO&&ae&&(ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'))return;
   try{var r2=localStorage.getItem(KEY);if(r2){var p2=JSON.parse(r2);if(p2&&p2.list){S=Object.assign(S,p2);pruneSel();renderAll();}}}catch(x){}
 }
 window.addEventListener('storage',function(e){if(e.key===KEY)pull();});
+// Any tap elsewhere (or 4 s) cancels a pending "Tap again to clear" / "Sure?" confirmation
+var armT=null;
+document.addEventListener('click',function(e){
+  var t=e.target.closest&&e.target.closest('[data-act]'),a=t?t.dataset.act:'';
+  if(ui.confirmClear&&a!=='clear'){ui.confirmClear=false;renderBar();}
+  if(ui.confirmRemove&&a!=='padremove'){ui.confirmRemove=false;renderPad();}
+  clearTimeout(armT);
+  armT=setTimeout(function(){var c=ui.confirmClear||ui.confirmRemove;ui.confirmClear=ui.confirmRemove=false;if(c){renderBar();renderPad();}},4000);
+},true);
 document.addEventListener('visibilitychange',function(){if(!document.hidden)pull();});
 renderAll();save();
 }
-fetch('monsters.json').then(function(r){return r.json();}).then(function(j){boot(j.monsters);}).catch(function(){
+var CKEY='encounter-tracker-monsters',CUSTOM=[],BUILTIN=0,MERGE={rep:0,add:0};
+try{CUSTOM=JSON.parse(localStorage.getItem(CKEY)||'[]');}catch(e){CUSTOM=[];}
+function saveCustom(){try{localStorage.setItem(CKEY,JSON.stringify(CUSTOM));return true;}catch(e){return false;}}
+var nkey=function(n){return String(n).toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,' ').trim();};
+function okMon(m){return m&&typeof m.name==='string'&&typeof m.id==='string'&&!isNaN(+m.ac)&&!isNaN(+m.hp)&&Array.isArray(m.abil)&&m.abil.length===6;}
+function fixMon(m){['extra','traits','actions','bonus','react','leg'].forEach(function(k){if(!Array.isArray(m[k]))m[k]=[];});m.ac=+m.ac;m.hp=+m.hp;m.cr=String(m.cr==null?'0':m.cr);m.type=m.type||'';m.speed=m.speed||'';m.dice=m.dice||String(m.hp);return m;}
+function mergeMon(base){
+  var out=base.slice(),byName={},byId={};MERGE={rep:0,add:0};
+  out.forEach(function(m,i){byName[nkey(m.name)]=i;byId[m.id]=i;});
+  CUSTOM.forEach(function(f){f.monsters.forEach(function(m0){
+    var m=fixMon(JSON.parse(JSON.stringify(m0))),k=nkey(m.name),i=byName[k];
+    if(i==null&&byId[m.id]!=null)i=byId[m.id];
+    if(i!=null){m.srcId=m.id;m.id=out[i].id;out[i]=m;MERGE.rep++;}   // keep built-in id so saved encounters still find it
+    else{if(byId[m.id]!=null)m.id=m.id+'-'+out.length;byName[k]=byId[m.id]=out.length;out.push(m);MERGE.add++;}
+  });});
+  return out;
+}
+function readMonFile(file,done){
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var j=JSON.parse(String(r.result).replace(/^\uFEFF/,'')),L=Array.isArray(j)?j:(j&&j.monsters);
+      if(!Array.isArray(L))throw 0;
+      var good=L.filter(okMon),bad=L.length-good.length;
+      if(!good.length){done('No valid stat blocks found in '+file.name+'. Nothing was changed.');return;}
+      var known={};CUSTOM.forEach(function(f){f.monsters.forEach(function(m){known[nkey(m.name)]=f.name;});});
+      var dup=good.filter(function(m){return known[nkey(m.name)];}).length;
+      var keep=CUSTOM.filter(function(f){return f.name!==file.name;});
+      CUSTOM=keep.concat([{name:file.name,monsters:good}]);
+      if(!saveCustom()){CUSTOM=keep;done('File too large for this device storage. Nothing was changed.');return;}
+      var bk={};BOOT_BASE.forEach(function(m){bk[nkey(m.name)]=1;});
+      var rep=good.filter(function(m){return bk[nkey(m.name)];}).length;
+      alert('Loaded '+good.length+' stat blocks from '+file.name+':\n'+rep+' replace built-in monsters\n'+(good.length-rep)+' are new'+(dup?'\n'+dup+' also in another of your files (this newest file wins)':'')+(bad?'\n'+bad+' skipped (missing name, id, AC, HP or abilities)':'')+'\n\nThe app will now reload.');
+      location.reload();
+    }catch(e){done('That file is not a valid monster file. Nothing was changed.');}
+  };
+  r.readAsText(file);
+}
+var BOOT_BASE=[];
+fetch('monsters.json').then(function(r){return r.json();}).then(function(j){BOOT_BASE=j.monsters;BUILTIN=j.monsters.length;boot(mergeMon(j.monsters));}).catch(function(){
   document.body.insertAdjacentHTML('afterbegin','<p style="padding:20px">Could not load monsters.json. Open the app once with an internet connection.</p>');
 });
 if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
