@@ -404,13 +404,6 @@ function acHTML(c){var e=effAC(c);return e!==+c.ac?'<b class="em">'+e+'</b> <s>'
 var NORX=['Incapacitated','Slowed','Confused','Open Hand'];
 function rxBlocked(c){return c.conds.some(function(x){return NORX.indexOf(x)>=0||CAUSE.indexOf(x)>=0;});}
 function ppOf(c){if(c.kind==='pc'){var l=libOf(c);return l&&l.pp!=null?l.pp:null;}var r=/passive perception\s*(\d+)/.exec(monLine(c,/^sens/i));return r?+r[1]:null;}
-function svFlags(c){
-  var has=function(x){return c.conds.indexOf(x)>=0;},o=[];
-  if(has('Paralyzed')||has('Stunned')||has('Unconscious')||has('Petrified'))return ['STR/DEX saves auto-fail'];
-  if(has('Restrained'))o.push('DEX saves disadv.');
-  c.conds.forEach(function(x){var f=(SPX[x]||{}).sv;if(f)o.push((f[0]==='all'?'All':AB[f[0]])+' saves '+f[1]);});
-  return o;
-}
 // Save DCs a player sets (8 + proficiency + ability). One line per class, so multiclass characters list each.
 var CDC={artificer:['int','Spells'],bard:['cha','Spells'],cleric:['wis','Spells'],druid:['wis','Spells'],paladin:['cha','Spells'],ranger:['wis','Spells'],sorcerer:['cha','Spells'],warlock:['cha','Spells'],wizard:['int','Spells'],monk:['wis','Monk features',2],rogue:['dex','Cunning Strike',5]};
 var SDC=[[/eldritch/,'int','Spells'],[/arcane/,'int','Spells'],[/battle/,'str/dex','Maneuvers'],[/rune/,'con','Runes']];
@@ -734,8 +727,7 @@ function offHTML(c){
   if(c.hp<=0||isPcDead(c))return '';
   var t=[],pp=ppOf(c),df=ui.sel[c.id]?defs(c):null;
   t.push(rxBlocked(c)?'<span class="rxu">No reactions</span>':'<button class="rxb'+(c.rx?' used':'')+'" data-act="rx" title="Tap when the reaction is used; it resets on its turn">'+(c.rx?'Reaction used':'Reaction ready')+'</button>');
-  if(pp!=null)t.push('<span>PP '+pp+'</span>');
-  svFlags(c).forEach(function(f){t.push('<span class="b">'+esc(f)+'</span>');});
+  if(pp!=null)t.push('<span title="Passive Perception">\u{1F441} '+pp+'</span>');
   if(df)[['Res',df.res],['Imm',df.imm],['Vuln',df.vul]].forEach(function(x){if(x[1].length)t.push('<span>'+x[0]+': '+esc(uniq(x[1]).join(', '))+'</span>');});
   return '<div class="off dmonly">'+t.join('')+'</div>';
 }

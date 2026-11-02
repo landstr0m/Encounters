@@ -548,7 +548,7 @@ def off_turn_info_and_dc(b):
              saves={"str": -1, "dex": 5, "con": 1, "int": 0, "wis": 1, "cha": 6}, saveProf=["dex", "cha"])
     a.e(f"findC({m}).init=20;findC({p}).init=5;findC({m}).conds.push('3/4 cover');renderBoard()")
     check("20" in a.pg.inner_text(f'tr[data-id="{m}"] .acb'), "row shows current AC, not base")
-    check("PP 9" in a.pg.inner_text(f'tr[data-id="{m}"]'), "monster passive Perception on row")
+    check("\U0001F441 9" in a.pg.inner_text(f'tr[data-id="{m}"]'), "monster passive Perception on row")
     a.click(f'tr[data-id="{m}"] [data-act="rx"]')
     eq(a.c(m).get("rx"), True, "reaction marked used")
     a.click('[data-act="next"]')
