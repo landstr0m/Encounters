@@ -597,6 +597,34 @@ def legendary_and_auto_expiry(b):
     eq(a.errors, [], "errors:")
 
 
+@test
+def concentration_links(b):
+    a = App(b)
+    g = a.mon("mm-goblin-warrior", 2); p = a.pc("Cleric"); q = a.pc("Wizard")
+    a.e(f"findC({p}).init=20;findC({q}).init=15;findC({g[0]}).init=10;findC({g[1]}).init=5;renderBoard()")
+    a.click('[data-act="next"]')  # Cleric casts Bless on both players
+    a.select(p, q); a.status("Blessed", search=True)
+    check("Concentrating" in a.c(p)["conds"], "caster gets Concentrating")
+    check("(Cleric)" in a.pg.inner_text(f'tr[data-id="{q}"]'), "chip names the caster")
+    a.click('[data-act="next"]')  # Wizard hastes himself, then is knocked out later
+    a.select(q); a.status("Hasted", search=True)
+    a.select(g[0], g[1]); a.status("Slowed", search=True)  # second concentration spell replaces Haste
+    eq(("Hasted" in a.c(q)["conds"], "Lethargic" in a.c(q)["conds"]), (False, True), "new concentration ends Haste, Lethargic follows")
+    a.click(f'tr[data-id="{p}"] [data-act="cond"][data-c="Concentrating"]')
+    eq(["Blessed" in a.c(x)["conds"] for x in (p, q)], [False, False], "dropping concentration removes Bless")
+    a.e(f"findC({q}).hp=0;renderBoard()")
+    eq(["Slowed" in a.c(x)["conds"] for x in g], [False, False], "caster at 0 HP drops Slow")
+    eq(a.errors, [], "errors:")
+
+
+@test
+def lair_saved_with_encounter(b):
+    a = App(b)
+    a.e("addMon(MON.find(function(m){return (m.leg||[]).length}).id,1);S.lair=true;ui.encName='Lair fight';ui.encNote='';encSave();S.list=[];S.lair=false;encLoad(S.enc[0],false)")
+    eq(a.e("S.lair"), True, "loading restores In lair")
+    eq(a.errors, [], "errors:")
+
+
 def layout_case(b, w, h):
     a = App(b, w, h)
     a.mon("mm-skeleton", 3); a.pc("Hero")
