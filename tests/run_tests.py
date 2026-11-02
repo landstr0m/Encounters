@@ -539,6 +539,35 @@ def simpler_screens(b):
     check(a.pg.query_selector('[data-k="maxdn"]'), "More shows them")
 
 
+@test
+def off_turn_info_and_dc(b):
+    a = App(b)
+    m = a.mon("mm-goblin-warrior")[0]
+    p = a.pc("Bard", abil={"str": 8, "dex": 14, "con": 12, "int": 10, "wis": 12, "cha": 17}, pp=13,
+             parsed=[{"class": "bard", "subclass": "", "level": 5}, {"class": "rogue", "subclass": "arcane trickster", "level": 3}],
+             saves={"str": -1, "dex": 5, "con": 1, "int": 0, "wis": 1, "cha": 6}, saveProf=["dex", "cha"])
+    a.e(f"findC({m}).init=20;findC({p}).init=5;findC({m}).conds.push('3/4 cover');renderBoard()")
+    check("20" in a.pg.inner_text(f'tr[data-id="{m}"] .acb'), "row shows current AC, not base")
+    check("PP 9" in a.pg.inner_text(f'tr[data-id="{m}"]'), "monster passive Perception on row")
+    a.click(f'tr[data-id="{m}"] [data-act="rx"]')
+    eq(a.c(m).get("rx"), True, "reaction marked used")
+    a.click('[data-act="next"]')
+    eq(a.c(m).get("rx"), False, "reaction resets on own turn")
+    a.e(f"findC({m}).conds.push('Stunned');renderBoard()")
+    check("No reactions" in a.pg.inner_text(f'tr[data-id="{m}"]'), "stunned: no reactions")
+    a.click('[data-act="next"]')
+    t = a.pg.inner_text("#turn")
+    check("DC 14" in t and "+6 to hit" in t and "DC 11" in t, "multiclass DCs: bard 8+3+3, arcane trickster 8+3+0")
+    check("Saves" in t, "player card shows saves")
+    a.click('#turn [data-act="tcol"]')
+    check("+6 to hit" not in a.pg.inner_text("#turn"), "Hide details hides the player card body")
+    a.click('#turn [data-act="tcol"]')
+    check("+6 to hit" in a.pg.inner_text("#turn"), "Show details brings it back")
+    a.click(f'tr[data-id="{m}"] .acb')
+    eq((a.e("S.tab"), a.e("S.edit")), ("edit", m), "tapping AC opens Edit for base AC")
+    eq(a.errors, [], "errors:")
+
+
 def layout_case(b, w, h):
     a = App(b, w, h)
     a.mon("mm-skeleton", 3); a.pc("Hero")

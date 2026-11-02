@@ -139,6 +139,13 @@ tr.r.down{opacity:.8}
 tr.dead td{font-size:.85rem;color:var(--muted);padding:4px 8px;border-top:1px solid var(--line)}
 tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 0}
 .c-in,.c-ac{width:66px;text-align:center}
+.acb{min-height:40px;width:100%;padding:0 4px;font-family:var(--display);font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums;background:transparent}
+.acb s,.acp s{font-size:.7em;color:var(--muted);margin-left:4px;font-weight:400}.acb .em,.acp .em{color:var(--accent)}
+.off{display:flex;flex-wrap:wrap;gap:4px;margin:3px 0;align-items:center}
+.off span,.off button{font-size:.72rem;font-weight:600;padding:1px 7px;border-radius:999px;border:1px solid var(--line);min-height:0;line-height:1.5}
+.off .b,.off .rxu,.mini .rxu{color:var(--bad);border-color:var(--bad)}
+.rxb{background:color-mix(in srgb,var(--ok) 14%,var(--surface));border-color:var(--ok)!important}.rxb.used{background:transparent;color:var(--muted);text-decoration:line-through;border-color:var(--line)!important}
+.a.pcs .sv{font-size:1rem;margin:2px 6px 2px 0}
 .c-hp{width:170px}
 .c-i{width:92px;white-space:nowrap;text-align:right}
 .num{width:54px;text-align:center;font-family:var(--display);font-size:1.3rem;font-weight:700;padding:0;min-height:40px}
@@ -392,6 +399,32 @@ var COMMON=SPELLS.slice(0,16).map(function(x){return x[0];});
 var EXCL=[['Half cover','3/4 cover'],['Raging','Concentrating'],['Enlarged','Reduced'],['Hasted','Lethargic'],['Stunned','Stun saved']];
 var ZERO=['Grappled','Restrained','Paralyzed','Petrified','Unconscious'];
 function effAC(c){var a=+c.ac,mn=0;c.conds.forEach(function(x){var o=SPX[x];if(o){a+=o.ac||0;if(o.min>mn)mn=o.min;}});return Math.max(a,mn);}
+// Off-turn info: current AC (base struck through when modified), reaction, passive Perception, save effects from statuses.
+function acHTML(c){var e=effAC(c);return e!==+c.ac?'<b class="em">'+e+'</b> <s>'+c.ac+'</s>':''+e;}
+var NORX=['Incapacitated','Slowed','Confused','Open Hand'];
+function rxBlocked(c){return c.conds.some(function(x){return NORX.indexOf(x)>=0||CAUSE.indexOf(x)>=0;});}
+function ppOf(c){if(c.kind==='pc'){var l=libOf(c);return l&&l.pp!=null?l.pp:null;}var r=/passive perception\s*(\d+)/.exec(monLine(c,/^sens/i));return r?+r[1]:null;}
+function svFlags(c){
+  var has=function(x){return c.conds.indexOf(x)>=0;},o=[];
+  if(has('Paralyzed')||has('Stunned')||has('Unconscious')||has('Petrified'))return ['STR/DEX saves auto-fail'];
+  if(has('Restrained'))o.push('DEX saves disadv.');
+  c.conds.forEach(function(x){var f=(SPX[x]||{}).sv;if(f)o.push((f[0]==='all'?'All':AB[f[0]])+' saves '+f[1]);});
+  return o;
+}
+// Save DCs a player sets (8 + proficiency + ability). One line per class, so multiclass characters list each.
+var CDC={artificer:['int','Spells'],bard:['cha','Spells'],cleric:['wis','Spells'],druid:['wis','Spells'],paladin:['cha','Spells'],ranger:['wis','Spells'],sorcerer:['cha','Spells'],warlock:['cha','Spells'],wizard:['int','Spells'],monk:['wis','Monk features',2],rogue:['dex','Cunning Strike',5]};
+var SDC=[[/eldritch/,'int','Spells'],[/arcane/,'int','Spells'],[/battle/,'str/dex','Maneuvers'],[/rune/,'con','Runes']];
+function pcDCs(l){
+  if(!l)return [];var pb=pcPb(l),ab=l.abil||{},out=[];
+  if(l.dc)return [{dc:+l.dc,what:'Set by hand',hit:null}];
+  var md=function(k){var v=k==='str/dex'?Math.max(ab.str||0,ab.dex||0):ab[k];return v?Math.floor((v-10)/2):null;};
+  (l.parsed||[]).forEach(function(x){
+    var C=[],b=CDC[x.class];if(b&&(x.level||0)>=(b[2]||1))C.push(b);
+    SDC.forEach(function(s){if(s[0].test(x.subclass||'')&&(x.level||0)>=3)C.push(s.slice(1));});
+    C.forEach(function(r){var m=md(r[0]);out.push({dc:m==null?null:8+pb+m,hit:r[1]==='Spells'&&m!=null?pb+m:null,what:x.class.charAt(0).toUpperCase()+x.class.slice(1)+' '+r[1].toLowerCase()+' ('+r[0].toUpperCase()+')'});});
+  });
+  return out;
+}
 function effSpeed(c,sp){
   var add=0,mul=1,zero=false;
   c.conds.forEach(function(x){var o=SPX[x];if(ZERO.indexOf(x)>=0||(o&&o.zero))zero=true;if(o){add+=o.spd||0;mul*=o.mul||1;}});
@@ -442,6 +475,7 @@ function nextTurn(){
   var r=stepFrom(O,idx);if(!r)return;
   if(idx<0)S.round=1;else S.round+=r.wrap;
   S.turnId=O[r.i].id;
+  O[r.i].rx=false;
 }
 function nextId(){
   var O=order();var idx=O.findIndex(function(c){return c.id===S.turnId;});
@@ -597,6 +631,7 @@ function tokHTML(c,isNext){
   if(isPcDead(c))tags.unshift('<span class="dn">Dead</span>');
   else if(c.hp<=0)tags.unshift('<span class="dn">'+(c.kind==='pc'?'Down':'Dead')+'</span>');
   else if(c.kind==='mon'&&c.hp*2<=c.max)tags.unshift('<span class="bl">Bloodied</span>');
+  if(!ui.present&&!down){tags.unshift('<span class="acp">AC '+acHTML(c)+'</span>');if(c.rx||rxBlocked(c))tags.push('<span class="rxu">No reaction</span>');}
   var showBar=c.kind==='pc'||!ui.present;
   return '<div class="tok '+c.kind+(now?' now':'')+(isNext?' next':'')+(down?' down':'')+(ui.sel[c.id]&&!ui.present?' sel':'')+'">'+
     '<div class="lab">'+(now?'Up now':(isNext?'Next':''))+'</div>'+
@@ -640,14 +675,26 @@ function renderTurn(){
   var m=c.kind==='mon'?MON.find(function(x){return x.id===c.monId;}):null;
   var chips=c.conds.map(function(x){return '<button class="chip" data-act="cond" data-c="'+esc(x)+'" title="Remove '+esc(x)+'">'+esc(x)+' ×</button>';}).join('');
   var h='<div class="th"><span class="tn">'+esc(c.name)+'</span>'+
-    '<span class="st"><i>AC</i>'+(effAC(c)!==+c.ac?'<s>'+c.ac+'</s> <b class="em">'+effAC(c)+'</b>':c.ac)+'</span><span class="st"><i>HP</i>'+c.hp+'/'+c.max+(c.base!=null?' (max \u2212'+(c.base-c.max)+')':'')+(c.temp>0?' +'+c.temp:'')+'</span>'+
-    (m?'<span class="st"><i>SPEED</i>'+(effSpeed(c,m.speed)!==m.speed?'<s>'+esc(m.speed)+'</s> <b class="em">'+esc(effSpeed(c,m.speed))+'</b>':esc(m.speed))+'</span><span class="st"><i>CR</i>'+esc(m.cr)+'</span>':'<span class="st muted">'+(c.kind==='pc'?'Player turn':'Stat block not loaded')+'</span>')+
-    '<span class="sp"></span>'+'<button data-act="tedit">Edit</button>'+(m?'<button data-act="tinfo">Full stat block</button>':'')+
-    '<button data-act="tcol">'+(ui.cardOpen?'Hide':'Show')+'</button></div>';
+    '<span class="st"><i>AC</i>'+(effAC(c)!==+c.ac?'<s>'+c.ac+'</s> <b class="em">'+effAC(c)+'</b>':c.ac)+'</span><span class="st"><i>HP</i>'+c.hp+'/'+c.max+(c.base!=null?' (max \u2212'+(c.base-c.max)+')':'')+(c.temp>0?' +'+c.temp:'')+'</span>';
+  var l=libOf(c),dcs=pcDCs(l),X=c.x||[],dv=uniq(dcs.map(function(d){return d.dc;}).filter(function(v){return v!=null;}));
+  if(dv.length)h+='<span class="st"><i>DC</i>'+dv.join('/')+'</span>';
+  h+=(m?'<span class="st"><i>SPEED</i>'+(effSpeed(c,m.speed)!==m.speed?'<s>'+esc(m.speed)+'</s> <b class="em">'+esc(effSpeed(c,m.speed))+'</b>':esc(m.speed))+'</span><span class="st"><i>CR</i>'+esc(m.cr)+'</span>':'<span class="st muted">'+(c.kind==='pc'?'Player turn':'Stat block not loaded')+'</span>');
+  // Player card body: DCs, saves, defences and traits (so Show/Hide has something to show).
+  var pb='';
+  if(l){
+    pb+=dcs.map(function(d){return '<div class="a"><b>'+(d.dc==null?'DC ?':'DC '+d.dc)+(d.hit!=null?' \u00b7 '+sgn(d.hit)+' to hit':'')+'</b>'+esc(d.what)+'</div>';}).join('');
+    var sv=AB.map(function(a,i){return saveOf(c,i)||'';}).join('');
+    var df=defs(c),dl=[['Resists',df.res],['Immune',df.imm],['Vulnerable',df.vul],['Cond. immune',df.cimm]].filter(function(x){return x[1].length;}).map(function(x){return x[0]+' '+uniq(x[1]).join(', ');}).join(' \u00b7 ');
+    pb='<div class="acts2">'+pb+(sv?'<div class="a pcs"><b>Saves</b>'+sv+'</div>':'')+(dl||ppOf(c)!=null?'<div class="a"><b>'+(ppOf(c)!=null?'Passive Perception '+ppOf(c):'Defences')+'</b>'+esc(dl)+'</div>':'')+'</div>';
+    if((l.traits||[]).length)pb+='<details'+(ui.traitsOpen?' open':'')+'><summary>Traits ('+l.traits.length+')</summary>'+l.traits.map(function(t){return '<p><b>'+esc(t.name)+'.</b> '+esc(t.text)+'</p>';}).join('')+'</details>';
+  }
+  var body=!!(m||X.length||pb);
+  h+='<span class="sp"></span>'+'<button data-act="tedit">Edit</button>'+(m?'<button data-act="tinfo">Full stat block</button>':'')+(l?'<button data-act="tinfo">Character</button>':'')+
+    (body?'<button data-act="tcol" aria-expanded="'+ui.cardOpen+'">'+(ui.cardOpen?'Hide details':'Show details')+'</button>':'')+'</div>';
   if(chips)h+='<div class="tc">'+chips+'</div>';
   h+=fxHTML(c,'fxs');
   h+=dsHTML(c);
-  var X=c.x||[];
+  if(ui.cardOpen&&pb)h+=pb;
   if(ui.cardOpen&&(m||X.length)){
     var acts=[];
     if(m&&!c.hideBase)[['a','',m.actions],['b','Bonus',m.bonus],['r','Reaction',m.react]].forEach(function(g){(g[2]||[]).forEach(function(a,i){acts.push([g[0]+i,g[1],a]);});});
@@ -683,6 +730,15 @@ function saveOf(c,i){
   var note=notes.map(function(t){return '<small'+(/^(\+|adv)/.test(t)?'':' class="b"')+'>'+t+'</small>';}).join('');
   return '<span class="sv'+(r?' svp':'')+'" title="'+(r?'Proficient':'Ability modifier')+'">'+AB[i]+' '+sgn(n)+note+'</span>';
 }
+function offHTML(c){
+  if(c.hp<=0||isPcDead(c))return '';
+  var t=[],pp=ppOf(c),df=ui.sel[c.id]?defs(c):null;
+  t.push(rxBlocked(c)?'<span class="rxu">No reactions</span>':'<button class="rxb'+(c.rx?' used':'')+'" data-act="rx" title="Tap when the reaction is used; it resets on its turn">'+(c.rx?'Reaction used':'Reaction ready')+'</button>');
+  if(pp!=null)t.push('<span>PP '+pp+'</span>');
+  svFlags(c).forEach(function(f){t.push('<span class="b">'+esc(f)+'</span>');});
+  if(df)[['Res',df.res],['Imm',df.imm],['Vuln',df.vul]].forEach(function(x){if(x[1].length)t.push('<span>'+x[0]+': '+esc(uniq(x[1]).join(', '))+'</span>');});
+  return '<div class="off dmonly">'+t.join('')+'</div>';
+}
 function rowHTML(c){
   var pct=c.max?Math.max(0,Math.min(100,c.hp/c.max*100)):0;
   var lvl=pct>50?'ok':(pct>25?'warn':'bad');
@@ -692,8 +748,8 @@ function rowHTML(c){
   var ph=c.kind==='pc'&&c.ib!=null?'d20'+sgn(c.ib):'—';
   return '<tr class="r'+(c.id===S.turnId?' turn':'')+(down?' down':'')+(ui.sel[c.id]?' sel':'')+'" data-id="'+c.id+'">'+
    '<td class="c-in"><input class="num" type="number" inputmode="numeric" data-act="init" placeholder="'+esc(ph)+'" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
-   '<td><span class="name">'+esc(c.name)+'</span>'+(c.kind==='pc'?'':'<span class="tag">CR '+esc(c.cr)+'</span>')+(ui.sv>=0?(saveOf(c,ui.sv)||''):'')+'<div class="conds">'+chips+'</div>'+(ui.sel[c.id]?fxHTML(c):'')+'</td>'+
-   '<td class="c-ac"><input class="num" type="number" inputmode="numeric" data-act="ac" value="'+c.ac+'" aria-label="Armor class for '+esc(c.name)+'"></td>'+
+   '<td><span class="name">'+esc(c.name)+'</span>'+(c.kind==='pc'?'':'<span class="tag">CR '+esc(c.cr)+'</span>')+(ui.sv>=0?(saveOf(c,ui.sv)||''):'')+offHTML(c)+'<div class="conds">'+chips+'</div>'+(ui.sel[c.id]?fxHTML(c):'')+'</td>'+
+   '<td class="c-ac"><button class="acb" data-act="edit" title="Current AC'+(effAC(c)!==+c.ac?' (base '+c.ac+')':'')+'. Tap to set base AC" aria-label="AC '+effAC(c)+' for '+esc(c.name)+', edit">'+acHTML(c)+'</button></td>'+
    '<td class="c-hp"><div class="hpnum"><span class="cur">'+c.hp+'</span><span class="max">/ '+c.max+'</span>'+(c.base!=null?'<span class="mred">max \u2212'+(c.base-c.max)+'</span>':'')+(c.temp>0?'<span class="temp">+'+c.temp+'</span>':'')+(down?'<span class="state">'+(pcDead?'Dead':'Down')+'</span>':'')+'</div>'+
      '<div class="track"><div class="fill '+lvl+'" style="width:'+pct+'%"></div></div>'+(pcDead?'<div class="dsd">Heal 1+ HP to revive</div>':dsHTML(c))+'</td>'+
    '<td class="c-i"><button class="ib" data-act="edit" aria-label="Edit '+esc(c.name)+'" title="Edit">✎</button><button class="ib" data-act="info" aria-label="Stat block for '+esc(c.name)+'">ⓘ</button></td>'+
@@ -918,7 +974,8 @@ function pcSheetHTML(c){
   return '</div><h3>Character sheet</h3><div class="muted">Saved with '+esc(l.name)+' for future sessions.'+(l.k?' Update from Kanka replaces ability scores and saves; defences you add here are kept.':'')+'</div>'+
    '<div class="eg ab6">'+AK.map(function(k){var v=ab[k];return '<label><span>'+k.toUpperCase()+' <span data-mod="'+k+'">'+(v==null?'':sgn(Math.floor((v-10)/2)))+'</span></span><input data-pe="abil" data-k="'+k+'" type="number" inputmode="numeric" min="1" max="30" value="'+(v==null?'':v)+'"></label>';}).join('')+'</div>'+
    '<div class="svp6"><b>Save proficiencies</b>'+AK.map(function(k){return '<label><input type="checkbox" data-pe="prof" data-k="'+k+'"'+(pf.indexOf(k)>=0?' checked':'')+'>'+k.toUpperCase()+'</label>';}).join('')+
-   '<label>Prof. bonus <input data-pe="pb" type="number" inputmode="numeric" min="2" max="6" value="'+pcPb(l)+'" style="width:4em"></label></div>'+
+   '<label>Prof. bonus <input data-pe="pb" type="number" inputmode="numeric" min="2" max="6" value="'+pcPb(l)+'" style="width:4em"></label>'+
+   '<label>Save DC <input data-pe="dc" type="number" inputmode="numeric" min="8" max="30" placeholder="auto" value="'+(l.dc||'')+'" style="width:4.5em" title="Blank = worked out from class, proficiency and ability"></label></div>'+
    '<div class="eg">'+DLBL.map(function(d){return '<label class="w">'+d[1]+'<input data-pe="'+d[0]+'" type="text" placeholder="'+(d[0]==='cimm'?'e.g. charmed, frightened':'e.g. fire, poison')+'" value="'+esc((l[d[0]]||[]).join(', '))+'"></label>';}).join('');
 }
 function pcSheetChange(t,c){
@@ -926,6 +983,7 @@ function pcSheetChange(t,c){
   if(f==='abil'){l.abil=l.abil||{};var n=t.value===''?null:Math.max(1,Math.min(30,Math.floor(+t.value)));l.abil[k]=n;if(n!=null)t.value=n;
     var md=dr.querySelector('[data-mod="'+k+'"]');if(md)md.textContent=n==null?'':sgn(Math.floor((n-10)/2));}
   else if(f==='prof'){l.saveProf=AK.filter(function(a){var b=dr.querySelector('[data-pe="prof"][data-k="'+a+'"]');return b&&b.checked;});}
+  else if(f==='dc'){var dc=Math.floor(+t.value);l.dc=dc>=8&&dc<=30?dc:null;if(!l.dc)t.value='';}
   else if(f==='pb'){var pb=Math.floor(+t.value);if(pb>=2&&pb<=6)l.pb=pb;else t.value=pcPb(l);}
   else{
     var ok=f==='cimm'?CONDS.concat(['Exhaustion']).map(function(x){return x.toLowerCase();}):DTYPES;
@@ -946,7 +1004,7 @@ function editHTML(){
   var TY=[['a','Action'],['b','Bonus action'],['r','Reaction'],['t','Trait']];
   return '<div class="ed"><h2 id="edh">'+esc(c.name)+'</h2>'+(m?'<div class="muted">'+esc(m.name)+' · CR '+esc(m.cr)+' · stat block HP '+esc(m.hp)+'</div>':'')+
    '<div class="eg"><label class="w">Display name<input data-ed="name" type="text" maxlength="40" value="'+esc(c.name)+'"></label>'+
-   '<label>AC<input data-ed="ac" type="number" inputmode="numeric" min="0" value="'+c.ac+'"></label>'+
+   '<label>Base AC<input data-ed="ac" type="number" inputmode="numeric" min="0" value="'+c.ac+'"></label>'+
    '<label>Initiative<input data-ed="init" type="number" inputmode="numeric" value="'+(c.init==null?'':c.init)+'"></label>'+
    '<label>Max HP<input data-ed="max" type="number" inputmode="numeric" min="1" value="'+c.max+'"></label>'+
    '<label>Current HP<input data-ed="hp" type="number" inputmode="numeric" min="0" value="'+c.hp+'"></label>'+
@@ -1040,7 +1098,7 @@ $('#turn').addEventListener('click',function(e){
   var c=findC(S.turnId);if(!c)return;
   if(c.kind==='fx'){if(a==='fxvis')c.vis=!c.vis;else if(a==='fxrm')rmComb(c);save();renderBoard();return;}
   if(a==='tcol'){ui.cardOpen=!ui.cardOpen;}
-  else if(a==='tinfo'){S.stat=c.monId;S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
+  else if(a==='tinfo'){S.stat=c.kind==='mon'?c.monId:'pc';S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
   else if(a==='tedit'){S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
   else if(a==='spent'){c.spent=c.spent||{};c.spent[b.dataset.i]=!c.spent[b.dataset.i];}
   else if(a==='cond'){snap('remove '+b.dataset.c);var i=c.conds.indexOf(b.dataset.c);if(i>=0)c.conds.splice(i,1);incSync(c,false);}
@@ -1075,6 +1133,7 @@ $('#tbl').addEventListener('click',function(e){
   if(act==='cond'){snap('remove '+b.dataset.c);var i=c.conds.indexOf(b.dataset.c);if(i>=0)c.conds.splice(i,1);incSync(c,false);save();renderBoard();return;}
   if(act&&act.indexOf('ds')===0){snap('death save');dsAct(c,act,b);save();renderBoard();return;}
   if(act==='info'){S.stat=c.kind==='mon'?c.monId:'pc';S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
+  if(act==='rx'){snap('reaction');c.rx=!c.rx;save();renderBoard();return;}
   if(act==='edit'){S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
   if(ui.sel[c.id])delete ui.sel[c.id];else ui.sel[c.id]=true;
   ui.confirmRemove=false;ui.menu=false;ui.pend={};
@@ -1145,7 +1204,7 @@ padEl.addEventListener('click',function(e){
       T.forEach(function(c){
         var i=c.conds.indexOf(x);
         if(ui.pend[x]&&condBlocked(c,x)){skip.push(esc(c.name)+' ('+esc(x)+')');return;}
-        if(ui.pend[x]){if(i<0)c.conds.push(x);}
+        if(ui.pend[x]){if(i<0){c.conds.push(x);if(x==='Shield')c.rx=true;}}
         else if(i>=0){c.conds.splice(i,1);if(x==='Dead'&&c.kind==='pc'&&c.hp<=0&&c.ds&&c.ds.f>=3)c.ds.f=2;}
       });
     });
