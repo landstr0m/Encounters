@@ -568,6 +568,35 @@ def off_turn_info_and_dc(b):
     eq(a.errors, [], "errors:")
 
 
+@test
+def legendary_and_auto_expiry(b):
+    a = App(b)
+    d = a.e("MON.find(function(m){return /in Lair/.test(((m.leg||[])[0]||['',''])[1])}).id")
+    m = a.mon(d)[0]; p = a.pc("Hero"); q = a.pc("Mage")
+    a.e(f"findC({m}).init=20;findC({p}).init=15;findC({q}).init=10;renderBoard()")
+    a.click('[data-act="next"]')
+    check(not a.pg.query_selector('#turn [data-act="laspend"]'), "no legendary prompt on its own turn")
+    n = a.e(f"legOf(findC({m})).la")
+    a.click('[data-act="lair"]')
+    eq(a.e(f"legOf(findC({m})).la"), n + 1, "In lair adds a use")
+    a.click('[data-act="next"]')
+    check(not a.pg.query_selector('#turn [data-act="laspend"]'), "no prompt right after its own turn")
+    a.select(m); a.status("Shield", search=True)
+    a.select(m); a.status("Guiding Bolt", search=True)
+    a.click('[data-act="next"]')
+    a.click('#turn [data-act="laspend"]')
+    eq(a.c(m)["la"], 1, "Use one spends a legendary action")
+    a.click(f'tr[data-id="{m}"] .pip[data-k="lr"].on')
+    eq(a.c(m)["lr"], 1, "pip spends Legendary Resistance")
+    a.click('[data-act="next"]')
+    eq((a.c(m)["conds"], a.c(m)["la"], a.c(m)["lr"]), (["Guiding Bolt"], 0, 1), "Shield ends and actions refill on its turn; LR does not")
+    a.click('[data-act="next"]'); a.click('[data-act="next"]')
+    eq(a.c(m)["conds"], [], "Guiding Bolt ends at the end of the caster's next turn")
+    a.click('[data-act="undo"]')
+    eq(a.c(m)["conds"], ["Guiding Bolt"], "undo brings it back")
+    eq(a.errors, [], "errors:")
+
+
 def layout_case(b, w, h):
     a = App(b, w, h)
     a.mon("mm-skeleton", 3); a.pc("Hero")

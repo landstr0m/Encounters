@@ -8,7 +8,7 @@ Newest first. Run `python tests/run_tests.py` after every change (see the README
 |---|-----|-------|-----|
 | 7 | Show/Hide on the turn card did nothing on a player's turn | Player cards had no collapsible content, so the toggle changed nothing | Player cards now have a body (DCs, saves, defences, traits); the button reads Show/Hide details and only appears when there is something to hide |
 
-Added: current AC on rows and tokens (base AC set via Edit), reaction tracking, passive Perception, status save effects, player save DCs. Test battery now 36 tests, all passing.
+Added: current AC on rows and tokens (base AC set via Edit), reaction tracking, passive Perception, status save effects, player save DCs. Later the same day: legendary action/resistance pips with an In lair switch and turn-card reminders; short effects (Shield, Dodge, Guiding Bolt and others) now expire automatically; start/end-of-turn effect reminders. Removed the duplicated save-effect tags from rows (the Saves view already shows them). Test battery now 37 tests, all passing.
 
 ## 2026-11-01 — pre-live-test polish
 

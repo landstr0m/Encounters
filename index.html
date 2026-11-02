@@ -145,6 +145,12 @@ tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 
 .off span,.off button{font-size:.72rem;font-weight:600;padding:1px 7px;border-radius:999px;border:1px solid var(--line);min-height:0;line-height:1.5}
 .off .b,.off .rxu,.mini .rxu{color:var(--bad);border-color:var(--bad)}
 .rxb{background:color-mix(in srgb,var(--ok) 14%,var(--surface));border-color:var(--ok)!important}.rxb.used{background:transparent;color:var(--muted);text-decoration:line-through;border-color:var(--line)!important}
+.leg{display:inline-flex;align-items:center;gap:2px}
+.pip{width:14px;height:14px;min-height:0!important;padding:0!important;border-radius:3px!important;transform:rotate(45deg);border:2px solid var(--accent)!important;background:transparent;margin:0 2px}
+.pip.on{background:var(--accent)}
+.legr{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin:0 0 6px;padding:5px 8px;border-radius:8px;border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+.legr button{min-height:30px;padding:0 10px;font-size:.8rem}.legr.tick{border-color:var(--warn,var(--accent));border-style:dashed}
+.gb.on{background:var(--accent);color:#fff}
 .a.pcs .sv{font-size:1rem;margin:2px 6px 2px 0}
 .c-hp{width:170px}
 .c-i{width:92px;white-space:nowrap;text-align:right}
@@ -401,6 +407,47 @@ var ZERO=['Grappled','Restrained','Paralyzed','Petrified','Unconscious'];
 function effAC(c){var a=+c.ac,mn=0;c.conds.forEach(function(x){var o=SPX[x];if(o){a+=o.ac||0;if(o.min>mn)mn=o.min;}});return Math.max(a,mn);}
 // Off-turn info: current AC (base struck through when modified), reaction, passive Perception, save effects from statuses.
 function acHTML(c){var e=effAC(c);return e!==+c.ac?'<b class="em">'+e+'</b> <s>'+c.ac+'</s>':''+e;}
+// Short effects that end on their own. s = start of its next turn, e = end of its next turn;
+// c* = same, but counted on the turn of whoever applied it (the creature whose turn it was).
+var EXP={'Shield':'s','Dodging':'s','Reckless':'s','Shocked':'s','Mocked':'e','Frostbitten':'e','Lethargic':'e','Commanded':'e',
+ 'Chilled':'cs','Stun saved':'cs','Open Hand':'cs','Guiding Bolt':'ce','Chill Touch':'ce','Starry Wisp':'ce','Mind Sliver':'ce'};
+function expSet(c,x){var k=EXP[x];if(!k)return;var src=k.charAt(0)==='c'?S.turnId:c.id;if(src==null)return;c.exp=c.exp||{};c.exp[x]={src:src,k:k.slice(-1),h:false};}
+// Runs as the turn passes from creature E to creature N; returns 'Name: effect' strings that ended.
+function expTick(E,N){
+  var gone=[];
+  S.list.forEach(function(c){if(!c.exp)return;Object.keys(c.exp).forEach(function(x){
+    var o=c.exp[x],i=c.conds.indexOf(x);if(i<0){delete c.exp[x];return;}
+    var end=(o.src===E&&o.k==='e'&&o.h)||(o.src===N&&o.k==='s');
+    if(end){c.conds.splice(i,1);delete c.exp[x];gone.push(c.name+': '+x);incSync(c,false);}
+    else if(o.src===N&&o.k==='e')o.h=true;
+  });});
+  return gone;
+}
+// Legendary actions (refill on its turn) and Legendary Resistance (per encounter). Counts follow the In lair switch.
+function legOf(c){
+  if(c.kind!=='mon')return null;var m=MON.find(function(x){return x.id===c.monId;});if(!m)return null;
+  var L=m.leg||[],u=L.find(function(t){return /^legendary action uses/i.test(t[0]);}),la=0,lr=0,r;
+  if(u){r=/^(\d+)(?:\s*\((\d+) in lair\))?/i.exec(u[1]);la=r?(S.lair&&r[2]?+r[2]:+r[1]):3;}else if(L.length)la=3;
+  var t=(m.traits||[]).find(function(x){return /^legendary resistance/i.test(x[0]);});
+  if(t){r=/(\d+)\/day(?:, or (\d+)\/day in lair)?/i.exec(t[0]);lr=r?(S.lair&&r[2]?+r[2]:+r[1]):3;}
+  return la||lr?{la:la,lr:lr,acts:L.filter(function(x){return x!==u;})}:null;
+}
+function pips(c,k,mx){var used=Math.min(mx,c[k]||0),h='';for(var i=0;i<mx;i++)h+='<button class="pip'+(i<mx-used?' on':'')+'" data-act="pip" data-k="'+k+'" aria-label="'+(i<mx-used?'Spend':'Restore')+' one"></button>';return h;}
+function legHTML(c){var g=legOf(c);if(!g)return '';
+  return (g.la?'<span class="leg" title="Legendary actions: refill at the start of its turn">LA '+pips(c,'la',g.la)+'</span>':'')+(g.lr?'<span class="leg" title="Legendary Resistance: per encounter">LR '+pips(c,'lr',g.lr)+'</span>':'');}
+// Turn-card reminders: legendary monsters with uses left (after another creature's turn), and start/end-of-turn effects.
+function remHTML(c){
+  var h='';
+  if(S.prevTurn!=null&&ui.legDis!==S.turnId)S.list.forEach(function(o){
+    var g=legOf(o);if(!g||!g.la||o.id===S.prevTurn||o.id===S.turnId||o.hp<=0||rxBlocked(o))return;var left=g.la-(o.la||0);if(left<=0)return;
+    h+='<div class="legr" data-id="'+o.id+'"><b>\u25C6 '+esc(o.name)+': '+left+' legendary action'+(left>1?'s':'')+' left</b> <span class="muted">'+esc(g.acts.map(function(a){return a[0];}).join(' \u00B7 '))+'</span>'+
+      '<button data-act="laspend" data-id="'+o.id+'">Use one</button><button data-act="ladis" aria-label="Dismiss">\u00D7</button></div>';
+  });
+  var st=[],en=[];c.conds.forEach(function(x){var t=FX[x]||'';if(/start of each of its turns|start of its turn|starts its turn/i.test(t))st.push(x);if(/end of each (of its )?turns?/i.test(t))en.push(x);});
+  if(st.length)h+='<div class="legr tick"><b>Start of turn:</b> '+st.map(function(x){return esc(x);}).join(', ')+' \u2014 roll damage or effect (rule text below)</div>';
+  if(en.length)h+='<div class="legr tick"><b>End of turn:</b> '+en.map(function(x){return esc(x);}).join(', ')+' \u2014 save or effect (see rule text)</div>';
+  return h;
+}
 var NORX=['Incapacitated','Slowed','Confused','Open Hand'];
 function rxBlocked(c){return c.conds.some(function(x){return NORX.indexOf(x)>=0||CAUSE.indexOf(x)>=0;});}
 function ppOf(c){if(c.kind==='pc'){var l=libOf(c);return l&&l.pp!=null?l.pp:null;}var r=/passive perception\s*(\d+)/.exec(monLine(c,/^sens/i));return r?+r[1]:null;}
@@ -467,8 +514,9 @@ function nextTurn(){
   var idx=O.findIndex(function(c){return c.id===S.turnId;});
   var r=stepFrom(O,idx);if(!r)return;
   if(idx<0)S.round=1;else S.round+=r.wrap;
-  S.turnId=O[r.i].id;
-  O[r.i].rx=false;
+  var E=S.turnId;S.prevTurn=idx<0?null:E;S.turnId=O[r.i].id;ui.legDis=null;
+  O[r.i].rx=false;O[r.i].la=0;
+  var gone=expTick(E,S.turnId);if(gone.length)toast('Ended: '+esc(gone.join(', ')));
 }
 function nextId(){
   var O=order();var idx=O.findIndex(function(c){return c.id===S.turnId;});
@@ -561,8 +609,8 @@ function typed(c,n,t){
 }
 function condBlocked(c,x){var d=defs(c).cimm;return (CIM[x]||[x.toLowerCase()]).some(function(k){return d.indexOf(k)>=0;});}
 // One-step undo: snapshot the encounter before any change made from the bar, pad, chips or death saves.
-function snap(label){ui.undo={label:label,s:JSON.stringify({list:S.list,round:S.round,turnId:S.turnId})};}
-function undo(){if(!ui.undo)return;var o=JSON.parse(ui.undo.s);S.list=o.list;S.round=o.round;S.turnId=o.turnId;toast('Undid: '+esc(ui.undo.label));ui.undo=null;pruneSel();finishPad();}
+function snap(label){ui.undo={label:label,s:JSON.stringify({list:S.list,round:S.round,turnId:S.turnId,prev:S.prevTurn})};}
+function undo(){if(!ui.undo)return;var o=JSON.parse(ui.undo.s);S.list=o.list;S.round=o.round;S.turnId=o.turnId;S.prevTurn=o.prev;toast('Undid: '+esc(ui.undo.label));ui.undo=null;pruneSel();finishPad();}
 function toast(h){var t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';t.setAttribute('role','status');document.body.appendChild(t);}
   t.innerHTML=h;t.classList.add('on');clearTimeout(toast.tm);toast.tm=setTimeout(function(){t.classList.remove('on');},6000);t.onclick=function(){t.classList.remove('on');};}
 function dmg(c,n){
@@ -624,7 +672,7 @@ function tokHTML(c,isNext){
   if(isPcDead(c))tags.unshift('<span class="dn">Dead</span>');
   else if(c.hp<=0)tags.unshift('<span class="dn">'+(c.kind==='pc'?'Down':'Dead')+'</span>');
   else if(c.kind==='mon'&&c.hp*2<=c.max)tags.unshift('<span class="bl">Bloodied</span>');
-  if(!ui.present&&!down){tags.unshift('<span class="acp">AC '+acHTML(c)+'</span>');if(c.rx||rxBlocked(c))tags.push('<span class="rxu">No reaction</span>');}
+  if(!ui.present&&!down){tags.unshift('<span class="acp">AC '+acHTML(c)+'</span>');if(c.rx||rxBlocked(c))tags.push('<span class="rxu">No reaction</span>');var lgo=legOf(c);if(lgo&&lgo.la)tags.push('<span>LA '+(lgo.la-(c.la||0))+'/'+lgo.la+'</span>');}
   var showBar=c.kind==='pc'||!ui.present;
   return '<div class="tok '+c.kind+(now?' now':'')+(isNext?' next':'')+(down?' down':'')+(ui.sel[c.id]&&!ui.present?' sel':'')+'">'+
     '<div class="lab">'+(now?'Up now':(isNext?'Next':''))+'</div>'+
@@ -685,6 +733,7 @@ function renderTurn(){
   h+='<span class="sp"></span>'+'<button data-act="tedit">Edit</button>'+(m?'<button data-act="tinfo">Full stat block</button>':'')+(l?'<button data-act="tinfo">Character</button>':'')+
     (body?'<button data-act="tcol" aria-expanded="'+ui.cardOpen+'">'+(ui.cardOpen?'Hide details':'Show details')+'</button>':'')+'</div>';
   if(chips)h+='<div class="tc">'+chips+'</div>';
+  if(!ui.present)h=remHTML(c)+h;
   h+=fxHTML(c,'fxs');
   h+=dsHTML(c);
   if(ui.cardOpen&&pb)h+=pb;
@@ -727,6 +776,7 @@ function offHTML(c){
   if(c.hp<=0||isPcDead(c))return '';
   var t=[],pp=ppOf(c),df=ui.sel[c.id]?defs(c):null;
   t.push(rxBlocked(c)?'<span class="rxu">No reactions</span>':'<button class="rxb'+(c.rx?' used':'')+'" data-act="rx" title="Tap when the reaction is used; it resets on its turn">'+(c.rx?'Reaction used':'Reaction ready')+'</button>');
+  var lg=legHTML(c);if(lg)t.push(lg);
   if(pp!=null)t.push('<span title="Passive Perception">\u{1F441} '+pp+'</span>');
   if(df)[['Res',df.res],['Imm',df.imm],['Vuln',df.vul]].forEach(function(x){if(x[1].length)t.push('<span>'+x[0]+': '+esc(uniq(x[1]).join(', '))+'</span>');});
   return '<div class="off dmonly">'+t.join('')+'</div>';
@@ -765,7 +815,7 @@ function renderTable(){
   seen.forEach(function(id){
     var g=groups[id],cg=id.indexOf('cg:')===0,m=cg?{name:g[0].cg}:MON.find(function(x){return x.id===id;});
     var alive=g.filter(function(c){return !isDead(c);}),dead=g.filter(isDead);
-    h+='<tr class="grp"><th colspan="5">'+esc(m?m.name:id)+' · '+alive.length+' alive'+(alive.length?'<button class="gb" data-act="selgrp" data-g="'+esc(id)+'">Select all</button>':'')+(cg?'':'<button class="gb" data-act="viewgrp" data-m="'+id+'">Stat block</button>')+'</th></tr>'+alive.map(rowHTML).join('');
+    h+='<tr class="grp"><th colspan="5">'+esc(m?m.name:id)+' · '+alive.length+' alive'+(alive.length?'<button class="gb" data-act="selgrp" data-g="'+esc(id)+'">Select all</button>':'')+(cg?'':'<button class="gb" data-act="viewgrp" data-m="'+id+'">Stat block</button>')+(legOf(g[0])?'<button class="gb'+(S.lair?' on':'')+'" data-act="lair" title="Legendary uses follow this (e.g. 3, or 4 in lair)">In lair: '+(S.lair?'yes':'no')+'</button>':'')+'</th></tr>'+alive.map(rowHTML).join('');
     if(dead.length){
       h+='<tr class="dead"><td colspan="5">Defeated: '+dead.map(function(c){return '<button data-act="revive" data-id="'+c.id+'" title="Restore at 1 HP">'+esc(c.name)+' ↺</button>';}).join('')+'<button data-act="purge" data-m="'+esc(id)+'">Remove defeated</button></td></tr>';
     }
@@ -1080,7 +1130,7 @@ $('#bar').addEventListener('click',function(e){
   else if(a==='saves'){ui.sv=ui.sv>=0?-1:ui.svLast;renderBar();renderTable();return;}
   else if(a==='present'){ui.present=!ui.present;if(ui.present)ui.drawer=false;document.body.classList.toggle('present',ui.present);try{sessionStorage.setItem('et-present',ui.present?'1':'0');}catch(e){}renderBoard();renderDrawer();return;}
   else if(a==='clear'){
-    if(ui.confirmClear){snap('clear all');S.list=[];S.turnId=null;S.round=1;S.envName=S.envNote='';ui.confirmClear=false;S.atTable={};ui.sel={};}else{ui.confirmClear=true;}
+    if(ui.confirmClear){snap('clear all');S.list=[];S.turnId=null;S.round=1;S.envName=S.envNote='';S.lair=false;S.prevTurn=null;ui.confirmClear=false;S.atTable={};ui.sel={};}else{ui.confirmClear=true;}
   }
   save();renderBoard();renderDrawer();
 });
@@ -1089,7 +1139,9 @@ $('#turn').addEventListener('click',function(e){
   var a=b.dataset.act;
   var c=findC(S.turnId);if(!c)return;
   if(c.kind==='fx'){if(a==='fxvis')c.vis=!c.vis;else if(a==='fxrm')rmComb(c);save();renderBoard();return;}
-  if(a==='tcol'){ui.cardOpen=!ui.cardOpen;}
+  if(a==='laspend'){var lc=findC(b.dataset.id);if(lc){snap('legendary');lc.la=(lc.la||0)+1;}}
+  else if(a==='ladis'){ui.legDis=S.turnId;}
+  else if(a==='tcol'){ui.cardOpen=!ui.cardOpen;}
   else if(a==='tinfo'){S.stat=c.kind==='mon'?c.monId:'pc';S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
   else if(a==='tedit'){S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
   else if(a==='spent'){c.spent=c.spent||{};c.spent[b.dataset.i]=!c.spent[b.dataset.i];}
@@ -1108,6 +1160,7 @@ $('#tbl').addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');
   var act=b?b.dataset.act:null;
   if(act==='start'){ui.drawer=true;S.tab='add';S.sub=b.dataset.s;ui.msg='';save();renderDrawer();return;}
+  if(act==='lair'){S.lair=!S.lair;save();renderBoard();return;}
   if(act==='viewgrp'){S.stat=b.dataset.m;S.statC=null;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
   if(act==='selgrp'){
     var g=b.dataset.g;
@@ -1126,6 +1179,7 @@ $('#tbl').addEventListener('click',function(e){
   if(act&&act.indexOf('ds')===0){snap('death save');dsAct(c,act,b);save();renderBoard();return;}
   if(act==='info'){S.stat=c.kind==='mon'?c.monId:'pc';S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
   if(act==='rx'){snap('reaction');c.rx=!c.rx;save();renderBoard();return;}
+  if(act==='pip'){snap('legendary');var k=b.dataset.k;c[k]=(c[k]||0)+(b.classList.contains('on')?1:-1);if(c[k]<0)c[k]=0;save();renderBoard();return;}
   if(act==='edit'){S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
   if(ui.sel[c.id])delete ui.sel[c.id];else ui.sel[c.id]=true;
   ui.confirmRemove=false;ui.menu=false;ui.pend={};
@@ -1196,7 +1250,7 @@ padEl.addEventListener('click',function(e){
       T.forEach(function(c){
         var i=c.conds.indexOf(x);
         if(ui.pend[x]&&condBlocked(c,x)){skip.push(esc(c.name)+' ('+esc(x)+')');return;}
-        if(ui.pend[x]){if(i<0){c.conds.push(x);if(x==='Shield')c.rx=true;}}
+        if(ui.pend[x]){if(i<0){c.conds.push(x);expSet(c,x);if(x==='Shield')c.rx=true;}}
         else if(i>=0){c.conds.splice(i,1);if(x==='Dead'&&c.kind==='pc'&&c.hp<=0&&c.ds&&c.ds.f>=3)c.ds.f=2;}
       });
     });
