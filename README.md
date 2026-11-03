@@ -41,6 +41,7 @@ Player characters can be synced from a [Kanka](https://kanka.io) campaign throug
 - The **Saves** button shows one chosen saving throw for every combatant, players and monsters alike. Shaded means proficient. Statuses and species traits add notes such as `adv.`, `+2` or `auto-fail`. Player saves need Kanka data.
 
 **Rules reference**
+- In stat blocks and on the turn card, **dice to roll** are highlighted (e.g. `6 (1d8 + 2)`), attack bonuses are green and DCs amber. Spell names in spellcasting entries are links: tap one to open its rule in the Rules tab, and **◂ Stat block** takes you back. Spells outside the SRD (e.g. Synaptic Static) aren't linked.
 - The **Rules** tab in the drawer searches all 339 SRD 5.2 spells (filter by level and class) and shows the full text of the 15 conditions. The data is a local file (`reference.json`), so it works offline.
 
 **Encounter prep and table view**

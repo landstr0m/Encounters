@@ -15,6 +15,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea
 | Rules tab: SRD 5.2 spells + full condition text, offline | ✅ | `reference.json`, built by `tools/build_reference.py` |
 | Effects with damage/save/status | ✅ | First version, see below |
 | Phone layout for building encounters; party list search, pinned Add button, delete all | ✅ | |
+| Stat blocks: dice/attack/DC highlighting, spell names linked to the Rules tab | ✅ | |
 | Controlled live table test | 📋 | Next |
 | v1.0 | 📋 | After the live test |
 
@@ -31,7 +32,6 @@ Still open (📋): saved target lists, "after N rounds" durations. (Prepared enc
 
 ### Reference extensions (💡)
 - Tap a spell status chip (Bless, Hex…) to open its spell entry.
-- Monster spellcasting lines linked to spell entries.
 - Player spell lists (needs a spell list per character, e.g. a Kanka property).
 
 ### Character library (📋)

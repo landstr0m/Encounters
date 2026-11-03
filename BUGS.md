@@ -6,8 +6,11 @@ Newest first. Run `python tests/run_tests.py` after every change (see the README
 
 | # | Bug | Cause | Fix |
 |---|-----|-------|-----|
+| 14 | Phone: Next button squeezed during combat, Clear pushed off-screen at 360 px | Too many toolbar buttons on one line | Table view hidden on phones; Clear hidden on phones during combat (End combat first); buttons keep their size and wrap if needed |
+| 13 | Phone: Close button off-screen when the Edit tab is shown | Six drawer tabs at fixed width | Tabs shrink to fit; Close becomes ✕ on phones |
+| 12 | Initiative token labels ("UP NOW", "NEXT") clipped at the bottom | Label height smaller than its line height | Label height matches line height |
 | 11 | "Up: Githzerai Monk 1" on a group token overlapped the initiative number | Long label wrapped onto a second line | Label is one line and shows the member number ("Up: #1") |
-| 10 | Modified AC in the table shield (e.g. 21 with 16 struck through) was cramped | Two numbers in a small shield | Shield shows only the current AC, in blue when modified; base AC stays in the tooltip. Initiative tokens keep the struck-through base |
+| 10 | Modified AC in the table shield (e.g. 21 with 16 struck through) was cramped | Two numbers in a small shield | Shield shows only the current AC (green if raised, red if lowered); base AC stays in the tooltip. Initiative tokens keep the struck-through base |
 
 ## 2026-11-03 — XP, End combat, Rules tab
 
