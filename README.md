@@ -44,7 +44,7 @@ Player characters can be synced from a [Kanka](https://kanka.io) campaign throug
 
 **Encounter prep and table view**
 - **Encounter XP** (2024 DMG): while combat isn't running, a bar above the table shows the living monsters' total XP against the party's Low, Moderate and High budgets. Player levels come from Kanka, or set **Level** on the character sheet (or type `Thorn, lvl 3`).
-- Effects: lair actions, hazards or timers placed at a fixed initiative, either visible to players or hidden.
+- Effects: lair actions, hazards or timers placed at a fixed initiative, either visible to players or hidden. An effect can also carry damage dice, a damage type, a save (ability + DC) and a status with a duration. On its turn, tap **Apply…**: the Saves view opens on that ability and the pad is preloaded. Select targets, type the number rolled at the table, then **Damage** (failed save: damage + status), **Half** (saved: half damage, no status) or **+ Status** (status only).
 - An environment banner for terrain, light or weather.
 - Prepared encounters: save a built encounter with notes, then **Load** it (replaces the monsters and keeps the players) or **Add** it as reinforcements.
 - A separate read-only table window for a second screen, with options for what players can see.

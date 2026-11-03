@@ -61,6 +61,7 @@ input{background:var(--surface);border:1px solid var(--line);border-radius:8px;p
 .tok.sel{box-shadow:inset 0 0 0 3px var(--ok);background:color-mix(in srgb,var(--ok) 24%,var(--surface))}
 .tok.sel .lab{color:var(--ok)}
 .xpb{margin-top:10px;padding:8px 12px;border:1px solid var(--line,#8884);border-radius:10px;font-size:.9rem}.xpb .xbar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:6px 0;background:color-mix(in srgb,currentColor 10%,transparent);position:relative}.xpb .xbar i{position:absolute;top:-2px;bottom:-2px;width:2px;background:currentColor;opacity:.5}.xpb .xbar b{display:block;height:8px;flex:none;background:var(--warn)}.xpb .xbar b.over{background:var(--bad,#c33)}
+.fxb{padding:4px 0 8px;font-size:.9rem}.fxb button{margin-left:6px}
 .refl button{display:block;width:100%;text-align:left;margin:2px 0}.refl small{opacity:.7}
 .svb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
 .svb b{font-size:.9rem}
@@ -523,7 +524,7 @@ var isOut=function(c){return isDead(c)||isPcDead(c);};
 var S={enc:[],encRoll:true,envName:'',envNote:'',round:1,turnId:null,list:[],next:1,libNext:7,tab:'add',sub:'monsters',stat:null,atTable:{},initMode:'each',hpMode:'roll',
  lib:[{id:'l1',name:'Aria (example)',ac:16,hp:31,ib:2},{id:'l2',name:'Brom (example)',ac:18,hp:38,ib:1},{id:'l3',name:'Wren (example)',ac:14,hp:24,ib:3},
       {id:'l4',name:'Tolliver (example)',ac:12,hp:20,ib:1},{id:'l5',name:'Sable (example)',ac:15,hp:27,ib:4},{id:'l6',name:'Marek (example)',ac:17,hp:34,ib:0}]};
-var ui={fx:{name:'',init:'',desc:'',vis:true},fType:'',fMin:'',fMax:'',q:'',qty:{},sel:{},amt:0,menu:false,pend:{},confirmRemove:false,confirmClear:false,msg:'',drawer:false,present:false,cardOpen:true,sv:-1,mq:'',encName:'',encNote:'',svLast:1,traitsOpen:false,ignoreUntil:0};
+var ui={fxRun:null,fx:{name:'',init:'',desc:'',vis:true,dd:'',dt:'',sv:'',dc:'',st:'',dur:''},fType:'',fMin:'',fMax:'',q:'',qty:{},sel:{},amt:0,menu:false,pend:{},confirmRemove:false,confirmClear:false,msg:'',drawer:false,present:false,cardOpen:true,sv:-1,mq:'',encName:'',encNote:'',svLast:1,traitsOpen:false,ignoreUntil:0};
 var loaded=false;try{if(RO||sessionStorage.getItem('et-present')==='1')ui.present=true;}catch(e){}
 try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.list){S=Object.assign(S,p);loaded=true;}}}catch(e){}
 function save(){if(RO)return;try{localStorage.setItem(KEY,JSON.stringify(S));ui.saveErr=false;}catch(e){if(!ui.saveErr){ui.saveErr=true;alert('This device\u2019s storage is full, so changes are NOT being saved. Export your encounter (Data tab), then remove a monster file you no longer need.');}}}
@@ -551,7 +552,7 @@ function nextTurn(){
   var idx=O.findIndex(function(c){return c.id===S.turnId;});
   var r=stepFrom(O,idx);if(!r)return;
   if(idx<0)S.round=1;else S.round+=r.wrap;
-  var E=S.turnId;S.prevTurn=idx<0?null:E;S.turnId=O[r.i].id;ui.legDis=null;
+  var E=S.turnId;S.prevTurn=idx<0?null:E;S.turnId=O[r.i].id;ui.legDis=null;ui.fxRun=null;
   O[r.i].rx=false;O[r.i].la=0;
   var gone=expTick(E,S.turnId);if(gone.length)toast('Ended: '+esc(gone.join(', ')));
 }
@@ -750,7 +751,8 @@ function renderTurn(){
   var c=S.list.find(function(x){return x.id===S.turnId;});
   if(!c){el.hidden=true;el.innerHTML='';return;}
   el.hidden=false;
-  if(c.kind==='fx'){el.innerHTML='<div class="th"><span class="tn">'+esc(c.name)+'</span><span class="st"><i>EFFECT</i>init '+c.init+'</span><span class="sp"></span><button data-act="fxvis">'+(c.vis?'Visible to players':'Hidden from players')+'</button><button data-act="fxrm">Remove</button></div>'+(c.desc?'<p style="margin:6px 0 0">'+esc(c.desc)+'</p>':'');return;}
+  if(c.kind==='fx'){el.innerHTML='<div class="th"><span class="tn">'+esc(c.name)+'</span><span class="st"><i>EFFECT</i>init '+c.init+'</span><span class="sp"></span><button data-act="fxvis">'+(c.vis?'Visible to players':'Hidden from players')+'</button><button data-act="fxrm">Remove</button></div>'+(c.desc?'<p style="margin:6px 0 0">'+esc(c.desc)+'</p>':'')+
+   (fxHas(c)&&!RO?'<p style="margin:6px 0 0"><b>'+esc(fxSum(c))+'</b> '+(ui.fxRun===c.id?'<span class="muted">Select the targets below, enter the rolled damage and tap Damage (failed save) or Half (saved).</span>':'<button class="primary" data-act="fxgo">Apply\u2026</button>')+'</p>':'');return;}
   var m=c.kind==='mon'?MON.find(function(x){return x.id===c.monId;}):null;
   var chips=c.conds.map(function(x){return '<button class="chip" data-act="cond" data-c="'+esc(x)+'" title="Remove '+esc(x)+'">'+esc(x)+' ×</button>';}).join('');
   var h='<div class="th"><span class="tn">'+esc(c.name)+'</span>'+
@@ -906,11 +908,12 @@ function renderPad(){
   document.body.classList.toggle('menuon',on&&!!ui.menu);
   if(!on)return;
   var names=T.map(function(c){return esc(c.name);}).join(', ');
-  pad.innerHTML='<div class="pi"><div class="pt"><div class="who"><b>'+T.length+' selected</b> · '+names+'</div><button data-act="desel">Deselect</button></div>'+
+  var fx=curFx();
+  pad.innerHTML='<div class="pi">'+(fx?'<div class="fxb">⚡ <b>'+esc(fx.name)+':</b> '+esc(fxSum(fx))+' <button data-act="fxdone">Done</button></div>':'')+'<div class="pt"><div class="who"><b>'+T.length+' selected</b> · '+names+'</div><button data-act="desel">Deselect</button></div>'+
    '<div class="pmain"><div class="wheelbox"><div class="wheel" id="wheel" aria-label="Amount wheel">'+WHEEL+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div></div>'+
    '<div class="pr"><div class="amtrow"><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount, tap to type"><span>Spin the wheel or tap the number to type</span><select id="dtype" aria-label="Damage type"><option value="">Untyped</option>'+DTYPES.map(function(t){return '<option value="'+t+'"'+(ui.dtype===t?' selected':'')+'>'+t[0].toUpperCase()+t.slice(1)+'</option>';}).join('')+'</select></div>'+
    '<div class="pacts"><button class="d" data-act="padhp" data-k="dmg">Damage</button><button class="d" data-act="padhp" data-k="half">Half</button><button class="h" data-act="padhp" data-k="heal">Heal</button>'+
-   '<button data-act="padhp" data-k="temp">Temp HP</button><button data-act="padstatus">Status ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove">'+(ui.confirmRemove?'Sure?':'Remove')+'</button><button data-act="padmore" aria-expanded="'+!!ui.more+'">'+(ui.more?'Less \u25b4':'More \u25be')+'</button>'+
+   '<button data-act="padhp" data-k="temp">Temp HP</button>'+(fx&&fx.st?'<button class="d" data-act="fxst">+ '+esc(fx.st)+'</button>':'')+'<button data-act="padstatus">Status ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove">'+(ui.confirmRemove?'Sure?':'Remove')+'</button><button data-act="padmore" aria-expanded="'+!!ui.more+'">'+(ui.more?'Less \u25b4':'More \u25be')+'</button>'+
    (ui.more?'<button class="d" data-act="padhp" data-k="maxdn">Max HP \u2212</button><button data-act="padhp" data-k="maxreset">Reset max</button><button data-act="padgroup">'+(T.some(function(c){return c.cg;})&&T.every(function(c){return c.cg&&c.cg===T[0].cg;})?'Ungroup':'Group\u2026')+'</button>':'')+'</div></div></div>'+
    (ui.menu?menuHTML(T):'')+'</div>';
   var mn=pad.querySelector('.menu');if(mn){mn.style.maxHeight='';mn.style.maxHeight=Math.max(200,mn.getBoundingClientRect().bottom-8)+'px';}
@@ -969,13 +972,38 @@ function filtHTML(){
   var crs=CRS.map(function(x){return [x,'CR '+x];});
   return '<div class="flt">'+selHTML('ftype','ftype','All types',TYPES.map(function(t){return [t,cap(t)];}),ui.fType)+selHTML('fmin','fmin','CR from',crs,ui.fMin)+selHTML('fmax','fmax','CR to',crs,ui.fMax)+'</div>';
 }
+// Effect payload: dd = damage dice (rolled at the table), dt = damage type, sv = save ability index, dc, st = status, dur = how long the status lasts.
+var FXDUR=[['','Normal duration'],['fx','1 round (until it acts again)'],['e','To end of target\u2019s next turn']];
+function fxSum(c){
+  var p=[];if(c.dd||c.dt)p.push((c.dd||'')+(c.dt?' '+c.dt:'')+' damage');
+  if(c.sv!==''&&c.sv!=null)p.push(AB[+c.sv]+' save'+(c.dc?' DC '+c.dc:''));
+  if(c.st)p.push(c.st+(c.dd||c.dt?' on a failed save':'')+(c.dur==='fx'?' (1 round)':c.dur==='e'?' (to end of its next turn)':''));
+  return p.join(' · ');
+}
+function fxHas(c){return !!(c.dd||c.dt||c.st||(c.sv!==''&&c.sv!=null));}
+function fxApplyStatus(T,fx){
+  var skip=[];T.forEach(function(c){var x=fx.st;
+    if(condBlocked(c,x)){skip.push(esc(c.name));return;}
+    if(c.conds.indexOf(x)<0)c.conds.push(x);
+    if(fx.dur==='fx'){c.exp=c.exp||{};c.exp[x]={src:fx.id,k:'s',h:false};}
+    else if(fx.dur==='e'){c.exp=c.exp||{};c.exp[x]={src:c.id,k:'e',h:c.id===S.turnId};}
+    else expSet(c,x);
+    incSync(c,true);});
+  return skip;
+}
+function curFx(){var f=ui.fxRun!=null&&ui.fxRun===S.turnId?findC(ui.fxRun):null;return f&&f.kind==='fx'?f:null;}
 function fxPanelHTML(){
   var f=ui.fx;
+  var stl=CONDS.concat(SPELLS.map(function(x){return x[0];}));
   return '<p class="muted" style="font-size:.9rem;margin:0 0 8px">An effect acts at a fixed point in the initiative order, such as a lair action or a timed spell. It is never selected for damage or healing.</p>'+
    '<input class="search" id="fxname" type="text" maxlength="40" placeholder="Name, e.g. Lair action" value="'+esc(f.name)+'" aria-label="Effect name">'+
    '<input class="search" id="fxinit" type="number" inputmode="numeric" placeholder="Initiative number, e.g. 20" value="'+esc(f.init)+'" aria-label="Effect initiative">'+
    '<input class="search" id="fxdesc" type="text" maxlength="200" placeholder="Note for you (players never see it)" value="'+esc(f.desc)+'" aria-label="Note for the DM">'+
    '<div class="lib"><label><input type="checkbox" id="fxvis"'+(f.vis?' checked':'')+'><span>Show the name to players in the initiative order</span></label></div>'+
+   '<h3 style="margin:10px 0 4px">What it does <span class="muted" style="font-weight:400;font-size:.85rem">(optional; dice are rolled at the table)</span></h3>'+
+   '<div class="flt"><input class="search" id="fxdd" type="text" maxlength="20" placeholder="Damage, e.g. 2d6" value="'+esc(f.dd)+'" aria-label="Damage dice" style="margin:0;max-width:8em">'+selHTML('fxdt','fxdt','Damage type',DTYPES.map(function(t){return [t,t];}),f.dt)+'</div>'+
+   '<div class="flt">'+selHTML('fxsv','fxsv','No save',AB.map(function(a,i){return [String(i),a+' save'];}),f.sv)+'<input class="search" id="fxdc" type="number" inputmode="numeric" min="1" max="30" placeholder="DC" value="'+esc(f.dc)+'" aria-label="Save DC" style="margin:0;max-width:6em"></div>'+
+   '<div class="flt">'+selHTML('fxst','fxst','No status',stl.map(function(x){return [x,x];}),f.st)+selHTML('fxdur','fxdur','Normal duration',FXDUR.slice(1),f.dur)+'</div>'+
    '<div class="row"><button class="add" data-act="addfx" style="flex:1">Add effect</button></div>'+
    '<div class="msg">'+esc(ui.msg||'')+'</div>';
 }
@@ -1200,7 +1228,7 @@ function parseChar(t){
 }
 function findC(id){return S.list.find(function(x){return x.id===+id;});}
 function pruneSel(){Object.keys(ui.sel).forEach(function(k){if(!findC(k))delete ui.sel[k];});}
-function finishPad(){ui.dtype='';ui.sel={};ui.amt=0;ui.menu=false;ui.pend={};ui.mq='';ui.confirmRemove=false;}
+function finishPad(){var fx=curFx();ui.dtype=fx&&fx.dt||'';ui.sel={};ui.amt=0;ui.menu=false;ui.pend={};ui.mq='';ui.confirmRemove=false;}
 function nextIdExcluding(T){
   var ids={};T.forEach(function(c){ids[c.id]=true;});
   var O=order();var idx=O.findIndex(function(c){return c.id===S.turnId;});
@@ -1229,7 +1257,9 @@ $('#turn').addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;
   var a=b.dataset.act;
   var c=findC(S.turnId);if(!c)return;
-  if(c.kind==='fx'){if(a==='fxvis')c.vis=!c.vis;else if(a==='fxrm')rmComb(c);save();renderBoard();return;}
+  if(c.kind==='fx'){if(a==='fxvis')c.vis=!c.vis;else if(a==='fxrm')rmComb(c);
+    else if(a==='fxgo'){ui.fxRun=c.id;ui.dtype=c.dt||'';ui.amt=0;if(c.sv!==''&&c.sv!=null){ui.sv=+c.sv;ui.svLast=ui.sv;}toast('Select who is affected.');}
+    save();renderBoard();return;}
   if(a==='laspend'){var lc=findC(b.dataset.id);if(lc){snap('legendary');lc.la=(lc.la||0)+1;}}
   else if(a==='ladis'){ui.legDis=S.turnId;}
   else if(a==='tcol'){ui.cardOpen=!ui.cardOpen;}
@@ -1312,10 +1342,13 @@ padEl.addEventListener('click',function(e){
       });
       var msg=out.length&&(ui.dtype||out.length>1)?'<b>'+(ui.dtype?ui.dtype[0].toUpperCase()+ui.dtype.slice(1)+' ':'')+'damage:</b> '+out.join(' · '):'';
       if(conc.length)msg+=(msg?'<br>':'')+'<b>Concentration:</b> '+conc.join(' · ');
+      var fxr=curFx();if(fxr&&fxr.st&&k==='dmg'){var sk=fxApplyStatus(T,fxr);msg+=(msg?'<br>':'')+'<b>'+esc(fxr.st)+'</b> applied'+(sk.length?' (immune: '+sk.join(', ')+')':'');}
       if(msg)toast(msg);
       finishPad();
     }
   }
+  else if(a==='fxst'){var fx2=curFx();if(fx2){snap(fx2.st);var sk2=fxApplyStatus(T,fx2);toast('<b>'+esc(fx2.st)+'</b> applied'+(sk2.length?' · immune: '+sk2.join(', '):''));finishPad();}}
+  else if(a==='fxdone'){ui.fxRun=null;finishPad();}
   else if(a==='padgroup'){
     if(T.length&&T.every(function(c){return c.cg&&c.cg===T[0].cg;})){setGroup(T,'');finishPad();}
     else{
@@ -1442,7 +1475,7 @@ dr.addEventListener('click',function(e){
     var f=ui.fx,nm=f.name.trim(),iv=f.init===''?NaN:Math.floor(+f.init);
     if(!nm)ui.msg='Give the effect a name.';
     else if(isNaN(iv))ui.msg='Enter the initiative number it acts on.';
-    else{S.list.push({id:S.next++,kind:'fx',name:nm,desc:f.desc.trim(),init:iv,vis:!!f.vis,ac:0,hp:0,max:0,temp:0,conds:[],cr:'',spent:{}});ui.fx={name:'',init:'',desc:'',vis:f.vis};ui.msg='Added '+nm+' at initiative '+iv+'.';}
+    else{S.list.push({id:S.next++,kind:'fx',name:nm,desc:f.desc.trim(),init:iv,vis:!!f.vis,ac:0,hp:0,max:0,temp:0,conds:[],cr:'',spent:{},dd:f.dd.trim(),dt:f.dt,sv:f.sv,dc:f.dc===''?'':Math.floor(+f.dc),st:f.st,dur:f.st?f.dur:''});ui.fx={name:'',init:'',desc:'',vis:f.vis,dd:'',dt:'',sv:'',dc:'',st:'',dur:''};ui.msg='Added '+nm+' at initiative '+iv+'.';}
   }
   save();renderBoard();renderDrawer();
 });
@@ -1455,6 +1488,8 @@ dr.addEventListener('input',function(e){
   else if(t.id==='fxname')ui.fx.name=t.value;
   else if(t.id==='fxinit')ui.fx.init=t.value;
   else if(t.id==='fxdesc')ui.fx.desc=t.value;
+  else if(t.id==='fxdd')ui.fx.dd=t.value;
+  else if(t.id==='fxdc')ui.fx.dc=t.value;
   else if(t.id==='encname')ui.encName=t.value;
   else if(t.id==='encnote')ui.encNote=t.value;
 });
@@ -1476,6 +1511,7 @@ dr.addEventListener('change',function(e){
   }
   if(t.dataset.act==='at'){S.atTable[t.dataset.l]=t.checked;save();}
   if(t.id==='fxvis')ui.fx.vis=t.checked;
+  if(['fxdt','fxsv','fxst','fxdur'].indexOf(t.id)>=0)ui.fx[t.id.slice(2)]=t.value;
   if(t.id==='encroll'){S.encRoll=t.checked;save();}
   if(t.dataset.act==='rl'||t.dataset.act==='rc'){ui[t.dataset.act]=t.value;renderDrawer();}
   if(t.dataset.act==='ftype'||t.dataset.act==='fmin'||t.dataset.act==='fmax'){ui[t.dataset.act==='ftype'?'fType':(t.dataset.act==='fmin'?'fMin':'fMax')]=t.value;$('#results').innerHTML=resultsHTML();}

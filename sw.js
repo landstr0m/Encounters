@@ -1,6 +1,6 @@
 // Offline cache. Serves saved files instantly, then refreshes them in the background,
 // so a new version you publish shows up the next time you open the app (online once).
-var CACHE = 'encounter-tracker-v11';
+var CACHE = 'encounter-tracker-v12';
 var FILES = ['./', 'index.html', 'monsters.json', 'reference.json', 'fonts.css', 'statuses.js', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png'];
 
 self.addEventListener('install', function (e) {

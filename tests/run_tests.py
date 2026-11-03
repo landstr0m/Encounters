@@ -692,6 +692,35 @@ def rules_reference(b):
     check(not a.errors, a.errors)
 
 
+@test
+def effect_damage_and_status(b):
+    a = App(b)
+    a.e("S.lib=[{id:'l1',name:'A',ac:12,hp:20,ib:0,lvl:3}];addPc(S.lib[0]);S.list[0].init=5;"
+        "var m=MON.find(function(x){return x.cr==='1';});addMon(m.id,2);S.list[1].init=4;S.list[2].init=3;renderAll()")
+    a.e("ui.drawer=true;S.tab='add';S.sub='effects';renderDrawer()")
+    a.pg.fill('#fxname', 'Rockfall'); a.pg.fill('#fxinit', '20'); a.pg.fill('#fxdd', '2d6')
+    a.pg.select_option('#fxdt', 'bludgeoning'); a.pg.select_option('#fxsv', '1'); a.pg.fill('#fxdc', '13')
+    a.pg.select_option('#fxst', 'Prone'); a.pg.select_option('#fxdur', 'fx')
+    a.click('[data-act="addfx"]')
+    fx = a.j("S.list.find(function(c){return c.kind==='fx';})")
+    check(fx["dd"] == "2d6" and fx["st"] == "Prone" and fx["dc"] == 13, fx)
+    a.click('[data-act="next"]')
+    check("DEX save DC 13" in a.pg.inner_text('#turn'), "turn card shows payload")
+    a.click('[data-act="fxgo"]')
+    check(a.e("ui.sv") == 1, "Saves view opens on DEX")
+    a.select(2, 3)
+    a.pad("dmg", 7)
+    check(a.e("S.list[1].hp") == a.e("S.list[1].max") - 7, "damage applied")
+    check("Prone" in a.j("S.list[1].conds") and "Prone" in a.j("S.list[2].conds"), "status on failed save")
+    a.select(1)
+    a.pad("half", 7)
+    check("Prone" not in a.j("S.list[0].conds"), "no status on half")
+    for _ in range(4):
+        a.click('[data-act="next"]')
+    check(a.e("S.turnId") == fx["id"] and "Prone" not in a.j("S.list[1].conds"), "Prone ended when the effect acts again")
+    check(not a.errors, a.errors)
+
+
 def main():
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def log_message(self, *a):

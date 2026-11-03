@@ -13,17 +13,15 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea
 | Encounter XP / difficulty while planning | ✅ | 2024 DMG budgets; hidden while combat runs |
 | End combat without clearing | ✅ | Keeps creatures, HP and statuses |
 | Rules tab: SRD 5.2 spells + full condition text, offline | ✅ | `reference.json`, built by `tools/build_reference.py` |
+| Effects with damage/save/status | ✅ | First version, see below |
 | Controlled live table test | 📋 | Next |
 | v1.0 | 📋 | After the live test |
 
 ## Stage 2: planned features
 
-### Effects that act on the board (📋)
-Effects (lair actions, hazards, timers) currently only mark a place in the initiative order. Plan:
-1. **Effect payload:** an effect can carry damage (amount or dice, damage type) and/or a status, plus targets (chosen when it fires, or a saved list).
-2. **Fire on its turn:** when the effect's initiative comes up, the turn card shows **Apply** (preselects its targets in the pad with type and amount filled in) and **Skip**.
-3. **Timed statuses from effects:** statuses applied by an effect use the same auto-expiry as creatures (end at the start or end of the effect's next turn, or after N rounds), with a toast and Undo. This needs `exp` to accept an effect as the source and a round counter (`rounds:N`).
-4. **Save prompts:** optional save ability and DC, so the Saves view opens on that ability when the effect fires.
+### Effects that act on the board (✅ first version)
+Effects can carry damage dice (rolled at the table), a damage type, a save (ability + DC) and a status with a duration (normal, 1 round, or to the end of the target's next turn). On the effect's turn, **Apply…** opens the Saves view on that ability and preloads the pad: select targets, type the roll, **Damage** = failed save (damage + status), **Half** = saved (no status), **+ Status** = status only.
+Still open (📋): saved target lists, "after N rounds" durations. (Prepared encounters already keep the payload.)
 
 ### Encounter difficulty extensions (💡)
 - CR / XP for effects and hazards, counted in the encounter XP.
