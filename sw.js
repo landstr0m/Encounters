@@ -1,7 +1,7 @@
 // Offline cache. Serves saved files instantly, then refreshes them in the background,
 // so a new version you publish shows up the next time you open the app (online once).
-var CACHE = 'encounter-tracker-v23';
-var FILES = ['./', 'index.html', 'monsters.json', 'reference.json', 'fonts.css', 'statuses.js', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png'];
+var CACHE = 'encounter-tracker-v24';
+var FILES = ['./', 'index.html', 'monsters.json', 'reference.json', 'spells-phb.json', 'fonts.css', 'statuses.js', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(FILES); }).then(function () { return self.skipWaiting(); }));

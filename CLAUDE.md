@@ -14,7 +14,7 @@
 
 ## Data and licensing (important)
 - `monsters.json` **temporarily holds the 2024 Monster Manual** (Andrew's own book, parsed locally for personal use). Before v1.0: restore SRD-only data in the public repo and load the book data as a local file via Data → Monster files. Never commit book text otherwise (`.gitignore` has `local/`, `*.local.json`, `img/`).
-- `reference.json` is SRD 5.2 only (CC-BY-4.0). Player's Handbook spells would also go in a local, uncommitted file.
+- `reference.json` is SRD 5.2 only (CC-BY-4.0). `spells-phb.json` **temporarily** holds Player's Handbook spells not in the SRD (Andrew's epub, OCR-cleaned) plus book-name aliases; before v1.0 it moves to a local file too. Merged in `refLoad()`.
 - `players.json` is written by the Kanka GitHub Action (secret `KANKA_API_KEY`). Kanka may not stay the main source, so treat the party library as source-independent.
 
 ## Where things are

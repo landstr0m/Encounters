@@ -1274,7 +1274,14 @@ function doImport(f){
 }
 // Rules reference: SRD 5.2 spells and full condition text from reference.json (local file, cached offline).
 var REF=null,SPRE=null;
-function refLoad(){if(REF)return;REF={spells:[],conditions:{},loading:1};fetch('reference.json').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){REF=j;SPRE=null;if(ui.drawer&&(S.tab==='ref'||S.tab==='stat'))renderDrawer();renderTurn();}).catch(function(){REF={spells:[],conditions:{},err:1};if(S.tab==='ref')renderDrawer();});}
+// reference.json = SRD 5.2; spells-phb.json (optional) = book spells not in the SRD + book names (aliases) of SRD spells.
+function refLoad(){if(REF)return;REF={spells:[],conditions:{},loading:1};
+  var phb=fetch('spells-phb.json').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
+  fetch('reference.json').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){return phb.then(function(p){
+    if(p){p.spells.forEach(function(x){x.src='PHB';j.spells.push(x);});
+      Object.keys(p.aliases||{}).forEach(function(a){var t=j.spells.find(function(x){return x.n===p.aliases[a];});if(t){var c=Object.assign({},t);c.n=a;c.a=t.n;j.spells.push(c);}});
+      j.missing=p.missing||[];}
+    j.spells.sort(function(a,b){return a.n.localeCompare(b.n);});return j;});}).then(function(j){REF=j;SPRE=null;if(ui.drawer&&(S.tab==='ref'||S.tab==='stat'))renderDrawer();renderTurn();}).catch(function(){REF={spells:[],conditions:{},err:1};if(S.tab==='ref')renderDrawer();});}
 // Stat block text: highlight dice to roll, attack bonuses and DCs; link spell names (in entries that cast spells) to the Rules tab.
 // Damage types: symbol + colour (CSS .dt-<type>). Book text always capitalises them ("Cold damage").
 var DTI={acid:'🧪',bludgeoning:'🔨',cold:'❄️',fire:'🔥',force:'✴️',lightning:'⚡',necrotic:'💀',piercing:'🏹',poison:'☠️',psychic:'🧠',radiant:'☀️',slashing:'🗡️',thunder:'💥'};
@@ -1319,12 +1326,13 @@ function refHTML(){
       return back+'<h3>'+esc(x.n)+'</h3><p><i>'+(x.l?LVN[x.l]+'-level '+esc(x.sc):cap(esc(x.sc))+' cantrip')+(x.ri?' (ritual)':'')+'</i></p>'+
       '<p><b>Casting time</b> '+esc(cap(x.t))+' · <b>Range</b> '+esc(x.r)+'<br><b>Components</b> '+esc(x.c)+'<br><b>Duration</b> '+(x.cn?'Concentration, ':'')+esc(x.d)+'</p>'+
       (x.sv||x.at||x.dt.length?'<p>'+(x.sv?'<b>Save</b> '+esc(cap(x.sv))+' ':'')+(x.at?'<b>Spell attack</b> ':'')+(x.dt.length?'<b>Damage</b> '+esc(x.dr)+' '+esc(x.dt.join(', ')):'')+'</p>':'')+
-      '<p>'+esc(x.tx).replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>')+'</p>'+(x.hl?'<p><b>At higher levels.</b> '+esc(x.hl)+'</p>':'')+
+      '<p>'+rich(x.tx).replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>')+'</p>'+(x.hl?'<p><b>'+(x.l?'Using a Higher-Level Spell Slot.':'Cantrip Upgrade.')+'</b> '+rich(x.hl)+'</p>':'')+
+      (x.a?'<p class="muted">Book name of the SRD spell '+esc(x.a)+'.</p>':'')+(x.src==='PHB'?'<p class="muted">Source: Player\u2019s Handbook (2024).</p>':'')+
       '<p class="muted">Classes: '+esc(x.cl.map(cap).join(', '))+'</p>';}
   }
   var q=(ui.rq||'').toLowerCase(),lv=ui.rl==null?'':ui.rl,cl=ui.rc||'';
   var C=Object.keys(REF.conditions).filter(function(k){return !lv&&!cl&&(!q||k.toLowerCase().indexOf(q)>=0);});
-  var SP=REF.spells.filter(function(x){return (!q||x.n.toLowerCase().indexOf(q)>=0)&&(lv===''||x.l===+lv)&&(!cl||x.cl.indexOf(cl)>=0);});
+  var SP=REF.spells.filter(function(x){return (x.a?(q&&x.n.toLowerCase().indexOf(q)>=0):(!q||x.n.toLowerCase().indexOf(q)>=0))&&(lv===''||x.l===+lv)&&(!cl||x.cl.indexOf(cl)>=0);});
   var cls=['bard','cleric','druid','paladin','ranger','sorcerer','warlock','wizard'];
   return '<input class="search" id="refq" type="search" placeholder="Search spells and conditions" value="'+esc(ui.rq||'')+'" aria-label="Search rules">'+
    '<div class="flt">'+selHTML('rl','rl','All levels',LVN.map(function(n,i){return [String(i),n];}),lv)+selHTML('rc','rc','All classes',cls.map(function(c){return [c,c.charAt(0).toUpperCase()+c.slice(1)];}),cl)+'</div>'+

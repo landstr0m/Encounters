@@ -25,7 +25,8 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea
 - [ ] Live table test on the iPad; log findings in BUGS.md
 - [ ] `monsters.json` back to SRD-only; Monster Manual data as a local file (Data → Monster files)
 - [x] Book checks flagged by the data check (confirmed and fixed 3 Nov)
-- [ ] Player's Handbook spells as a local file (needs a spell import in the app, see Reference extensions)
+- [x] Player's Handbook spells (35 of 51 non-SRD spells; 16 need book photos, see BUGS.md)
+- [ ] `spells-phb.json` out of the public repo; load it as a local file (needs a spell-file import in the Data tab)
 
 ## Stage 2: planned features
 

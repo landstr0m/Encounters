@@ -2,6 +2,12 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-03 — Player's Handbook spells (`spells-phb.json`)
+
+- The SRD 5.2 spell text is the 2024 PHB text, so only the **51 PHB spells not in the SRD** were taken from the epub (OCR text, pages 233–341). Book names of 17 SRD spells (Melf's Acid Arrow, Bigby's Hand, Tasha's Hideous Laughter…) are aliases to the SRD entries.
+- **35 added** after cleaning: picture captions and page footers removed, OCR words fixed ("filied", "triry", "Sell slot", "idi0O" → 1d10, "6110" → 6d10, "witha", "Ona"…), every word spell-checked, every header field checked.
+- **16 still missing** (text interleaved between columns or lost; not guessed): Arcane Gate, Arcane Vigor, Blinding Smite, Conjure Volley, Grasping Vine, Hail of Thorns, Lightning Arrow, Swift Quiver, and Summon Aberration, Beast, Celestial, Construct, Elemental, Fey, Fiend, Undead (stat blocks). Photos of these pages would let them be added.
+
 ## 2026-11-03 — Monster data check (all 503 entries) ✅ done, no need to repeat
 
 Every entry in `monsters.json` (Monster Manual 2024 import) was checked once, systematically, by `tools/check_monsters.py` plus the app's own highlighter:

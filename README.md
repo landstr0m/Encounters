@@ -67,7 +67,7 @@ After an update, open the app once while online, then close and reopen it to get
 
 **Monsters**
 - 503 stat blocks (currently the 2024 Monster Manual, see *Data*). Full stat block in the drawer (ⓘ or **Stat block**).
-- Dice to roll are highlighted, attack bonuses green, DCs amber, and damage types have their own colour and symbol (🔥 Fire, ❄️ Cold, ⚡ Lightning, 💀 Necrotic…), also in the defences lines and the damage-type pickers. Spell names (blue) and conditions (red, e.g. *Paralyzed*) are links: tap to read the rule, then **◂ Stat block** to go back. Only SRD spells link for now (e.g. Hunger of Hadar doesn't until Player's Handbook spells are added).
+- Dice to roll are highlighted, attack bonuses green, DCs amber, and damage types have their own colour and symbol (🔥 Fire, ❄️ Cold, ⚡ Lightning, 💀 Necrotic…), also in the defences lines and the damage-type pickers. Spell names (blue) and conditions (red, e.g. *Paralyzed*) are links: tap to read the rule, then **◂ Stat block** to go back. Spells missing from the data (see Rules tab) don't link.
 - ✎ Edit per creature: name, AC, HP, initiative, extra actions/traits/notes (can be copied to every creature of that type), or a custom group.
 - **Data → Monster files:** import your own monster JSON files; they stay on this device and override built-in entries with the same name.
 
@@ -81,7 +81,8 @@ After an update, open the app once while online, then close and reopen it to get
 - While combat isn't running, the XP bar shows the living monsters' XP against the party's Low / Moderate / High budget. Player levels come from Kanka, the sheet's **Level** field, or `Name, lvl 3`.
 
 **Rules tab**
-- All 339 SRD 5.2 spells (search, filter by level and class) and the full text of the 15 conditions, from the local file `reference.json` (works offline). Spells outside the SRD aren't included yet.
+- 339 SRD 5.2 spells plus 35 more from the Player's Handbook (`spells-phb.json`), and the full text of the 15 conditions. Search and filter by level and class; works offline. Book names of SRD spells (Melf's Acid Arrow, Bigby's Hand…) are found by search and link from stat blocks. Spell text gets the same dice, damage-type and condition highlighting as stat blocks.
+- 16 PHB spells are still missing (OCR too damaged), listed in `spells-phb.json` → `missing`.
 
 **Prepared encounters and notes (Data tab)**
 - Save the current monsters and effects with a note; later **Load** (replaces monsters, keeps players) or **Add** (reinforcements). The note shows as a banner above the table. In lair is saved too.
@@ -128,6 +129,7 @@ Then bump `CACHE` in `sw.js` so installed apps pick up the change. Log bugs and 
 | `statuses.js` | Rule text shown for each status (edit wording here; mechanics are in `index.html`) |
 | `monsters.json` | Monster stat blocks |
 | `reference.json` | SRD 5.2 spells and conditions (built by `tools/build_reference.py`) |
+| `spells-phb.json` | **Temporary:** Player's Handbook spells not in the SRD, book-name aliases, and the list of spells still missing |
 | `players.json` | Player characters from Kanka (written by the workflow) |
 | `tools/kanka_players.py` | Kanka → `players.json` |
 | `tools/build_reference.py` | open5e-api SRD 5.2 data → `reference.json` |
@@ -140,5 +142,6 @@ Then bump `CACHE` in `sw.js` so installed apps pick up the change. Log bugs and 
 ## Data and licence
 
 - Spells, conditions and rules text: SRD 5.2 (CC-BY-4.0), spell data via [open5e-api](https://github.com/open5e/open5e-api).
+- `spells-phb.json` **temporarily contains 35 Player's Handbook 2024 spells** (OCR from the owner's epub, checked and corrected), same arrangement as the monsters below.
 - `monsters.json` **temporarily contains the 2024 Monster Manual** (imported from the owner's own book for personal use at his table) to make testing easier. Before v1.0 it goes back to SRD-only, and the book data moves to a local file imported on the device (**Data → Monster files**), which is never committed.
 - App data stays in your browser on the current device. Export it regularly as a backup.

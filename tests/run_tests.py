@@ -770,6 +770,21 @@ def stat_block_dice_and_spell_links(b):
     check(not a.errors, a.errors)
 
 
+@test
+def phb_spells_and_aliases(b):
+    a = App(b)
+    a.pg.wait_for_function("window.__e('REF&&REF.spells.length>0')")
+    check(a.e("REF.spells.some(function(x){return x.n==='Hunger of Hadar'&&x.src==='PHB';})"), "PHB spell loaded")
+    h = a.e("rich('The vampire casts Hunger of Hadar (level 5 version). The dragon casts Melf\u2019s Acid Arrow.')")
+    check('data-n="Hunger of Hadar"' in h and 'Melf' in h and 'Acid Arrow</a>' in h, h)
+    a.e("ui.drawer=true;S.tab='ref';ui.ref=null;ui.rq='';renderDrawer()")
+    names = a.pg.inner_text('#refl')
+    check("Melf" not in names, "aliases hidden from the unfiltered list")
+    a.pg.fill('#refq', 'melf')
+    check("Melf" in a.pg.inner_text('#refl'), "aliases found by search")
+    check(not a.errors, a.errors)
+
+
 def main():
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def log_message(self, *a):
