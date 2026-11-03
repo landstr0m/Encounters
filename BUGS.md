@@ -9,7 +9,7 @@ Every entry in `monsters.json` (Monster Manual 2024 import) was checked once, sy
 - **Dice in text:** all 1,192 dice expressions are written with standard characters (no en/em dashes, minus signs, `ld8`, `1 d8` or broken brackets), every `N (XdY + Z)` average matches its dice, and the app highlights 1,192 / 1,192.
 - **Spell links:** 786 spell names in casting entries link to the Rules tab.
 - **Text:** checked for stray OCR characters, joined words, doubled words, unbalanced brackets, cut-off entries, accented letters, attack/save/senses/speed formats and spelling (dictionary + D&D word list). **62 fixes** applied, e.g. misread "fly" in 11 speed lines (`ih 80 ft.` → `fly 80 ft.`), `can it ioe a use` → `can expend a use` (Demilich), `Wisdorr` → `Wisdom` (Kenku), `ona` → `on a` (10×), `lgnan` → `Ignan`, `reach 5 feet` → `reach 5 ft.`, stray `]`, `<a`, `’`.
-- **Still to confirm in the book** (couldn't be recovered from the text): Ettercap Passive Perception (number missing); Nightmare speed (fly 90 ft., hover?); Vampire Umbral Lord (fly 40 ft.?); Primeval Owlbear (dropped a garbled "5 ft." after climb).
+- **Confirmed from the book by Andrew** and fixed: Ettercap Passive Perception 13; Nightmare `60 ft., fly 90 ft. (hover)`; Primeval Owlbear `40 ft., climb 40 ft., fly 5 ft.`; Vampire Umbral Lord `40 ft., climb 40 ft., fly 40 ft. (hover)`. The checker now reports 0 items.
 - Re-run `python tools/check_monsters.py` only after importing new or changed monster data.
 
 ## 2026-11-03 (evening) — iPad test feedback

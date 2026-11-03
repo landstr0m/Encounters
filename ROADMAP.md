@@ -24,7 +24,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea
 ### Before v1.0 (checklist)
 - [ ] Live table test on the iPad; log findings in BUGS.md
 - [ ] `monsters.json` back to SRD-only; Monster Manual data as a local file (Data → Monster files)
-- [ ] Book checks flagged by the data check (see BUGS.md, 3 Nov): Ettercap Passive Perception, and three speed lines
+- [x] Book checks flagged by the data check (confirmed and fixed 3 Nov)
 - [ ] Player's Handbook spells as a local file (needs a spell import in the app, see Reference extensions)
 
 ## Stage 2: planned features

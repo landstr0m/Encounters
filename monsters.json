@@ -996,7 +996,7 @@
     ],
     [
      "Senses",
-     "Darkvision 60 ft.; Passive Perception"
+     "Darkvision 60 ft.; Passive Perception 13"
     ],
     [
      "Languages",
@@ -19148,7 +19148,7 @@
    "acn": "",
    "hp": 68,
    "dice": "8d10+24",
-   "speed": "60 ft., fly 90 ft.",
+   "speed": "60 ft., fly 90 ft. (hover)",
    "abil": [
     18,
     15,
@@ -19696,7 +19696,7 @@
    "acn": "",
    "hp": 126,
    "dice": "12d12+48",
-   "speed": "40 ft., climb 40 ft.",
+   "speed": "40 ft., climb 40 ft., fly 5 ft.",
    "abil": [
     22,
     14,
@@ -26246,7 +26246,7 @@
    "acn": "",
    "hp": 187,
    "dice": "22d8+88",
-   "speed": "40 ft., climb 40 ft., fly 40 ft.",
+   "speed": "40 ft., climb 40 ft., fly 40 ft. (hover)",
    "abil": [
     20,
     18,
