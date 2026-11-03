@@ -647,6 +647,51 @@ for _w, _h in [(390, 844), (820, 1180), (1024, 768), (1180, 820), (1366, 768), (
 
 
 # ---------------------------------------------------------------- runner
+@test
+def xp_calculator_and_end_combat(b):
+    a = App(b)
+    a.e("S.lib=[{id:'l1',name:'A',ac:12,hp:20,ib:0,lvl:3},{id:'l2',name:'B',ac:12,hp:20,ib:0,parsed:[{class:'bard',level:2},{class:'wizard',level:1}]}];"
+        "addPc(S.lib[0]);addPc(S.lib[1]);var m=MON.find(function(x){return x.cr==='1';});addMon(m.id,2);renderBoard()")
+    t = a.pg.inner_text("#xpb")
+    check("400" in t and "Moderate" in t, "2 x CR 1 = 400 XP vs two level-3 budgets (300/450/800): " + t)
+    a.e("S.list.forEach(function(c){if(c.init==null)c.init=10;});renderBoard()")
+    a.click('[data-act="next"]')
+    check(a.pg.is_hidden("#xpb"), "XP bar hidden while combat runs")
+    a.e("S.list[2].hp=3;S.list[2].conds.push('Prone');renderBoard()")
+    a.click('[data-act="endc"]')
+    check(a.e("S.turnId") is None and a.e("S.round") == 1, "combat ended")
+    check(a.e("S.list[2].hp") == 3 and "Prone" in a.j("S.list[2].conds"), "HP and statuses kept")
+    check(not a.pg.is_hidden("#xpb"), "XP bar back after combat")
+    a.click('[data-act="undo"]')
+    check(a.e("S.turnId") is not None, "undo restores combat")
+    check(not a.errors, a.errors)
+
+
+@test
+def rules_reference(b):
+    a = App(b)
+    a.e("ui.drawer=true;S.tab='ref';renderDrawer()")
+    a.pg.wait_for_selector('#refl button')
+    a.pg.fill('#refq', 'fireb')
+    a.pg.wait_for_timeout(60)
+    check("Fireball" in a.pg.inner_text('#refl'), "search finds Fireball")
+    a.click('#refl [data-n="Fireball"]')
+    t = a.pg.inner_text('#drawer')
+    check("8d6" in t and "Dexterity" in t, "spell card shows damage and save")
+    a.click('[data-act="refback"]')
+    a.pg.fill('#refq', 'prone')
+    a.click('#refl [data-n="Prone"]')
+    check("Prone" in a.pg.inner_text('#drawer'), "condition text shown")
+    a.click('[data-act="refback"]')
+    a.pg.fill('#refq', '')
+    a.pg.select_option('#rc', 'warlock')
+    a.pg.select_option('#rl', '0')
+    names = a.pg.inner_text('#refl')
+    check("Eldritch Blast" in names and "Fireball" not in names, "class + level filter")
+    check(a.e("REF.spells.length") > 300, "SRD 5.2 spells loaded")
+    check(not a.errors, a.errors)
+
+
 def main():
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def log_message(self, *a):

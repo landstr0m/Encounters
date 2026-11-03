@@ -60,6 +60,8 @@ input{background:var(--surface);border:1px solid var(--line);border-radius:8px;p
 .tok.down{opacity:.6}
 .tok.sel{box-shadow:inset 0 0 0 3px var(--ok);background:color-mix(in srgb,var(--ok) 24%,var(--surface))}
 .tok.sel .lab{color:var(--ok)}
+.xpb{margin-top:10px;padding:8px 12px;border:1px solid var(--line,#8884);border-radius:10px;font-size:.9rem}.xpb .xbar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:6px 0;background:color-mix(in srgb,currentColor 10%,transparent);position:relative}.xpb .xbar i{position:absolute;top:-2px;bottom:-2px;width:2px;background:currentColor;opacity:.5}.xpb .xbar b{display:block;height:8px;flex:none;background:var(--warn)}.xpb .xbar b.over{background:var(--bad,#c33)}
+.refl button{display:block;width:100%;text-align:left;margin:2px 0}.refl small{opacity:.7}
 .svb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
 .svb b{font-size:.9rem}
 .env{margin-top:10px;padding:8px 12px;border:2px solid var(--warn);border-radius:10px;background:color-mix(in srgb,var(--warn) 12%,var(--surface));display:flex;gap:10px;align-items:flex-start}
@@ -302,7 +304,7 @@ button{touch-action:manipulation}
   .pad .pacts{grid-template-columns:1fr 1fr}
   .pad .pacts button{min-height:38px;font-size:.9rem}
   .pad .menu{right:calc(100% + 12px);bottom:0;width:620px}
-  body.drawon .tw,body.drawon .env,body.drawon .svb{margin-right:446px}
+  body.drawon .tw,body.drawon .env,body.drawon .xpb,body.drawon .svb{margin-right:446px}
   body.drawon .pad{right:462px}
   body.drawon.padon{padding-bottom:345px}
   body.drawon .pad .menu{left:auto;right:0;bottom:calc(100% + 12px);width:min(620px,calc(100vw - 494px))}
@@ -317,6 +319,7 @@ button{touch-action:manipulation}
 </div>
 <div class="big" id="big"></div>
 <div class="env dmonly" id="env" hidden></div>
+<div class="xpb dmonly" id="xpb" hidden></div>
 <div class="svb dmonly" id="svb" hidden></div>
 <div class="tw dmonly"><table id="tbl" aria-label="Combatants"></table></div>
 <div class="pad dmonly" id="pad" hidden></div>
@@ -328,6 +331,9 @@ function boot(MON){
 MON.forEach(function(m){if(!m.ctype){var t=(m.type||'').split(',')[0].split(' of ').pop().trim().split(' ').pop().toLowerCase();m.ctype=t.replace(/ies$/,'y').replace(/s$/,'');}});
 var TYPES=Array.from(new Set(MON.map(function(m){return m.ctype;}).filter(Boolean))).sort();
 var CRS=['0','1/8','1/4','1/2'];for(var q=1;q<=30;q++)CRS.push(String(q));
+// Encounter XP (2024 DMG): XP by CR, and per-character budget [Low, Moderate, High] by level.
+var CRXP={'0':10,'1/8':25,'1/4':50,'1/2':100,'1':200,'2':450,'3':700,'4':1100,'5':1800,'6':2300,'7':2900,'8':3900,'9':5000,'10':5900,'11':7200,'12':8400,'13':10000,'14':11500,'15':13000,'16':15000,'17':18000,'18':20000,'19':22000,'20':25000,'21':33000,'22':41000,'23':50000,'24':62000,'25':75000,'26':90000,'27':105000,'28':120000,'29':135000,'30':155000};
+var XPB=[[50,75,100],[100,150,200],[150,225,400],[250,375,500],[500,750,1100],[600,1000,1400],[750,1300,1700],[1000,1700,2100],[1300,2000,2600],[1600,2300,3100],[1900,2900,4100],[2200,3700,4700],[2600,4200,5400],[2900,4900,6200],[3300,5400,7800],[3800,6100,9800],[4500,7200,11700],[5000,8700,14200],[5500,10700,17200],[6400,13200,22000]];
 var crv=function(x){return x==='1/8'?0.125:x==='1/4'?0.25:x==='1/2'?0.5:+x;};
 var CONDS=['Blinded','Charmed','Deafened','Exhaustion','Frightened','Grappled','Incapacitated','Invisible','Paralyzed','Petrified','Poisoned','Prone','Restrained','Stunned','Unconscious','Concentrating'];
 var FX=window.STATUS_FX||{};
@@ -686,6 +692,7 @@ function renderBar(){
   $('#bar').innerHTML=
    '<div class="round"><small>Round</small>'+S.round+'</div>'+
    '<button class="primary" data-act="next">'+(started?'Next turn ▸':'Start combat')+'</button>'+
+   (started?'<button data-act="endc" title="End combat: keeps creatures, HP and statuses; resets round and turn">■ End combat</button>':'')+
    (ui.undo?'<button data-act="undo" title="Undo: '+esc(ui.undo.label)+'">↶ Undo</button>':'')+
    '<span class="spacer"></span>'+
    '<button class="dmonly" data-act="openadd">+ Add</button>'+
@@ -833,8 +840,23 @@ function fxRow(c){
    '<td colspan="4"><span class="name">'+esc(c.name)+'</span><span class="tag">Effect</span>'+(c.desc?'<div class="fx" style="margin-top:2px">'+esc(c.desc)+'</div>':'')+
    '<div class="dsb" style="margin-top:4px"><button data-act="fxvis">'+(c.vis?'Visible to players':'Hidden from players')+'</button><button data-act="fxrm">Remove</button></div></td></tr>';
 }
+function pcLvl(l){if(!l)return 0;if(l.lvl)return l.lvl;return (l.parsed||[]).reduce(function(a,x){return a+(x.level||0);},0);}
+function xpHTML(){
+  var M=S.list.filter(function(c){return c.kind==='mon'&&c.hp>0;}),P=S.list.filter(function(c){return c.kind==='pc';});
+  if(!M.length)return '';
+  var xp=M.reduce(function(a,c){return a+(CRXP[String(c.cr)]||0);},0),B=[0,0,0],miss=[];
+  P.forEach(function(c){var v=pcLvl(libOf(c));if(!v){miss.push(c.name);return;}var r=XPB[Math.min(20,v)-1];B[0]+=r[0];B[1]+=r[1];B[2]+=r[2];});
+  var f=function(n){return n.toLocaleString('en');};
+  if(!B[2])return '<b>Encounter XP '+f(xp)+'</b> · '+M.length+' monsters. '+(P.length?'Set player levels (✎ Edit) to see difficulty.':'Add the party to see difficulty.');
+  var lab=xp<=B[0]?'Low':xp<=B[1]?'Moderate':xp<=B[2]?'High':'Above High';
+  var top=Math.max(xp,B[2])*1.1,pc=function(n){return (n/top*100).toFixed(1)+'%';};
+  return '<b>Encounter XP '+f(xp)+' · '+lab+'</b> <span class="muted">('+M.length+' monsters, '+(P.length-miss.length)+' players)</span>'+
+   '<div class="xbar"><b class="'+(xp>B[2]?'over':'')+'" style="width:'+pc(xp)+'"></b>'+B.map(function(b){return '<i style="left:'+pc(b)+'"></i>';}).join('')+'</div>'+
+   '<span class="muted">Low '+f(B[0])+' · Moderate '+f(B[1])+' · High '+f(B[2])+(miss.length?' · no level: '+esc(miss.join(', '))+' (✎ Edit)':'')+'</span>';
+}
 function renderTable(){
   var h='';
+  var xb=$('#xpb'),xh=S.turnId==null?xpHTML():'';xb.hidden=!xh;xb.innerHTML=xh;
   var ev=$('#env');ev.hidden=!String(S.envNote||'').trim();
   if(!ev.hidden)ev.innerHTML='<div><b>'+esc(S.envName||'Notes')+'</b>\n'+esc(S.envNote)+'</div><button data-act="envx" aria-label="Hide encounter notes">Hide</button>';
   var sb=$('#svb');sb.hidden=ui.sv<0;
@@ -974,7 +996,7 @@ function addPanelHTML(){
         '<button class="x" data-act="dellib" data-l="'+l.id+'" aria-label="Delete '+esc(l.name)+' from library">×</button></div>';
     }).join('');
     h+='<div class="row"><button class="add" data-act="addparty" style="flex:1">Add ticked to encounter</button></div>'+
-       '<div class="row"><input id="newchar" type="text" placeholder="Name (optional: , AC 15, HP 28, init +3)" aria-label="New character"><button data-act="newchar">Save</button></div>'+
+       '<div class="row"><input id="newchar" type="text" placeholder="Name (optional: , AC 15, HP 28, init +3, lvl 2)" aria-label="New character"><button data-act="newchar">Save</button></div>'+
        '<div class="msg">'+esc(ui.msg||'Saved characters are reused every session. Tick who is at the table today.')+'</div>';
   }
   return h;
@@ -1048,6 +1070,7 @@ function pcSheetHTML(c){
   return '</div><h3>Character sheet</h3><div class="muted">Saved with '+esc(l.name)+' for future sessions.'+(l.k?' Update from Kanka replaces ability scores and saves; defences you add here are kept.':'')+'</div>'+
    '<div class="eg ab6">'+AK.map(function(k){var v=ab[k];return '<label><span>'+k.toUpperCase()+' <span data-mod="'+k+'">'+(v==null?'':sgn(Math.floor((v-10)/2)))+'</span></span><input data-pe="abil" data-k="'+k+'" type="number" inputmode="numeric" min="1" max="30" value="'+(v==null?'':v)+'"></label>';}).join('')+'</div>'+
    '<div class="svp6"><b>Save proficiencies</b>'+AK.map(function(k){return '<label><input type="checkbox" data-pe="prof" data-k="'+k+'"'+(pf.indexOf(k)>=0?' checked':'')+'>'+k.toUpperCase()+'</label>';}).join('')+
+   '<label>Level <input data-pe="lvl" type="number" inputmode="numeric" min="1" max="20" placeholder="'+(pcLvl(Object.assign({},l,{lvl:0}))||'')+'" value="'+(l.lvl||'')+'" style="width:4em" title="Total character level, used for encounter XP. Blank = from Kanka"></label>'+
    '<label>Prof. bonus <input data-pe="pb" type="number" inputmode="numeric" min="2" max="6" value="'+pcPb(l)+'" style="width:4em"></label>'+
    '<label>Save DC <input data-pe="dc" type="number" inputmode="numeric" min="8" max="30" placeholder="auto" value="'+(l.dc||'')+'" style="width:4.5em" title="Blank = worked out from class, proficiency and ability"></label></div>'+
    '<div class="eg">'+DLBL.map(function(d){return '<label class="w">'+d[1]+'<input data-pe="'+d[0]+'" type="text" placeholder="'+(d[0]==='cimm'?'e.g. charmed, frightened':'e.g. fire, poison')+'" value="'+esc((l[d[0]]||[]).join(', '))+'"></label>';}).join('');
@@ -1058,6 +1081,7 @@ function pcSheetChange(t,c){
     var md=dr.querySelector('[data-mod="'+k+'"]');if(md)md.textContent=n==null?'':sgn(Math.floor((n-10)/2));}
   else if(f==='prof'){l.saveProf=AK.filter(function(a){var b=dr.querySelector('[data-pe="prof"][data-k="'+a+'"]');return b&&b.checked;});}
   else if(f==='dc'){var dc=Math.floor(+t.value);l.dc=dc>=8&&dc<=30?dc:null;if(!l.dc)t.value='';}
+  else if(f==='lvl'){var lv=Math.floor(+t.value);l.lvl=lv>=1&&lv<=20?lv:null;if(!l.lvl)t.value='';}
   else if(f==='pb'){var pb=Math.floor(+t.value);if(pb>=2&&pb<=6)l.pb=pb;else t.value=pcPb(l);}
   else{
     var ok=f==='cimm'?CONDS.concat(['Exhaustion']).map(function(x){return x.toLowerCase();}):DTYPES;
@@ -1121,13 +1145,47 @@ function doImport(f){
   r.onerror=function(){ui.msg='Could not read that file.';renderDrawer();};
   r.readAsText(f);
 }
+// Rules reference: SRD 5.2 spells and full condition text from reference.json (local file, cached offline).
+var REF=null;
+function refLoad(){if(REF)return;REF={spells:[],conditions:{},loading:1};fetch('reference.json').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){REF=j;if(S.tab==='ref')renderDrawer();}).catch(function(){REF={spells:[],conditions:{},err:1};if(S.tab==='ref')renderDrawer();});}
+var LVN=['Cantrip','1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
+function refHTML(){
+  refLoad();
+  if(REF.loading)return '<p class="muted">Loading rules…</p>';
+  if(REF.err)return '<p class="muted">Could not load reference.json.</p>';
+  if(ui.ref){
+    var cd=REF.conditions[ui.ref];
+    var back='<div class="row"><button data-act="refback">◂ Back</button></div>';
+    if(cd)return back+'<h3>'+esc(ui.ref)+'</h3>'+esc(cd).replace(/\n \* /g,'<br>• ').replace(/\n/g,'<br>');
+    var x=REF.spells.find(function(z){return z.n===ui.ref;});
+    if(x){var cap=function(t){return t.charAt(0).toUpperCase()+t.slice(1);};
+      return back+'<h3>'+esc(x.n)+'</h3><p><i>'+(x.l?LVN[x.l]+'-level '+esc(x.sc):cap(esc(x.sc))+' cantrip')+(x.ri?' (ritual)':'')+'</i></p>'+
+      '<p><b>Casting time</b> '+esc(cap(x.t))+' · <b>Range</b> '+esc(x.r)+'<br><b>Components</b> '+esc(x.c)+'<br><b>Duration</b> '+(x.cn?'Concentration, ':'')+esc(x.d)+'</p>'+
+      (x.sv||x.at||x.dt.length?'<p>'+(x.sv?'<b>Save</b> '+esc(cap(x.sv))+' ':'')+(x.at?'<b>Spell attack</b> ':'')+(x.dt.length?'<b>Damage</b> '+esc(x.dr)+' '+esc(x.dt.join(', ')):'')+'</p>':'')+
+      '<p>'+esc(x.tx).replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>')+'</p>'+(x.hl?'<p><b>At higher levels.</b> '+esc(x.hl)+'</p>':'')+
+      '<p class="muted">Classes: '+esc(x.cl.map(cap).join(', '))+'</p>';}
+  }
+  var q=(ui.rq||'').toLowerCase(),lv=ui.rl==null?'':ui.rl,cl=ui.rc||'';
+  var C=Object.keys(REF.conditions).filter(function(k){return !lv&&!cl&&(!q||k.toLowerCase().indexOf(q)>=0);});
+  var SP=REF.spells.filter(function(x){return (!q||x.n.toLowerCase().indexOf(q)>=0)&&(lv===''||x.l===+lv)&&(!cl||x.cl.indexOf(cl)>=0);});
+  var cls=['bard','cleric','druid','paladin','ranger','sorcerer','warlock','wizard'];
+  return '<input class="search" id="refq" type="search" placeholder="Search spells and conditions" value="'+esc(ui.rq||'')+'" aria-label="Search rules">'+
+   '<div class="flt">'+selHTML('rl','rl','All levels',LVN.map(function(n,i){return [String(i),n];}),lv)+selHTML('rc','rc','All classes',cls.map(function(c){return [c,c.charAt(0).toUpperCase()+c.slice(1)];}),cl)+'</div>'+
+   '<div class="refl" id="refl">'+refList(C,SP)+'</div>';
+}
+function refList(C,SP){
+  var h=C.map(function(k){return '<button data-act="ref" data-n="'+esc(k)+'"><b>'+esc(k)+'</b> <small>condition</small></button>';}).join('');
+  h+=SP.slice(0,80).map(function(x){return '<button data-act="ref" data-n="'+esc(x.n)+'"><b>'+esc(x.n)+'</b> <small>'+(x.l?LVN[x.l]:'cantrip')+' · '+esc(x.t)+(x.cn?' · conc.':'')+(x.sv?' · '+esc(x.sv.slice(0,3))+' save':'')+'</small></button>';}).join('');
+  if(SP.length>80)h+='<p class="muted">'+(SP.length-80)+' more, narrow the search.</p>';
+  return h||'<p class="muted">Nothing found.</p>';
+}
 function renderDrawer(){
   var dr=$('#drawer');
   dr.hidden=!ui.drawer;
   document.body.classList.toggle('drawon',ui.drawer);
   if(!ui.drawer)return;
-  dr.innerHTML='<div class="dh"><button class="tab'+(S.tab==='add'?' on':'')+'" data-act="tab" data-t="add">Add</button><button class="tab'+(S.tab==='stat'?' on':'')+'" data-act="tab" data-t="stat">Stat block</button>'+(S.edit!=null&&findC(S.edit)?'<button class="tab'+(S.tab==='edit'?' on':'')+'" data-act="tab" data-t="edit">Edit</button>':'')+'<button class="tab'+(S.tab==='data'?' on':'')+'" data-act="tab" data-t="data">Data</button><button data-act="close" aria-label="Close panel">Close</button></div>'+
-    (S.tab==='add'?addPanelHTML():S.tab==='data'?dataHTML():S.tab==='edit'?editHTML():statHTML());
+  dr.innerHTML='<div class="dh"><button class="tab'+(S.tab==='add'?' on':'')+'" data-act="tab" data-t="add">Add</button><button class="tab'+(S.tab==='stat'?' on':'')+'" data-act="tab" data-t="stat">Stat block</button>'+(S.edit!=null&&findC(S.edit)?'<button class="tab'+(S.tab==='edit'?' on':'')+'" data-act="tab" data-t="edit">Edit</button>':'')+'<button class="tab'+(S.tab==='ref'?' on':'')+'" data-act="tab" data-t="ref">Rules</button><button class="tab'+(S.tab==='data'?' on':'')+'" data-act="tab" data-t="data">Data</button><button data-act="close" aria-label="Close panel">Close</button></div>'+
+    (S.tab==='add'?addPanelHTML():S.tab==='ref'?refHTML():S.tab==='data'?dataHTML():S.tab==='edit'?editHTML():statHTML());
 }
 function renderBoard(){if(!RO)ccSweep();renderBar();renderStrip();renderTurn();renderTable();renderPad();}
 function renderAll(){
@@ -1137,8 +1195,8 @@ function renderAll(){
 function khpDiff(l){return !!(l.k&&l.hpEst&&l.hp!==l.hpEst);}
 function parseChar(t){
   var name=t.split(',')[0].trim();if(!name)return null;
-  var ac=(t.match(/AC\s*(\d+)/i)||[])[1],hp=(t.match(/HP\s*(\d+)/i)||[])[1],ini=(t.match(/init\w*\s*([+-]?\d+)/i)||[])[1];
-  return {name:name,ac:ac?+ac:null,hp:hp?+hp:null,ib:ini?+ini:0};
+  var ac=(t.match(/AC\s*(\d+)/i)||[])[1],hp=(t.match(/HP\s*(\d+)/i)||[])[1],ini=(t.match(/init\w*\s*([+-]?\d+)/i)||[])[1],lv=(t.match(/(?:lvl|level|lv)\s*(\d+)/i)||[])[1];
+  return {name:name,ac:ac?+ac:null,hp:hp?+hp:null,ib:ini?+ini:0,lvl:lv?Math.min(20,+lv):null};
 }
 function findC(id){return S.list.find(function(x){return x.id===+id;});}
 function pruneSel(){Object.keys(ui.sel).forEach(function(k){if(!findC(k))delete ui.sel[k];});}
@@ -1157,6 +1215,7 @@ $('#bar').addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;
   var a=b.dataset.act;
   if(a==='undo'){undo();}
+  else if(a==='endc'){snap('end combat');S.turnId=null;S.round=1;S.prevTurn=null;ui.legDis=null;S.list.forEach(function(c){delete c.exp;c.rx=false;c.la=0;});toast('Combat ended. Creatures, HP and statuses kept.');}
   else if(a==='next'){snap('next turn');nextTurn();ui.confirmClear=false;}
   else if(a==='openadd'){ui.drawer=true;S.tab='add';}
   else if(a==='saves'){ui.sv=ui.sv>=0?-1:ui.svLast;renderBar();renderTable();return;}
@@ -1321,7 +1380,7 @@ var dr=$('#drawer');
 dr.addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;
   var act=b.dataset.act;
-  if(act==='qty'||act==='at')return;
+  if(act==='qty'||act==='at'||b.tagName==='SELECT')return;
   if(act==='export'){doExport();renderDrawer();return;}
   if(act==='import'){var pf=$('#impfile');if(pf)pf.click();return;}
   if(act==='addmonfile'){var mf=$('#monfile');if(mf)mf.click();return;}
@@ -1329,6 +1388,8 @@ dr.addEventListener('click',function(e){
   if(act==='tablewin'){window.open(location.pathname+'?view=table','_blank');return;}
   if(act==='close'){ui.drawer=false;}
   else if(act==='tab'){S.tab=b.dataset.t;ui.msg=ui.emsg='';}
+  else if(act==='ref'){ui.ref=b.dataset.n;dr.scrollTop=0;}
+  else if(act==='refback'){ui.ref=null;}
   else if(act==='sub'){S.sub=b.dataset.s;ui.msg='';}
   else if(act==='set'){S[b.dataset.k]=b.dataset.v;}
   else if(act==='view'){S.stat=b.dataset.m;S.statC=null;S.tab='stat';}
@@ -1356,8 +1417,8 @@ dr.addEventListener('click',function(e){
   else if(act==='newchar'){
     var inp=$('#newchar');var p=parseChar(inp?inp.value:'');
     var ex=p&&S.lib.find(function(l){return l.name.toLowerCase()===p.name.toLowerCase();});
-    if(ex){if(p.ac!=null){ex.ac=p.ac;ex.chk=false;}if(p.hp!=null){ex.hp=p.hp;ex.hpMan=true;}if(/init/i.test(inp.value))ex.ib=p.ib;ui.msg='Updated '+ex.name+'.';}
-    else if(p){S.lib.push({id:'l'+(S.libNext++),name:p.name,ac:p.ac==null?10:p.ac,hp:p.hp==null?10:p.hp,ib:p.ib,chk:p.ac==null,hpMan:p.hp!=null});ui.msg='Saved '+p.name+(p.ac==null||p.hp==null?' (AC/HP default 10; change them with ✎ Edit once added).':'.');}
+    if(ex){if(p.ac!=null){ex.ac=p.ac;ex.chk=false;}if(p.hp!=null){ex.hp=p.hp;ex.hpMan=true;}if(/init/i.test(inp.value))ex.ib=p.ib;if(p.lvl)ex.lvl=p.lvl;ui.msg='Updated '+ex.name+'.';}
+    else if(p){S.lib.push({id:'l'+(S.libNext++),name:p.name,ac:p.ac==null?10:p.ac,hp:p.hp==null?10:p.hp,ib:p.ib,lvl:p.lvl,chk:p.ac==null,hpMan:p.hp!=null});ui.msg='Saved '+p.name+(p.ac==null||p.hp==null?' (AC/HP default 10; change them with ✎ Edit once added).':'.');}
     else{ui.msg='Type at least a name, e.g. Thorn (optionally , AC 15, HP 28, init +3)';}
   }
   else if(act==='kanka'){
@@ -1389,6 +1450,7 @@ dr.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='new
 dr.addEventListener('input',function(e){
   var t=e.target;
   if(t.id==='search'){ui.q=t.value;$('#results').innerHTML=resultsHTML();}
+  else if(t.id==='refq'){ui.rq=t.value;ui.ref=null;var rh=document.createElement('div');rh.innerHTML=refHTML();$('#refl').innerHTML=rh.querySelector('#refl').innerHTML;}
   else if(t.dataset.act==='qty'){ui.qty[t.dataset.m]=t.value;}
   else if(t.id==='fxname')ui.fx.name=t.value;
   else if(t.id==='fxinit')ui.fx.init=t.value;
@@ -1415,6 +1477,7 @@ dr.addEventListener('change',function(e){
   if(t.dataset.act==='at'){S.atTable[t.dataset.l]=t.checked;save();}
   if(t.id==='fxvis')ui.fx.vis=t.checked;
   if(t.id==='encroll'){S.encRoll=t.checked;save();}
+  if(t.dataset.act==='rl'||t.dataset.act==='rc'){ui[t.dataset.act]=t.value;renderDrawer();}
   if(t.dataset.act==='ftype'||t.dataset.act==='fmin'||t.dataset.act==='fmax'){ui[t.dataset.act==='ftype'?'fType':(t.dataset.act==='fmin'?'fMin':'fMax')]=t.value;$('#results').innerHTML=resultsHTML();}
   if(t.id==='impfile'&&t.files&&t.files[0]){doImport(t.files[0]);t.value='';}
   if(t.id==='monfile'&&t.files&&t.files[0]){readMonFile(t.files[0],function(msg){ui.msg=msg;renderDrawer();});t.value='';}

@@ -10,6 +10,7 @@ Player characters can be synced from a [Kanka](https://kanka.io) campaign throug
 - Initiative order with round and turn tracking. A sticky turn card shows the current creature's attacks, statuses and death saves.
 - A compact combat table: tap rows to select one or more combatants. Status chips stay small; their rule text appears on selected rows and on the turn card.
 - A bottom action pad with a number wheel to apply damage, healing, temp HP or statuses to the selection. Rarely used actions (Max HP −, Reset max, Group) sit behind **More**.
+- **End combat** (next to Next turn) stops the turn order but keeps creatures, HP and statuses; Start combat begins again at round 1.
 - **Undo** (↶ next to Next turn) reverses the last damage, heal, status change, death save, removal, turn change or Clear.
 - **Concentration reminders:** when a Concentrating creature takes damage, a note gives the Con save DC (half the damage, min 10, max 30). At 0 HP, Concentrating is removed automatically.
 - **Damage types:** pick a type (fire, cold, …) before Damage or Half. Each target takes the right amount: halved if it resists (round down), 0 if immune, doubled if vulnerable. Monster defences come from their stat blocks, player defences from Kanka; Raging and Petrified add their resistances. A note shows what each target took.
@@ -38,7 +39,11 @@ Player characters can be synced from a [Kanka](https://kanka.io) campaign throug
 - **Condition immunities:** applying a status to a group skips creatures immune to it (from monster stat blocks and player traits) and lists who was skipped. Spell statuses count the condition they impose: Hypnotic Pattern = Charmed, Fear and Turn Undead = Frightened, Stinking Cloud = Poisoned, Sleep = Exhaustion or Unconscious.
 - The **Saves** button shows one chosen saving throw for every combatant, players and monsters alike. Shaded means proficient. Statuses and species traits add notes such as `adv.`, `+2` or `auto-fail`. Player saves need Kanka data.
 
+**Rules reference**
+- The **Rules** tab in the drawer searches all 339 SRD 5.2 spells (filter by level and class) and shows the full text of the 15 conditions. The data is a local file (`reference.json`), so it works offline.
+
 **Encounter prep and table view**
+- **Encounter XP** (2024 DMG): while combat isn't running, a bar above the table shows the living monsters' total XP against the party's Low, Moderate and High budgets. Player levels come from Kanka, or set **Level** on the character sheet (or type `Thorn, lvl 3`).
 - Effects: lair actions, hazards or timers placed at a fixed initiative, either visible to players or hidden.
 - An environment banner for terrain, light or weather.
 - Prepared encounters: save a built encounter with notes, then **Load** it (replaces the monsters and keeps the players) or **Add** it as reinforcements.
@@ -82,6 +87,8 @@ Bugs found and fixed are logged in `BUGS.md`.
 | `index.html` | The whole app: UI, styles and logic |
 | `statuses.js` | Condition and status definitions with their mechanics |
 | `monsters.json` | Built-in SRD 5.2 monster data |
+| `reference.json` | SRD 5.2 spells and conditions (built by `tools/build_reference.py` from open5e-api) |
+| `ROADMAP.md` | Goal tracker and planned features |
 | `players.json` | Player characters generated from Kanka |
 | `tools/kanka_players.py` | Kanka → `players.json` script |
 | `.github/workflows/kanka-players.yml` | Manual GitHub Action that runs the script and commits the result |
@@ -103,4 +110,4 @@ It can also be hosted as-is on GitHub Pages. Opening `index.html` directly from 
 
 ## Data and licence
 
-Monster data and rules references are based on the SRD 5.2, embedded for offline use. App data stays in your browser on the current device. Export it before and after each session as a backup.
+Monster data, spells and rules references are based on the SRD 5.2 (CC-BY-4.0; spell data via [open5e-api](https://github.com/open5e/open5e-api)), embedded for offline use. App data stays in your browser on the current device. Export it before and after each session as a backup.

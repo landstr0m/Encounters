@@ -2,6 +2,15 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-03 — XP, End combat, Rules tab
+
+| # | Bug | Cause | Fix |
+|---|-----|-------|-----|
+| 9 | XP bar fill was invisible | Its class `bar` clashed with the round bar's styles | Renamed to `xbar` |
+| 8 | Tapping a filter dropdown in the drawer could re-render the drawer and close the dropdown | Clicks on `<select>` fell through to the drawer's re-render | Clicks on dropdowns are ignored; changes are handled on `change` |
+
+Added: encounter XP bar (planning only), End combat, player Level field, Rules tab with local SRD 5.2 spells and conditions. Test battery now 41 tests, all passing.
+
 ## 2026-11-02 — off-turn info
 
 | # | Bug | Cause | Fix |
