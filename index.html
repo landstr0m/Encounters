@@ -51,7 +51,7 @@ input{background:var(--surface);border:1px solid var(--line);border-radius:8px;p
 
 .strip{position:relative;display:flex;gap:8px;overflow-x:auto;padding:4px 2px 6px;scroll-behavior:smooth}
 .tok{flex:none;width:128px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 9px;display:flex;flex-direction:column;gap:2px;min-height:96px}
-.tok .lab{height:1.05em;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.tok .lab{height:1.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 .tok .in{font-family:var(--display);font-size:1.5rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
 .tok .nm{font-family:var(--display);font-size:1.15rem;font-weight:600;line-height:1.1;overflow-wrap:anywhere}
 .tok.now{border:2px solid var(--accent);padding:5px 8px;background:color-mix(in srgb,var(--accent) 14%,var(--surface))}
@@ -769,7 +769,7 @@ function grpTokHTML(g,nid){
   var hp=0,mx=0;g.forEach(function(c){hp+=Math.max(0,c.hp);mx+=c.max;});var pct=mx?hp/mx*100:0,lvl=pct>50?'ok':(pct>25?'warn':'bad');
   var nm=g[0].cg||(MON.find(function(m){return m.id===g[0].monId;})||{name:g[0].name}).name+' Group';
   var ns=ui.present?0:g.filter(function(c){return ui.sel[c.id];}).length;
-  return '<div class="tok mon'+(cur?' now':'')+(nx?' next':'')+(ns?' sel':'')+'"><div class="lab">'+(cur?'Up: '+esc(cur.name):(nx?'Next':''))+'</div><div class="in">'+g[0].init+'</div><div class="nm">'+esc(nm)+'</div>'+
+  return '<div class="tok mon'+(cur?' now':'')+(nx?' next':'')+(ns?' sel':'')+'"><div class="lab">'+(cur?'Up: '+esc((/ (\d+)$/.exec(cur.name)||[])[1]?'#'+/ (\d+)$/.exec(cur.name)[1]:cur.name):(nx?'Next':''))+'</div><div class="in">'+g[0].init+'</div><div class="nm">'+esc(nm)+'</div>'+
    '<div class="mini"><span>×'+up.length+'</span>'+(ns&&ns<g.length?'<span>'+ns+' selected</span>':'')+(bl?'<span class="bl">'+bl+' bloodied</span>':'')+(g.length>up.length?'<span class="dn">'+(g.length-up.length)+' down</span>':'')+'</div>'+
    (ui.present?'':'<div class="track"><div class="fill '+lvl+'" style="width:'+pct+'%"></div></div>')+'</div>';
 }
@@ -873,7 +873,7 @@ function rowHTML(c){
   return '<tr class="r'+(c.id===S.turnId?' turn':'')+(down?' down':'')+(ui.sel[c.id]?' sel':'')+'" data-id="'+c.id+'">'+
    '<td class="c-in"><input class="num" type="number" inputmode="numeric" data-act="init" placeholder="'+esc(ph)+'" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
    '<td><span class="name">'+esc(c.name)+'</span>'+(c.kind==='pc'?'':'<span class="tag">CR '+esc(c.cr)+'</span>')+(ui.sv>=0?(saveOf(c,ui.sv)||''):'')+offHTML(c)+'<div class="conds">'+chips+'</div>'+(ui.sel[c.id]?fxHTML(c):'')+'</td>'+
-   '<td class="c-ac"><button class="acb" data-act="edit" title="Current AC'+(effAC(c)!==+c.ac?' (base '+c.ac+')':'')+'. Tap to set base AC" aria-label="AC '+effAC(c)+' for '+esc(c.name)+', edit">'+acHTML(c)+'</button></td>'+
+   '<td class="c-ac"><button class="acb" data-act="edit" title="Current AC'+(effAC(c)!==+c.ac?' (base '+c.ac+')':'')+'. Tap to set base AC" aria-label="AC '+effAC(c)+' for '+esc(c.name)+', edit">'+(effAC(c)!==+c.ac?'<b class="em">'+effAC(c)+'</b>':''+effAC(c))+'</button></td>'+
    '<td class="c-hp"><div class="hpnum"><span class="cur">'+c.hp+'</span><span class="max">/ '+c.max+'</span>'+(c.base!=null?'<span class="mred">max \u2212'+(c.base-c.max)+'</span>':'')+(c.temp>0?'<span class="temp">+'+c.temp+'</span>':'')+(down?'<span class="state">'+(pcDead?'Dead':'Down')+'</span>':'')+'</div>'+
      '<div class="track"><div class="fill '+lvl+'" style="width:'+pct+'%"></div></div>'+(pcDead?'<div class="dsd">Heal 1+ HP to revive</div>':dsHTML(c))+'</td>'+
    '<td class="c-i"><button class="ib" data-act="edit" aria-label="Edit '+esc(c.name)+'" title="Edit">✎</button><button class="ib" data-act="info" aria-label="Stat block for '+esc(c.name)+'">ⓘ</button></td>'+

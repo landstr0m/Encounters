@@ -2,6 +2,13 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-03 (evening) — iPad test feedback
+
+| # | Bug | Cause | Fix |
+|---|-----|-------|-----|
+| 11 | "Up: Githzerai Monk 1" on a group token overlapped the initiative number | Long label wrapped onto a second line | Label is one line and shows the member number ("Up: #1") |
+| 10 | Modified AC in the table shield (e.g. 21 with 16 struck through) was cramped | Two numbers in a small shield | Shield shows only the current AC, in blue when modified; base AC stays in the tooltip. Initiative tokens keep the struck-through base |
+
 ## 2026-11-03 — XP, End combat, Rules tab
 
 | # | Bug | Cause | Fix |
