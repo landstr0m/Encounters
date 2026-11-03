@@ -34,6 +34,13 @@ Still open (📋): saved target lists, "after N rounds" durations. (Prepared enc
 - Monster spellcasting lines linked to spell entries.
 - Player spell lists (needs a spell list per character, e.g. a Kanka property).
 
+### Character library (📋)
+The party list should become a source-independent library (Kanka may not stay the main source; D&D Beyond or another character builder may be added).
+- Groups / tags (e.g. "Blackrock regulars", "guest players") and filtering the list by group.
+- Import from several sources into the same library, with the source shown per character.
+- Keep the library small: it is for session planning, not an archive. Export covers backups.
+- Done: search, ticked first, pinned Add button, Delete all (keeps characters in the current encounter, hand-made included).
+
 ### Data and edition (📋)
 - Local monster images (kept out of the repo).
 - 2014 (5.1) edition toggle.

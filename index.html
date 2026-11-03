@@ -72,15 +72,23 @@ input{background:var(--surface);border:1px solid var(--line);border-radius:8px;p
 .dfoot .add{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dfoot button[disabled]{opacity:.55}
 button.danger.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
+/* Landscape phone: action pad docks to the right, table stays tappable on the left */
+@media (max-height:500px) and (orientation:landscape){
+  body.padon{padding-bottom:16px}
+  body.padon .tw,body.padon .xpb,body.padon .env,body.padon .svb,body.padon .bar,body.padon .strip,body.padon .turn{margin-right:calc(min(330px,44vw) + 8px)}
+  body .pad{left:auto;top:0;width:min(330px,44vw);border-top:0;border-left:2px solid var(--ok);overflow-y:auto;padding-top:calc(8px + env(safe-area-inset-top,0px))}
+  body .pad .pi{max-width:none}body .pad .wheelbox{width:72px;height:110px}body .pad .amtrow span{display:none}body .pad .amtin{width:100%}
+  body .pad .pacts{grid-template-columns:1fr 1fr}body .pad .pacts button{min-height:36px;font-size:.85rem}
+  body .pad .menu{position:fixed;left:8px;right:calc(min(330px,44vw) + 8px);top:8px;bottom:8px;width:auto;max-height:none!important}
+}
 /* Phone: build encounters on the go. Rows become two-line cards, toolbar becomes icons. */
-@media (max-width:600px){
+@media (max-width:600px),(max-height:500px) and (orientation:landscape){
   .bar{gap:6px;flex-wrap:nowrap}
   .bar .tx{display:none}
   .bar button{min-width:44px;padding-inline:10px}
   .bar .primary{padding-inline:14px;white-space:nowrap}
   .bar .spacer{flex:1 1 0}
   .round{font-size:1.5rem}
-  body.idle .strip{display:none}
   .tok{width:96px;min-height:72px}.tok .nm{font-size:.95rem}.tok .in{font-size:1.2rem}
   .tw #tbl,.tw #tbl tbody{display:block;min-width:0;width:100%}
   tr.grp{display:block}tr.grp th{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
@@ -93,6 +101,7 @@ button.danger.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
   .num{width:46px}
   .lib .meta{font-size:.78rem}
 }
+body.idle .strip{display:none}
 .fxb{padding:4px 0 8px;font-size:.9rem}.fxb button{margin-left:6px}
 .refl button{display:block;width:100%;text-align:left;margin:2px 0}.refl small{opacity:.7}
 .svb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
@@ -174,7 +183,7 @@ tr.r.down{opacity:.8}
 tr.dead td{font-size:.85rem;color:var(--muted);padding:4px 8px;border-top:1px solid var(--line)}
 tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 0}
 .c-in,.c-ac{width:66px;text-align:center}
-.acb{min-height:40px;width:100%;padding:0 4px;font-family:var(--display);font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums;background:transparent}
+.acb{min-height:46px;min-width:48px;width:auto;margin:0 auto;display:block;border:0;padding:0 8px 6px;background:no-repeat center/100% 100% url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 46' preserveAspectRatio='none'%3E%3Cpath d='M20 2 L37 8 V22 C37 33 29 40 20 44 C11 40 3 33 3 22 V8 Z' fill='%2394a3b822' stroke='%2394a3b8' stroke-width='2'/%3E%3C/svg%3E");font-family:var(--display);font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums;}
 .acb s,.acp s{font-size:.7em;color:var(--muted);margin-left:4px;font-weight:400}.acb .em,.acp .em{color:var(--accent)}
 .off{display:flex;flex-wrap:wrap;gap:4px;margin:3px 0;align-items:center}
 .off span,.off button{font-size:.72rem;font-weight:600;padding:1px 7px;border-radius:999px;border:1px solid var(--line);min-height:0;line-height:1.5}
