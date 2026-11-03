@@ -3781,10 +3781,32 @@
     [
      "Multiattack",
      "The arcanaloth makes three Fiendish Burst attacks. It can replace one attack with a Banishing Claw attack."
+    ],
+    [
+     "Banishing Claw (Requires Soul Tome)",
+     "Melee Attack Roll: +9, reach 5 ft. Hit: 10 (2d4 + 5) Slashing damage plus 19 (3d12) Psychic damage. If the target is a creature, it is subjected to the following effect. Charisma Saving Throw: DC 17. Failure: The target is trapped in a demiplane inside the Soul Tome. While trapped there, the target has the Incapacitated condition. At the end of each of its turns, the target repeats the save, escaping the tome on a success. When the target escapes, it appears in the space it left or, if that space is occupied, the nearest unoccupied space. If the target fails three of these saves while in the demiplane, it becomes bound to the tome and can escape only if the tome is reduced to 0 Hit Points."
+    ],
+    [
+     "Fiendish Burst",
+     "Melee or Ranged Attack Roll: +9, reach 5 ft. or range 120 ft. Hit: 31 (4d12 + 5) Necrotic damage."
+    ],
+    [
+     "Spellcasting",
+     "The arcanaloth casts one of the following spells, requiring no Material components and using Intelligence as the spellcasting ability (spell save DC 17): At Will: Alter Self, Detect Magic, Identify, Mage Hand, Prestidigitation 1/Day Each: Contact Other Plane, Detect Thoughts, Dimension Door, Mind Blank"
     ]
    ],
-   "bonus": [],
-   "react": [],
+   "bonus": [
+    [
+     "Teleport",
+     "The arcanaloth teleports up to 30 feet to an unoccupied space it can see."
+    ]
+   ],
+   "react": [
+    [
+     "Counterspell",
+     "The arcanaloth casts Counterspell in response to that spell’s trigger, using the same spellcasting ability as Spellcasting."
+    ]
+   ],
    "leg": [],
    "image": "",
    "ed": "book",
@@ -5872,11 +5894,32 @@
     [
      "Engulf",
      "The blob moves up to its Speed and can move through the spaces of Huge or smaller creatures and objects. Strength Saving Throw: DC 23, each creature or object whose space the blob enters for the first time during this move. Failure: The target is engulfed. While engulfed, a target has Total Cover against attacks and other effects outside the blob, and when the blob moves, the engulfed target moves with it. A nonmagical object is destroyed after spending 1 minute engulfed. While engulfed, a creature takes 21 (6d6) Force damage at the start of each of its turns, is suffocating, has the Restrained condition, and repeats the save at the end of each of its turns. An engulfed creature that is reduced to 0 Hit Points dissolves into ash, which is ejected into the Astral Sea. Success: The target escapes and enters the nearest unoccupied space."
+    ],
+    [
+     "Restraining Glob",
+     "The blob lobs a slimy glob at one Large or smaller creature it can see within 600 feet of itself. Dexterity Saving Throw: DC 23, the targeted creature. Failure: 18 (3d6 + 8) Acid damage. The glob rolls the target 60 feet straight toward the blob, and the target has the Restrained condition until the end of its next turn, when the glob harmlessly dissolves. Success: Half damage only."
     ]
    ],
    "bonus": [],
    "react": [],
-   "leg": [],
+   "leg": [
+    [
+     "Legendary Action Uses",
+     "3. Immediately after another creature’s turn, the blob can expend a use to take one of the following actions. The blob regains all expended uses at the start of each of its turns."
+    ],
+    [
+     "Decay",
+     "The blob deals 14 (4d6) Necrotic damage to each creature engulfed by it. The blob can’t take this action again until the start of its next turn."
+    ],
+    [
+     "Grasping Glob",
+     "The blob uses Restraining Glob. The blob can’t take this action again until the start of its next turn."
+    ],
+    [
+     "Lashing Goop",
+     "The blob makes one Pseudopod attack."
+    ]
+   ],
    "image": "",
    "ed": "book",
    "page": 50
@@ -11030,7 +11073,7 @@
    "actions": [
     [
      "Multiattack",
-     "The erinyes makes three Infernal Sword attacks and can use Entangling Rope."
+     "The erinyes makes three Withering Sword attacks and can use Entangling Rope."
     ],
     [
      "Withering Sword",
@@ -27701,6 +27744,18 @@
     [
      "Claw",
      "Melee Attack Roll: +11, reach 5 ft. Hit: 14 (2d6 + 7) Slashing damage plus 7 (2d6) Cold damage."
+    ],
+    [
+     "Ice Throw",
+     "Ranged Attack Roll: +11, range 60/240 ft. Hit: 12 (2d4 + 7) Bludgeoning damage plus 7 (2d6) Cold damage."
+    ],
+    [
+     "Chilling Gaze",
+     "Constitution Saving Throw: DC 18, one creature the yeti can see within 30 feet. Failure: 21 (6d6) Cold damage, and the target has the Paralyzed condition until the start of the yeti’s next turn unless the target has Immunity to Cold damage. Success: The target is immune to this yeti’s Chilling Gaze for 1 hour."
+    ],
+    [
+     "Cold Breath (Recharge 6)",
+     "Constitution Saving Throw: DC 18, each creature in a 30-foot Cone. Failure: 45 (10d8) Cold damage. Success: Half damage."
     ]
    ],
    "bonus": [],
