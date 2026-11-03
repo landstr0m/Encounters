@@ -377,10 +377,22 @@ button{touch-action:manipulation}
 
 <script src="statuses.js"></script>
 <script>
+/* CODE MAP (search for the "=====" banners)
+   1 Rules data   2 State (S saved, ui not saved)   3 Combat logic   4 Board rendering
+   5 Drawer panels   6 Event handlers   7 Start-up
+   Patterns used everywhere:
+   - Render functions rebuild HTML strings; state changes then call save() + renderBoard() / renderDrawer().
+   - Buttons have data-act="name"; the area's click listener switches on it (search "act==='name'" to find a handler).
+   - snap('label') before a change makes it undoable (one step).
+   - esc() every piece of user or data text that goes into HTML; rich() for stat block text (dice, spell links).
+   - Add a test in tests/run_tests.py for each feature; bump CACHE in sw.js when publishing.
+*/
 function boot(MON){
 MON.forEach(function(m){if(!m.ctype){var t=(m.type||'').split(',')[0].split(' of ').pop().trim().split(' ').pop().toLowerCase();m.ctype=t.replace(/ies$/,'y').replace(/s$/,'');}});
 var TYPES=Array.from(new Set(MON.map(function(m){return m.ctype;}).filter(Boolean))).sort();
 var CRS=['0','1/8','1/4','1/2'];for(var q=1;q<=30;q++)CRS.push(String(q));
+
+// ================= 1. RULES DATA: XP tables, statuses, spell effects, exclusions =================
 // Encounter XP (2024 DMG): XP by CR, and per-character budget [Low, Moderate, High] by level.
 var CRXP={'0':10,'1/8':25,'1/4':50,'1/2':100,'1':200,'2':450,'3':700,'4':1100,'5':1800,'6':2300,'7':2900,'8':3900,'9':5000,'10':5900,'11':7200,'12':8400,'13':10000,'14':11500,'15':13000,'16':15000,'17':18000,'18':20000,'19':22000,'20':25000,'21':33000,'22':41000,'23':50000,'24':62000,'25':75000,'26':90000,'27':105000,'28':120000,'29':135000,'30':155000};
 var XPB=[[50,75,100],[100,150,200],[150,225,400],[250,375,500],[500,750,1100],[600,1000,1400],[750,1300,1700],[1000,1700,2100],[1300,2000,2600],[1600,2300,3100],[1900,2900,4100],[2200,3700,4700],[2600,4200,5400],[2900,4900,6200],[3300,5400,7800],[3800,6100,9800],[4500,7200,11700],[5000,8700,14200],[5500,10700,17200],[6400,13200,22000]];
@@ -571,6 +583,8 @@ var isDead=function(c){return c.kind==='mon'&&c.hp<=0;};
 var isPcDead=function(c){return c.kind==='pc'&&c.conds.indexOf('Dead')>=0;};
 var isOut=function(c){return isDead(c)||isPcDead(c);};
 
+
+// ================= 2. STATE: S (saved to localStorage, exported) and ui (this screen only, not saved) =================
 var S={enc:[],encRoll:true,envName:'',envNote:'',round:1,turnId:null,list:[],next:1,libNext:7,tab:'add',sub:'monsters',stat:null,atTable:{},initMode:'each',hpMode:'roll',
  lib:[{id:'l1',name:'Aria (example)',ac:16,hp:31,ib:2},{id:'l2',name:'Brom (example)',ac:18,hp:38,ib:1},{id:'l3',name:'Wren (example)',ac:14,hp:24,ib:3},
       {id:'l4',name:'Tolliver (example)',ac:12,hp:20,ib:1},{id:'l5',name:'Sable (example)',ac:15,hp:27,ib:4},{id:'l6',name:'Marek (example)',ac:17,hp:34,ib:0}]};
@@ -597,6 +611,8 @@ function stepFrom(O,i){
   }
   return null;
 }
+
+// ================= 3. COMBAT LOGIC: turns, adding creatures, damage, healing, undo =================
 function nextTurn(){
   var O=order();if(!O.length)return;
   var idx=O.findIndex(function(c){return c.id===S.turnId;});
@@ -737,6 +753,8 @@ function dsHTML(c){
   return '<div class="ds"><div class="dsl"><span class="dl">Saves</span>'+dots('s',ds.s)+'<span class="dl">Fails</span>'+dots('f',ds.f)+(ds.s>=3?'<span class="stb">Stable</span>':'')+'</div>'+
     '<div class="dsb"><button data-act="dsS">Success</button><button data-act="dsF">Fail</button><button data-act="ds20">Nat 20</button><button data-act="ds1">Nat 1</button></div></div>';
 }
+
+// ================= 4. BOARD RENDERING: top bar, initiative strip, turn card, table, XP bar, action pad =================
 function renderBar(){
   if(RO){$('#bar').innerHTML='<div class="round"><small>Round</small>'+S.round+'</div>';return;}
   var started=S.turnId!=null;
@@ -981,6 +999,8 @@ function resultsHTML(){
      '<button class="add" data-act="addmon" data-m="'+m.id+'">Add</button></div>';
   }).join('')+(all.length>r.length?'<p class="muted">Showing '+r.length+' of '+all.length+'. Type to narrow the list.</p>':'')||'<p class="muted">No monster matches.</p>';
 }
+
+// ================= 5. DRAWER PANELS: stat block, Add (monsters / party / effects), encounters, data, edit, rules =================
 function statHTML(){
   if(S.stat==='pc'){
     var pc=findC(S.statC),kl=pc&&S.lib.find(function(l){return l.id===pc.libId;});
@@ -1092,7 +1112,7 @@ function partyHTML(){
    '<div class="dfoot"><button class="add" data-act="addparty" style="flex:1"'+(tk.length?'':' disabled')+'>'+(tk.length?'Add '+tk.length+' ticked: '+esc(tk.map(function(l){return l.name;}).join(', ')):'Tick characters to add')+'</button>'+(tk.length?'<button data-act="untick">Untick all</button>':'')+'</div>';
 }
 function addPanelHTML(){
-  var h='<div class="sub" hidden><button data-act="sub" data-s="monsters" class="'+(S.sub==='monsters'?'on':'')+'">Monsters</button><button data-act="sub" data-s="party" class="'+(S.sub==='party'?'on':'')+'">Party</button><button data-act="sub" data-s="effects" class="'+(S.sub==='effects'?'on':'')+'">Effects</button></div>';
+  var h='';
   if(S.sub==='monsters'){
     h+=segHTML('Initiative','initMode',[['each','Roll each'],['group','One per group']])+segHTML('Hit points','hpMode',[['roll','Roll HD'],['avg','Average']]);
     h+='<input class="search" id="search" type="search" placeholder="Search monsters" value="'+esc(ui.q)+'" aria-label="Search monsters">'+filtHTML()+'<div id="results">'+resultsHTML()+'</div>';
@@ -1100,17 +1120,6 @@ function addPanelHTML(){
     h+=fxPanelHTML();
   }else{
     return h+partyHTML();
-    var nd=S.lib.filter(khpDiff).length;
-    h+='<div class="row"><button data-act="kanka" style="flex:1">Update from Kanka</button>'+(nd?'<button data-act="usekhp" data-l="all">Use Kanka HP for all ('+nd+')</button>':'')+'</div>';
-    h+=S.lib.map(function(l){
-      var inEnc=S.list.some(function(c){return c.libId===l.id;});
-      return '<div class="lib"><label><input type="checkbox" data-act="at" data-l="'+l.id+'"'+(S.atTable[l.id]?' checked':'')+(inEnc?' disabled':'')+'><span><b>'+esc(l.name)+'</b><br><span class="meta">'+(l.chk?'<b>set AC/HP</b> · ':'')+'AC '+l.ac+' · HP '+l.hp+(khpDiff(l)?' (Kanka '+l.hpEst+')':'')+' · init '+sgn(l.ib)+(l.cls?' · '+esc(l.cls):'')+(inEnc?' · in encounter':'')+'</span></span></label>'+
-        (khpDiff(l)?'<button data-act="usekhp" data-l="'+l.id+'" title="Set max HP to the Kanka estimate">Use Kanka HP</button>':'')+
-        '<button class="x" data-act="dellib" data-l="'+l.id+'" aria-label="Delete '+esc(l.name)+' from library">×</button></div>';
-    }).join('');
-    h+='<div class="row"><button class="add" data-act="addparty" style="flex:1">Add ticked to encounter</button></div>'+
-       '<div class="row"><input id="newchar" type="text" placeholder="Name (optional: , AC 15, HP 28, init +3, lvl 2)" aria-label="New character"><button data-act="newchar">Save</button></div>'+
-       '<div class="msg">'+esc(ui.msg||'Saved characters are reused every session. Tick who is at the table today.')+'</div>';
   }
   return h;
 }
@@ -1340,6 +1349,8 @@ function nextIdExcluding(T){
   return null;
 }
 
+
+// ================= 6. EVENT HANDLERS: every button carries data-act="..."; each area has one click listener =================
 $('#bar').addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;
   var a=b.dataset.act;
@@ -1681,6 +1692,8 @@ function readMonFile(file,done){
   };
   r.readAsText(file);
 }
+
+// ================= 7. START-UP: load monsters.json (+ files imported on this device), then boot() =================
 var BOOT_BASE=[];
 fetch('monsters.json').then(function(r){return r.json();}).then(function(j){BOOT_BASE=j.monsters;BUILTIN=j.monsters.length;boot(mergeMon(j.monsters));}).catch(function(){
   document.body.insertAdjacentHTML('afterbegin','<p style="padding:20px">Could not load monsters.json. Open the app once with an internet connection.</p>');

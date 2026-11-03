@@ -1,0 +1,11 @@
+# Python caches
+__pycache__/
+*.pyc
+# Local-only data (book content, images) - never commit
+img/
+local/
+*.local.json
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db
