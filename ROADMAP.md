@@ -25,7 +25,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea
 - [ ] Live table test on the iPad; log findings in BUGS.md
 - [ ] `monsters.json` back to SRD-only; Monster Manual data as a local file (Data → Monster files)
 - [x] Book checks flagged by the data check (confirmed and fixed 3 Nov)
-- [x] Player's Handbook spells (35 of 51 non-SRD spells; 16 need book photos, see BUGS.md)
+- [x] Player's Handbook spells (35 of 51 non-SRD spells). The 16 missing ones are low priority: none appear in any monster stat block, and players track their own spells. Cross-check with the D&D Beyond (cobalt) connection.
 - [ ] `spells-phb.json` out of the public repo; load it as a local file (needs a spell-file import in the Data tab)
 
 ## Stage 2: planned features
@@ -62,6 +62,7 @@ Kept out until the offline app is stable at the table.
 - **D&D Beyond public-character import from a link.** Unofficial: D&D Beyond has no public API and the character JSON can change without warning. Only public characters, no credentials. Would run like the Kanka flow (GitHub Action writes `players.json`). Using a login cookie for purchased content is not planned: fragile and an account risk.
 
 ## Later ideas (from the original plan)
+- 💡 **Encounters generated from DM notes:** Andrew gives his session notes to an AI (Claude), which writes a file of ready-made encounters (monsters by id, counts, effects with damage/save/status, environment notes, lair flag) that the app imports and that he then uses with **Load** / **Add**. Open questions: the file format (probably the existing prepared-encounter JSON, documented as a schema so any AI or tool can write it), matching monster names to ids, and an "import encounters" button that adds them without replacing the party or app state.
 - MCP server / voice input at the table, with an at-a-glance status.
 - Scene and encounter library; tracking which scenes land well.
 - Kanka articles/reports after the session (on confirmation).
