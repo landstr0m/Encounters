@@ -110,6 +110,7 @@ body.idle .strip{display:none}
 .fxb{padding:4px 0 8px;font-size:.9rem}.fxb button{margin-left:6px}
 .dice{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--ink);border-radius:5px;padding:0 3px;font-weight:700;white-space:nowrap;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 45%,transparent)}
 .hit{color:var(--ok);font-weight:700}.dcx{color:var(--warn);font-weight:700;white-space:nowrap}
+a.spl.cnd{color:var(--bad);text-decoration-style:dashed}
 a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-underline-offset:2px;cursor:pointer}
 .refl button{display:block;width:100%;text-align:left;margin:2px 0}.refl small{opacity:.7}
 .svb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
@@ -1025,7 +1026,7 @@ function statHTML(){
     var TL={a:'Action',b:'Bonus action',r:'Reaction',t:'Trait'};
     cx='<div class="cx"><h3>'+esc(sc.name)+'</h3>'+(sc.hideBase?'<p><i>Uses only the extras below instead of the actions in this stat block.</i></p>':'')+(sc.x||[]).map(function(x){return '<p><b>'+esc(x.n||'Extra')+'.</b> <span class="muted">('+TL[x.t]+')</span> '+rich(x.d||'')+'</p>';}).join('')+'<p><button data-act="sedit">Edit '+esc(sc.name)+'</button></p></div>';
   }
-  var ex=m.extra.map(function(e){return '<dt>'+esc(e[0])+'</dt><dd>'+esc(e[1])+'</dd>';}).join('');
+  var ex=m.extra.map(function(e){return '<dt>'+esc(e[0])+'</dt><dd>'+(e[0]==='Immune'?esc(e[1]).replace(CNRE,'<a class="spl cnd" data-act="spl" data-n="$1">$1</a>'):esc(e[1]))+'</dd>';}).join('');
   var tr=m.traits.map(function(t){return '<p><b>'+esc(t[0])+'.</b> '+rich(t[1])+'</p>';}).join('');
   var sec=function(h,a){return a&&a.length?'<h3>'+h+'</h3>'+a.map(function(t){return '<p><b>'+esc(t[0])+'.</b> '+rich(t[1])+'</p>';}).join(''):'';};
   return '<div class="sb">'+cx+'<img class="thumb" src="img/'+esc(m.srcId||m.id)+'.webp" alt="" onerror="this.remove()"><h2>'+esc(m.name)+'</h2><div class="type">'+esc(m.type)+'</div>'+
@@ -1271,6 +1272,8 @@ function doImport(f){
 var REF=null,SPRE=null;
 function refLoad(){if(REF)return;REF={spells:[],conditions:{},loading:1};fetch('reference.json').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){REF=j;SPRE=null;if(ui.drawer&&(S.tab==='ref'||S.tab==='stat'))renderDrawer();renderTurn();}).catch(function(){REF={spells:[],conditions:{},err:1};if(S.tab==='ref')renderDrawer();});}
 // Stat block text: highlight dice to roll, attack bonuses and DCs; link spell names (in entries that cast spells) to the Rules tab.
+var AMB=['Light','Darkness','Resistance','Darkvision','Fly','Teleport'];
+var CNRE=/\b(Blinded|Charmed|Deafened|Exhaustion|Frightened|Grappled|Incapacitated|Invisible|Paralyzed|Petrified|Poisoned|Prone|Restrained|Stunned|Unconscious)\b/g;
 function spRe(){
   if(SPRE||!REF||!REF.spells||!REF.spells.length)return SPRE;
   var n=REF.spells.map(function(x){return x.n;}).sort(function(a,b){return b.length-a.length;}).map(function(x){return esc(x).replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/&#39;/g,'(?:&#39;|\u2019)');});
@@ -1278,7 +1281,14 @@ function spRe(){
 }
 function rich(t){
   t=String(t||'');var h=esc(t);
-  if(/cast/i.test(t)&&spRe())h=h.replace(SPRE,function(m){return '<a class="spl" data-act="spl" data-n="'+m.replace('\u2019','&#39;')+'">'+m+'</a>';});
+  var cast=/cast/i.test(t);
+  if(spRe())h=h.replace(SPRE,function(m,p1,off,str){
+    var bef=str.slice(Math.max(0,off-20),off),aft=str.slice(off+m.length,off+m.length+12);
+    if(AMB.indexOf(m)>=0&&!cast)return m;                                   // plain words: only in casting text
+    if(/^ [A-Z][a-z]/.test(aft)||/^ attack/.test(aft))return m;               // part of a longer name: Fear Ray, Shield Bash
+    if(/[A-Z][a-z]+ $/.test(bef)&&!/(?:\u2019|&#39;)s $/.test(bef))return m; // Bright Light, Long Jump (but Melf’s Acid Arrow links)
+    return '<a class="spl" data-act="spl" data-n="'+m.replace('\u2019','&#39;')+'">'+m+'</a>';});
+  h=h.replace(CNRE,'<a class="spl cnd" data-act="spl" data-n="$1">$1</a>');
   h=h.replace(/(\d+ )?\((\d+d\d+(?: ?[+\u2212-] ?\d+)?)\)|(\b\d*d\d+(?: ?[+\u2212-] ?\d+)?)(?![\w(])/g,function(m){return '<span class="dice">'+m+'</span>';});
   h=h.replace(/((?:Melee|Ranged|Melee\/ranged)(?: or Ranged)?(?: Attack Roll:| Weapon Attack:)? )([+\u2212-]\d+)/g,'$1<span class="hit">$2</span>');
   h=h.replace(/\bDC \d+/g,'<span class="dcx">$&</span>');

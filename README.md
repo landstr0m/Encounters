@@ -28,7 +28,7 @@ After an update, open the app once while online, then close and reopen it to get
 
 **3. Run combat**
 1. Type each player's initiative roll into their row, then press **Start combat**. **Next turn ▸** moves on; **↶ Undo** reverses the last change.
-2. The **turn card** shows the current creature's attacks (dice to roll are highlighted), statuses, reminders and death saves. Tap a spell name to read the spell.
+2. The **turn card** shows the current creature's attacks (dice to roll are highlighted), statuses, reminders and death saves. Tap a spell or condition name to read its rule.
 3. **Tap rows to select** creatures, then use the **action pad**: spin or type the amount, pick a damage type if it matters, and press **Damage**, **Half**, **Heal**, **Temp HP** or **Status ▾**.
 4. **Saves** shows one saving throw for everyone (useful before a Fireball).
 5. **■ End combat** stops the turn order but keeps creatures, HP and statuses. **Clear** (two taps) empties the tracker.
@@ -67,7 +67,7 @@ After an update, open the app once while online, then close and reopen it to get
 
 **Monsters**
 - 503 stat blocks (currently the 2024 Monster Manual, see *Data*). Full stat block in the drawer (ⓘ or **Stat block**).
-- Dice to roll are highlighted, attack bonuses green, DCs amber; spell names in spellcasting entries open the spell.
+- Dice to roll are highlighted, attack bonuses green, DCs amber. Spell names (blue) and conditions (red, e.g. *Paralyzed*) are links: tap to read the rule, then **◂ Stat block** to go back. Only SRD spells link for now (e.g. Hunger of Hadar doesn't until Player's Handbook spells are added).
 - ✎ Edit per creature: name, AC, HP, initiative, extra actions/traits/notes (can be copied to every creature of that type), or a custom group.
 - **Data → Monster files:** import your own monster JSON files; they stay on this device and override built-in entries with the same name.
 

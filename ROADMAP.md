@@ -15,7 +15,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea
 | Rules tab: SRD 5.2 spells + full condition text, offline | ✅ | `reference.json`, built by `tools/build_reference.py` |
 | Effects with damage/save/status | ✅ | First version, see below |
 | Phone layout for building encounters; party list search, pinned Add button, delete all | ✅ | |
-| Stat blocks: dice/attack/DC highlighting, spell names linked to the Rules tab | ✅ | |
+| Stat blocks: dice/attack/DC highlighting, spell and condition names linked to the Rules tab | ✅ | Spells link anywhere in the text; ability names like Fear Ray or Bright Light are excluded |
 | Monster data check (all 503 entries) | ✅ | 3 Nov 2026, see BUGS.md; `tools/check_monsters.py` |
 | Code map, CLAUDE.md, README how-to | ✅ | |
 | Controlled live table test | 📋 | Next |
