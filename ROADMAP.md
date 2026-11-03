@@ -40,6 +40,7 @@ Still open (📋): saved target lists, "after N rounds" durations. (Prepared enc
 - "Rounds to defeat" estimate from party damage, as a second balance check.
 
 ### Reference extensions
+- 📋 **Sort and present effects/spells better:** sort the status/effect list (possibly from D&D Beyond public character profiles: show each character's own spells and abilities first), and find a way to present spell effects so the DM doesn't need to remember 60+ effects. Re-check the effects list now that spells beyond the SRD are loaded.
 - 📋 **Player's Handbook spells (local):** Andrew's PHB 2024 epub has OCR text for all ~390 spells (epub pages 233–341, some OCR errors in headings); a local parser (like the Monster Manual one) writes a spell file that is loaded on the device via Data, merged with `reference.json`, never committed. Needs: the parser, and a "spell file" import in the Data tab. Then non-SRD monster spells (Synaptic Static, Destructive Wave…) link too.
 - 💡 Tap a spell status chip (Bless, Hex…) to open its spell entry.
 - 💡 Player spell lists (needs a spell list per character, e.g. a Kanka property).
@@ -53,7 +54,7 @@ The party list should become a source-independent library (Kanka may not stay th
 
 ### Data and edition (📋)
 - Local monster images (kept out of the repo).
-- 2014 (5.1) edition toggle.
+- **2014 and 2024 rules compatibility:** a toggle in the Data tab. Work out what each ruleset needs, flag only actionable differences, and keep a small variants table instead of duplicating every monster, ability and spell.
 
 ## Stage 3: network features (📋, deliberately postponed)
 Kept out until the offline app is stable at the table.
