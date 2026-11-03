@@ -61,6 +61,38 @@ input{background:var(--surface);border:1px solid var(--line);border-radius:8px;p
 .tok.sel{box-shadow:inset 0 0 0 3px var(--ok);background:color-mix(in srgb,var(--ok) 24%,var(--surface))}
 .tok.sel .lab{color:var(--ok)}
 .xpb{margin-top:10px;padding:8px 12px;border:1px solid var(--line,#8884);border-radius:10px;font-size:.9rem}.xpb .xbar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:6px 0;background:color-mix(in srgb,currentColor 10%,transparent);position:relative}.xpb .xbar i{position:absolute;top:-2px;bottom:-2px;width:2px;background:currentColor;opacity:.5}.xpb .xbar b{display:block;height:8px;flex:none;background:var(--warn)}.xpb .xbar b.over{background:var(--bad,#c33)}
+.dtop{position:sticky;top:calc(-12px - env(safe-area-inset-top,0px));z-index:3;background:var(--surface);margin:calc(-12px - env(safe-area-inset-top,0px)) -12px 8px;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 6px;border-bottom:1px solid var(--line)}
+.dtop .dh{margin-bottom:8px}.dtop .sub{margin-bottom:6px}
+.esum{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;font-size:.85rem}
+.esum .et{margin-right:4px}.esum .lv{color:var(--warn)}
+.esum .ec{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:999px;padding:0 0 0 8px;background:var(--surface2);min-height:28px}
+.esum .ec:not(:has(button)){padding-right:8px}
+.esum .ec button{min-height:28px;min-width:30px;border:0;background:none;padding:0;font-weight:700;color:var(--bad)}
+.dfoot{position:sticky;bottom:calc(-12px - env(safe-area-inset-bottom,0px));z-index:3;display:flex;gap:6px;background:var(--surface);margin:8px -12px calc(-12px - env(safe-area-inset-bottom,0px));padding:8px 12px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.dfoot .add{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dfoot button[disabled]{opacity:.55}
+button.danger.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
+/* Phone: build encounters on the go. Rows become two-line cards, toolbar becomes icons. */
+@media (max-width:600px){
+  .bar{gap:6px;flex-wrap:nowrap}
+  .bar .tx{display:none}
+  .bar button{min-width:44px;padding-inline:10px}
+  .bar .primary{padding-inline:14px;white-space:nowrap}
+  .bar .spacer{flex:1 1 0}
+  .round{font-size:1.5rem}
+  body.idle .strip{display:none}
+  .tok{width:96px;min-height:72px}.tok .nm{font-size:.95rem}.tok .in{font-size:1.2rem}
+  .tw #tbl,.tw #tbl tbody{display:block;min-width:0;width:100%}
+  tr.grp{display:block}tr.grp th{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+  tr.r{display:grid;grid-template-columns:54px 1fr 92px;grid-template-areas:"in nm ic" "ac hp hp";align-items:center;border-top:1px solid var(--line)}
+  .tw tr.r td{border-top:0;display:block;width:auto;padding:4px 6px}
+  tr.r td.c-in{grid-area:in}tr.r td:nth-child(2){grid-area:nm}tr.r td.c-ac{grid-area:ac;width:auto}tr.r td.c-hp{grid-area:hp;width:auto}tr.r td.c-i{grid-area:ic}
+  tr.r.fxr{grid-template-areas:"in nm nm"}tr.r.fxr td:nth-child(2){grid-column:2/4}
+  tr.r td.c-hp .hpnum{gap:4px}
+  .name{font-size:1.15rem}
+  .num{width:46px}
+  .lib .meta{font-size:.78rem}
+}
 .fxb{padding:4px 0 8px;font-size:.9rem}.fxb button{margin-left:6px}
 .refl button{display:block;width:100%;text-align:left;margin:2px 0}.refl small{opacity:.7}
 .svb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
@@ -692,14 +724,15 @@ function renderBar(){
   var started=S.turnId!=null;
   $('#bar').innerHTML=
    '<div class="round"><small>Round</small>'+S.round+'</div>'+
-   '<button class="primary" data-act="next">'+(started?'Next turn ▸':'Start combat')+'</button>'+
-   (started?'<button data-act="endc" title="End combat: keeps creatures, HP and statuses; resets round and turn">■ End combat</button>':'')+
-   (ui.undo?'<button data-act="undo" title="Undo: '+esc(ui.undo.label)+'">↶ Undo</button>':'')+
+   '<button class="primary" data-act="next">'+(started?'Next<span class="tx"> turn</span> ▸':'Start<span class="tx"> combat</span>')+'</button>'+
+   (started?'<button data-act="endc" title="End combat: keeps creatures, HP and statuses; resets round and turn" aria-label="End combat"><span class="ic">■</span><span class="tx"> End combat</span></button>':'')+
+   (ui.undo?'<button data-act="undo" title="Undo: '+esc(ui.undo.label)+'" aria-label="Undo"><span class="ic">↶</span><span class="tx"> Undo</span></button>':'')+
    '<span class="spacer"></span>'+
-   '<button class="dmonly" data-act="openadd">+ Add</button>'+
-   '<button class="dmonly'+(ui.sv>=0?' on':'')+'" data-act="saves" title="Show saving throw modifiers">Saves</button>'+
-   '<button data-act="present">'+(ui.present?'Exit table view':'Table view')+'</button>'+
-   '<button class="danger dmonly'+(ui.confirmClear?' armed':'')+'" data-act="clear">'+(ui.confirmClear?'Tap again to clear all':'Clear')+'</button>';
+   '<button class="dmonly" data-act="openadd" aria-label="Add"><span class="ic">＋</span><span class="tx"> Add</span></button>'+
+   '<button class="dmonly'+(ui.sv>=0?' on':'')+'" data-act="saves" title="Show saving throw modifiers" aria-label="Saves"><span class="ic">🛡</span><span class="tx"> Saves</span></button>'+
+   '<button data-act="present" aria-label="Table view"><span class="ic">🖥</span><span class="tx"> '+(ui.present?'Exit table view':'Table view')+'</span></button>'+
+   '<button class="danger dmonly'+(ui.confirmClear?' armed':'')+'" data-act="clear" aria-label="Clear">'+(ui.confirmClear?'Tap again to clear all':'<span class="ic">🗑</span><span class="tx"> Clear</span>')+'</button>';
+  document.body.classList.toggle('idle',!started);
 }
 function tokHTML(c,isNext){
   if(c.kind==='fx'){var nw=c.id===S.turnId;return '<div class="tok fx'+(nw?' now':'')+(isNext?' next':'')+'"><div class="lab">'+(nw?'Up now':(isNext?'Next':''))+'</div><div class="in">'+(c.init==null?'\u2014':c.init)+'</div><div class="nm">'+esc(c.name)+'</div><div class="mini">'+(c.vis?'':'<span>Hidden</span>')+'</div></div>';}
@@ -1007,14 +1040,48 @@ function fxPanelHTML(){
    '<div class="row"><button class="add" data-act="addfx" style="flex:1">Add effect</button></div>'+
    '<div class="msg">'+esc(ui.msg||'')+'</div>';
 }
+function encSumHTML(){
+  var M=S.list.filter(function(c){return c.kind==='mon';}),P=S.list.filter(function(c){return c.kind==='pc';}),F=S.list.filter(function(c){return c.kind==='fx';});
+  if(!M.length&&!P.length&&!F.length)return '<div class="esum muted">Nothing in the encounter yet.</div>';
+  var g={},o=[];M.forEach(function(c){if(!g[c.monId]){g[c.monId]={n:0,name:(MON.find(function(m){return m.id===c.monId;})||c).name};o.push(c.monId);}g[c.monId].n++;});
+  var xp=M.filter(function(c){return c.hp>0;}).reduce(function(a,c){return a+(CRXP[String(c.cr)]||0);},0);
+  var xh=xpHTML(),lab=(/· ([A-Za-z ]+)<\/b>/.exec(xh)||[])[1]||'';
+  return '<div class="esum"><span class="et"><b>This encounter</b>'+(M.length?' · '+xp.toLocaleString('en')+' XP'+(lab?' · <b class="lv">'+lab+'</b>':''):'')+'</span>'+
+   (P.length?'<span class="ec">👤 '+P.length+'</span>':'')+
+   o.map(function(id){return '<span class="ec">'+esc(g[id].name)+' ×'+g[id].n+'<button data-act="sumrm" data-m="'+esc(id)+'" aria-label="Remove one '+esc(g[id].name)+'">−</button></span>';}).join('')+
+   (F.length?'<span class="ec">⚡ '+F.length+'</span>':'')+'</div>';
+}
+function addTopHTML(){
+  return '<div class="sub"><button data-act="sub" data-s="monsters" class="'+(S.sub==='monsters'?'on':'')+'">Monsters</button><button data-act="sub" data-s="party" class="'+(S.sub==='party'?'on':'')+'">Party</button><button data-act="sub" data-s="effects" class="'+(S.sub==='effects'?'on':'')+'">Effects</button></div>'+encSumHTML();
+}
+function partyHTML(){
+  var q=(ui.pq||'').trim().toLowerCase(),nd=S.lib.filter(khpDiff).length;
+  var inE=function(l){return S.list.some(function(c){return c.libId===l.id;});};
+  var L=S.lib.filter(function(l){return !q||(l.name+' '+(l.cls||'')).toLowerCase().indexOf(q)>=0;});
+  var rank=function(l){return S.atTable[l.id]?0:inE(l)?2:1;};
+  L=L.slice().sort(function(a,b){return rank(a)-rank(b)||a.name.localeCompare(b.name);});
+  var row=function(l){var e=inE(l);
+    return '<div class="lib"><label><input type="checkbox" data-act="at" data-l="'+l.id+'"'+(S.atTable[l.id]?' checked':'')+(e?' disabled':'')+'><span><b>'+esc(l.name)+'</b><br><span class="meta">'+(l.chk?'<b>set AC/HP</b> · ':'')+'AC '+l.ac+' · HP '+l.hp+(khpDiff(l)?' (Kanka '+l.hpEst+')':'')+' · init '+sgn(l.ib)+(l.cls?' · '+esc(l.cls):'')+(e?' · in encounter':'')+'</span></span></label>'+
+      (khpDiff(l)?'<button data-act="usekhp" data-l="'+l.id+'" title="Set max HP to the Kanka estimate">Use Kanka HP</button>':'')+
+      '<button class="x" data-act="dellib" data-l="'+l.id+'" aria-label="Delete '+esc(l.name)+' from library">×</button></div>';};
+  var tk=S.lib.filter(function(l){return S.atTable[l.id]&&!inE(l);});
+  return '<div class="row"><button data-act="kanka" style="flex:1">Update from Kanka</button>'+(nd?'<button data-act="usekhp" data-l="all">Use Kanka HP for all ('+nd+')</button>':'')+'</div>'+
+   '<input class="search" id="pq" type="search" placeholder="Search '+S.lib.length+' characters" value="'+esc(ui.pq||'')+'" aria-label="Search characters">'+
+   '<div id="plist">'+(L.map(row).join('')||'<p class="muted">No character matches.</p>')+'</div>'+
+   '<div class="row"><input id="newchar" type="text" placeholder="Name (optional: , AC 15, HP 28, init +3, lvl 2)" aria-label="New character"><button data-act="newchar">Save</button></div>'+
+   '<div class="msg">'+esc(ui.msg||'Saved characters are reused every session. Tick who is at the table today.')+'</div>'+
+   (S.lib.length?'<div class="row"><button class="danger'+(ui.confirmLib?' armed':'')+'" data-act="libclear" style="flex:1">'+(ui.confirmLib?'Tap again: delete all '+S.lib.length+' saved characters (Update from Kanka reloads them; hand-set AC/HP are lost)':'Delete all saved characters…')+'</button></div>':'')+
+   '<div class="dfoot"><button class="add" data-act="addparty" style="flex:1"'+(tk.length?'':' disabled')+'>'+(tk.length?'Add '+tk.length+' ticked: '+esc(tk.map(function(l){return l.name;}).join(', ')):'Tick characters to add')+'</button>'+(tk.length?'<button data-act="untick">Untick all</button>':'')+'</div>';
+}
 function addPanelHTML(){
-  var h='<div class="sub"><button data-act="sub" data-s="monsters" class="'+(S.sub==='monsters'?'on':'')+'">Monsters</button><button data-act="sub" data-s="party" class="'+(S.sub==='party'?'on':'')+'">Party</button><button data-act="sub" data-s="effects" class="'+(S.sub==='effects'?'on':'')+'">Effects</button></div>';
+  var h='<div class="sub" hidden><button data-act="sub" data-s="monsters" class="'+(S.sub==='monsters'?'on':'')+'">Monsters</button><button data-act="sub" data-s="party" class="'+(S.sub==='party'?'on':'')+'">Party</button><button data-act="sub" data-s="effects" class="'+(S.sub==='effects'?'on':'')+'">Effects</button></div>';
   if(S.sub==='monsters'){
     h+=segHTML('Initiative','initMode',[['each','Roll each'],['group','One per group']])+segHTML('Hit points','hpMode',[['roll','Roll HD'],['avg','Average']]);
     h+='<input class="search" id="search" type="search" placeholder="Search monsters" value="'+esc(ui.q)+'" aria-label="Search monsters">'+filtHTML()+'<div id="results">'+resultsHTML()+'</div>';
   }else if(S.sub==='effects'){
     h+=fxPanelHTML();
   }else{
+    return h+partyHTML();
     var nd=S.lib.filter(khpDiff).length;
     h+='<div class="row"><button data-act="kanka" style="flex:1">Update from Kanka</button>'+(nd?'<button data-act="usekhp" data-l="all">Use Kanka HP for all ('+nd+')</button>':'')+'</div>';
     h+=S.lib.map(function(l){
@@ -1212,7 +1279,7 @@ function renderDrawer(){
   dr.hidden=!ui.drawer;
   document.body.classList.toggle('drawon',ui.drawer);
   if(!ui.drawer)return;
-  dr.innerHTML='<div class="dh"><button class="tab'+(S.tab==='add'?' on':'')+'" data-act="tab" data-t="add">Add</button><button class="tab'+(S.tab==='stat'?' on':'')+'" data-act="tab" data-t="stat">Stat block</button>'+(S.edit!=null&&findC(S.edit)?'<button class="tab'+(S.tab==='edit'?' on':'')+'" data-act="tab" data-t="edit">Edit</button>':'')+'<button class="tab'+(S.tab==='ref'?' on':'')+'" data-act="tab" data-t="ref">Rules</button><button class="tab'+(S.tab==='data'?' on':'')+'" data-act="tab" data-t="data">Data</button><button data-act="close" aria-label="Close panel">Close</button></div>'+
+  dr.innerHTML='<div class="dtop"><div class="dh"><button class="tab'+(S.tab==='add'?' on':'')+'" data-act="tab" data-t="add">Add</button><button class="tab'+(S.tab==='stat'?' on':'')+'" data-act="tab" data-t="stat">Stat block</button>'+(S.edit!=null&&findC(S.edit)?'<button class="tab'+(S.tab==='edit'?' on':'')+'" data-act="tab" data-t="edit">Edit</button>':'')+'<button class="tab'+(S.tab==='ref'?' on':'')+'" data-act="tab" data-t="ref">Rules</button><button class="tab'+(S.tab==='data'?' on':'')+'" data-act="tab" data-t="data">Data</button><button data-act="close" aria-label="Close panel">Close</button></div>'+(S.tab==='add'?addTopHTML():'')+'</div>'+
     (S.tab==='add'?addPanelHTML():S.tab==='ref'?refHTML():S.tab==='data'?dataHTML():S.tab==='edit'?editHTML():statHTML());
 }
 function renderBoard(){if(!RO)ccSweep();renderBar();renderStrip();renderTurn();renderTable();renderPad();}
@@ -1414,6 +1481,7 @@ dr.addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;
   var act=b.dataset.act;
   if(act==='qty'||act==='at'||b.tagName==='SELECT')return;
+  if(act!=='libclear')ui.confirmLib=false;
   if(act==='export'){doExport();renderDrawer();return;}
   if(act==='import'){var pf=$('#impfile');if(pf)pf.click();return;}
   if(act==='addmonfile'){var mf=$('#monfile');if(mf)mf.click();return;}
@@ -1443,6 +1511,9 @@ dr.addEventListener('click',function(e){
     var q=Math.max(1,Math.min(20,Math.floor(+ui.qty[b.dataset.m]||1)));
     addMon(b.dataset.m,q);ui.qty[b.dataset.m]=1;
   }
+  else if(act==='sumrm'){var rl=S.list.filter(function(c){return c.monId===b.dataset.m;});if(rl.length){snap('remove '+rl[rl.length-1].name);rmComb(rl[rl.length-1]);}}
+  else if(act==='untick'){S.atTable={};}
+  else if(act==='libclear'){if(ui.confirmLib){S.lib=S.lib.filter(function(l){return S.list.some(function(c){return c.libId===l.id;});});S.atTable={};ui.confirmLib=false;ui.msg=S.lib.length?'Deleted. Characters in the current encounter were kept.':'All saved characters deleted.';}else{ui.confirmLib=true;}}
   else if(act==='addparty'){
     var n=0;S.lib.forEach(function(l){if(S.atTable[l.id]&&addPc(l)){n++;S.atTable[l.id]=false;}});
     ui.msg=n?n+' added. Enter each player’s initiative roll in the table.':'Tick at least one character first.';
@@ -1483,6 +1554,7 @@ dr.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.id==='new
 dr.addEventListener('input',function(e){
   var t=e.target;
   if(t.id==='search'){ui.q=t.value;$('#results').innerHTML=resultsHTML();}
+  else if(t.id==='pq'){ui.pq=t.value;var tp=document.createElement('div');tp.innerHTML=partyHTML();$('#plist').innerHTML=tp.querySelector('#plist').innerHTML;}
   else if(t.id==='refq'){ui.rq=t.value;ui.ref=null;var rh=document.createElement('div');rh.innerHTML=refHTML();$('#refl').innerHTML=rh.querySelector('#refl').innerHTML;}
   else if(t.dataset.act==='qty'){ui.qty[t.dataset.m]=t.value;}
   else if(t.id==='fxname')ui.fx.name=t.value;
@@ -1509,7 +1581,7 @@ dr.addEventListener('change',function(e){
     else if(f==='cg'){setGroup([c],t.value);var ii=dr.querySelector('[data-ed="init"]');if(ii)ii.value=c.init==null?'':c.init;}
     save();renderBoard();return;
   }
-  if(t.dataset.act==='at'){S.atTable[t.dataset.l]=t.checked;save();}
+  if(t.dataset.act==='at'){S.atTable[t.dataset.l]=t.checked;save();var ft=dr.querySelector('.dfoot');if(ft){var tmp=document.createElement('div');tmp.innerHTML=partyHTML();ft.outerHTML=tmp.querySelector('.dfoot').outerHTML;}}
   if(t.id==='fxvis')ui.fx.vis=t.checked;
   if(['fxdt','fxsv','fxst','fxdur'].indexOf(t.id)>=0)ui.fx[t.id.slice(2)]=t.value;
   if(t.id==='encroll'){S.encRoll=t.checked;save();}

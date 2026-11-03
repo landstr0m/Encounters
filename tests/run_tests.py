@@ -124,8 +124,8 @@ def add_party_through_ui(b):
     a.pg.check('[data-act="at"][data-l="l2"]')
     a.click('[data-act="addparty"]')
     eq(a.j("S.list.map(function(c){return c.kind})"), ["pc", "pc"], "two players added")
-    a.click('[data-act="addparty"]')
-    eq(a.e("S.list.length"), 2, "no duplicates when adding again")
+    check(a.pg.is_disabled('[data-act="addparty"]'), "add button disabled when nothing is ticked")
+    eq(a.e("S.list.length"), 2, "no duplicates")
 
 
 @test
@@ -718,6 +718,32 @@ def effect_damage_and_status(b):
     for _ in range(4):
         a.click('[data-act="next"]')
     check(a.e("S.turnId") == fx["id"] and "Prone" not in a.j("S.list[1].conds"), "Prone ended when the effect acts again")
+    check(not a.errors, a.errors)
+
+
+@test
+def party_list_tools(b):
+    a = App(b, 390, 844)
+    a.e("S.lib=[];for(var i=0;i<20;i++)S.lib.push({id:'l'+i,name:'Char '+String.fromCharCode(65+i),ac:12,hp:20,ib:0});ui.drawer=true;S.tab='add';S.sub='party';renderDrawer()")
+    a.pg.check('[data-act="at"][data-l="l15"]')
+    check("Char P" in a.pg.inner_text('.dfoot'), "footer names the ticked character")
+    box = a.pg.query_selector('.dfoot').bounding_box()
+    check(box["y"] + box["height"] <= 845, "add button visible without scrolling")
+    a.pg.fill('#pq', 'char t')
+    check(a.pg.query_selector_all('#plist .lib').__len__() == 1, "search filters")
+    a.pg.fill('#pq', '')
+    a.e("renderDrawer()")
+    check("Char P" in a.pg.inner_text('#plist .lib'), "ticked character pinned first")
+    a.click('[data-act="addparty"]')
+    a.e("addMon(MON.find(function(x){return x.cr==='1';}).id,2);renderDrawer()")
+    check("×2" in a.pg.inner_text('.esum'), "encounter summary shows monsters")
+    a.click('[data-act="sumrm"]')
+    eq(a.e("S.list.filter(function(c){return c.kind==='mon'}).length"), 1, "minus removes one")
+    a.click('[data-act="libclear"]')
+    a.click('[data-act="libclear"]')
+    eq(a.j("S.lib.map(function(l){return l.name})"), ["Char P"], "delete all keeps characters in the encounter")
+    w = a.pg.evaluate("document.querySelector('#tbl').getBoundingClientRect().right")
+    check(w <= 390, "phone table fits the screen")
     check(not a.errors, a.errors)
 
 

@@ -30,6 +30,7 @@ Player characters can be synced from a [Kanka](https://kanka.io) campaign throug
 - Import your own monster JSON files. They are kept on the device and merged with the SRD data, overriding entries with the same id.
 
 **Players**
+- The party tab has a search box, puts ticked characters first, and keeps **Add N ticked** pinned at the bottom (with **Untick all**). **Delete all saved characters…** (two taps) empties the library if it gets messy; characters already in the encounter are kept, and Update from Kanka reloads the rest.
 - A reusable party library. Tick who is at the table and add them in one go.
 - Add characters by hand with just a name (`Thorn`); AC and HP default to 10. You can also type `Thorn, AC 15, HP 28, init +3`. Then use ✎ Edit on the player in the tracker to fill in the character sheet: ability scores (modifiers are calculated), save proficiencies and proficiency bonus (saves are recalculated), resistances, immunities, vulnerabilities and condition immunities. These, and AC and Max HP changed on that page, are saved with the character for future sessions. Current HP stays with the encounter.
 - **Update from Kanka** loads `players.json`. It fills name, class and subclass, species, ability scores, initiative modifier, passive Perception, saving throws, resistances and species/class traits. Tap ⓘ on a player to see this as a stat block, including how the class text was read. Max HP is auto-filled with the estimate (see below). If a hand-set HP differs from the latest Kanka estimate (for example after a level-up in another game), the party list shows both values with a **Use Kanka HP** button, plus a **Use Kanka HP for all** button. AC still has to be entered (`Name, AC 16`).
@@ -43,6 +44,8 @@ Player characters can be synced from a [Kanka](https://kanka.io) campaign throug
 - The **Rules** tab in the drawer searches all 339 SRD 5.2 spells (filter by level and class) and shows the full text of the 15 conditions. The data is a local file (`reference.json`), so it works offline.
 
 **Encounter prep and table view**
+- The drawer's tabs, Close and a **This encounter** summary (XP, difficulty, players, monsters ×count with − to remove one) stay pinned at the top while you scroll.
+- **Phone layout** (≤600 px wide): rows become two-line cards, the toolbar uses icons, and the initiative strip hides until combat starts. Meant for building encounters on the go; running combat is still best on the iPad or laptop.
 - **Encounter XP** (2024 DMG): while combat isn't running, a bar above the table shows the living monsters' total XP against the party's Low, Moderate and High budgets. Player levels come from Kanka, or set **Level** on the character sheet (or type `Thorn, lvl 3`).
 - Effects: lair actions, hazards or timers placed at a fixed initiative, either visible to players or hidden. An effect can also carry damage dice, a damage type, a save (ability + DC) and a status with a duration. On its turn, tap **Apply…**: the Saves view opens on that ability and the pad is preloaded. Select targets, type the number rolled at the table, then **Damage** (failed save: damage + status), **Half** (saved: half damage, no status) or **+ Status** (status only).
 - An environment banner for terrain, light or weather.

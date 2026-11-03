@@ -14,6 +14,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea
 | End combat without clearing | ✅ | Keeps creatures, HP and statuses |
 | Rules tab: SRD 5.2 spells + full condition text, offline | ✅ | `reference.json`, built by `tools/build_reference.py` |
 | Effects with damage/save/status | ✅ | First version, see below |
+| Phone layout for building encounters; party list search, pinned Add button, delete all | ✅ | |
 | Controlled live table test | 📋 | Next |
 | v1.0 | 📋 | After the live test |
 
