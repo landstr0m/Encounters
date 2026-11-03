@@ -112,6 +112,31 @@ for m in M:
                     issues['saves/skills format'].append(f"{nm}: {e[0]} {e[1]}")
                     break
 
+# Structure: content lost or merged at page/column breaks during import.
+try:
+    SPELLS = {x['n'].lower() for x in json.load(open('reference.json', encoding='utf-8'))['spells']}
+except Exception:
+    SPELLS = set()
+MERGED = re.compile(r"(?<=[.)]) ((?:[A-Z][\w’'-]*)(?: (?:of |the |and )?[A-Z][\w’'-]*)*(?: \([^)]*\))?)\. (?=(?:Melee|Ranged|Melee or Ranged) Attack Roll:|(?:Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) Saving Throw:|Trigger:)")
+KNOWN_SPELLS = {'melf’s acid arrow'}
+for m in M:
+    names = [a[0].split(' (')[0].lower() for k in TEXT for a in m.get(k) or []]
+    for a in (m.get('actions') or []):
+        if a[0] == 'Multiattack':
+            for n in re.findall(r"(?:using|makes (?:one|two|three|four|five|six) |use of |uses |use its )([A-Z][a-z’'-]+(?: (?:of the |of |the )?[A-Z][a-z’'-]+)*)", a[1]):
+                l = n.lower()
+                if l in SPELLS or l in KNOWN_SPELLS or l in m['name'].lower():
+                    continue
+                if not any(x == l or x.startswith(l) or l.rstrip('s') == x for x in names):
+                    issues['missing action (page break?)'].append(f"{m['name']} (p. {m.get('page')}): Multiattack mentions {n}")
+    for k in TEXT:
+        for a in m.get(k) or []:
+            g = MERGED.search(a[1])
+            if g or a[1].count('Attack Roll:') > 1:
+                issues['merged entries'].append(f"{m['name']} / {a[0]}: contains {g.group(1) if g else 'two attacks'}")
+    if m.get('leg') and not m['leg'][0][0].startswith('Legendary Action Uses'):
+        issues['legendary uses missing'].append(m['name'])
+
 # Spelling: words not in the dictionary and used at most twice in the whole file.
 try:
     from spellchecker import SpellChecker
