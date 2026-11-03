@@ -757,6 +757,8 @@ def stat_block_dice_and_spell_links(b):
     h2 = a.e("rich('Bright Light. Fly Speed 20 ft. Fear Ray. Shield Bash. Under a Bless spell it has the Paralyzed condition.')")
     check(h2.count('class="spl"') == 1 and 'data-n="Bless"' in h2, "spells link outside casting text, ability names don't: " + h2)
     check('class="spl cnd" data-act="spl" data-n="Paralyzed"' in h2, "conditions are linked")
+    h3 = a.e("rich('Hit: 7 (2d6) Cold damage. Bludgeoning, Piercing, and Slashing damage. Fire Aura.')")
+    check(h3.count('class="dt ') == 4 and 'dt-cold' in h3 and 'Fire Aura' in h3, "damage types marked only before 'damage': " + h3)
     m = a.e("MON.find(function(x){return (x.actions||[]).concat(x.traits||[]).some(function(t){return /casts/.test(t[1])&&/Mage Hand/.test(t[1]);});}).id")
     a.e(f"ui.drawer=true;S.tab='stat';S.stat='{m}';S.statC=null;renderDrawer()")
     a.click('#drawer a.spl[data-n="Mage Hand"]')

@@ -110,6 +110,10 @@ body.idle .strip{display:none}
 .fxb{padding:4px 0 8px;font-size:.9rem}.fxb button{margin-left:6px}
 .dice{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--ink);border-radius:5px;padding:0 3px;font-weight:700;white-space:nowrap;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 45%,transparent)}
 .hit{color:var(--ok);font-weight:700}.dcx{color:var(--warn);font-weight:700;white-space:nowrap}
+.dt{font-weight:700;white-space:nowrap}.dt i{font-style:normal;font-size:.8em;margin-right:2px}
+.dt-acid{color:#2f9e44}.dt-cold{color:#0c8599}.dt-fire{color:#e8590c}.dt-force{color:#c2255c}.dt-lightning{color:#1c7ed6}.dt-necrotic{color:#495057}
+.dt-poison{color:#66a80f}.dt-psychic{color:#ae3ec9}.dt-radiant{color:#b08800}.dt-thunder{color:#6741d9}.dt-bludgeoning,.dt-piercing,.dt-slashing{color:#7c6f64}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .dt-acid{color:#69db7c}:root:not([data-theme="light"]) .dt-cold{color:#66d9e8}:root:not([data-theme="light"]) .dt-fire{color:#ffa94d}:root:not([data-theme="light"]) .dt-force{color:#f783ac}:root:not([data-theme="light"]) .dt-lightning{color:#74c0fc}:root:not([data-theme="light"]) .dt-necrotic{color:#ced4da}:root:not([data-theme="light"]) .dt-poison{color:#c0eb75}:root:not([data-theme="light"]) .dt-psychic{color:#e599f7}:root:not([data-theme="light"]) .dt-radiant{color:#ffd43b}:root:not([data-theme="light"]) .dt-thunder{color:#b197fc}:root:not([data-theme="light"]) .dt-bludgeoning,:root:not([data-theme="light"]) .dt-piercing,:root:not([data-theme="light"]) .dt-slashing{color:#c9b8a8}}
 a.spl.cnd{color:var(--bad);text-decoration-style:dashed}
 a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-underline-offset:2px;cursor:pointer}
 .refl button{display:block;width:100%;text-align:left;margin:2px 0}.refl small{opacity:.7}
@@ -981,7 +985,7 @@ function renderPad(){
   var fx=curFx();
   pad.innerHTML='<div class="pi">'+(fx?'<div class="fxb">⚡ <b>'+esc(fx.name)+':</b> '+esc(fxSum(fx))+' <button data-act="fxdone">Done</button></div>':'')+'<div class="pt"><div class="who"><b>'+T.length+' selected</b> · '+names+'</div><button data-act="desel">Deselect</button></div>'+
    '<div class="pmain"><div class="wheelbox"><div class="wheel" id="wheel" aria-label="Amount wheel">'+WHEEL+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div></div>'+
-   '<div class="pr"><div class="amtrow"><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount, tap to type"><span>Spin the wheel or tap the number to type</span><select id="dtype" aria-label="Damage type"><option value="">Untyped</option>'+DTYPES.map(function(t){return '<option value="'+t+'"'+(ui.dtype===t?' selected':'')+'>'+t[0].toUpperCase()+t.slice(1)+'</option>';}).join('')+'</select></div>'+
+   '<div class="pr"><div class="amtrow"><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount, tap to type"><span>Spin the wheel or tap the number to type</span><select id="dtype" aria-label="Damage type"><option value="">Untyped</option>'+DTYPES.map(function(t){return '<option value="'+t+'"'+(ui.dtype===t?' selected':'')+'>'+DTI[t]+' '+t[0].toUpperCase()+t.slice(1)+'</option>';}).join('')+'</select></div>'+
    '<div class="pacts"><button class="d" data-act="padhp" data-k="dmg">Damage</button><button class="d" data-act="padhp" data-k="half">Half</button><button class="h" data-act="padhp" data-k="heal">Heal</button>'+
    '<button data-act="padhp" data-k="temp">Temp HP</button>'+(fx&&fx.st?'<button class="d" data-act="fxst">+ '+esc(fx.st)+'</button>':'')+'<button data-act="padstatus">Status ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove">'+(ui.confirmRemove?'Sure?':'Remove')+'</button><button data-act="padmore" aria-expanded="'+!!ui.more+'">'+(ui.more?'Less \u25b4':'More \u25be')+'</button>'+
    (ui.more?'<button class="d" data-act="padhp" data-k="maxdn">Max HP \u2212</button><button data-act="padhp" data-k="maxreset">Reset max</button><button data-act="padgroup">'+(T.some(function(c){return c.cg;})&&T.every(function(c){return c.cg&&c.cg===T[0].cg;})?'Ungroup':'Group\u2026')+'</button>':'')+'</div></div></div>'+
@@ -1026,7 +1030,7 @@ function statHTML(){
     var TL={a:'Action',b:'Bonus action',r:'Reaction',t:'Trait'};
     cx='<div class="cx"><h3>'+esc(sc.name)+'</h3>'+(sc.hideBase?'<p><i>Uses only the extras below instead of the actions in this stat block.</i></p>':'')+(sc.x||[]).map(function(x){return '<p><b>'+esc(x.n||'Extra')+'.</b> <span class="muted">('+TL[x.t]+')</span> '+rich(x.d||'')+'</p>';}).join('')+'<p><button data-act="sedit">Edit '+esc(sc.name)+'</button></p></div>';
   }
-  var ex=m.extra.map(function(e){return '<dt>'+esc(e[0])+'</dt><dd>'+(e[0]==='Immune'?esc(e[1]).replace(CNRE,'<a class="spl cnd" data-act="spl" data-n="$1">$1</a>'):esc(e[1]))+'</dd>';}).join('');
+  var ex=m.extra.map(function(e){return '<dt>'+esc(e[0])+'</dt><dd>'+(/^(Immune|Resist|Vulnerable)$/.test(e[0])?esc(e[1]).split(';').map(function(part,i){return i?part.replace(CNRE,'<a class="spl cnd" data-act="spl" data-n="$1">$1</a>'):part.replace(DTW,dtSpan).replace(CNRE,'<a class="spl cnd" data-act="spl" data-n="$1">$1</a>');}).join(';'):esc(e[1]))+'</dd>';}).join('');
   var tr=m.traits.map(function(t){return '<p><b>'+esc(t[0])+'.</b> '+rich(t[1])+'</p>';}).join('');
   var sec=function(h,a){return a&&a.length?'<h3>'+h+'</h3>'+a.map(function(t){return '<p><b>'+esc(t[0])+'.</b> '+rich(t[1])+'</p>';}).join(''):'';};
   return '<div class="sb">'+cx+'<img class="thumb" src="img/'+esc(m.srcId||m.id)+'.webp" alt="" onerror="this.remove()"><h2>'+esc(m.name)+'</h2><div class="type">'+esc(m.type)+'</div>'+
@@ -1073,7 +1077,7 @@ function fxPanelHTML(){
    '<input class="search" id="fxdesc" type="text" maxlength="200" placeholder="Note for you (players never see it)" value="'+esc(f.desc)+'" aria-label="Note for the DM">'+
    '<div class="lib"><label><input type="checkbox" id="fxvis"'+(f.vis?' checked':'')+'><span>Show the name to players in the initiative order</span></label></div>'+
    '<h3 style="margin:10px 0 4px">What it does <span class="muted" style="font-weight:400;font-size:.85rem">(optional; dice are rolled at the table)</span></h3>'+
-   '<div class="flt"><input class="search" id="fxdd" type="text" maxlength="20" placeholder="Damage, e.g. 2d6" value="'+esc(f.dd)+'" aria-label="Damage dice" style="margin:0;max-width:8em">'+selHTML('fxdt','fxdt','Damage type',DTYPES.map(function(t){return [t,t];}),f.dt)+'</div>'+
+   '<div class="flt"><input class="search" id="fxdd" type="text" maxlength="20" placeholder="Damage, e.g. 2d6" value="'+esc(f.dd)+'" aria-label="Damage dice" style="margin:0;max-width:8em">'+selHTML('fxdt','fxdt','Damage type',DTYPES.map(function(t){return [t,DTI[t]+' '+t[0].toUpperCase()+t.slice(1)];}),f.dt)+'</div>'+
    '<div class="flt">'+selHTML('fxsv','fxsv','No save',AB.map(function(a,i){return [String(i),a+' save'];}),f.sv)+'<input class="search" id="fxdc" type="number" inputmode="numeric" min="1" max="30" placeholder="DC" value="'+esc(f.dc)+'" aria-label="Save DC" style="margin:0;max-width:6em"></div>'+
    '<div class="flt">'+selHTML('fxst','fxst','No status',stl.map(function(x){return [x,x];}),f.st)+selHTML('fxdur','fxdur','Normal duration',FXDUR.slice(1),f.dur)+'</div>'+
    '<div class="row"><button class="add" data-act="addfx" style="flex:1">Add effect</button></div>'+
@@ -1272,6 +1276,11 @@ function doImport(f){
 var REF=null,SPRE=null;
 function refLoad(){if(REF)return;REF={spells:[],conditions:{},loading:1};fetch('reference.json').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(j){REF=j;SPRE=null;if(ui.drawer&&(S.tab==='ref'||S.tab==='stat'))renderDrawer();renderTurn();}).catch(function(){REF={spells:[],conditions:{},err:1};if(S.tab==='ref')renderDrawer();});}
 // Stat block text: highlight dice to roll, attack bonuses and DCs; link spell names (in entries that cast spells) to the Rules tab.
+// Damage types: symbol + colour (CSS .dt-<type>). Book text always capitalises them ("Cold damage").
+var DTI={acid:'🧪',bludgeoning:'🔨',cold:'❄️',fire:'🔥',force:'✴️',lightning:'⚡',necrotic:'💀',piercing:'🏹',poison:'☠️',psychic:'🧠',radiant:'☀️',slashing:'🗡️',thunder:'💥'};
+var DTN='Acid|Bludgeoning|Cold|Fire|Force|Lightning|Necrotic|Piercing|Poison|Psychic|Radiant|Slashing|Thunder';
+var DTRE=new RegExp('\\b('+DTN+')\\b(?=(?:,? (?:or |and )?(?:'+DTN+'))* damage)','g'),DTW=new RegExp('\\b('+DTN+')\\b','g');
+function dtSpan(m){var k=m.toLowerCase();return '<span class="dt dt-'+k+'"><i>'+DTI[k]+'</i>'+m+'</span>';}
 var AMB=['Light','Darkness','Resistance','Darkvision','Fly','Teleport'];
 var CNRE=/\b(Blinded|Charmed|Deafened|Exhaustion|Frightened|Grappled|Incapacitated|Invisible|Paralyzed|Petrified|Poisoned|Prone|Restrained|Stunned|Unconscious)\b/g;
 function spRe(){
@@ -1289,6 +1298,7 @@ function rich(t){
     if(/[A-Z][a-z]+ $/.test(bef)&&!/(?:\u2019|&#39;)s $/.test(bef))return m; // Bright Light, Long Jump (but Melf’s Acid Arrow links)
     return '<a class="spl" data-act="spl" data-n="'+m.replace('\u2019','&#39;')+'">'+m+'</a>';});
   h=h.replace(CNRE,'<a class="spl cnd" data-act="spl" data-n="$1">$1</a>');
+  h=h.replace(DTRE,dtSpan);
   h=h.replace(/(\d+ )?\((\d+d\d+(?: ?[+\u2212-] ?\d+)?)\)|(\b\d*d\d+(?: ?[+\u2212-] ?\d+)?)(?![\w(])/g,function(m){return '<span class="dice">'+m+'</span>';});
   h=h.replace(/((?:Melee|Ranged|Melee\/ranged)(?: or Ranged)?(?: Attack Roll:| Weapon Attack:)? )([+\u2212-]\d+)/g,'$1<span class="hit">$2</span>');
   h=h.replace(/\bDC \d+/g,'<span class="dcx">$&</span>');

@@ -67,7 +67,7 @@ After an update, open the app once while online, then close and reopen it to get
 
 **Monsters**
 - 503 stat blocks (currently the 2024 Monster Manual, see *Data*). Full stat block in the drawer (ⓘ or **Stat block**).
-- Dice to roll are highlighted, attack bonuses green, DCs amber. Spell names (blue) and conditions (red, e.g. *Paralyzed*) are links: tap to read the rule, then **◂ Stat block** to go back. Only SRD spells link for now (e.g. Hunger of Hadar doesn't until Player's Handbook spells are added).
+- Dice to roll are highlighted, attack bonuses green, DCs amber, and damage types have their own colour and symbol (🔥 Fire, ❄️ Cold, ⚡ Lightning, 💀 Necrotic…), also in the defences lines and the damage-type pickers. Spell names (blue) and conditions (red, e.g. *Paralyzed*) are links: tap to read the rule, then **◂ Stat block** to go back. Only SRD spells link for now (e.g. Hunger of Hadar doesn't until Player's Handbook spells are added).
 - ✎ Edit per creature: name, AC, HP, initiative, extra actions/traits/notes (can be copied to every creature of that type), or a custom group.
 - **Data → Monster files:** import your own monster JSON files; they stay on this device and override built-in entries with the same name.
 

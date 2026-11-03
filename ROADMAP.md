@@ -15,7 +15,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea
 | Rules tab: SRD 5.2 spells + full condition text, offline | ✅ | `reference.json`, built by `tools/build_reference.py` |
 | Effects with damage/save/status | ✅ | First version, see below |
 | Phone layout for building encounters; party list search, pinned Add button, delete all | ✅ | |
-| Stat blocks: dice/attack/DC highlighting, spell and condition names linked to the Rules tab | ✅ | Spells link anywhere in the text; ability names like Fear Ray or Bright Light are excluded |
+| Stat blocks: dice/attack/DC and damage-type highlighting, spell and condition names linked to the Rules tab | ✅ | Spells link anywhere in the text; ability names like Fear Ray or Bright Light are excluded |
 | Monster data check (all 503 entries) | ✅ | 3 Nov 2026, see BUGS.md; `tools/check_monsters.py` |
 | Code map, CLAUDE.md, README how-to | ✅ | |
 | Controlled live table test | 📋 | Next |
@@ -39,7 +39,7 @@ Still open (📋): saved target lists, "after N rounds" durations. (Prepared enc
 - "Rounds to defeat" estimate from party damage, as a second balance check.
 
 ### Reference extensions
-- 📋 **Player's Handbook spells (local):** Andrew provides the PHB 2024 spell chapter (text PDF); a local parser (like the Monster Manual one) writes a spell file that is loaded on the device via Data, merged with `reference.json`, never committed. Needs: the parser, and a "spell file" import in the Data tab. Then non-SRD monster spells (Synaptic Static, Destructive Wave…) link too.
+- 📋 **Player's Handbook spells (local):** Andrew's PHB 2024 epub has OCR text for all ~390 spells (epub pages 233–341, some OCR errors in headings); a local parser (like the Monster Manual one) writes a spell file that is loaded on the device via Data, merged with `reference.json`, never committed. Needs: the parser, and a "spell file" import in the Data tab. Then non-SRD monster spells (Synaptic Static, Destructive Wave…) link too.
 - 💡 Tap a spell status chip (Bless, Hex…) to open its spell entry.
 - 💡 Player spell lists (needs a spell list per character, e.g. a Kanka property).
 
