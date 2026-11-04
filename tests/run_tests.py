@@ -802,12 +802,13 @@ def phone_toolbar_one_line(b):
 def tablet_toolbar_one_line(b):
     a = App(b)
     J = "(function(){var k=[].slice.call(document.querySelectorAll('#bar>button')).filter(function(x){return x.offsetParent});var t=k.map(function(x){return Math.round(x.getBoundingClientRect().top)});return Math.max.apply(0,t)-Math.min.apply(0,t)+document.documentElement.scrollWidth-innerWidth})()"
-    for w, h in ((744, 1133), (768, 1024), (820, 1180), (834, 1194), (1024, 768), (1180, 820)):
+    for w, h in ((744, 1133), (768, 1024), (820, 1180), (834, 1194), (1024, 768), (1180, 820), (1366, 768), (1920, 1080)):
         a.pg.set_viewport_size({"width": w, "height": h})
         for started in ("null", "'z'"):
             for armed in ("false", "true"):
                 a.e(f"S.turnId={started};ui.undo={{label:'x'}};ui.confirmClear={armed};ui.present=false;renderBar()")
                 eq(a.e(J), 0, f"toolbar on one line at {w}x{h} (combat={started}, armed={armed})")
+                eq(a.e("[].slice.call(document.querySelectorAll('#bar [data-act=endc] .tx,#bar [data-act=undo] .tx')).filter(function(x){return x.offsetParent}).length"), 0, f"End combat/Undo icon-only at {w}px")
     check(not a.errors, a.errors)
 
 

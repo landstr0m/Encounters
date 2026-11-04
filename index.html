@@ -107,9 +107,9 @@ button.danger.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
   .num{width:46px}
   .lib .meta{font-size:.78rem}
 }
-/* iPad / tablet: keep the toolbar on one line. Main labels stay; End combat and Undo go icon-only
-   (names on long-press/hover) and "Tap again to clear all" wraps inside its own button instead of pushing to a new line. */
-@media (min-width:601px) and (max-width:1199px) and (min-height:501px){
+/* Tablet and up: toolbar always on one line. Main labels stay; End combat and Undo are icon-only on every screen
+   (names on hover) and "Tap again to clear all" wraps inside its own button instead of pushing to a new line. */
+@media (min-width:601px) and (min-height:501px){
   .bar{gap:6px;flex-wrap:nowrap}
   .bar>*{flex:none}
   .bar>button{flex:0 1 auto;min-width:44px;padding-inline:10px;white-space:nowrap}
