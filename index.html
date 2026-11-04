@@ -158,7 +158,7 @@ a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-
 .tc .chip{min-height:0;padding:1px 8px;font-size:.8rem}
 .acts2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:6px;margin-top:8px}
 .a{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:.95rem;background:var(--bg)}
-.a b{font-family:var(--display);font-size:1.15rem;font-weight:700;letter-spacing:.02em;display:block}
+.a>b{font-family:var(--display);font-size:1.15rem;font-weight:700;letter-spacing:.02em;display:block}
 .a.spent{opacity:.5}
 .a .tg{float:right;min-height:34px;padding:2px 10px;font-size:.8rem;font-weight:700}
 .turn details{margin-top:6px;font-size:.9rem}
@@ -309,7 +309,10 @@ td.empty p{margin:0 0 10px}
 .abil span{font-family:var(--display);font-size:1.1rem;font-weight:600;font-variant-numeric:tabular-nums}
 .sb h3{font-family:var(--display);font-size:1.2rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:12px 0 4px;border-bottom:1px solid var(--line)}
 .sb p{margin:6px 0;font-size:.95rem}
-.sb p b{font-style:italic}
+.sb p b,.sb .p>b{font-style:italic}
+.sb .p{margin:6px 0;font-size:.95rem}
+.ro{display:grid;gap:4px;margin:6px 0 2px}.ro>div{display:grid;grid-template-columns:2.4em 1fr;gap:6px;padding:5px 8px 5px 4px;border-left:3px solid var(--accent);background:var(--surface2);border-radius:6px}
+.ro .rn{font-weight:800;color:var(--accent);text-align:center;white-space:nowrap}.ro .rh{font-weight:700;font-style:normal}.oc{font-style:italic;color:var(--muted)}
 
 /* Table view: what the players see */
 body.present .dmonly{display:none!important}
@@ -857,12 +860,12 @@ function renderTurn(){
     X.forEach(function(x,i){if(x.t!=='t'&&(x.n||x.d))acts.push(['x'+i,{a:'Extra',b:'Bonus · extra',r:'Reaction · extra'}[x.t]||'Extra',[x.n||'Extra',x.d||''],1]);});
     h+='<div class="acts2">'+acts.map(function(x){
       var a=x[2],rech=/Recharge/.test(a[0]);var sp=rech&&c.spent&&c.spent[x[0]];
-      return '<div class="a'+(sp?' spent':'')+'">'+(rech?'<button class="tg" data-act="spent" data-i="'+x[0]+'">'+(sp?'Spent':'Ready')+'</button>':'')+'<b>'+esc(a[0])+(x[1]?'<span class="sec'+(x[3]?' cu':'')+'">'+x[1]+'</span>':'')+'</b>'+rich(short(a[1]))+'</div>';
+      return '<div class="a'+(sp?' spent':'')+'">'+(rech?'<button class="tg" data-act="spent" data-i="'+x[0]+'">'+(sp?'Spent':'Ready')+'</button>':'')+'<b>'+esc(a[0])+(x[1]?'<span class="sec'+(x[3]?' cu':'')+'">'+x[1]+'</span>':'')+'</b>'+blk(rich(short(a[1])))+'</div>';
     }).join('')+'</div>';
     var leg=m?(m.leg||[]):[];
     var more=X.filter(function(x){return x.t==='t'&&(x.n||x.d);}).map(function(x){return [x.n||'Extra',x.d||''];}).concat(m?(m.traits||[]):[],leg.map(function(t){return ['Legendary: '+t[0],t[1]];}));
     if(more.length){
-      h+='<details'+(ui.traitsOpen?' open':'')+'><summary>Traits'+(leg.length?' and legendary actions':'')+' ('+more.length+')</summary>'+more.map(function(t){return '<p><b>'+esc(t[0])+'.</b> '+rich(t[1])+'</p>';}).join('')+'</details>';
+      h+='<details'+(ui.traitsOpen?' open':'')+'><summary>Traits'+(leg.length?' and legendary actions':'')+' ('+more.length+')</summary>'+more.map(function(t){return ent(t[0],t[1]);}).join('')+'</details>';
     }
   }
   el.innerHTML=h;
@@ -1031,8 +1034,8 @@ function statHTML(){
     cx='<div class="cx"><h3>'+esc(sc.name)+'</h3>'+(sc.hideBase?'<p><i>Uses only the extras below instead of the actions in this stat block.</i></p>':'')+(sc.x||[]).map(function(x){return '<p><b>'+esc(x.n||'Extra')+'.</b> <span class="muted">('+TL[x.t]+')</span> '+rich(x.d||'')+'</p>';}).join('')+'<p><button data-act="sedit">Edit '+esc(sc.name)+'</button></p></div>';
   }
   var ex=m.extra.map(function(e){return '<dt>'+esc(e[0])+'</dt><dd>'+(/^(Immune|Resist|Vulnerable)$/.test(e[0])?esc(e[1]).split(';').map(function(part,i){return i?part.replace(CNRE,'<a class="spl cnd" data-act="spl" data-n="$1">$1</a>'):part.replace(DTW,dtSpan).replace(CNRE,'<a class="spl cnd" data-act="spl" data-n="$1">$1</a>');}).join(';'):esc(e[1]))+'</dd>';}).join('');
-  var tr=m.traits.map(function(t){return '<p><b>'+esc(t[0])+'.</b> '+rich(t[1])+'</p>';}).join('');
-  var sec=function(h,a){return a&&a.length?'<h3>'+h+'</h3>'+a.map(function(t){return '<p><b>'+esc(t[0])+'.</b> '+rich(t[1])+'</p>';}).join(''):'';};
+  var tr=m.traits.map(function(t){return ent(t[0],t[1]);}).join('');
+  var sec=function(h,a){return a&&a.length?'<h3>'+h+'</h3>'+a.map(function(t){return ent(t[0],t[1]);}).join(''):'';};
   return '<div class="sb">'+cx+'<img class="thumb" src="img/'+esc(m.srcId||m.id)+'.webp" alt="" onerror="this.remove()"><h2>'+esc(m.name)+'</h2><div class="type">'+esc(m.type)+'</div>'+
    '<dl><dt>AC</dt><dd>'+esc(m.ac)+(m.acn?' ('+esc(m.acn)+')':'')+'</dd><dt>HP</dt><dd>'+esc(m.hp)+' ('+esc(m.dice)+')</dd><dt>Speed</dt><dd>'+esc(m.speed)+'</dd><dt>CR</dt><dd>'+esc(m.cr)+'</dd></dl>'+
    '<div class="abil">'+ab+'</div><dl>'+ex+'</dl>'+(tr?'<h3>Traits</h3>'+tr:'')+sec('Actions',m.actions)+sec('Bonus actions',m.bonus)+sec('Reactions',m.react)+sec('Legendary actions',m.leg)+'</div>';
@@ -1311,6 +1314,20 @@ function rich(t){
   h=h.replace(/\bDC \d+/g,'<span class="dcx">$&</span>');
   return h;
 }
+function blk(h){
+  // Roll tables ("1: Charm Ray. …" or "1-4. The target …") become one row per result; long text gets one line per save outcome.
+  var re=/([.:;] |^)(\d{1,2})(?:-(\d{1,2}))?[:.] (?=[A-Z<])/g,m,cut=[],nx=1;
+  while((m=re.exec(h))){var a=+m[2],z=+(m[3]||m[2]);if(a!==nx)continue;cut.push([m.index+m[1].length,re.lastIndex,m[2]+(m[3]?'–'+m[3]:''),m[0].slice(-2,-1)]);nx=z+1;}
+  var oc=function(x){return x.replace(/(^|\. )((?:First |Second )?Failure(?: or Success)?|Success):/g,function(_,p,l){return (p?'.':'')+'<br><b class="oc">'+l+':</b>';}).replace(/^<br>/,'');};
+  if(cut.length<2)return h.replace(/<[^>]+>/g,'').length>350?oc(h):h;
+  var out=oc(h.slice(0,cut[0][0]).trim())+'<div class="ro">';
+  cut.forEach(function(c,i){
+    var t=h.slice(c[1],i+1<cut.length?cut[i+1][0]:h.length).trim(),hd='',d=t.indexOf('. ');
+    if(c[3]===':'&&d>0&&d<60){hd='<b class="rh">'+t.slice(0,d)+'</b><br>';t=t.slice(d+2);}
+    out+='<div><span class="rn">'+c[2]+'</span><div>'+hd+oc(t)+'</div></div>';});
+  return out+'</div>';
+}
+function ent(n,t){var x=blk(rich(t));return x.indexOf('<div')>=0?'<div class="p"><b>'+esc(n)+'.</b> '+x+'</div>':'<p><b>'+esc(n)+'.</b> '+x+'</p>';}
 function openSpell(n){if(!ui.refBack)ui.refBack=ui.drawer?S.tab:'close';ui.drawer=true;S.tab='ref';ui.ref=n;}
 var LVN=['Cantrip','1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
 function refHTML(){

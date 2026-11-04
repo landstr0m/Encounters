@@ -2,6 +2,12 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-04 — Roll tables in stat blocks
+
+| # | Bug | Cause | Fix |
+|---|-----|-------|-----|
+| 15 | Beholder Eye Rays (and other roll tables) were one wall of text, options hard to find | Stat block text was shown as a single paragraph | `blk()` lays out numbered results (`1: Charm Ray.` or `1-4.`) as one row each with the roll number and name as a header, and puts Failure / Success / Failure or Success on their own lines in roll tables and long entries (over 350 characters). Done at display time, so the JSON is unchanged and imported monster files get it too. Applies to Beholder, Death Tyrant, Beholder Zombie, Spectator, Umber Hulk, Gibbering Mouther, Elemental Cataclysm, in the stat block and the turn card |
+
 ## 2026-11-03 — Player's Handbook spells (`spells-phb.json`)
 
 - The SRD 5.2 spell text is the 2024 PHB text, so only the **51 PHB spells not in the SRD** were taken from the epub (OCR text, pages 233–341). Book names of 17 SRD spells (Melf's Acid Arrow, Bigby's Hand, Tasha's Hideous Laughter…) are aliases to the SRD entries.

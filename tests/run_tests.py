@@ -771,6 +771,20 @@ def stat_block_dice_and_spell_links(b):
 
 
 @test
+def roll_tables_laid_out(b):
+    a = App(b)
+    n = a.e("MON.filter(function(m){return ['traits','actions','bonus','react','leg'].some(function(k){return (m[k]||[]).some(function(t){return blk(rich(t[1])).indexOf('class=\"ro\"')>=0;});});}).map(function(m){return m.name;}).sort().join(',')")
+    for x in ["Beholder", "Death Tyrant", "Spectator", "Beholder Zombie", "Umber Hulk", "Gibbering Mouther", "Elemental Cataclysm"]:
+        check(x in n.split(","), x + " roll table laid out: " + n)
+    a.e("ui.drawer=true;S.tab='stat';S.stat='mm-beholder';S.statC=null;renderDrawer()")
+    eq(a.e("document.querySelectorAll('#drawer .ro>div').length"), 10, "ten eye rays")
+    check("Charm Ray" in a.e("document.querySelector('#drawer .ro .rh').textContent"), "ray names are headers")
+    check(a.e("document.querySelectorAll('#drawer .ro .oc').length") >= 15, "failure/success on their own lines")
+    check("<div" not in a.e("blk(rich('Melee Attack Roll: +4, reach 5 ft. Hit: 6 (1d8 + 2) Slashing damage.'))"), "short actions unchanged")
+    check(not a.errors, a.errors)
+
+
+@test
 def phb_spells_and_aliases(b):
     a = App(b)
     a.pg.wait_for_function("window.__e('REF&&REF.spells.length>0')")

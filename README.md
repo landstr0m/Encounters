@@ -67,6 +67,7 @@ After an update, open the app once while online, then close and reopen it to get
 
 **Monsters**
 - 503 stat blocks (currently the 2024 Monster Manual, see *Data*). Full stat block in the drawer (ⓘ or **Stat block**).
+- Roll tables (Beholder Eye Rays, Umber Hulk Confusing Gaze…) are shown as one row per result, and long entries put Failure / Success on their own lines.
 - Dice to roll are highlighted, attack bonuses green, DCs amber, and damage types have their own colour and symbol (🔥 Fire, ❄️ Cold, ⚡ Lightning, 💀 Necrotic…), also in the defences lines and the damage-type pickers. Spell names (blue) and conditions (red, e.g. *Paralyzed*) are links: tap to read the rule, then **◂ Stat block** to go back. Spells missing from the data (see Rules tab) don't link.
 - ✎ Edit per creature: name, AC, HP, initiative, extra actions/traits/notes (can be copied to every creature of that type), or a custom group.
 - **Data → Monster files:** import your own monster JSON files; they stay on this device and override built-in entries with the same name.
@@ -116,7 +117,7 @@ Before pushing:
 
 ```bash
 pip install playwright && playwright install chromium
-python tests/run_tests.py            # full browser test battery (44 tests, phone to desktop)
+python tests/run_tests.py            # full browser test battery (46 tests, phone to desktop)
 python tests/run_tests.py typed undo # only tests whose names contain these words
 python tools/check_monsters.py       # data check after changing monsters.json (see BUGS.md)
 ```
