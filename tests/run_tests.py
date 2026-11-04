@@ -813,6 +813,24 @@ def tablet_toolbar_one_line(b):
 
 
 @test
+def stat_tab_follows_selection(b):
+    a = App(b)
+    g = a.mon("mm-goblin-warrior")[0]
+    d = a.mon("mm-green-dragon-wyrmling")[0]
+    p = a.pc("Aer")
+    tap = lambda i: a.e(f"document.querySelector('tr.r[data-id=\"{i}\"] td:nth-child(2)').click()")
+    tab = lambda: a.e("ui.drawer=true;renderDrawer();document.querySelector('#drawer [data-act=tab][data-t=stat]').click()")
+    a.e(f"S.stat='mm-goblin-warrior';S.statC={g};save()")
+    tap(d); tab()
+    eq(a.e("S.statC"), d, "selected monster shown"); eq(a.e("S.stat"), "mm-green-dragon-wyrmling", "its stat block")
+    tap(p); tab()
+    eq(a.e("S.statC"), p, "latest tapped of several selected wins"); eq(a.e("S.stat"), "pc", "player sheet")
+    a.e("finishPad();renderBoard()"); a.e(f"S.stat='mm-goblin-warrior';S.statC={g}"); tab()
+    eq(a.e("S.statC"), p, "nothing selected: last selected creature")
+    check(not a.errors, a.errors)
+
+
+@test
 def wheel_tap_to_type(b):
     a = App(b)
     m = a.mon("mm-goblin-warrior")[0]

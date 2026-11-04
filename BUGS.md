@@ -6,6 +6,7 @@ Newest first. Run `python tests/run_tests.py` after every change (see the README
 
 | # | Bug | Cause | Fix |
 |---|-----|-------|-----|
+| 19 | Stat block tab showed the last monster opened with ⓘ or the search list, not the creature selected in the table (ⓘ is hidden behind the pad while selecting) | Tab only reused `S.stat` | Opening the Stat block tab now shows the most recently tapped selected creature (monster or player), or the last one selected if none is selected now |
 | 18 | iPad: toolbar wrapped onto two lines when Undo was present and Clear was armed ("Tap again to clear all"), and in combat with End combat + Undo | Only phones (≤600 px) had a no-wrap toolbar; tablets used the wrapping desktop bar | Toolbar never wraps on any screen above phone size: Add/Saves/Table view/Clear keep labels, End combat and Undo are icon-only everywhere (Andrew's choice), armed Clear text wraps inside its button. Test covers iPad mini to 1920 px desktop |
 | 17 | Typed amount box beside the wheel was squeezed to a sliver on phones | The box, hint and damage-type picker shared one row | Box removed; tap the middle (selected) number on the wheel to type, Enter or tapping away closes it; spinning still changes the amount |
 | 16 | Phone: toolbar wrapped onto two lines when Undo appeared (≈390 px screens) | Phone buttons had a fixed 44 px minimum plus padding and the bar was allowed to wrap | Phone toolbar never wraps; icon buttons shrink to 34 px if needed, the armed Clear button shows its text on two small lines |

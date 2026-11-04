@@ -1394,6 +1394,8 @@ function parseChar(t){
   return {name:name,ac:ac?+ac:null,hp:hp?+hp:null,ib:ini?+ini:0,lvl:lv?Math.min(20,+lv):null};
 }
 function findC(id){return S.list.find(function(x){return x.id===+id;});}
+// Stat block tab follows the table: the most recently tapped selected creature, else the last one selected.
+function statPick(){var id=ui.sel[ui.lastSel]?ui.lastSel:(Object.keys(ui.sel)[0]||ui.lastSel),c=id!=null&&findC(id);if(!c||c.kind==='fx')return;S.stat=c.kind==='mon'?c.monId:'pc';S.statC=c.id;}
 function pruneSel(){Object.keys(ui.sel).forEach(function(k){if(!findC(k))delete ui.sel[k];});}
 function finishPad(){var fx=curFx();ui.dtype=fx&&fx.dt||'';ui.sel={};ui.amt=0;ui.menu=false;ui.pend={};ui.mq='';ui.confirmRemove=false;}
 function nextIdExcluding(T){
@@ -1455,7 +1457,7 @@ $('#tbl').addEventListener('click',function(e){
   if(act==='viewgrp'){S.stat=b.dataset.m;S.statC=null;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
   if(act==='selgrp'){
     var g=b.dataset.g;
-    S.list.forEach(function(c){if(!isDead(c)&&(g==='pc'?c.kind==='pc':(c.kind==='mon'&&gkey(c)===g)))ui.sel[c.id]=true;});
+    S.list.forEach(function(c){if(!isDead(c)&&(g==='pc'?c.kind==='pc':(c.kind==='mon'&&gkey(c)===g))){ui.sel[c.id]=true;ui.lastSel=ui.lastSel&&ui.sel[ui.lastSel]?ui.lastSel:c.id;}});
     renderTable();renderStrip();renderPad();return;
   }
   if(act==='revive'){var rc=findC(b.dataset.id);if(rc){rc.hp=1;}save();renderBoard();return;}
@@ -1472,7 +1474,7 @@ $('#tbl').addEventListener('click',function(e){
   if(act==='rx'){snap('reaction');c.rx=!c.rx;save();renderBoard();return;}
   if(act==='pip'){snap('legendary');var k=b.dataset.k;c[k]=(c[k]||0)+(b.classList.contains('on')?1:-1);if(c[k]<0)c[k]=0;save();renderBoard();return;}
   if(act==='edit'){S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
-  if(ui.sel[c.id])delete ui.sel[c.id];else ui.sel[c.id]=true;
+  if(ui.sel[c.id])delete ui.sel[c.id];else{ui.sel[c.id]=true;ui.lastSel=c.id;}
   ui.confirmRemove=false;ui.menu=false;ui.pend={};
   renderTable();renderStrip();renderPad();
 });
@@ -1593,7 +1595,7 @@ dr.addEventListener('click',function(e){
   if(act==='rmmonfile'){CUSTOM.splice(+b.dataset.i,1);saveCustom();location.reload();return;}
   if(act==='tablewin'){window.open(location.pathname+'?view=table','_blank');return;}
   if(act==='close'){ui.drawer=false;}
-  else if(act==='tab'){S.tab=b.dataset.t;ui.msg=ui.emsg='';ui.refBack=null;if(S.tab!=='ref')ui.ref=null;}
+  else if(act==='tab'){S.tab=b.dataset.t;if(S.tab==='stat')statPick();ui.msg=ui.emsg='';ui.refBack=null;if(S.tab!=='ref')ui.ref=null;}
   else if(act==='ref'){ui.ref=b.dataset.n;dr.scrollTop=0;}
   else if(act==='refback'){ui.ref=null;if(ui.refBack){if(ui.refBack==='close')ui.drawer=false;else S.tab=ui.refBack;ui.refBack=null;}}
   else if(act==='spl'){openSpell(b.dataset.n);}
