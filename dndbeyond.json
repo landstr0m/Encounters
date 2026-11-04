@@ -1,0 +1,74 @@
+[
+ {
+  "id": 172192516,
+  "name": "Aer Prismray",
+  "classes": "School of Illusion Wizard 3",
+  "level": 3,
+  "race": "Prismray Gnome",
+  "abilities": {
+   "str": 8,
+   "dex": 16,
+   "con": 10,
+   "int": 16,
+   "wis": 14,
+   "cha": 10
+  },
+  "mods": {
+   "str": -1,
+   "dex": 3,
+   "con": 0,
+   "int": 3,
+   "wis": 2,
+   "cha": 0
+  },
+  "initMod": 3,
+  "passivePerception": 14,
+  "ac": 13,
+  "hp": 14,
+  "acNote": "Mage Armor on the sheet (+3); use the Mage Armor status",
+  "saves": {
+   "str": -1,
+   "dex": 3,
+   "con": 0,
+   "int": 5,
+   "wis": 4,
+   "cha": 0
+  },
+  "saveProf": [
+   "int",
+   "wis"
+  ],
+  "advSaves": [
+   "cha",
+   "int",
+   "wis"
+  ],
+  "advNote": "Against Magic",
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "speed": "25 ft.",
+  "senses": "Darkvision 60 ft.",
+  "spells": [
+   "Color Spray",
+   "Detect Magic",
+   "Find Familiar",
+   "Identify",
+   "Mage Armor",
+   "Mage Hand",
+   "Magic Missile",
+   "Message",
+   "Mind Sliver",
+   "Minor Illusion",
+   "Mirror Image",
+   "Scorching Ray",
+   "Shield",
+   "Shocking Grasp",
+   "Silent Image"
+  ],
+  "image": "https://www.dndbeyond.com/avatars/58829/261/1581111423-170857457.jpeg?width=150&height=150&fit=crop&quality=95&auto=webp",
+  "url": "https://dndbeyond.com/characters/172192516",
+  "modified": "2026-11-04T19:34:29.546Z"
+ }
+]

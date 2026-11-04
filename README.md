@@ -56,7 +56,8 @@ After an update, open the app once while online, then close and reopen it to get
 - **Max HP −** (under More on the pad) for effects like a spectre's Life Drain; **Reset max** undoes it.
 
 **Statuses and saves**
-- The 15 conditions plus spell and class effects (Bless, Haste, Slow, Raging, cover, Hex…), with rule text. AC, speed and save modifiers apply automatically. Paralyzed, Stunned etc. add Incapacitated.
+- The status menu has three parts: the 15 conditions, **General** statuses for any creature (Dodging, Disengaged, Readied, Help, half / three-quarters / total cover, Burning), then **spells and effects** (Bless, Haste, Mage Armor, Hex, Rage…) with rule text. Spells and features are shown by their own names. AC, speed, save and resistance changes apply automatically (Mage Armor: base AC 13 + Dex). Paralyzed, Stunned etc. add Incapacitated.
+- Spells that creatures in the encounter can cast (monster Spellcasting, D&D Beyond spell lists) are listed first; search finds the rest.
 - Creatures immune to a condition are skipped (and listed) when you apply it to a group.
 - **Saves** view: shaded = proficient; notes such as `adv.`, `+d4` or `auto-fail` come from statuses and traits.
 
@@ -105,6 +106,15 @@ After an update, open the app once while online, then close and reopen it to get
 - **Estimated HP** = max hit die at level 1, average after, plus Con per level. Feats like Tough aren't included; override by hand.
 - Extra defences: give the character a Kanka property `Resistances`, `Immunities` or `Vulnerabilities` (comma-separated).
 
+## D&D Beyond player import
+
+Works on its own (no Kanka needed), for public characters only (character sheet privacy: Public). Unofficial: D&D Beyond has no public API, so it may break if they change their data.
+
+- Add character links (or ids) to `dndbeyond.txt` on GitHub, one per line. Saving the file runs **Actions → Update players from D&D Beyond** by itself (or press Run workflow), which writes `dndbeyond.json`.
+- In the app: party tab → **Update from D&D Beyond**. New characters are added. A character already in the list (same name, e.g. from Kanka) is matched: empty fields fill in, and each value that differs (AC, HP, ability scores, saves, defences, class…) is shown with **Keep** or **Use**. Kept values aren't asked again.
+- Read from the sheet: ability scores, exact max HP, AC (armour, shield, Dex, magic items; Mage Armor is left out, use the status), initiative, saves and save advantage (with notes such as *Against Magic*), resistances and immunities from species, class, feats and equipped items only, passive Perception, speed, senses, spell names (used only to sort the status menu).
+- Test the converter on a saved sheet: `python tools/dndbeyond.py --file character.json`.
+
 ## Development
 
 Run locally (needed so the JSON files load):
@@ -133,6 +143,7 @@ Then bump `CACHE` in `sw.js` so installed apps pick up the change. Log bugs and 
 | `spells-phb.json` | **Temporary:** Player's Handbook spells not in the SRD, book-name aliases, and the list of spells still missing |
 | `players.json` | Player characters from Kanka (written by the workflow) |
 | `tools/kanka_players.py` | Kanka → `players.json` |
+| `dndbeyond.txt`, `dndbeyond.json`, `tools/dndbeyond.py` | D&D Beyond links → characters (workflow `dndbeyond-players.yml`) |
 | `tools/build_reference.py` | open5e-api SRD 5.2 data → `reference.json` |
 | `tools/check_monsters.py` | Checks every monster entry (stats, dice, text, spelling); `--fix` normalises dice symbols |
 | `.github/workflows/kanka-players.yml` | Manual GitHub Action for the Kanka sync |

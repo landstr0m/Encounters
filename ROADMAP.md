@@ -61,7 +61,7 @@ The party list should become a source-independent library (Kanka may not stay th
 Kept out until the offline app is stable at the table.
 - **Cross-device table view** through a free realtime service (today: same browser only).
 - **Cloud backup / sync** of app state (today: manual Export/Import).
-- **D&D Beyond public-character import from a link.** Unofficial: D&D Beyond has no public API and the character JSON can change without warning. Only public characters, no credentials. Would run like the Kanka flow (GitHub Action writes `players.json`). Using a login cookie for purchased content is not planned: fragile and an account risk.
+- ✅ **D&D Beyond public-character import** (4 Nov 2026): `dndbeyond.txt` → workflow → `dndbeyond.json`, per-field Keep/Use merge with same-name characters. Unofficial: D&D Beyond has no public API and the character JSON can change without warning. Only public characters, no credentials. Would run like the Kanka flow (GitHub Action writes `players.json`). Using a login cookie for purchased content is not planned: fragile and an account risk.
 
 ## Later ideas (from the original plan)
 - 💡 **Encounters generated from DM notes:** Andrew gives his session notes to an AI (Claude), which writes a file of ready-made encounters (monsters by id, counts, effects with damage/save/status, environment notes, lair flag) that the app imports and that he then uses with **Load** / **Add**. Open questions: the file format (probably the existing prepared-encounter JSON, documented as a schema so any AI or tool can write it), matching monster names to ids, and an "import encounters" button that adds them without replacing the party or app state.

@@ -2,6 +2,12 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-04 — Status list review and D&D Beyond import
+
+- Status list: **General** section (Dodging, Disengaged, Readied, Help / Distracted, half / 3/4 / total cover, Burning) now sits above spells. Spell and feature statuses are shown by their real names (Bless, Hunter’s Mark, Hypnotic Pattern…); saved keys are unchanged, so old encounters still load.
+- Cross-checked against the PHB 2024 / SRD 5.2 spell list: added 33 lasting effects (Mage Armor, Aid, Warding Bond, Stoneskin, Protection from Energy/Poison, Fly, Mirror Image, Blink, Beacon of Hope, Death Ward, Ray of Enfeeblement, Crown of Madness…). Spells that only impose a condition (Hold Person, Web, Color Spray…) use the condition.
+- D&D Beyond import: an unequipped Potion of Fire Resistance gave Aer fire resistance in the raw data; the converter only counts equipped (and attuned) items. Aer's sheet adds Mage Armour as a custom AC bonus; the converter leaves it out (AC 13) and notes it.
+
 ## 2026-11-04 — Roll tables in stat blocks
 
 | # | Bug | Cause | Fix |

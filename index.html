@@ -486,19 +486,68 @@ var SPELLS=[
  ['Goaded','📯','Goading Attack: disadvantage on attacks against anyone but the fighter until the end of the fighter’s next turn.'],
  ['Distracted','👀','Distracting Strike / Help: the next attack roll against it by someone else has advantage.'],
  ['Halted','🛑','Sentinel: speed 0 for the rest of the current turn.',{zero:1}],
- ['Hexblade','🪄','Hexblade’s Curse (2014): warlock adds proficiency bonus to damage and scores a critical hit on 19–20 against it.']];
+ ['Hexblade','🪄','Hexblade’s Curse (2014): warlock adds proficiency bonus to damage and scores a critical hit on 19–20 against it.'],
+ // general (any creature): shown in their own section above spells
+ ['Disengaged','🏃','Disengage: its movement doesn’t provoke Opportunity Attacks for the rest of the turn.'],
+ ['Readied','⏳','Ready: holds an action for a stated trigger, used as a Reaction before the start of its next turn. A readied spell needs Concentration.'],
+ ['Total cover','🚫','Total cover: can’t be targeted directly by an attack or a spell.'],
+ // more lasting spells (2024 PHB / SRD 5.2)
+ ['Mage Armor','🧥','Mage Armor (8 h, no concentration): base AC becomes 13 + Dex while it wears no armor. Ends if it dons armor; Dispel Magic ends it.',{bd:13}],
+ ['Aid','❤️','Aid (8 h): max HP and current HP +5 (+5 per slot level above 2). Use Max HP on the pad if you track it.'],
+ ['Armor of Agathys','🧊','Armor of Agathys (1 h): has temp HP; a creature that hits it with a melee attack takes 5 cold (+5 per slot level above 1). Ends when the temp HP are gone.'],
+ ['Warding Bond','🔗','Warding Bond (1 h): +1 AC and saving throws, resistance to all damage; the caster takes the same damage. Ends beyond 60 ft or if the caster drops to 0 HP.',{ac:1,sv:['all','+1']}],
+ ['Stoneskin','🪨','Stoneskin: resistance to bludgeoning, piercing and slashing damage.'],
+ ['Protection from Energy','🌈','Protection from Energy: resistance to one chosen type (acid, cold, fire, lightning or thunder).'],
+ ['Protection from Poison','🧪','Protection from Poison (1 h): advantage on saves against Poisoned; resistance to poison damage.'],
+ ['Fire Shield','🌋','Fire Shield (10 min): resistance to cold (warm shield) or fire (chill shield); a creature within 5 ft that hits it with a melee attack takes 2d8 fire or cold.'],
+ ['Divine Favor','✝️','Divine Favor (1 min): its weapon hits deal +1d4 radiant.'],
+ ['Magic Weapon','🔪','Magic Weapon (1 h): the touched weapon is +1 to attack and damage (+2 at slot 3–5, +3 at 6+).'],
+ ['Elemental Weapon','🌀','Elemental Weapon: the touched weapon is +1 to attack and deals +1d4 of a chosen type (acid, cold, fire, lightning or thunder).'],
+ ['Crusader’s Mantle','🚩','Crusader’s Mantle: the caster and allies in the 30-ft aura deal +1d4 radiant on weapon and Unarmed Strike hits.'],
+ ['Fly','🪽','Fly: fly speed 60 ft and can hover. Falls when it ends, if still aloft.'],
+ ['Spider Climb','🕷️','Spider Climb: climb speed equal to its speed; moves on walls and ceilings with hands free.'],
+ ['Expeditious Retreat','💨','Expeditious Retreat: can take the Dash action as a Bonus Action.'],
+ ['Pass without Trace','🍃','Pass without Trace: +10 to Dexterity (Stealth) checks in the aura; leaves no tracks.'],
+ ['Enhance Ability','💪','Enhance Ability: advantage on ability checks with one chosen ability.'],
+ ['Blink','🫧','Blink (1 min): roll 1d6 at the end of each of its turns; on 4–6 it vanishes to the Ethereal Plane until the start of its next turn.'],
+ ['Mirror Image','👥','Mirror Image (1 min): 3 duplicates. When hit by an attack roll, roll a d6 per duplicate left; any 3+ means a duplicate is hit and destroyed instead. No effect on attackers that are Blinded or have Blindsight or Truesight.'],
+ ['Beacon of Hope','🌅','Beacon of Hope: advantage on Wis saves and Death Saving Throws; healing it receives is maximised.',{sv:[4,'adv.']}],
+ ['Death Ward','⚰️','Death Ward (8 h): the first time it would drop to 0 HP it drops to 1 instead, and the ward ends.'],
+ ['Freedom of Movement','🦅','Freedom of Movement (1 h): ignores difficult terrain; magic can’t reduce its speed or make it Paralyzed or Restrained; 5 ft of movement escapes a grapple; swim speed.'],
+ ['Holy Aura','😇','Holy Aura: advantage on all saving throws; attacks against it have disadvantage. A fiend or undead that hits it in melee makes a Con save or is Blinded.',{sv:['all','adv.']}],
+ ['Foresight','🔭','Foresight (8 h): advantage on D20 Tests; attacks against it have disadvantage.',{sv:['all','adv.']}],
+ ['Ray of Enfeeblement','🫥','Ray of Enfeeblement: disadvantage on Strength-based D20 Tests and −1d8 on its damage rolls. Con save at the end of each of its turns ends it.',{sv:[0,'disadv.']}],
+ ['Witch Bolt','🌩️','Witch Bolt: the caster can deal 1d12 lightning to it as a Bonus Action each turn. Ends if it is more than 30 ft away or has total cover.'],
+ ['Mind Spike','📍','Mind Spike (1 h): the caster always knows where it is; it can’t become hidden from the caster and gains nothing from Invisible against them.'],
+ ['Suggestion','💬','Suggestion (8 h): Charmed and follows the suggested course of action. Ends if the caster or allies damage it.'],
+ ['Crown of Madness','👑','Crown of Madness: Charmed; must use its action before moving to make a melee attack against a creature the caster picks. Wis save at the end of each of its turns.'],
+ ['Phantasmal Force','🎭','Phantasmal Force: sees an illusion only it perceives; 2d8 psychic on the caster’s turns if it is in or within 5 ft of it. Study action and Int (Investigation) check to see through it.'],
+ ['Phantasmal Killer','👁️','Phantasmal Killer: disadvantage on ability checks and attack rolls; Wis save at the end of each of its turns, 4d10 psychic on a failure.'],
+ ['Irresistible Dance','💃','Irresistible Dance: Charmed, dances in place (all movement), disadvantage on Dex saves and attacks, attacks against it have advantage. Wis save at the end of each turn.',{zero:1,sv:[1,'disadv.']}],
+ ['Contagion','🦠','Contagion: Poisoned, and disadvantage on saves with one chosen ability. Con save at the end of each of its turns until 3 successes (ends) or 3 failures (7 days).']];
 var SPX={};SPELLS.forEach(function(x){FX[x[0]]=x[2];SPX[x[0]]=x[3]||{};});
-var COMMON=SPELLS.slice(0,16).map(function(x){return x[0];});
+// Shown names (status keys stay the same in saved data): spell or feature names, so they match spell lists and searches.
+var NAME={'Blessed':'Bless','Baned':'Bane','Hexed':'Hex','Marked':'Hunter’s Mark','Mocked':'Vicious Mockery','Chilled':'Ray of Frost','Hasted':'Haste','Slowed':'Slow','Raging':'Rage',
+ 'Shocked':'Shocking Grasp','Frostbitten':'Frostbite','Blurred':'Blur','Inspired':'Bardic Inspiration','Reckless':'Reckless Attack','Enlarged':'Enlarge','Reduced':'Reduce','Commanded':'Command',
+ 'Dueled':'Compelled Duel','Ensnared':'Ensnaring Strike','Silenced':'Silence','Protected':'Prot. from Evil and Good','Cursed':'Bestow Curse','Entranced':'Hypnotic Pattern','Laughing':'Hideous Laughter',
+ 'Confused':'Confusion','Levitating':'Levitate','Polymorphed':'Polymorph','Banished':'Banishment','Sleeping':'Sleep','Lethargic':'Lethargic (Haste ended)','Vowed':'Vow of Enmity','Turned':'Turn Undead',
+ 'Stun saved':'Stunning Strike (saved)','Open Hand':'Open Hand Technique','Hamstrung':'Hamstring Blow','Staggered':'Staggering Blow','Goaded':'Goading Attack','Distracted':'Help / Distracted','Halted':'Sentinel','Hexblade':'Hexblade’s Curse'};
+function nm(x){return NAME[x]||x;}
+// General statuses that apply to any creature, listed above the spells
+var GEN=['Dodging','Disengaged','Readied','Distracted','Half cover','3/4 cover','Total cover','Burning'];
+var COMMON=SPELLS.slice(0,16).map(function(x){return x[0];}).filter(function(x){return GEN.indexOf(x)<0;}).concat(['Mage Armor']);
 // Pairs that can't be active together: turning one on turns the other off
 var EXCL=[['Half cover','3/4 cover'],['Raging','Concentrating'],['Enlarged','Reduced'],['Hasted','Lethargic'],['Stunned','Stun saved']];
 var ZERO=['Grappled','Restrained','Paralyzed','Petrified','Unconscious'];
-function effAC(c){var a=+c.ac,mn=0;c.conds.forEach(function(x){var o=SPX[x];if(o){a+=o.ac||0;if(o.min>mn)mn=o.min;}});return Math.max(a,mn);}
+function dexMod(c){var v=null;if(c.kind==='pc'){var l=S.lib.find(function(x){return x.id===c.libId;});v=l&&l.abil&&l.abil.dex;}else{var m=MON.find(function(x){return x.id===c.monId;});v=m&&m.abil[1];}return v==null||v===''?null:Math.floor((+v-10)/2);}
+// Mage Armor (bd): base AC becomes 13 + Dex if that is higher (unknown Dex: assumes unarmored AC, so +3).
+function effAC(c){var a=+c.ac,mn=0;c.conds.forEach(function(x){var o=SPX[x];if(o&&o.bd){var d=dexMod(c);a=Math.max(a,d==null?+c.ac+3:o.bd+d);}});c.conds.forEach(function(x){var o=SPX[x];if(o){a+=o.ac||0;if(o.min>mn)mn=o.min;}});return Math.max(a,mn);}
 // Off-turn info: current AC (base struck through when modified), reaction, passive Perception, save effects from statuses.
 function acCls(c){var e=effAC(c),b=+c.ac;return e>b?'em up':e<b?'em dn':'';}
 function acHTML(c){var e=effAC(c);return e!==+c.ac?'<b class="'+acCls(c)+'">'+e+'</b> <s>'+c.ac+'</s>':''+e;}
 // Short effects that end on their own. s = start of its next turn, e = end of its next turn;
 // c* = same, but counted on the turn of whoever applied it (the creature whose turn it was).
-var EXP={'Shield':'s','Dodging':'s','Reckless':'s','Shocked':'s','Mocked':'e','Frostbitten':'e','Lethargic':'e','Commanded':'e',
+var EXP={'Shield':'s','Dodging':'s','Disengaged':'s','Readied':'s','Reckless':'s','Shocked':'s','Mocked':'e','Frostbitten':'e','Lethargic':'e','Commanded':'e',
  'Chilled':'cs','Stun saved':'cs','Open Hand':'cs','Guiding Bolt':'ce','Chill Touch':'ce','Starry Wisp':'ce','Mind Sliver':'ce'};
 function expSet(c,x){var k=EXP[x];if(!k)return;var src=k.charAt(0)==='c'?S.turnId:c.id;if(src==null)return;c.exp=c.exp||{};c.exp[x]={src:src,k:k.slice(-1),h:false};}
 // Runs as the turn passes from creature E to creature N; returns 'Name: effect' strings that ended.
@@ -533,13 +582,13 @@ function remHTML(c){
       '<button data-act="laspend" data-id="'+o.id+'">Use one</button><button data-act="ladis" aria-label="Dismiss">\u00D7</button></div>';
   });
   var st=[],en=[];c.conds.forEach(function(x){var t=FX[x]||'';if(/start of each of its turns|start of its turn|starts its turn/i.test(t))st.push(x);if(/end of each (of its )?turns?/i.test(t))en.push(x);});
-  if(st.length)h+='<div class="legr tick"><b>Start of turn:</b> '+st.map(function(x){return esc(x);}).join(', ')+' \u2014 roll damage or effect (rule text below)</div>';
-  if(en.length)h+='<div class="legr tick"><b>End of turn:</b> '+en.map(function(x){return esc(x);}).join(', ')+' \u2014 save or effect (see rule text)</div>';
+  if(st.length)h+='<div class="legr tick"><b>Start of turn:</b> '+st.map(function(x){return esc(nm(x));}).join(', ')+' \u2014 roll damage or effect (rule text below)</div>';
+  if(en.length)h+='<div class="legr tick"><b>End of turn:</b> '+en.map(function(x){return esc(nm(x));}).join(', ')+' \u2014 save or effect (see rule text)</div>';
   return h;
 }
 // Concentration spells: a status added on someone's turn is linked to that caster. The caster gets Concentrating;
 // when that ends (removed, 0 HP, Incapacitated, a new concentration spell) every linked status is removed.
-var CONC=['Blessed','Baned','Hexed','Marked','Faerie Fire','Hasted','Slowed','Shield of Faith','Blurred','Heroism','Enlarged','Reduced','Dueled','Ensnared','Shining Smite','Heat Metal','Silenced','Protected','Cursed','Entranced','Fear','Spirit Guardians','Stinking Cloud','Laughing','Confused','Levitating','Polymorphed','Banished','Sleeping','Blade Ward','Guidance','Resistance'];
+var CONC=['Blessed','Baned','Hexed','Marked','Faerie Fire','Hasted','Slowed','Shield of Faith','Blurred','Heroism','Enlarged','Reduced','Dueled','Ensnared','Shining Smite','Heat Metal','Silenced','Protected','Cursed','Entranced','Fear','Spirit Guardians','Stinking Cloud','Laughing','Confused','Levitating','Polymorphed','Banished','Sleeping','Blade Ward','Guidance','Resistance','Stoneskin','Protection from Energy','Elemental Weapon','Crusader’s Mantle','Fly','Spider Climb','Expeditious Retreat','Pass without Trace','Enhance Ability','Beacon of Hope','Holy Aura','Ray of Enfeeblement','Witch Bolt','Mind Spike','Suggestion','Crown of Madness','Phantasmal Force','Phantasmal Killer','Irresistible Dance'];
 function ccSet(c,x){
   var K=findC(S.turnId);if(CONC.indexOf(x)<0||!K||K.kind==='fx')return;
   ccEnd(K,x);
@@ -721,7 +770,9 @@ function defs(c){
     DTYPES.forEach(function(t){if(has(R,t))d.res.push(t);if(has(I,t))d.imm.push(t);if(has(V,t))d.vul.push(t);});
     CONDS.concat(['Exhaustion']).forEach(function(x){if(has(I,x.toLowerCase()))d.cimm.push(x.toLowerCase());});
   }
-  if(c.conds.indexOf('Raging')>=0)d.res.push('bludgeoning','piercing','slashing');
+  if(c.conds.indexOf('Raging')>=0||c.conds.indexOf('Stoneskin')>=0)d.res.push('bludgeoning','piercing','slashing');
+  if(c.conds.indexOf('Protection from Poison')>=0)d.res.push('poison');
+  if(c.conds.indexOf('Warding Bond')>=0)d.res=DTYPES.slice();
   if(c.conds.indexOf('Petrified')>=0)d.res=DTYPES.slice();
   return d;
 }
@@ -764,7 +815,7 @@ function dsAct(c,act,b){
 
 function fxHTML(c,cls){
   if(!c.conds.length)return '';
-  return '<div class="'+(cls||'')+'">'+c.conds.map(function(x){return '<div class="fx"><b>'+esc(x)+'.</b> '+esc(FX[x]||'')+'</div>';}).join('')+'</div>';
+  return '<div class="'+(cls||'')+'">'+c.conds.map(function(x){return '<div class="fx"><b>'+esc(nm(x))+'.</b> '+esc(FX[x]||'')+'</div>';}).join('')+'</div>';
 }
 function dsHTML(c){
   if(c.kind!=='pc'||c.hp>0||isPcDead(c))return '';
@@ -795,7 +846,7 @@ function tokHTML(c,isNext){
   var now=c.id===S.turnId,down=c.hp<=0||isPcDead(c);
   var pct=c.max?Math.max(0,Math.min(100,c.hp/c.max*100)):0;
   var lvl=pct>50?'ok':(pct>25?'warn':'bad');
-  var tags=c.conds.filter(function(x){return x!=='Dead';}).map(function(x){return '<span>'+esc(x)+'</span>';});
+  var tags=c.conds.filter(function(x){return x!=='Dead';}).map(function(x){return '<span>'+esc(nm(x))+'</span>';});
   if(c.base!=null&&c.max>0)tags.push('<span>Max HP \u2212'+(c.base-c.max)+'</span>');
   if(isPcDead(c))tags.unshift('<span class="dn">Dead</span>');
   else if(c.hp<=0)tags.unshift('<span class="dn">'+(c.kind==='pc'?'Down':'Dead')+'</span>');
@@ -843,7 +894,7 @@ function renderTurn(){
   if(c.kind==='fx'){el.innerHTML='<div class="th"><span class="tn">'+esc(c.name)+'</span><span class="st"><i>EFFECT</i>init '+c.init+'</span><span class="sp"></span><button data-act="fxvis">'+(c.vis?'Visible to players':'Hidden from players')+'</button><button data-act="fxrm">Remove</button></div>'+(c.desc?'<p style="margin:6px 0 0">'+esc(c.desc)+'</p>':'')+
    (fxHas(c)&&!RO?'<p style="margin:6px 0 0"><b>'+esc(fxSum(c))+'</b> '+(ui.fxRun===c.id?'<span class="muted">Select the targets below, enter the rolled damage and tap Damage (failed save) or Half (saved).</span>':'<button class="primary" data-act="fxgo">Apply\u2026</button>')+'</p>':'');return;}
   var m=c.kind==='mon'?MON.find(function(x){return x.id===c.monId;}):null;
-  var chips=c.conds.map(function(x){return '<button class="chip" data-act="cond" data-c="'+esc(x)+'" title="Remove '+esc(x)+'">'+esc(x)+' ×</button>';}).join('');
+  var chips=c.conds.map(function(x){return '<button class="chip" data-act="cond" data-c="'+esc(x)+'" title="Remove '+esc(nm(x))+'">'+esc(nm(x))+' ×</button>';}).join('');
   var h='<div class="th"><span class="tn">'+esc(c.name)+'</span>'+
     '<span class="st"><i>AC</i>'+(effAC(c)!==+c.ac?'<s>'+c.ac+'</s> <b class="'+acCls(c)+'">'+effAC(c)+'</b>':c.ac)+'</span><span class="st"><i>HP</i>'+c.hp+'/'+c.max+(c.base!=null?' (max \u2212'+(c.base-c.max)+')':'')+(c.temp>0?' +'+c.temp:'')+'</span>';
   var l=libOf(c),dcs=pcDCs(l),X=c.x||[],dv=uniq(dcs.map(function(d){return d.dc;}).filter(function(v){return v!=null;}));
@@ -915,7 +966,7 @@ function rowHTML(c){
   var lvl=pct>50?'ok':(pct>25?'warn':'bad');
   var pcDead=isPcDead(c);
   var down=c.hp<=0||pcDead;
-  var chips=c.conds.map(function(x){var k=c.cc&&c.cc[x]!=null?findC(c.cc[x]):null;return '<button class="chip" data-act="cond" data-c="'+esc(x)+'" title="'+esc(FX[x]||x)+' (tap to remove)">'+esc(x)+(k&&k.id!==c.id?' <small>('+esc(k.name)+')</small>':'')+' ×</button>';}).join('');
+  var chips=c.conds.map(function(x){var k=c.cc&&c.cc[x]!=null?findC(c.cc[x]):null;return '<button class="chip" data-act="cond" data-c="'+esc(x)+'" title="'+esc(FX[x]||x)+' (tap to remove)">'+esc(nm(x))+(k&&k.id!==c.id?' <small>('+esc(k.name)+')</small>':'')+' ×</button>';}).join('');
   var ph=c.kind==='pc'&&c.ib!=null?'d20'+sgn(c.ib):'—';
   return '<tr class="r'+(c.id===S.turnId?' turn':'')+(down?' down':'')+(ui.sel[c.id]?' sel':'')+'" data-id="'+c.id+'">'+
    '<td class="c-in"><input class="num" type="number" inputmode="numeric" data-act="init" placeholder="'+esc(ph)+'" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
@@ -975,17 +1026,24 @@ function effState(T,x){if(Object.prototype.hasOwnProperty.call(ui.pend,x))return
 function menuHTML(T){
   var list=CONDS.slice();if(T.every(function(c){return c.kind==='pc';}))list.push('Dead');
   var n=Object.keys(ui.pend).length;
-  return '<div class="menu"><div class="mt"><div class="mh">Status · '+T.length+' selected</div><button data-act="mcancel">Cancel</button><button class="add" data-act="mapply">Apply'+(n?' ('+n+')':'')+'</button></div><div class="ms">Conditions</div><div class="mg">'+list.map(btn).join('')+'</div><div class="ms ss">Spells and effects<input id="msearch" type="search" autocomplete="off" placeholder="Search '+SPELLS.length+' spells and abilities\u2026" value="'+esc(ui.mq)+'" aria-label="Search spells and abilities"></div><div class="mg" id="mres">'+spellGrid(T)+'</div><div class="muted" style="font-size:.75rem">Paralyzed, Petrified, Stunned and Unconscious also apply Incapacitated. Tap a chip on a creature to end an effect.</div></div>';
+  return '<div class="menu"><div class="mt"><div class="mh">Status · '+T.length+' selected</div><button data-act="mcancel">Cancel</button><button class="add" data-act="mapply">Apply'+(n?' ('+n+')':'')+'</button></div><div class="ms">Conditions</div><div class="mg">'+list.map(btn).join('')+'</div><div class="ms">General</div><div class="mg">'+GEN.map(btn).join('')+'</div><div class="ms ss">Spells and effects<input id="msearch" type="search" autocomplete="off" placeholder="Search '+SPELLS.length+' spells and abilities\u2026" value="'+esc(ui.mq)+'" aria-label="Search spells and abilities"></div><div class="mg" id="mres">'+spellGrid(T)+'</div><div class="muted" style="font-size:.75rem">Paralyzed, Petrified, Stunned and Unconscious also apply Incapacitated. Tap a chip on a creature to end an effect.</div></div>';
   function btn(x){return mbtn(T,x);}
 }
 function mbtn(T,x){
   var s=effState(T,x);
-  return '<button class="mi '+s+'" data-act="mi" data-c="'+esc(x)+'" title="'+esc(FX[x]||'')+'"><span class="bx">'+(ICON[x]||'•')+'</span>'+esc(x)+'</button>';
+  return '<button class="mi '+s+'" data-act="mi" data-c="'+esc(x)+'" title="'+esc(FX[x]||'')+'"><span class="bx">'+(ICON[x]||'•')+'</span>'+esc(nm(x))+'</button>';
 }
+// Statuses for spells that creatures in this encounter can cast (monster Spellcasting text, imported player spell lists)
+function spName(x){var r=FX[x]||'',m=r.match(/^([^:(]+?)\s*(?:\(|:)/);return (m?m[1]:nm(x)).replace(/\u2019/g,"'").toLowerCase();}
+function present(){var t='';S.list.forEach(function(c){
+    if(c.kind==='pc'){var l=S.lib.find(function(x){return x.id===c.libId;});if(l&&l.spells)t+='|'+l.spells.join('|');}
+    else if(c.kind==='mon'){var m=MON.find(function(x){return x.id===c.monId;});if(m)['traits','actions','bonus','react','leg'].forEach(function(f){(m[f]||[]).forEach(function(e){if(/spell/i.test(e[0])||/\bcasts?\b/i.test(e[1]))t+='|'+e[1];});});}});
+  t=t.replace(/\u2019/g,"'").toLowerCase();if(!t)return [];
+  return SPELLS.map(function(x){return x[0];}).filter(function(x){if(GEN.indexOf(x)>=0)return false;var n=spName(x).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return new RegExp('(^|[^a-z])'+n+'($|[^a-z])').test(t);});}
 function spellGrid(T){
   var q=(ui.mq||'').trim().toLowerCase(),L;
-  if(q)L=SPELLS.filter(function(x){return (x[0]+' '+x[2]).toLowerCase().indexOf(q)>=0;}).slice(0,16).map(function(x){return x[0];});
-  else{L=COMMON.slice();SPELLS.forEach(function(x){if(L.indexOf(x[0])<0&&effState(T,x[0])!=='none')L.push(x[0]);});}
+  if(q)L=SPELLS.filter(function(x){return (x[0]+' '+nm(x[0])+' '+x[2]).toLowerCase().replace(/\u2019/g,"'").indexOf(q.replace(/\u2019/g,"'"))>=0;}).slice(0,16).map(function(x){return x[0];});
+  else{L=present().concat(COMMON.filter(function(x){return present().indexOf(x)<0;}));SPELLS.forEach(function(x){if(L.indexOf(x[0])<0&&GEN.indexOf(x[0])<0&&effState(T,x[0])!=='none')L.push(x[0]);});}
   return L.length?L.map(function(x){return mbtn(T,x);}).join(''):'<div class="muted" style="grid-column:1/-1;font-size:.85rem">No match. Try a spell or ability name.</div>';
 }
 function renderPad(){
@@ -1002,7 +1060,7 @@ function renderPad(){
    '<div class="pmain"><div class="wheelbox"><div class="wheel" id="wheel" aria-label="Amount wheel">'+WHEEL+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount" tabindex="-1"></div>'+
    '<div class="pr"><div class="amtrow"><span>Spin, or tap the middle number to type</span><select id="dtype" aria-label="Damage type"><option value="">Untyped</option>'+DTYPES.map(function(t){return '<option value="'+t+'"'+(ui.dtype===t?' selected':'')+'>'+DTI[t]+' '+t[0].toUpperCase()+t.slice(1)+'</option>';}).join('')+'</select></div>'+
    '<div class="pacts"><button class="d" data-act="padhp" data-k="dmg">Damage</button><button class="d" data-act="padhp" data-k="half">Half</button><button class="h" data-act="padhp" data-k="heal">Heal</button>'+
-   '<button data-act="padhp" data-k="temp">Temp HP</button>'+(fx&&fx.st?'<button class="d" data-act="fxst">+ '+esc(fx.st)+'</button>':'')+'<button data-act="padstatus">Status ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove">'+(ui.confirmRemove?'Sure?':'Remove')+'</button><button data-act="padmore" aria-expanded="'+!!ui.more+'">'+(ui.more?'Less \u25b4':'More \u25be')+'</button>'+
+   '<button data-act="padhp" data-k="temp">Temp HP</button>'+(fx&&fx.st?'<button class="d" data-act="fxst">+ '+esc(nm(fx.st))+'</button>':'')+'<button data-act="padstatus">Status ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove">'+(ui.confirmRemove?'Sure?':'Remove')+'</button><button data-act="padmore" aria-expanded="'+!!ui.more+'">'+(ui.more?'Less \u25b4':'More \u25be')+'</button>'+
    (ui.more?'<button class="d" data-act="padhp" data-k="maxdn">Max HP \u2212</button><button data-act="padhp" data-k="maxreset">Reset max</button><button data-act="padgroup">'+(T.some(function(c){return c.cg;})&&T.every(function(c){return c.cg&&c.cg===T[0].cg;})?'Ungroup':'Group\u2026')+'</button>':'')+'</div></div></div>'+
    (ui.menu?menuHTML(T):'')+'</div>';
   var mn=pad.querySelector('.menu');if(mn){mn.style.maxHeight='';mn.style.maxHeight=Math.max(200,mn.getBoundingClientRect().bottom-8)+'px';}
@@ -1034,7 +1092,10 @@ function statHTML(){
       (kl.saves?'<p><b>Saves</b> '+['str','dex','con','int','wis','cha'].map(function(k){var p=(kl.saveProf||[]).indexOf(k)>=0;return (p?'<b>':'')+k.toUpperCase()+' '+(kl.saves[k]==null?'?':sgn(kl.saves[k]))+(p?'</b>':'')+((kl.adv||[]).indexOf(k)>=0?' (adv.)':'');}).join(' · ')+' <span class="muted">(bold = proficient)</span></p>':'')+
       [['Resistances',kl.res],['Immunities',kl.imm],['Vulnerabilities',kl.vul],['Condition immunities',kl.cimm]].map(function(x){return x[1]&&x[1].length?'<p><b>'+x[0]+'</b> '+esc(x[1].join(', '))+'</p>':'';}).join('')+
       (kl.traits||[]).map(function(t){return '<p><b><i>'+esc(t.name)+'.</i></b> '+esc(t.text)+' <span class="muted">('+esc(t.src)+')</span></p>';}).join('')+
-      (kl.url?'<p><a href="'+esc(kl.url)+'" target="_blank" rel="noopener">Open in Kanka</a></p>':'<p class="muted">Not linked to Kanka. Add scores and defences with ✎ Edit.</p>');
+      (kl.speed||kl.senses?'<p>'+(kl.speed?'<b>Speed</b> '+esc(kl.speed):'')+(kl.speed&&kl.senses?' · ':'')+(kl.senses?'<b>Senses</b> '+esc(kl.senses):'')+'</p>':'')+
+      (kl.advNote?'<p class="muted">Save advantage: '+esc(kl.advNote)+'</p>':'')+(kl.acNote?'<p class="muted">'+esc(kl.acNote)+'</p>':'')+
+      (kl.url?'<p><a href="'+esc(kl.url)+'" target="_blank" rel="noopener">Open in Kanka</a></p>':'')+(kl.durl?'<p><a href="'+esc(kl.durl)+'" target="_blank" rel="noopener">Open in D&amp;D Beyond</a></p>':'')+
+      (kl.url||kl.durl?'':'<p class="muted">Not linked to Kanka or D&amp;D Beyond. Add scores and defences with ✎ Edit.</p>');
   }
   var m=MON.find(function(x){return x.id===S.stat;});
   if(!m)return '<p class="muted">Tap ⓘ on a monster in the table, or a name in the search list, to open its stat block here.</p>';
@@ -1094,7 +1155,7 @@ function fxPanelHTML(){
    '<h3 style="margin:10px 0 4px">What it does <span class="muted" style="font-weight:400;font-size:.85rem">(optional; dice are rolled at the table)</span></h3>'+
    '<div class="flt"><input class="search" id="fxdd" type="text" maxlength="20" placeholder="Damage, e.g. 2d6" value="'+esc(f.dd)+'" aria-label="Damage dice" style="margin:0;max-width:8em">'+selHTML('fxdt','fxdt','Damage type',DTYPES.map(function(t){return [t,DTI[t]+' '+t[0].toUpperCase()+t.slice(1)];}),f.dt)+'</div>'+
    '<div class="flt">'+selHTML('fxsv','fxsv','No save',AB.map(function(a,i){return [String(i),a+' save'];}),f.sv)+'<input class="search" id="fxdc" type="number" inputmode="numeric" min="1" max="30" placeholder="DC" value="'+esc(f.dc)+'" aria-label="Save DC" style="margin:0;max-width:6em"></div>'+
-   '<div class="flt">'+selHTML('fxst','fxst','No status',stl.map(function(x){return [x,x];}),f.st)+selHTML('fxdur','fxdur','Normal duration',FXDUR.slice(1),f.dur)+'</div>'+
+   '<div class="flt">'+selHTML('fxst','fxst','No status',stl.map(function(x){return [x,nm(x)];}).sort(function(a,b){return a[1].localeCompare(b[1]);}),f.st)+selHTML('fxdur','fxdur','Normal duration',FXDUR.slice(1),f.dur)+'</div>'+
    '<div class="row"><button class="add" data-act="addfx" style="flex:1">Add effect</button></div>'+
    '<div class="msg">'+esc(ui.msg||'')+'</div>';
 }
@@ -1123,7 +1184,7 @@ function partyHTML(){
       (khpDiff(l)?'<button data-act="usekhp" data-l="'+l.id+'" title="Set max HP to the Kanka estimate">Use Kanka HP</button>':'')+
       '<button class="x" data-act="dellib" data-l="'+l.id+'" aria-label="Delete '+esc(l.name)+' from library">×</button></div>';};
   var tk=S.lib.filter(function(l){return S.atTable[l.id]&&!inE(l);});
-  return '<div class="row"><button data-act="kanka" style="flex:1">Update from Kanka</button>'+(nd?'<button data-act="usekhp" data-l="all">Use Kanka HP for all ('+nd+')</button>':'')+'</div>'+
+  return mergeHTML()+'<div class="row"><button data-act="kanka" style="flex:1">Update from Kanka</button><button data-act="ddb" style="flex:1">Update from D&amp;D Beyond</button>'+(nd?'<button data-act="usekhp" data-l="all">Use Kanka HP for all ('+nd+')</button>':'')+'</div>'+
    '<input class="search" id="pq" type="search" placeholder="Search '+S.lib.length+' characters" value="'+esc(ui.pq||'')+'" aria-label="Search characters">'+
    '<div id="plist">'+(L.map(row).join('')||'<p class="muted">No character matches.</p>')+'</div>'+
    '<div class="row"><input id="newchar" type="text" placeholder="Name (optional: , AC 15, HP 28, init +3, lvl 2)" aria-label="New character"><button data-act="newchar">Save</button></div>'+
@@ -1387,6 +1448,44 @@ function renderAll(){
   document.body.classList.toggle('present',ui.present);
   renderBoard();renderDrawer();
 }
+// D&D Beyond import (dndbeyond.json, written by the GitHub workflow). New characters are added; a character already in the
+// library (same D&D Beyond id, or same name) is updated field by field: empty fields fill in, differences wait in ui.merge
+// for Keep / Use D&D Beyond. A kept value is remembered so the same difference isn't asked again.
+var DDBF=[['ac','AC'],['hp','Max HP'],['ib','Initiative bonus'],['lvl','Level'],['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA'],
+ ['saves','Saving throws'],['adv','Save advantage'],['res','Resistances'],['imm','Immunities'],['vul','Vulnerabilities'],['cimm','Condition immunities'],['pp','Passive Perception'],['cls','Class'],['race','Species']];
+function ddbVal(p,k){var A=['str','dex','con','int','wis','cha'];if(A.indexOf(k)>=0)return p.abilities?p.abilities[k]:null;
+  return {ac:p.ac,hp:p.hp,ib:p.initMod,lvl:p.level,saves:p.saves,adv:{a:(p.advSaves||[]).slice().sort(),n:p.advNote||''},res:p.resist,imm:p.immune,vul:p.vulnerable,cimm:p.condImmune,pp:p.passivePerception,cls:p.classes,race:p.race}[k];}
+function libVal(l,k){var A=['str','dex','con','int','wis','cha'];if(A.indexOf(k)>=0)return l.abil?l.abil[k]:null;
+  if(k==='adv')return l.adv?{a:l.adv.slice().sort(),n:l.advNote||''}:null;return l[k];}
+function ddbShow(k,v){if(v==null||v==='')return '—';if(Array.isArray(v))return v.length?v.join(', '):'none';
+  if(k==='saves')return ['str','dex','con','int','wis','cha'].map(function(a){return a.toUpperCase()+' '+(v[a]==null?'?':sgn(v[a]));}).join(' ');
+  if(k==='adv')return (v.a.length?v.a.map(function(a){return a.toUpperCase();}).join(', '):'none')+(v.n?' ('+v.n+')':'');return ''+v;}
+function ddbSet(l,k,v,p){var A=['str','dex','con','int','wis','cha'];
+  if(A.indexOf(k)>=0){l.abil=Object.assign({},l.abil||{});l.abil[k]=v;}
+  else if(k==='adv'){l.adv=v.a.slice();l.advNote=v.n;}
+  else if(['res','imm','vul','cimm'].indexOf(k)>=0)l[k]=uniq(v.concat(l['x'+k]||[]));
+  else{l[k]=v;if(k==='ac')l.chk=false;if(k==='hp')l.hpMan=true;if(k==='saves'&&p)l.saveProf=(p.saveProf||[]).slice();}
+  if(l.keep)delete l.keep[k];}
+function ddbUpdate(P){
+  var nw=0,up=0;ui.merge=(ui.merge||[]).filter(function(){return false;});
+  P.forEach(function(p){
+    var l=S.lib.find(function(x){return x.ddb===p.id;})||S.lib.find(function(x){return !x.ddb&&x.name.toLowerCase()===p.name.toLowerCase();});
+    if(!l){l={id:'l'+(S.libNext++),name:p.name,ac:10,hp:10,ib:0};S.lib.push(l);nw++;DDBF.forEach(function(f){var v=ddbVal(p,f[0]);if(v!=null)ddbSet(l,f[0],v,p);});}
+    else{up++;DDBF.forEach(function(f){var k=f[0],v=ddbVal(p,k),c=libVal(l,k),J=JSON.stringify;if(v==null)return;
+      if(c==null||c===''){ddbSet(l,k,v,p);return;}
+      var n=function(x){return Array.isArray(x)?x.slice().sort():x;};
+      if(J(n(c))===J(n(v))||(l.keep&&l.keep[k]===J(v)))return;
+      ui.merge.push({l:l.id,k:k,lab:f[1],cur:ddbShow(k,c),nw:ddbShow(k,v),v:v,p:p});});}
+    l.ddb=p.id;l.durl=p.url;l.speed=p.speed;l.senses=p.senses;l.spells=p.spells||[];l.acNote=p.acNote||'';if(!l.saveProf)l.saveProf=(p.saveProf||[]).slice();
+  });
+  S.lib.sort(function(a,b){return a.name.localeCompare(b.name);});
+  return nw+' new, '+up+' updated from D&D Beyond.'+(ui.merge.length?' '+ui.merge.length+' difference'+(ui.merge.length>1?'s':'')+' to check above.':'');
+}
+function ddbPick(i,use){var m=ui.merge[i];if(!m)return;var l=S.lib.find(function(x){return x.id===m.l;});
+  if(l){if(use)ddbSet(l,m.k,m.v,m.p);else{l.keep=l.keep||{};l.keep[m.k]=JSON.stringify(m.v);}}ui.merge.splice(i,1);}
+function mergeHTML(){var M=ui.merge||[];if(!M.length)return '';
+  return '<div class="cx"><h3>D&amp;D Beyond differs ('+M.length+')</h3><div class="row"><button data-act="mall" data-v="1" style="flex:1">Use D&amp;D Beyond for all</button><button data-act="mall" data-v="0" style="flex:1">Keep all</button></div>'+
+   M.map(function(m,i){var l=S.lib.find(function(x){return x.id===m.l;})||{};return '<div class="lib"><span style="flex:1"><b>'+esc(l.name||'?')+'</b> · '+esc(m.lab)+'<br><span class="meta">Now: '+esc(m.cur)+'<br>D&amp;D Beyond: '+esc(m.nw)+'</span></span><button data-act="mkeep" data-i="'+i+'">Keep</button><button data-act="muse" data-i="'+i+'">Use</button></div>';}).join('')+'</div>';}
 function khpDiff(l){return !!(l.k&&l.hpEst&&l.hp!==l.hpEst);}
 function parseChar(t){
   var name=t.split(',')[0].trim();if(!name)return null;
@@ -1634,6 +1733,13 @@ dr.addEventListener('click',function(e){
     else if(p){S.lib.push({id:'l'+(S.libNext++),name:p.name,ac:p.ac==null?10:p.ac,hp:p.hp==null?10:p.hp,ib:p.ib,lvl:p.lvl,chk:p.ac==null,hpMan:p.hp!=null});ui.msg='Saved '+p.name+(p.ac==null||p.hp==null?' (AC/HP default 10; change them with ✎ Edit once added).':'.');}
     else{ui.msg='Type at least a name, e.g. Thorn (optionally , AC 15, HP 28, init +3)';}
   }
+  else if(act==='ddb'){
+    ui.msg='Loading dndbeyond.json…';
+    fetch('dndbeyond.json?t='+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(P){ui.msg=ddbUpdate(P);save();renderDrawer();})
+     .catch(function(){ui.msg='Could not load dndbeyond.json. Add links to dndbeyond.txt on GitHub (the workflow then runs by itself).';renderDrawer();});
+  }
+  else if(act==='muse'||act==='mkeep'){ddbPick(+b.dataset.i,act==='muse');}
+  else if(act==='mall'){while(ui.merge&&ui.merge.length)ddbPick(0,b.dataset.v==='1');}
   else if(act==='kanka'){
     ui.msg='Loading players.json…';
     fetch('players.json?t='+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(P){

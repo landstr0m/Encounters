@@ -834,6 +834,58 @@ def stat_tab_follows_selection(b):
 
 
 @test
+def general_statuses_and_mage_armor(b):
+    a = App(b)
+    p = a.pc("Aer", ac=13, abil={"dex": 16})
+    m = a.mon("mm-archmage")[0]
+    a.select(p, m); a.e("ui.menu=true;renderPad()")
+    sec = a.e("[].map.call(document.querySelectorAll('.menu .ms'),function(x){return x.firstChild.textContent.trim()})")
+    eq(sec[:3], ["Conditions", "General", "Spells and effects"], "General section sits above spells")
+    gen = a.e("[].map.call(document.querySelectorAll('.menu .mg')[1].querySelectorAll('.mi'),function(x){return x.dataset.c})")
+    check("Half cover" in gen and "Dodging" in gen and "Total cover" in gen, gen)
+    check("Bless" in a.e("document.querySelector('#mres').textContent"), "spell names shown (Bless, not Blessed)")
+    a.e(f"findC({p}).conds.push('Mage Armor');findC({m}).conds.push('Mage Armor')")
+    eq(a.e(f"effAC(findC({p}))"), 16, "Mage Armor: 13 + Dex 3")
+    eq(a.e(f"effAC(findC({m}))"), 17, "higher natural AC kept")
+    a.e(f"findC({p}).conds.push('Shield')"); eq(a.e(f"effAC(findC({p}))"), 21, "Shield stacks on Mage Armor")
+    check(not a.errors, a.errors)
+
+
+@test
+def dndbeyond_import_and_merge(b):
+    a = App(b)
+    a.pc("Aer Prismray", ac=13, hp=14, saves={"str": -1, "dex": 3, "con": 0, "int": 5, "wis": 4, "cha": 0}, adv=["cha", "int", "wis"], res=[], cls="Illusion Wizard - 3")
+    P = [dict(id=172192516, name="Aer Prismray", classes="School of Illusion Wizard 3", level=3, race="Gnome", abilities=dict(str=8, dex=16, con=10, int=16, wis=14, cha=10),
+              initMod=3, passivePerception=14, ac=13, hp=14, acNote="", saves=dict(str=-1, dex=3, con=0, int=5, wis=4, cha=0), saveProf=["int", "wis"], advSaves=["cha", "int", "wis"],
+              advNote="Against Magic", resist=[], immune=[], vulnerable=[], condImmune=[], speed="25 ft.", senses="Darkvision 60 ft.", spells=["Mage Armor", "Shield", "Color Spray"], url="u"),
+         dict(id=5, name="Newbie", classes="Fighter 1", level=1, race="Human", abilities=dict(str=16, dex=12, con=14, int=8, wis=10, cha=10), initMod=1, passivePerception=10,
+              ac=16, hp=12, saves={}, saveProf=["str", "con"], advSaves=[], resist=[], immune=[], vulnerable=[], condImmune=[], spells=[], url="v")]
+    msg = a.e(f"ddbUpdate({json.dumps(P)})")
+    check("1 new, 1 updated" in msg, msg)
+    ks = a.e("ui.merge.map(function(m){return m.k})")
+    eq(sorted(ks), ["adv", "cls", "ib"], "only real differences are asked (advantage note, class wording, init +2 vs +3)")
+    eq(a.e("S.lib.find(function(l){return l.name==='Newbie'}).ac"), 16, "new D&D Beyond character added")
+    a.e("ui.drawer=true;S.tab='add';S.sub='party';renderDrawer()")
+    check(a.e("document.querySelectorAll('#drawer [data-act=muse]').length") == 3, "a Use button per difference")
+    a.e("document.querySelector('#drawer [data-act=mkeep]').click()")
+    a.e("document.querySelector('#drawer [data-act=muse]').click()")
+    a.e("document.querySelector('#drawer [data-act=mall][data-v=\"1\"]').click()")
+    eq(a.e("ui.merge.length"), 0, "all answered")
+    eq(a.e("S.lib.find(function(l){return l.name==='Aer Prismray'}).ib"), 2, "kept value stays (first row: init)")
+    eq(a.e("S.lib.find(function(l){return l.name==='Aer Prismray'}).advNote"), "Against Magic", "used value applied")
+    a.e(f"ddbUpdate({json.dumps(P)})")
+    eq(a.e("ui.merge.length"), 0, "kept and used answers are not asked again")
+    eq(a.e("S.lib.find(function(l){return l.name==='Aer Prismray'}).speed"), "25 ft.", "speed filled in")
+    # spells of creatures present float to the top of the status list
+    a.e("addPc(S.lib.find(function(l){return l.name==='Aer Prismray'}));renderBoard()")
+    pr = a.e("present()")
+    check("Mage Armor" in pr and "Shield" in pr, pr)
+    a.mon("mm-archmage")
+    check("Fly" in a.e("present()") or "Mind Spike" in a.e("present()") or len(a.e("present()")) > len(pr), "monster spellcasting adds its spells")
+    check(not a.errors, a.errors)
+
+
+@test
 def wheel_tap_to_type(b):
     a = App(b)
     m = a.mon("mm-goblin-warrior")[0]
