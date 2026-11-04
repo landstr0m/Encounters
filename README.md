@@ -66,7 +66,7 @@ After an update, open the app once while online, then close and reopen it to get
 - On its turn press **Apply…**: the Saves view opens on that ability and the pad is preloaded. Select the targets, type the roll, then **Damage** (failed save: damage + status), **Half** (saved: half, no status) or **+ Status** (status only). **Done** ends it.
 
 **Monsters**
-- 503 stat blocks (currently the 2024 Monster Manual, see *Data*). Full stat block in the drawer (ⓘ or the **Stat block** tab, which opens on the creature you last tapped in the table, monster or player).
+- 503 stat blocks (currently the 2024 Monster Manual, see *Data*). Full stat block in the drawer (ⓘ or the **Stat block** tab, which shows the creature you last tapped in the table, monster or player, and follows your taps while open).
 - Roll tables (Beholder Eye Rays, Umber Hulk Confusing Gaze…) are shown as one row per result, and every entry puts Failure / Success on their own lines.
 - Dice to roll are highlighted, attack bonuses green, DCs amber, and damage types have their own colour and symbol (🔥 Fire, ❄️ Cold, ⚡ Lightning, 💀 Necrotic…), also in the defences lines and the damage-type pickers. Spell names (blue) and conditions (red, e.g. *Paralyzed*) are links: tap to read the rule, then **◂ Stat block** to go back. Spells missing from the data (see Rules tab) don't link.
 - ✎ Edit per creature: name, AC, HP, initiative, extra actions/traits/notes (can be copied to every creature of that type), or a custom group.

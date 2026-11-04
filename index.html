@@ -1476,6 +1476,7 @@ $('#tbl').addEventListener('click',function(e){
   if(act==='edit'){S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
   if(ui.sel[c.id])delete ui.sel[c.id];else{ui.sel[c.id]=true;ui.lastSel=c.id;}
   ui.confirmRemove=false;ui.menu=false;ui.pend={};
+  if(ui.drawer&&S.tab==='stat'){statPick();save();renderDrawer();}
   renderTable();renderStrip();renderPad();
 });
 $('#tbl').addEventListener('change',function(e){

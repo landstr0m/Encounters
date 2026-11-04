@@ -827,6 +827,9 @@ def stat_tab_follows_selection(b):
     eq(a.e("S.statC"), p, "latest tapped of several selected wins"); eq(a.e("S.stat"), "pc", "player sheet")
     a.e("finishPad();renderBoard()"); a.e(f"S.stat='mm-goblin-warrior';S.statC={g}"); tab()
     eq(a.e("S.statC"), p, "nothing selected: last selected creature")
+    tap(d)
+    eq(a.e("S.statC"), d, "open Stat block tab follows taps live")
+    check("Wyrmling" in a.e("document.querySelector('#drawer').textContent"), "drawer redrawn")
     check(not a.errors, a.errors)
 
 
