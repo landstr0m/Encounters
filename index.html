@@ -1034,12 +1034,14 @@ function renderTable(){
 }
 // Damage type wheel: Untyped, the 13 types, and (extra slot) Max HP only. Tap the middle item for the full list.
 // Grouped: no type / healing / max HP, then physical, poison, elemental, then force, necrotic, psychic, radiant. The wheel loops.
-var TORD=['','heal','temp','maxhp','bludgeoning','piercing','slashing','poison','acid','cold','fire','lightning','thunder','force','necrotic','psychic','radiant'];
-var SPEC={heal:1,temp:1,maxhp:1},TGRP=[[0,4],[4,7],[7,8],[8,13],[13,17]];
+// Wheel order (loops, so Heal sits just above Untyped); TGRP = the picker's groups, TDIV = where the wheel draws a divider.
+var TORD=['','bludgeoning','piercing','slashing','acid','cold','fire','lightning','thunder','force','necrotic','poison','psychic','radiant','maxhp','temp','heal'];
+var SPEC={heal:1,temp:1,maxhp:1},TGRP=[['','heal','temp','maxhp'],['bludgeoning','piercing','slashing'],['acid','cold','fire','lightning','thunder'],['force','necrotic','poison','psychic','radiant']],TDIV=[1,4,9,14];
 function TL(){return TORD;}
-function tLab(t){return t===''?'\u26aa Untyped':t==='heal'?'\ud83d\udc9a Heal':t==='temp'?'\ud83d\udca0 Temp HP':t==='maxhp'?'\ud83d\udc94 Max HP \u2212':DTI[t]+' '+t[0].toUpperCase()+t.slice(1);}
-function tWheel(){var h='<div class="sp"></div>';for(var r=0;r<3;r++)TL().forEach(function(t,i){h+='<div class="wi'+(i===0||i===4||i===7||i===8||i===13?' g':'')+'" data-act="ti" data-i="'+(r*TL().length+i)+'">'+tLab(t)+'</div>';});return h+'<div class="sp"></div>';}
-function tPick(){return '<div class="tpick"><div class="tph"><b>Type</b><button data-act="tpclose">Close</button></div>'+TGRP.map(function(g){return '<div class="tpg">'+TL().slice(g[0],g[1]).map(function(t){return '<button class="'+(t===(ui.dtype||'')?'on':'')+'" data-act="tset" data-t="'+t+'">'+tLab(t)+'</button>';}).join('')+'</div>';}).join('')+'</div>';}
+function DTI2(t){return tLab(t).split(' ')[0];}
+function tLab(t){return t===''?'Untyped':t==='heal'?'\u2764\ufe0f Heal':t==='temp'?'\ud83d\udca0 Temp HP':t==='maxhp'?'\ud83d\udc94 Max HP \u2212':DTI[t]+' '+t[0].toUpperCase()+t.slice(1);}
+function tWheel(){var h='<div class="sp"></div>';for(var r=0;r<3;r++)TL().forEach(function(t,i){h+='<div class="wi'+(TDIV.indexOf(i)>=0?' g':'')+'" data-act="ti" data-i="'+(r*TL().length+i)+'">'+tLab(t)+'</div>';});return h+'<div class="sp"></div>';}
+function tPick(){return '<div class="tpick"><div class="tph"><b>Type</b><button data-act="tpclose">Close</button></div>'+TGRP.map(function(g){return '<div class="tpg">'+g.map(function(t){return '<button class="'+(t===(ui.dtype||'')?'on':'')+'" data-act="tset" data-t="'+t+'">'+tLab(t)+'</button>';}).join('')+'</div>';}).join('')+'</div>';}
 // Wheels snap in JS (CSS scroll-snap made iOS stop after a fling until the wheel was tapped again).
 function wheelFit(el){var box=el.parentNode,pd=Math.max(0,(box.clientHeight-IH)/2);[].forEach.call(el.querySelectorAll('.sp'),function(x){x.style.height=pd+'px';});[].forEach.call(box.querySelectorAll('.wband,.amtin'),function(x){x.style.top=pd+'px';});}
 function wheelSettle(el){clearTimeout(el._st);el._st=setTimeout(function(){var k=Math.round(el.scrollTop/IH);
@@ -1047,7 +1049,7 @@ function wheelSettle(el){clearTimeout(el._st);el._st=setTimeout(function(){var k
   if(Math.abs(el.scrollTop-k*IH)>1)el.scrollTo({top:k*IH,behavior:'smooth'});},110);}
 // Keep the Apply label and the slot tabs current while a wheel spins (no full redraw, so the scroll isn't interrupted)
 function padLive(){var b=$('#pad [data-act=papply]');if(b){var sm=padSum(Object.keys(ui.pend));b.disabled=!sm;b.innerHTML=sm?'Apply: '+sm:'Pick an amount or a status';}
-  var t=$('#pad .slots [data-k="'+(ui.ax||0)+'"]');if(t)t.innerHTML=(ui.ax?'+ Extra ':'Main ')+'<b>'+ui.amt+'</b>'+(ui.dtype?' '+tLab(ui.dtype).split(' ')[0]:'');}
+  var t=$('#pad .slots [data-k="'+(ui.ax||0)+'"]');if(t)t.innerHTML=(ui.ax?'+ Extra ':'Main ')+'<b>'+ui.amt+'</b>'+(ui.dtype?' '+DTI2(ui.dtype):'');}
 var WHEEL='';
 (function(){var s='<div class="sp"></div>';for(var i=0;i<=WMAX;i++)s+='<div class="wi" data-act="wi" data-n="'+i+'">'+i+'</div>';WHEEL=s+'<div class="sp"></div>';})();
 function condState(T,x){var n=T.filter(function(c){return c.conds.indexOf(x)>=0;}).length;return n===T.length?'all':(n?'some':'none');}
@@ -1089,7 +1091,7 @@ function renderPad(){
   pad.innerHTML='<div class="pi">'+(fx?'<div class="fxb">⚡ <b>'+esc(fx.name)+':</b> '+esc(fxSum(fx))+' <button data-act="fxdone">Done</button></div>':'')+'<div class="pt"><div class="who"><b>'+T.length+' selected</b> · '+names+'</div><button data-act="desel">Deselect</button></div>'+
    '<div class="pmain"><div class="wheelbox"><div class="wheel" id="wheel" aria-label="Amount wheel">'+WHEEL+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount" tabindex="-1"></div>'+
    '<div class="wheelbox tbox"><div class="wheel twh" id="twheel" aria-label="Type wheel: tap the middle for the list">'+tWheel()+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div></div>'+
-   '<div class="pr">'+(ui.ex?'<div class="amtrow"><div class="slots">'+[0,1].map(function(i){var sv=slot(i);return '<button class="'+(ui.ax===i?'on':'')+'" data-act="pslot" data-k="'+i+'">'+(i?'+ Extra ':'Main ')+'<b>'+sv.v+'</b>'+(sv.dt?' '+tLab(sv.dt).split(' ')[0]:'')+'</button>';}).join('')+'</div></div>':'')+
+   '<div class="pr">'+(ui.ex?'<div class="amtrow"><div class="slots">'+[0,1].map(function(i){var sv=slot(i);return '<button class="'+(ui.ax===i?'on':'')+'" data-act="pslot" data-k="'+i+'">'+(i?'+ Extra ':'Main ')+'<b>'+sv.v+'</b>'+(sv.dt?' '+DTI2(sv.dt):'')+'</button>';}).join('')+'</div></div>':'')+
    '<div class="pacts"><button class="tg'+(ui.half?' on':'')+'" data-act="ptog" data-k="half" aria-pressed="'+!!ui.half+'"'+(nod?' disabled':'')+'>Half</button>'+
    '<button class="tg'+(ui.ex?' on':'')+'" data-act="ptog" data-k="extra" aria-pressed="'+!!ui.ex+'"'+' title="A second amount with its own damage type (or max HP only), applied together">+ Extra</button>'+
    '<button class="tg d'+(ui.mx?' on':'')+'" data-act="ptog" data-k="maxdn" aria-pressed="'+!!ui.mx+'"'+(nod?' disabled':'')+' title="Also lower max HP by the damage taken (e.g. Life Drain)">Max HP \u2212</button>'+
