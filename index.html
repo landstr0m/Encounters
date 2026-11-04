@@ -107,6 +107,17 @@ button.danger.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
   .num{width:46px}
   .lib .meta{font-size:.78rem}
 }
+/* iPad / tablet: keep the toolbar on one line. Main labels stay; End combat and Undo go icon-only
+   (names on long-press/hover) and "Tap again to clear all" wraps inside its own button instead of pushing to a new line. */
+@media (min-width:601px) and (max-width:1199px) and (min-height:501px){
+  .bar{gap:6px;flex-wrap:nowrap}
+  .bar>*{flex:none}
+  .bar>button{flex:0 1 auto;min-width:44px;padding-inline:10px;white-space:nowrap}
+  .bar .primary{padding-inline:14px}
+  .bar .spacer{flex:1 1 0}
+  .bar [data-act="endc"] .tx,.bar [data-act="undo"] .tx{display:none}
+  .bar .danger.armed{flex:0 1 112px;white-space:normal;font-size:.78rem;line-height:1.1;padding:2px 6px}
+}
 body.idle .strip{display:none}
 .fxb{padding:4px 0 8px;font-size:.9rem}.fxb button{margin-left:6px}
 .dice{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--ink);border-radius:5px;padding:0 3px;font-weight:700;white-space:nowrap;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 45%,transparent)}
