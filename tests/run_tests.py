@@ -799,6 +799,28 @@ def phone_toolbar_one_line(b):
 
 
 @test
+def wheel_tap_to_type(b):
+    a = App(b)
+    m = a.mon("mm-goblin-warrior")[0]
+    a.select(m); a.e("ui.amt=3;renderPad()")
+    a.pg.wait_for_selector('#wheel')
+    check(not a.pg.is_visible('#amtin'), "no separate number box")
+    a.e("document.querySelector('#wheel .wi[data-n=\"5\"]').click()")
+    eq(a.e("ui.amt"), 5, "tapping a number picks it")
+    check(not a.pg.is_visible('#amtin'), "picking a number does not open typing")
+    a.e("document.querySelector('#wheel .wi[data-n=\"5\"]').click()")
+    check(a.pg.is_visible('#amtin'), "tapping the middle number opens typing")
+    a.pg.keyboard.type("47")
+    eq(a.e("ui.amt"), 47, "typed amount")
+    a.pg.keyboard.press("Enter")
+    check(not a.pg.is_visible('#amtin'), "Enter closes typing")
+    a.pg.wait_for_timeout(400)
+    a.e("var w=document.getElementById('wheel');ui.ignoreUntil=0;w.scrollTop=12*44;w.dispatchEvent(new Event('scroll'))")
+    eq(a.e("ui.amt"), 12, "scrolling still changes the amount")
+    check(not a.errors, a.errors)
+
+
+@test
 def phb_spells_and_aliases(b):
     a = App(b)
     a.pg.wait_for_function("window.__e('REF&&REF.spells.length>0')")

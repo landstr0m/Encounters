@@ -29,7 +29,7 @@ After an update, open the app once while online, then close and reopen it to get
 **3. Run combat**
 1. Type each player's initiative roll into their row, then press **Start combat**. **Next turn ▸** moves on; **↶ Undo** reverses the last change.
 2. The **turn card** shows the current creature's attacks (dice to roll are highlighted), statuses, reminders and death saves. Tap a spell or condition name to read its rule.
-3. **Tap rows to select** creatures, then use the **action pad**: spin or type the amount, pick a damage type if it matters, and press **Damage**, **Half**, **Heal**, **Temp HP** or **Status ▾**.
+3. **Tap rows to select** creatures, then use the **action pad**: spin the wheel for the amount (tap the middle number to type it), pick a damage type if it matters, and press **Damage**, **Half**, **Heal**, **Temp HP** or **Status ▾**.
 4. **Saves** shows one saving throw for everyone (useful before a Fireball).
 5. **■ End combat** stops the turn order but keeps creatures, HP and statuses. **Clear** (two taps) empties the tracker.
 
@@ -117,7 +117,7 @@ Before pushing:
 
 ```bash
 pip install playwright && playwright install chromium
-python tests/run_tests.py            # full browser test battery (47 tests, phone to desktop)
+python tests/run_tests.py            # full browser test battery (48 tests, phone to desktop)
 python tests/run_tests.py typed undo # only tests whose names contain these words
 python tools/check_monsters.py       # data check after changing monsters.json (see BUGS.md)
 ```
