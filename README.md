@@ -57,6 +57,7 @@ After an update, open the app once while online, then close and reopen it to get
 
 **Statuses and saves**
 - The status menu has three parts: the 15 conditions, **General** statuses for any creature (Dodging, Disengaged, Readied, Help, half / three-quarters / total cover, Burning), then **spells and effects** (Bless, Haste, Mage Armor, Hex, Rage…) with rule text. Spells and features are shown by their own names. AC, speed, save and resistance changes apply automatically (Mage Armor: base AC 13 + Dex). Paralyzed, Stunned etc. add Incapacitated.
+- Spells that impose one condition (Hold Person, Charm Person, Web, Color Spray, Invisibility…) add that condition too, linked to the spell: when the spell ends (concentration lost, expiry, or tapping its chip) the condition goes with it. A condition the creature already had stays.
 - Spells that creatures in the encounter can cast (monster Spellcasting, D&D Beyond spell lists) are listed first; search finds the rest.
 - Creatures immune to a condition are skipped (and listed) when you apply it to a group.
 - **Saves** view: shaded = proficient; notes such as `adv.`, `+d4` or `auto-fail` come from statuses and traits.

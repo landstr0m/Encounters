@@ -944,6 +944,25 @@ def one_apply_damage_and_status(b):
 
 
 @test
+def single_condition_spells_linked(b):
+    a = App(b)
+    k = a.pc("Caster"); g = a.mon("mm-goblin-warrior")[0]
+    a.e(f"S.turnId={k};renderBoard()")
+    a.select(g); a.status("Hold Person", search=True)
+    cs = a.c(g)["conds"]
+    check("Hold Person" in cs and "Paralyzed" in cs and "Incapacitated" in cs, cs)
+    check("Concentrating" in a.c(k)["conds"], "caster concentrates")
+    a.e(f"var c=findC({k});c.conds.splice(c.conds.indexOf('Concentrating'),1);save();renderBoard()")
+    eq(a.c(g)["conds"], [], "concentration ends: spell, Paralyzed and Incapacitated all go")
+    # a condition already there before the spell stays when the spell ends
+    a.e(f"findC({g}).conds.push('Charmed');renderBoard()")
+    a.select(g); a.status("Charm Person", search=True)
+    a.e(f"var c=findC({g});c.conds.splice(c.conds.indexOf('Charm Person'),1);save();renderBoard()")
+    eq(a.c(g)["conds"], ["Charmed"], "earlier Charmed is kept")
+    check(not a.errors, a.errors)
+
+
+@test
 def wheel_tap_to_type(b):
     a = App(b)
     m = a.mon("mm-goblin-warrior")[0]

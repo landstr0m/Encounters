@@ -2,6 +2,10 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-04 — Single-condition spells
+
+- Reverses the earlier choice to leave out spells that only impose a condition: 20 added (Charm Person/Monster, Hold Person/Monster, Entangle, Web, Black Tentacles, Flesh to Stone, Color Spray, Blindness/Deafness, Ray of Sickness, Wrathful and Staggering Smite, Dominate Beast/Person/Monster, Power Word Stun, Invisibility, Greater Invisibility). Each adds its condition, linked so it ends with the spell (concentration, expiry or removal). Older statuses that describe a condition (Hypnotic Pattern, Fear, Turn Undead, Hideous Laughter, Sleep, Ensnaring Strike, Suggestion…) now apply it the same way; Hideous Laughter's Prone stays after it ends.
+
 ## 2026-11-04 — Type wheel v2
 
 | # | Bug | Cause | Fix |

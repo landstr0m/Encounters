@@ -537,14 +537,42 @@ var SPELLS=[
  ['Phantasmal Force','🎭','Phantasmal Force: sees an illusion only it perceives; 2d8 psychic on the caster’s turns if it is in or within 5 ft of it. Study action and Int (Investigation) check to see through it.'],
  ['Phantasmal Killer','👁️','Phantasmal Killer: disadvantage on ability checks and attack rolls; Wis save at the end of each of its turns, 4d10 psychic on a failure.'],
  ['Irresistible Dance','💃','Irresistible Dance: Charmed, dances in place (all movement), disadvantage on Dex saves and attacks, attacks against it have advantage. Wis save at the end of each turn.',{zero:1,sv:[1,'disadv.']}],
+ // spells that impose one condition: the condition is linked to the spell status and ends with it (concentration, expiry or removal)
+ ['Charm Person','💞','Charm Person (1 h): Charmed by the caster. Ends if the caster or their allies damage it.',{cd:['Charmed']}],
+ ['Charm Monster','💞','Charm Monster (1 h): Charmed by the caster. Ends if the caster or their allies damage it.',{cd:['Charmed']}],
+ ['Hold Person','🫷','Hold Person: Paralyzed. Wis save at the end of each of its turns ends it.',{cd:['Paralyzed']}],
+ ['Hold Monster','🫷','Hold Monster: Paralyzed. Wis save at the end of each of its turns ends it.',{cd:['Paralyzed']}],
+ ['Entangle','🌱','Entangle: Restrained until the spell ends; an action and Str (Athletics) check against the spell DC to break free.',{cd:['Restrained']}],
+ ['Web','🕸️','Web: Restrained while in the webs; an action and Str (Athletics) check against the spell DC to break free. Webs are difficult terrain and burn.',{cd:['Restrained']}],
+ ['Black Tentacles','🐙','Black Tentacles: Restrained; 3d6 bludgeoning when it enters the area or starts its turn there. Str (Athletics) check as an action to escape.',{cd:['Restrained']}],
+ ['Flesh to Stone','⛰️','Flesh to Stone: Restrained. Con save at the end of each of its turns: 3 failures and it is Petrified, 3 successes end it.',{cd:['Restrained']}],
+ ['Color Spray','🎨','Color Spray: Blinded until the end of the caster’s next turn.',{cd:['Blinded']}],
+ ['Blindness','🕶️','Blindness/Deafness (1 min): Blinded. Con save at the end of each of its turns ends it.',{cd:['Blinded']}],
+ ['Deafness','🦻','Blindness/Deafness (1 min): Deafened. Con save at the end of each of its turns ends it.',{cd:['Deafened']}],
+ ['Ray of Sickness','🤮','Ray of Sickness: Poisoned until the end of the caster’s next turn.',{cd:['Poisoned']}],
+ ['Wrathful Smite','😠','Wrathful Smite (1 min): Frightened. Wis save at the end of each of its turns ends it.',{cd:['Frightened']}],
+ ['Staggering Smite','😵‍💫','Staggering Smite: Stunned until the end of the caster’s next turn.',{cd:['Stunned']}],
+ ['Dominate Beast','🎮','Dominate Beast: Charmed; the caster can command it telepathically. It repeats the save each time it takes damage.',{cd:['Charmed']}],
+ ['Dominate Person','🎮','Dominate Person: Charmed; the caster can command it telepathically. It repeats the save each time it takes damage.',{cd:['Charmed']}],
+ ['Dominate Monster','🎮','Dominate Monster: Charmed; the caster can command it telepathically. It repeats the save each time it takes damage.',{cd:['Charmed']}],
+ ['Power Word Stun','⛔','Power Word Stun: Stunned (if it has 150 HP or fewer). Con save at the end of each of its turns ends it.',{cd:['Stunned']}],
+ ['Invisibility','👤','Invisibility: Invisible until the spell ends; ends early after it attacks, deals damage or casts a spell.',{cd:['Invisible']}],
+ ['Greater Invisibility','🌘','Greater Invisibility: Invisible for the duration, even while attacking or casting.',{cd:['Invisible']}],
  ['Contagion','🦠','Contagion: Poisoned, and disadvantage on saves with one chosen ability. Con save at the end of each of its turns until 3 successes (ends) or 3 failures (7 days).']];
 var SPX={};SPELLS.forEach(function(x){FX[x[0]]=x[2];SPX[x[0]]=x[3]||{};});
+// Conditions that older spell statuses impose (cd: linked, end with the status; cp: added once, stay, e.g. Prone)
+var LINK={'Entranced':{cd:['Charmed','Incapacitated']},'Fear':{cd:['Frightened']},'Turned':{cd:['Frightened','Incapacitated']},'Laughing':{cd:['Incapacitated'],cp:['Prone']},
+ 'Sleeping':{cd:['Incapacitated']},'Ensnared':{cd:['Restrained']},'Suggestion':{cd:['Charmed']},'Crown of Madness':{cd:['Charmed']},'Irresistible Dance':{cd:['Charmed']},'Contagion':{cd:['Poisoned']},'Banished':{cd:['Incapacitated']}};
+Object.keys(LINK).forEach(function(k){Object.assign(SPX[k],LINK[k]);});
+// Add a spell status's conditions (linkAdd) and drop them again once the status is gone (linkSweep, run on every redraw)
+function linkAdd(c,x){var o=SPX[x];if(!o)return;(o.cd||[]).forEach(function(k){if(c.conds.indexOf(k)<0){c.conds.push(k);c.lc=c.lc||{};c.lc[k]=x;}});(o.cp||[]).forEach(function(k){if(c.conds.indexOf(k)<0)c.conds.push(k);});}
+function linkSweep(c){if(!c.lc)return;var ch=false;Object.keys(c.lc).forEach(function(k){var i=c.conds.indexOf(k);if(i<0){delete c.lc[k];return;}if(c.conds.indexOf(c.lc[k])<0){c.conds.splice(i,1);delete c.lc[k];ch=true;}});if(ch)incSync(c,false);}
 // Shown names (status keys stay the same in saved data): spell or feature names, so they match spell lists and searches.
 var NAME={'Blessed':'Bless','Baned':'Bane','Hexed':'Hex','Marked':'Hunter’s Mark','Mocked':'Vicious Mockery','Chilled':'Ray of Frost','Hasted':'Haste','Slowed':'Slow','Raging':'Rage',
  'Shocked':'Shocking Grasp','Frostbitten':'Frostbite','Blurred':'Blur','Inspired':'Bardic Inspiration','Reckless':'Reckless Attack','Enlarged':'Enlarge','Reduced':'Reduce','Commanded':'Command',
  'Dueled':'Compelled Duel','Ensnared':'Ensnaring Strike','Silenced':'Silence','Protected':'Prot. from Evil and Good','Cursed':'Bestow Curse','Entranced':'Hypnotic Pattern','Laughing':'Hideous Laughter',
  'Confused':'Confusion','Levitating':'Levitate','Polymorphed':'Polymorph','Banished':'Banishment','Sleeping':'Sleep','Lethargic':'Lethargic (Haste ended)','Vowed':'Vow of Enmity','Turned':'Turn Undead',
- 'Stun saved':'Stunning Strike (saved)','Open Hand':'Open Hand Technique','Hamstrung':'Hamstring Blow','Staggered':'Staggering Blow','Goaded':'Goading Attack','Distracted':'Help / Distracted','Halted':'Sentinel','Hexblade':'Hexblade’s Curse'};
+ 'Stun saved':'Stunning Strike (saved)','Open Hand':'Open Hand Technique','Hamstrung':'Hamstring Blow','Staggered':'Staggering Blow','Goaded':'Goading Attack','Distracted':'Help / Distracted','Halted':'Sentinel','Hexblade':'Hexblade’s Curse','Blindness':'Blindness/Deafness (blind)','Deafness':'Blindness/Deafness (deaf)'};
 function nm(x){return NAME[x]||x;}
 // General statuses that apply to any creature, listed above the spells
 var GEN=['Dodging','Disengaged','Readied','Distracted','Half cover','3/4 cover','Total cover','Burning'];
@@ -560,7 +588,7 @@ function acCls(c){var e=effAC(c),b=+c.ac;return e>b?'em up':e<b?'em dn':'';}
 function acHTML(c){var e=effAC(c);return e!==+c.ac?'<b class="'+acCls(c)+'">'+e+'</b> <s>'+c.ac+'</s>':''+e;}
 // Short effects that end on their own. s = start of its next turn, e = end of its next turn;
 // c* = same, but counted on the turn of whoever applied it (the creature whose turn it was).
-var EXP={'Shield':'s','Dodging':'s','Disengaged':'s','Readied':'s','Reckless':'s','Shocked':'s','Mocked':'e','Frostbitten':'e','Lethargic':'e','Commanded':'e',
+var EXP={'Color Spray':'ce','Ray of Sickness':'ce','Staggering Smite':'ce','Shield':'s','Dodging':'s','Disengaged':'s','Readied':'s','Reckless':'s','Shocked':'s','Mocked':'e','Frostbitten':'e','Lethargic':'e','Commanded':'e',
  'Chilled':'cs','Stun saved':'cs','Open Hand':'cs','Guiding Bolt':'ce','Chill Touch':'ce','Starry Wisp':'ce','Mind Sliver':'ce'};
 function expSet(c,x){var k=EXP[x];if(!k)return;var src=k.charAt(0)==='c'?S.turnId:c.id;if(src==null)return;c.exp=c.exp||{};c.exp[x]={src:src,k:k.slice(-1),h:false};}
 // Runs as the turn passes from creature E to creature N; returns 'Name: effect' strings that ended.
@@ -601,7 +629,7 @@ function remHTML(c){
 }
 // Concentration spells: a status added on someone's turn is linked to that caster. The caster gets Concentrating;
 // when that ends (removed, 0 HP, Incapacitated, a new concentration spell) every linked status is removed.
-var CONC=['Blessed','Baned','Hexed','Marked','Faerie Fire','Hasted','Slowed','Shield of Faith','Blurred','Heroism','Enlarged','Reduced','Dueled','Ensnared','Shining Smite','Heat Metal','Silenced','Protected','Cursed','Entranced','Fear','Spirit Guardians','Stinking Cloud','Laughing','Confused','Levitating','Polymorphed','Banished','Sleeping','Blade Ward','Guidance','Resistance','Stoneskin','Protection from Energy','Elemental Weapon','Crusader’s Mantle','Fly','Spider Climb','Expeditious Retreat','Pass without Trace','Enhance Ability','Beacon of Hope','Holy Aura','Ray of Enfeeblement','Witch Bolt','Mind Spike','Suggestion','Crown of Madness','Phantasmal Force','Phantasmal Killer','Irresistible Dance'];
+var CONC=['Blessed','Baned','Hexed','Marked','Faerie Fire','Hasted','Slowed','Shield of Faith','Blurred','Heroism','Enlarged','Reduced','Dueled','Ensnared','Shining Smite','Heat Metal','Silenced','Protected','Cursed','Entranced','Fear','Spirit Guardians','Stinking Cloud','Laughing','Confused','Levitating','Polymorphed','Banished','Sleeping','Blade Ward','Guidance','Resistance','Stoneskin','Protection from Energy','Elemental Weapon','Crusader’s Mantle','Fly','Spider Climb','Expeditious Retreat','Pass without Trace','Enhance Ability','Beacon of Hope','Holy Aura','Ray of Enfeeblement','Witch Bolt','Mind Spike','Suggestion','Crown of Madness','Phantasmal Force','Phantasmal Killer','Irresistible Dance','Hold Person','Hold Monster','Entangle','Web','Black Tentacles','Flesh to Stone','Dominate Beast','Dominate Person','Dominate Monster','Invisibility','Greater Invisibility'];
 function ccSet(c,x){
   var K=findC(S.turnId);if(CONC.indexOf(x)<0||!K||K.kind==='fx')return;
   ccEnd(K,x);
@@ -795,7 +823,7 @@ function typed(c,n,t){
   if(d.imm.indexOf(t)>=0)return [0,'immune'];
   if(r&&v)return [n,''];if(r)return [Math.floor(n/2),'resists'];if(v)return [n*2,'vulnerable'];return [n,''];
 }
-function condBlocked(c,x){var d=defs(c).cimm;return (CIM[x]||[x.toLowerCase()]).some(function(k){return d.indexOf(k)>=0;});}
+function condBlocked(c,x){var d=defs(c).cimm;return (CIM[x]||(SPX[x]&&SPX[x].cd?SPX[x].cd.map(function(k){return k.toLowerCase();}):[x.toLowerCase()])).some(function(k){return d.indexOf(k)>=0;});}
 // One-step undo: snapshot the encounter before any change made from the bar, pad, chips or death saves.
 function snap(label){ui.undo={label:label,s:JSON.stringify({list:S.list,round:S.round,turnId:S.turnId,prev:S.prevTurn})};}
 function undo(){if(!ui.undo)return;var o=JSON.parse(ui.undo.s);S.list=o.list;S.round=o.round;S.turnId=o.turnId;S.prevTurn=o.prev;toast('Undid: '+esc(ui.undo.label));ui.undo=null;pruneSel();finishPad();}
@@ -1174,7 +1202,7 @@ function fxHas(c){return !!(c.dd||c.dt||c.st||(c.sv!==''&&c.sv!=null));}
 function fxApplyStatus(T,fx){
   var skip=[];T.forEach(function(c){var x=fx.st;
     if(condBlocked(c,x)){skip.push(esc(c.name));return;}
-    if(c.conds.indexOf(x)<0)c.conds.push(x);
+    if(c.conds.indexOf(x)<0){c.conds.push(x);linkAdd(c,x);}
     if(fx.dur==='fx'){c.exp=c.exp||{};c.exp[x]={src:fx.id,k:'s',h:false};}
     else if(fx.dur==='e'){c.exp=c.exp||{};c.exp[x]={src:c.id,k:'e',h:c.id===S.turnId};}
     else expSet(c,x);
@@ -1481,7 +1509,7 @@ function renderDrawer(){
   dr.innerHTML='<div class="dtop"><div class="dh"><button class="tab'+(S.tab==='add'?' on':'')+'" data-act="tab" data-t="add">Add</button><button class="tab'+(S.tab==='stat'?' on':'')+'" data-act="tab" data-t="stat">Stat block</button>'+(S.edit!=null&&findC(S.edit)?'<button class="tab'+(S.tab==='edit'?' on':'')+'" data-act="tab" data-t="edit">Edit</button>':'')+'<button class="tab'+(S.tab==='ref'?' on':'')+'" data-act="tab" data-t="ref">Rules</button><button class="tab'+(S.tab==='data'?' on':'')+'" data-act="tab" data-t="data">Data</button><button data-act="close" class="cls" aria-label="Close panel"><span class="tx">Close</span><span class="ic">✕</span></button></div>'+(S.tab==='add'?addTopHTML():'')+'</div>'+
     (S.tab==='add'?addPanelHTML():S.tab==='ref'?refHTML():S.tab==='data'?dataHTML():S.tab==='edit'?editHTML():statHTML());
 }
-function renderBoard(){if(!RO)ccSweep();renderBar();renderStrip();renderTurn();renderTable();renderPad();}
+function renderBoard(){if(!RO){ccSweep();S.list.forEach(linkSweep);}renderBar();renderStrip();renderTurn();renderTable();renderPad();}
 function renderAll(){
   document.body.classList.toggle('present',ui.present);
   renderBoard();renderDrawer();
@@ -1549,7 +1577,7 @@ function applyPend(T){var skip=[],fx=curFx();
     T.forEach(function(c){
       var i=c.conds.indexOf(x);
       if(ui.pend[x]&&condBlocked(c,x)){skip.push(esc(c.name)+' ('+esc(nm(x))+')');return;}
-      if(ui.pend[x]){if(i<0){c.conds.push(x);expSet(c,x);ccSet(c,x);if(x==='Shield')c.rx=true;}}
+      if(ui.pend[x]){if(i<0){c.conds.push(x);expSet(c,x);ccSet(c,x);linkAdd(c,x);if(x==='Shield')c.rx=true;}}
       else if(i>=0){c.conds.splice(i,1);if(x==='Dead'&&c.kind==='pc'&&c.hp<=0&&c.ds&&c.ds.f>=3)c.ds.f=2;}
     });
   });
