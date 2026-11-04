@@ -77,7 +77,7 @@ button.danger.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
   body.padon{padding-bottom:16px}
   body.padon .tw,body.padon .xpb,body.padon .env,body.padon .svb,body.padon .bar,body.padon .strip,body.padon .turn{margin-right:calc(min(330px,44vw) + 8px)}
   body .pad{left:auto;top:0;width:min(330px,44vw);border-top:0;border-left:2px solid var(--ok);overflow-y:auto;padding-top:calc(8px + env(safe-area-inset-top,0px))}
-  body .pad .pi{max-width:none}body .pad .wheelbox{width:72px;height:110px}body .pad .amtrow span{display:none}
+  body .pad .pi{max-width:none}body .pad .wheelbox{width:60px;height:110px}body .pad .tbox{width:112px}body .pad .wband,body .pad .amtin,body .pad .tbox #dtype{top:33px}body .pad .wheel .sp{height:33px}body .pad .amtrow span{display:none}
   body .pad .pacts{grid-template-columns:1fr 1fr}body .pad .pacts button{min-height:36px;font-size:.85rem}
   body .pad .menu{position:fixed;left:8px;right:calc(min(330px,44vw) + 8px);top:8px;bottom:8px;width:auto;max-height:none!important}
 }
@@ -246,7 +246,7 @@ tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 
 .pt .who b{font-family:var(--display);font-size:1.2rem}
 .pt button{min-height:36px;padding:2px 12px}
 .pmain{display:flex;gap:12px;align-items:stretch}
-.wheelbox{position:relative;flex:none;width:104px;height:132px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
+.wheelbox{position:relative;flex:none;width:64px;height:132px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
 .wheel{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:none}
 .wheel::-webkit-scrollbar{display:none}
 .wheel .sp{height:44px}
@@ -259,6 +259,9 @@ tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 
 .amtrow{display:flex;gap:8px;align-items:center}
 .amtin{display:none;position:absolute;left:0;right:0;top:44px;height:44px;min-height:0;width:100%;border:0;border-radius:0;text-align:center;font-family:var(--display);font-size:1.6rem;font-weight:700;padding:0;background:var(--surface);box-shadow:inset 0 0 0 2px var(--accent)}
 .wheelbox.typing .amtin{display:block}
+.wheelbox.tbox{width:132px}.wheel.tw .wi{font-family:inherit;font-size:.92rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px;text-align:left}
+.tbox #dtype{position:absolute;left:0;right:0;top:44px;height:44px;width:100%;min-height:0;margin:0;opacity:0;cursor:pointer}
+@media (max-width:600px){.pmain{flex-wrap:wrap}.pmain .pr{flex-basis:100%}.wheelbox.tbox{flex:1}}
 .amtrow span{font-size:.8rem;color:var(--muted)}
 .slots{display:flex;gap:4px;flex-wrap:wrap}.slots button{min-height:36px;padding:0 8px;font-size:.85rem}.slots .on{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
 #dtype{min-height:40px;margin-left:auto;font:inherit;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:0 6px}
@@ -376,7 +379,7 @@ button{touch-action:manipulation}
   body.padon .tw{margin-right:396px}
   .pad{left:auto;right:16px;bottom:16px;width:376px;border:2px solid var(--ok);border-radius:14px;padding:8px 10px 10px}
   .pad .pi{max-width:none}
-  .pad .wheelbox{width:84px}
+  .pad .wheelbox{width:64px}.pad .tbox{width:124px}
   .pad .amtrow span{display:none}
   .pad .pacts{grid-template-columns:1fr 1fr}
   .pad .pacts button{min-height:38px;font-size:.9rem}
@@ -1026,6 +1029,13 @@ function renderTable(){
   if(fxs.length)h+='<tr class="grp"><th colspan="5">Effects \u00B7 '+fxs.length+'</th></tr>'+fxs.map(fxRow).join('');
   $('#tbl').innerHTML=h||'<tr><td class="empty"><p>No combatants yet.</p><button class="add" data-act="start" data-s="party">Add your party</button> <button class="add" data-act="start" data-s="monsters">Add monsters</button></td></tr>';
 }
+// Damage type wheel: Untyped, the 13 types, and (extra slot) Max HP only. Tap the middle item for the full list.
+function TL(){return [''].concat(DTYPES).concat(ui.ex&&ui.ax===1?['maxhp']:[]);}
+function tLab(t){return t===''?'Untyped':t==='maxhp'?'\u2764\ufe0f Max HP only':DTI[t]+' '+t[0].toUpperCase()+t.slice(1);}
+function tWheel(){return '<div class="sp"></div>'+TL().map(function(t,i){return '<div class="wi" data-act="ti" data-i="'+i+'">'+tLab(t)+'</div>';}).join('')+'<div class="sp"></div>';}
+// Keep the Apply label and the slot tabs current while a wheel spins (no full redraw, so the scroll isn't interrupted)
+function padLive(){var b=$('#pad [data-act=papply]');if(b){var sm=padSum(Object.keys(ui.pend));b.disabled=!sm;b.innerHTML=sm?'Apply: '+sm:'Pick an amount or a status';}
+  var t=$('#pad .slots [data-k="'+(ui.ax||0)+'"] b');if(t)t.textContent=ui.amt;}
 var WHEEL='';
 (function(){var s='<div class="sp"></div>';for(var i=0;i<=WMAX;i++)s+='<div class="wi" data-act="wi" data-n="'+i+'">'+i+'</div>';WHEEL=s+'<div class="sp"></div>';})();
 function condState(T,x){var n=T.filter(function(c){return c.conds.indexOf(x)>=0;}).length;return n===T.length?'all':(n?'some':'none');}
@@ -1065,12 +1075,14 @@ function renderPad(){
   var fx=curFx(),pk=Object.keys(ui.pend),pn=pk.length,sum=padSum(pk);
   pad.innerHTML='<div class="pi">'+(fx?'<div class="fxb">⚡ <b>'+esc(fx.name)+':</b> '+esc(fxSum(fx))+' <button data-act="fxdone">Done</button></div>':'')+'<div class="pt"><div class="who"><b>'+T.length+' selected</b> · '+names+'</div><button data-act="desel">Deselect</button></div>'+
    '<div class="pmain"><div class="wheelbox"><div class="wheel" id="wheel" aria-label="Amount wheel">'+WHEEL+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount" tabindex="-1"></div>'+
-   '<div class="pr"><div class="amtrow">'+(ui.ex?'<div class="slots">'+[0,1].map(function(i){var sv=slot(i);return '<button class="'+(ui.ax===i?'on':'')+'" data-act="pslot" data-k="'+i+'">'+(i?'+ Extra ':'Main ')+'<b>'+sv.v+'</b>'+(sv.dt==='maxhp'?' max HP':sv.dt?' '+DTI[sv.dt]:'')+'</button>';}).join('')+'</div>':'<span>Spin, or tap the middle number to type</span>')+'<select id="dtype" aria-label="Damage type"><option value="">Untyped</option>'+(ui.ex&&ui.ax===1?'<option value="maxhp"'+(ui.dtype==='maxhp'?' selected':'')+'>Max HP only (no damage)</option>':'')+DTYPES.map(function(t){return '<option value="'+t+'"'+(ui.dtype===t?' selected':'')+'>'+DTI[t]+' '+t[0].toUpperCase()+t.slice(1)+'</option>';}).join('')+'</select></div>'+
+   '<div class="wheelbox tbox"><div class="wheel tw" id="twheel" aria-label="Damage type wheel">'+tWheel()+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div>'+
+   '<select id="dtype" aria-label="Damage type">'+TL().map(function(t){return '<option value="'+t+'"'+(ui.dtype===t?' selected':'')+'>'+tLab(t)+'</option>';}).join('')+'</select></div>'+
+   '<div class="pr">'+(ui.ex?'<div class="amtrow"><div class="slots">'+[0,1].map(function(i){var sv=slot(i);return '<button class="'+(ui.ax===i?'on':'')+'" data-act="pslot" data-k="'+i+'">'+(i?'+ Extra ':'Main ')+'<b>'+sv.v+'</b>'+(sv.dt==='maxhp'?' max HP':sv.dt?' '+DTI[sv.dt]:'')+'</button>';}).join('')+'</div></div>':'')+
    '<div class="seg" role="group" aria-label="Amount is">'+[['dmg','Damage','d'],['heal','Heal','h'],['temp','Temp HP','']].map(function(x){return '<button class="'+x[2]+(ui.mode===x[0]?' on':'')+'" data-act="pmode" data-k="'+x[0]+'" aria-pressed="'+(ui.mode===x[0])+'">'+x[1]+'</button>';}).join('')+'</div>'+
    '<div class="pacts"><button class="tg'+(ui.half?' on':'')+'" data-act="ptog" data-k="half" aria-pressed="'+!!ui.half+'"'+(ui.mode!=='dmg'?' disabled':'')+'>Half</button>'+
    '<button class="tg'+(ui.ex?' on':'')+'" data-act="ptog" data-k="extra" aria-pressed="'+!!ui.ex+'"'+(ui.mode!=='dmg'?' disabled':'')+' title="A second amount with its own damage type (or max HP only), applied together">+ Extra</button>'+
    '<button class="tg d'+(ui.mx?' on':'')+'" data-act="ptog" data-k="maxdn" aria-pressed="'+!!ui.mx+'"'+(ui.mode!=='dmg'?' disabled':'')+' title="Also lower max HP by the damage taken (e.g. Life Drain)">Max HP \u2212</button>'+
-   '<button class="tg'+(pn?' on':'')+'" data-act="padstatus">Status'+(pn?' ('+pn+')':'')+' ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove">'+(ui.confirmRemove?'Sure?':'Remove')+'</button>'+
+   '<button class="tg'+(pn?' on':'')+'" data-act="padstatus">Status'+(pn?' ('+pn+')':'')+' ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove" aria-label="Remove from encounter" title="Remove from encounter">'+(ui.confirmRemove?'🗑 Sure?':'🗑')+'</button>'+
    '<button data-act="padmore" aria-expanded="'+!!ui.more+'">'+(ui.more?'Less \u25b4':'More \u25be')+'</button>'+
    (ui.more?'<button data-act="padhp" data-k="maxreset">Reset max</button><button data-act="padgroup">'+(T.some(function(c){return c.cg;})&&T.every(function(c){return c.cg&&c.cg===T[0].cg;})?'Ungroup':'Group\u2026')+'</button>':'')+'</div>'+
    '<button class="papply" data-act="papply"'+(sum?'':' disabled')+'>'+(sum?'Apply: '+sum:'Pick an amount or a status')+'</button></div></div>'+
@@ -1078,6 +1090,7 @@ function renderPad(){
   var mn=pad.querySelector('.menu');if(mn){mn.style.maxHeight='';mn.style.maxHeight=Math.max(200,mn.getBoundingClientRect().bottom-8)+'px';}
   var w=$('#wheel');
   if(w){ui.ignoreUntil=Date.now()+250;w.style.scrollSnapType='none';w.scrollTop=Math.min(ui.amt,WMAX)*IH;w.style.scrollSnapType='';}
+  var tw=$('#twheel');if(tw){tw.style.scrollSnapType='none';tw.scrollTop=Math.max(0,TL().indexOf(ui.dtype||''))*IH;tw.style.scrollSnapType='';}
 }
 function resultsHTML(){
   var q=ui.q.trim().toLowerCase();
@@ -1628,6 +1641,7 @@ padEl.addEventListener('click',function(e){
   var a=b.dataset.act;
   var T=S.list.filter(function(c){return ui.sel[c.id];});
   var v=Math.floor(+ui.amt)||0;
+  if(a==='ti'){var tw=$('#twheel');if(tw)tw.scrollTo({top:+b.dataset.i*IH,behavior:'smooth'});return;}
   if(a==='wi'){
     var n=+b.dataset.n,inp=$('#amtin');
     if(n===ui.amt&&inp){inp.value=n;inp.parentNode.classList.add('typing');inp.focus();inp.select();return;}
@@ -1713,17 +1727,19 @@ padEl.addEventListener('click',function(e){
   save();renderBoard();
 });
 padEl.addEventListener('scroll',function(e){
-  if(!e.target||e.target.id!=='wheel')return;
+  if(!e.target)return;
+  if(e.target.id==='twheel'){if(Date.now()<ui.ignoreUntil)return;var L=TL(),k=Math.max(0,Math.min(L.length-1,Math.round(e.target.scrollTop/IH)));if(L[k]!==(ui.dtype||'')){ui.dtype=L[k];var sel=$('#dtype');if(sel)sel.value=L[k];padLive();}return;}
+  if(e.target.id!=='wheel')return;
   if(Date.now()<ui.ignoreUntil)return;
   var i=Math.max(0,Math.min(WMAX,Math.round(e.target.scrollTop/IH)));
-  if(i!==ui.amt){ui.amt=i;var inp=$('#amtin');if(inp)inp.value=i;}
+  if(i!==ui.amt){ui.amt=i;var inp=$('#amtin');if(inp)inp.value=i;padLive();}
 },true);
 padEl.addEventListener('input',function(e){
   var t=e.target;
   if(t.id==='msearch'){ui.mq=t.value;var mr=$('#mres');if(mr)mr.innerHTML=spellGrid(S.list.filter(function(c){return ui.sel[c.id];}));return;}if(t.id!=='amtin')return;
   var digits=t.value.replace(/\D/g,'').slice(0,3);
   t.value=digits;
-  ui.amt=digits===''?0:parseInt(digits,10);
+  ui.amt=digits===''?0:parseInt(digits,10);padLive();
   var w=$('#wheel');
   if(w){ui.ignoreUntil=Date.now()+250;w.style.scrollSnapType='none';w.scrollTop=Math.min(ui.amt,WMAX)*IH;w.style.scrollSnapType='';}
 });

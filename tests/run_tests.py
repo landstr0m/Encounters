@@ -916,6 +916,14 @@ def one_apply_damage_and_status(b):
     a.click('[data-act="ptog"][data-k="extra"]'); a.e("ui.amt=5;ui.dtype='poison';renderPad()")
     check("4 bludgeoning + 5 poison damage" in a.pg.inner_text('[data-act="papply"]'), a.pg.inner_text('[data-act="papply"]'))
     a.click('[data-act="papply"]'); eq(a.c(k)["hp"], 22, "8 bludgeoning (vulnerable) + 0 poison (immune)")
+    # damage type wheel: spinning picks the type, the middle item opens the full list
+    a.select(k); a.e("ui.amt=3;renderPad()"); a.pg.wait_for_timeout(300)
+    a.e("var t=document.getElementById('twheel');t.scrollTop=(DTYPES.indexOf('fire')+1)*IH;t.dispatchEvent(new Event('scroll'))")
+    eq(a.e("ui.dtype"), "fire", "type wheel sets the damage type")
+    check("3 fire damage" in a.pg.inner_text('[data-act="papply"]'), "Apply label follows the wheel")
+    a.pg.select_option('#dtype', 'cold'); eq(a.e("ui.dtype"), "cold", "tap-to-list picker still works")
+    check("Spin" not in a.pg.inner_text('#pad'), "no spin hint")
+    a.e("finishPad();renderBoard()")
     # max HP only (Demilich Energy Drain, Otyugh bite): extra slot without damage
     a.select(g); a.click('[data-act="ptog"][data-k="extra"]'); a.e("ui.amt=4;ui.dtype='maxhp';renderPad()")
     a.click('[data-act="papply"]'); eq((a.c(g)["hp"], a.c(g)["max"]), (10, 13), "max HP lowered without damage")

@@ -2,6 +2,11 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-04 — Pad wheels
+
+- Damage type is now a second wheel next to the (narrower, 3-digit) number wheel; tapping its middle item opens the full list. The spin hint is gone and Remove is a 🗑 icon.
+- The Apply label didn't update while spinning the number wheel (only after the next redraw); both wheels now update it live.
+
 ## 2026-11-04 — Extra damage on the pad
 
 - Most monster attacks deal two damage types with separate rolls; the pad now has **+ Extra**, a second amount with its own type, applied in the same Apply with independent resistances.
