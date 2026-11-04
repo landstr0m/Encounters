@@ -57,8 +57,9 @@ class App:
 
     def pad(self, kind, amount, dtype=""):
         # kind: dmg, half, heal, temp or maxdn (damage that also lowers max HP); one Apply does it all
-        mode = {"half": "dmg", "maxdn": "dmg"}.get(kind, kind)
-        self.e(f"ui.amt={amount};ui.dtype='{dtype}';ui.mode='{mode}';ui.half={'true' if kind == 'half' else 'false'};"
+        if kind in ("heal", "temp"):
+            dtype = kind
+        self.e(f"ui.amt={amount};ui.dtype='{dtype}';ui.half={'true' if kind == 'half' else 'false'};"
                f"ui.mx={'true' if kind == 'maxdn' else 'false'};var f=curFx();if(f&&f.st){{if(ui.half)delete ui.pend[f.st];else ui.pend[f.st]=true;}}renderPad()")
         self.click('[data-act="papply"]')
 
@@ -906,7 +907,7 @@ def one_apply_damage_and_status(b):
     # half + max HP down, then heal mode
     a.select(g); a.e("ui.amt=6;renderPad()"); a.click('[data-act="ptog"][data-k="half"]'); a.click('[data-act="ptog"][data-k="maxdn"]'); a.click('[data-act="papply"]')
     eq((a.c(g)["hp"], a.c(g)["max"]), (10, 17), "half damage also lowers max HP")
-    a.select(g); a.e("ui.amt=5;renderPad()"); a.click('[data-act="pmode"][data-k="heal"]')
+    a.select(g); a.e("ui.amt=5;ui.dtype='heal';renderPad()")
     check(a.e("document.querySelector('[data-act=ptog][data-k=half]').disabled"), "half only for damage")
     a.click('[data-act="papply"]'); eq(a.c(g)["hp"], 15, "heal mode")
     a.click('[data-act="undo"]'); eq(a.c(g)["hp"], 10, "one undo step")
@@ -918,10 +919,21 @@ def one_apply_damage_and_status(b):
     a.click('[data-act="papply"]'); eq(a.c(k)["hp"], 22, "8 bludgeoning (vulnerable) + 0 poison (immune)")
     # damage type wheel: spinning picks the type, the middle item opens the full list
     a.select(k); a.e("ui.amt=3;renderPad()"); a.pg.wait_for_timeout(300)
-    a.e("var t=document.getElementById('twheel');t.scrollTop=(DTYPES.indexOf('fire')+1)*IH;t.dispatchEvent(new Event('scroll'))")
+    a.e("var t=document.getElementById('twheel');t.scrollTop=(TL().length+TL().indexOf('fire'))*IH;t.dispatchEvent(new Event('scroll'))")
     eq(a.e("ui.dtype"), "fire", "type wheel sets the damage type")
     check("3 fire damage" in a.pg.inner_text('[data-act="papply"]'), "Apply label follows the wheel")
-    a.pg.select_option('#dtype', 'cold'); eq(a.e("ui.dtype"), "cold", "tap-to-list picker still works")
+    a.e("var t=document.getElementById('twheel');t.scrollTop=(TL().length-1)*IH;t.dispatchEvent(new Event('scroll'))")
+    eq(a.e("ui.dtype"), "radiant", "wheel loops: radiant sits above untyped")
+    a.pg.wait_for_timeout(400)
+    check(a.e("var t=document.getElementById('twheel');Math.round(t.scrollTop/IH)>=TL().length&&Math.round(t.scrollTop/IH)<2*TL().length"), "loop recentres after settling")
+    eq(a.e("ui.dtype"), "radiant", "still radiant after recentring")
+    a.e("renderPad()"); a.pg.wait_for_timeout(100)
+    a.e("var k=TL().length+TL().indexOf(ui.dtype);document.querySelector('#twheel .wi[data-i=\"'+k+'\"]').click()")
+    check(a.pg.is_visible('.tpick'), "tapping the middle type opens the list")
+    a.click('.tpick [data-t="cold"]'); eq(a.e("ui.dtype"), "cold", "picked from the list")
+    # middle of the wheel lines up with the band
+    off = a.e("(function(){var w=document.getElementById('twheel'),b=w.parentNode.querySelector('.wband').getBoundingClientRect(),k=Math.round(w.scrollTop/IH),i=w.querySelector('.wi[data-i=\"'+k+'\"]').getBoundingClientRect();return Math.abs((i.top+i.bottom)/2-(b.top+b.bottom)/2)})()")
+    check(off < 2, f"selected type centred in the band (off by {off}px)")
     check("Spin" not in a.pg.inner_text('#pad'), "no spin hint")
     a.e("finishPad();renderBoard()")
     # max HP only (Demilich Energy Drain, Otyugh bite): extra slot without damage

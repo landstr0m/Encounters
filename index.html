@@ -247,7 +247,7 @@ tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 
 .pt button{min-height:36px;padding:2px 12px}
 .pmain{display:flex;gap:12px;align-items:stretch}
 .wheelbox{position:relative;flex:none;width:64px;height:132px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
-.wheel{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:none}
+.wheel{height:100%;overflow-y:scroll;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:none}
 .wheel::-webkit-scrollbar{display:none}
 .wheel .sp{height:44px}
 .wheel .wi{height:44px;line-height:44px;text-align:center;scroll-snap-align:center;scroll-snap-stop:always;font-family:var(--display);font-size:1.6rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);cursor:pointer}
@@ -259,8 +259,11 @@ tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 
 .amtrow{display:flex;gap:8px;align-items:center}
 .amtin{display:none;position:absolute;left:0;right:0;top:44px;height:44px;min-height:0;width:100%;border:0;border-radius:0;text-align:center;font-family:var(--display);font-size:1.6rem;font-weight:700;padding:0;background:var(--surface);box-shadow:inset 0 0 0 2px var(--accent)}
 .wheelbox.typing .amtin{display:block}
-.wheelbox.tbox{width:132px}.wheel.tw .wi{font-family:inherit;font-size:.92rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px;text-align:left}
-.tbox #dtype{position:absolute;left:0;right:0;top:44px;height:44px;width:100%;min-height:0;margin:0;opacity:0;cursor:pointer}
+.wheelbox.tbox{width:132px}.wheel.twh .wi{font-family:inherit;font-size:.92rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px;text-align:left}
+.wheel.twh .wi.g{box-shadow:inset 0 1px 0 var(--line)}
+.tpick{position:absolute;left:8px;right:8px;bottom:8px;z-index:6;background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.3);max-height:calc(100% - 16px);overflow-y:auto}
+.tph{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}.tph button{min-height:34px}
+.tpg{display:flex;flex-wrap:wrap;gap:6px;padding:6px 0;border-top:1px solid var(--line)}.tpg button{min-height:40px;padding:0 10px;font-weight:600}.tpg .on{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
 @media (max-width:600px){.pmain{flex-wrap:wrap}.pmain .pr{flex-basis:100%}.wheelbox.tbox{flex:1}}
 .amtrow span{font-size:.8rem;color:var(--muted)}
 .slots{display:flex;gap:4px;flex-wrap:wrap}.slots button{min-height:36px;padding:0 8px;font-size:.85rem}.slots .on{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
@@ -1030,12 +1033,21 @@ function renderTable(){
   $('#tbl').innerHTML=h||'<tr><td class="empty"><p>No combatants yet.</p><button class="add" data-act="start" data-s="party">Add your party</button> <button class="add" data-act="start" data-s="monsters">Add monsters</button></td></tr>';
 }
 // Damage type wheel: Untyped, the 13 types, and (extra slot) Max HP only. Tap the middle item for the full list.
-function TL(){return [''].concat(DTYPES).concat(ui.ex&&ui.ax===1?['maxhp']:[]);}
-function tLab(t){return t===''?'Untyped':t==='maxhp'?'\u2764\ufe0f Max HP only':DTI[t]+' '+t[0].toUpperCase()+t.slice(1);}
-function tWheel(){return '<div class="sp"></div>'+TL().map(function(t,i){return '<div class="wi" data-act="ti" data-i="'+i+'">'+tLab(t)+'</div>';}).join('')+'<div class="sp"></div>';}
+// Grouped: no type / healing / max HP, then physical, poison, elemental, then force, necrotic, psychic, radiant. The wheel loops.
+var TORD=['','heal','temp','maxhp','bludgeoning','piercing','slashing','poison','acid','cold','fire','lightning','thunder','force','necrotic','psychic','radiant'];
+var SPEC={heal:1,temp:1,maxhp:1},TGRP=[[0,4],[4,7],[7,8],[8,13],[13,17]];
+function TL(){return TORD;}
+function tLab(t){return t===''?'\u26aa Untyped':t==='heal'?'\ud83d\udc9a Heal':t==='temp'?'\ud83d\udca0 Temp HP':t==='maxhp'?'\ud83d\udc94 Max HP \u2212':DTI[t]+' '+t[0].toUpperCase()+t.slice(1);}
+function tWheel(){var h='<div class="sp"></div>';for(var r=0;r<3;r++)TL().forEach(function(t,i){h+='<div class="wi'+(i===0||i===4||i===7||i===8||i===13?' g':'')+'" data-act="ti" data-i="'+(r*TL().length+i)+'">'+tLab(t)+'</div>';});return h+'<div class="sp"></div>';}
+function tPick(){return '<div class="tpick"><div class="tph"><b>Type</b><button data-act="tpclose">Close</button></div>'+TGRP.map(function(g){return '<div class="tpg">'+TL().slice(g[0],g[1]).map(function(t){return '<button class="'+(t===(ui.dtype||'')?'on':'')+'" data-act="tset" data-t="'+t+'">'+tLab(t)+'</button>';}).join('')+'</div>';}).join('')+'</div>';}
+// Wheels snap in JS (CSS scroll-snap made iOS stop after a fling until the wheel was tapped again).
+function wheelFit(el){var box=el.parentNode,pd=Math.max(0,(box.clientHeight-IH)/2);[].forEach.call(el.querySelectorAll('.sp'),function(x){x.style.height=pd+'px';});[].forEach.call(box.querySelectorAll('.wband,.amtin'),function(x){x.style.top=pd+'px';});}
+function wheelSettle(el){clearTimeout(el._st);el._st=setTimeout(function(){var k=Math.round(el.scrollTop/IH);
+  if(el.id==='twheel'){var N=TL().length;if(k<N||k>=2*N){var nk=N+((k%N)+N)%N;ui.ignoreUntil=Date.now()+80;el.scrollTop=el.scrollTop+(nk-k)*IH;k=nk;}}
+  if(Math.abs(el.scrollTop-k*IH)>1)el.scrollTo({top:k*IH,behavior:'smooth'});},110);}
 // Keep the Apply label and the slot tabs current while a wheel spins (no full redraw, so the scroll isn't interrupted)
 function padLive(){var b=$('#pad [data-act=papply]');if(b){var sm=padSum(Object.keys(ui.pend));b.disabled=!sm;b.innerHTML=sm?'Apply: '+sm:'Pick an amount or a status';}
-  var t=$('#pad .slots [data-k="'+(ui.ax||0)+'"] b');if(t)t.textContent=ui.amt;}
+  var t=$('#pad .slots [data-k="'+(ui.ax||0)+'"]');if(t)t.innerHTML=(ui.ax?'+ Extra ':'Main ')+'<b>'+ui.amt+'</b>'+(ui.dtype?' '+tLab(ui.dtype).split(' ')[0]:'');}
 var WHEEL='';
 (function(){var s='<div class="sp"></div>';for(var i=0;i<=WMAX;i++)s+='<div class="wi" data-act="wi" data-n="'+i+'">'+i+'</div>';WHEEL=s+'<div class="sp"></div>';})();
 function condState(T,x){var n=T.filter(function(c){return c.conds.indexOf(x)>=0;}).length;return n===T.length?'all':(n?'some':'none');}
@@ -1072,25 +1084,24 @@ function renderPad(){
   document.body.classList.toggle('menuon',on&&!!ui.menu);
   if(!on)return;
   var names=T.map(function(c){return esc(c.name);}).join(', ');
-  var fx=curFx(),pk=Object.keys(ui.pend),pn=pk.length,sum=padSum(pk);
+  var fx=curFx(),pk=Object.keys(ui.pend),pn=pk.length,sum=padSum(pk),nod=SPEC[slot(0).dt]&&(!ui.ex||SPEC[slot(1).dt]);
+  if(nod){ui.half=false;ui.mx=false;}
   pad.innerHTML='<div class="pi">'+(fx?'<div class="fxb">⚡ <b>'+esc(fx.name)+':</b> '+esc(fxSum(fx))+' <button data-act="fxdone">Done</button></div>':'')+'<div class="pt"><div class="who"><b>'+T.length+' selected</b> · '+names+'</div><button data-act="desel">Deselect</button></div>'+
    '<div class="pmain"><div class="wheelbox"><div class="wheel" id="wheel" aria-label="Amount wheel">'+WHEEL+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount" tabindex="-1"></div>'+
-   '<div class="wheelbox tbox"><div class="wheel tw" id="twheel" aria-label="Damage type wheel">'+tWheel()+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div>'+
-   '<select id="dtype" aria-label="Damage type">'+TL().map(function(t){return '<option value="'+t+'"'+(ui.dtype===t?' selected':'')+'>'+tLab(t)+'</option>';}).join('')+'</select></div>'+
-   '<div class="pr">'+(ui.ex?'<div class="amtrow"><div class="slots">'+[0,1].map(function(i){var sv=slot(i);return '<button class="'+(ui.ax===i?'on':'')+'" data-act="pslot" data-k="'+i+'">'+(i?'+ Extra ':'Main ')+'<b>'+sv.v+'</b>'+(sv.dt==='maxhp'?' max HP':sv.dt?' '+DTI[sv.dt]:'')+'</button>';}).join('')+'</div></div>':'')+
-   '<div class="seg" role="group" aria-label="Amount is">'+[['dmg','Damage','d'],['heal','Heal','h'],['temp','Temp HP','']].map(function(x){return '<button class="'+x[2]+(ui.mode===x[0]?' on':'')+'" data-act="pmode" data-k="'+x[0]+'" aria-pressed="'+(ui.mode===x[0])+'">'+x[1]+'</button>';}).join('')+'</div>'+
-   '<div class="pacts"><button class="tg'+(ui.half?' on':'')+'" data-act="ptog" data-k="half" aria-pressed="'+!!ui.half+'"'+(ui.mode!=='dmg'?' disabled':'')+'>Half</button>'+
-   '<button class="tg'+(ui.ex?' on':'')+'" data-act="ptog" data-k="extra" aria-pressed="'+!!ui.ex+'"'+(ui.mode!=='dmg'?' disabled':'')+' title="A second amount with its own damage type (or max HP only), applied together">+ Extra</button>'+
-   '<button class="tg d'+(ui.mx?' on':'')+'" data-act="ptog" data-k="maxdn" aria-pressed="'+!!ui.mx+'"'+(ui.mode!=='dmg'?' disabled':'')+' title="Also lower max HP by the damage taken (e.g. Life Drain)">Max HP \u2212</button>'+
+   '<div class="wheelbox tbox"><div class="wheel twh" id="twheel" aria-label="Type wheel: tap the middle for the list">'+tWheel()+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div></div>'+
+   '<div class="pr">'+(ui.ex?'<div class="amtrow"><div class="slots">'+[0,1].map(function(i){var sv=slot(i);return '<button class="'+(ui.ax===i?'on':'')+'" data-act="pslot" data-k="'+i+'">'+(i?'+ Extra ':'Main ')+'<b>'+sv.v+'</b>'+(sv.dt?' '+tLab(sv.dt).split(' ')[0]:'')+'</button>';}).join('')+'</div></div>':'')+
+   '<div class="pacts"><button class="tg'+(ui.half?' on':'')+'" data-act="ptog" data-k="half" aria-pressed="'+!!ui.half+'"'+(nod?' disabled':'')+'>Half</button>'+
+   '<button class="tg'+(ui.ex?' on':'')+'" data-act="ptog" data-k="extra" aria-pressed="'+!!ui.ex+'"'+' title="A second amount with its own damage type (or max HP only), applied together">+ Extra</button>'+
+   '<button class="tg d'+(ui.mx?' on':'')+'" data-act="ptog" data-k="maxdn" aria-pressed="'+!!ui.mx+'"'+(nod?' disabled':'')+' title="Also lower max HP by the damage taken (e.g. Life Drain)">Max HP \u2212</button>'+
    '<button class="tg'+(pn?' on':'')+'" data-act="padstatus">Status'+(pn?' ('+pn+')':'')+' ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove" aria-label="Remove from encounter" title="Remove from encounter">'+(ui.confirmRemove?'🗑 Sure?':'🗑')+'</button>'+
    '<button data-act="padmore" aria-expanded="'+!!ui.more+'">'+(ui.more?'Less \u25b4':'More \u25be')+'</button>'+
    (ui.more?'<button data-act="padhp" data-k="maxreset">Reset max</button><button data-act="padgroup">'+(T.some(function(c){return c.cg;})&&T.every(function(c){return c.cg&&c.cg===T[0].cg;})?'Ungroup':'Group\u2026')+'</button>':'')+'</div>'+
    '<button class="papply" data-act="papply"'+(sum?'':' disabled')+'>'+(sum?'Apply: '+sum:'Pick an amount or a status')+'</button></div></div>'+
-   (ui.menu?menuHTML(T):'')+'</div>';
+   (ui.menu?menuHTML(T):'')+(ui.tpk?tPick():'')+'</div>';
   var mn=pad.querySelector('.menu');if(mn){mn.style.maxHeight='';mn.style.maxHeight=Math.max(200,mn.getBoundingClientRect().bottom-8)+'px';}
   var w=$('#wheel');
-  if(w){ui.ignoreUntil=Date.now()+250;w.style.scrollSnapType='none';w.scrollTop=Math.min(ui.amt,WMAX)*IH;w.style.scrollSnapType='';}
-  var tw=$('#twheel');if(tw){tw.style.scrollSnapType='none';tw.scrollTop=Math.max(0,TL().indexOf(ui.dtype||''))*IH;tw.style.scrollSnapType='';}
+  if(w){wheelFit(w);ui.ignoreUntil=Date.now()+250;w.scrollTop=Math.min(ui.amt,WMAX)*IH;}
+  var tw=$('#twheel');if(tw){wheelFit(tw);tw.scrollTop=(TL().length+Math.max(0,TL().indexOf(ui.dtype||'')))*IH;}
 }
 function resultsHTML(){
   var q=ui.q.trim().toLowerCase();
@@ -1525,14 +1536,11 @@ function pruneSel(){Object.keys(ui.sel).forEach(function(k){if(!findC(k))delete 
 // Two amount slots: main and extra. ui.amt / ui.dtype always hold the slot being edited, ui.amtO / ui.dtO the other one.
 function slot(i){return i===(ui.ax||0)?{v:ui.amt||0,dt:ui.dtype||''}:{v:ui.amtO||0,dt:ui.dtO||''};}
 function swapSlot(i){if(i===(ui.ax||0))return;var v=ui.amt,d=ui.dtype;ui.amt=ui.amtO||0;ui.dtype=ui.dtO||'';ui.amtO=v;ui.dtO=d;ui.ax=i;}
-function padSum(pk){var m0=slot(0),x=ui.ex&&ui.mode==='dmg'?slot(1):{v:0},v=m0.v,p=[],h=function(n){return ui.half?Math.floor(n/2):n;};
-  if(ui.mode==='dmg'&&(v>0||x.v>0)){var d=[];if(v>0)d.push(h(v)+(m0.dt?' '+m0.dt:''));if(x.v>0&&x.dt!=='maxhp')d.push(h(x.v)+(x.dt?' '+x.dt:''));
-    if(d.length)p.push(d.join(' + ')+' damage'+(ui.half?' (half)':'')+(ui.mx?' and max HP':''));if(x.v>0&&x.dt==='maxhp')p.push('max HP \u2212'+x.v);
-    pk.forEach(function(k){p.push((ui.pend[k]?'+ ':'\u2212 ')+nm(k));});return p.map(esc).join(' \u00b7 ');}
-  v=ui.ax===1?m0.v:v;
-  if(v>0){if(ui.mode==='heal')p.push('heal '+v);else if(ui.mode==='temp')p.push(v+' temp HP');
-    else p.push((ui.half?Math.floor(v/2)+' (half of '+v+')':v)+(ui.dtype?' '+ui.dtype:'')+' damage'+(ui.mx?' and max HP':''));}
-  pk.forEach(function(x){p.push((ui.pend[x]?'+ ':'\u2212 ')+nm(x));});return p.map(esc).join(' \u00b7 ');}
+function padSlots(){return [slot(0)].concat(ui.ex?[slot(1)]:[]).filter(function(x){return x.v>0;});}
+function padSum(pk){var SL=padSlots(),p=[],h=function(n){return ui.half?Math.floor(n/2):n;},D=SL.filter(function(x){return !SPEC[x.dt];});
+  if(D.length)p.push(D.map(function(x){return h(x.v)+(x.dt?' '+x.dt:'');}).join(' + ')+' damage'+(ui.half?' (half)':'')+(ui.mx?' and max HP':''));
+  SL.forEach(function(x){if(x.dt==='heal')p.push('heal '+x.v);else if(x.dt==='temp')p.push(x.v+' temp HP');else if(x.dt==='maxhp')p.push('max HP \u2212'+x.v);});
+  pk.forEach(function(k){p.push((ui.pend[k]?'+ ':'\u2212 ')+nm(k));});return p.map(esc).join(' \u00b7 ');}
 function applyPend(T){var skip=[],fx=curFx();
   Object.keys(ui.pend).forEach(function(x){
     if(fx&&fx.st===x&&ui.pend[x]){fxApplyStatus(T,fx).forEach(function(n){skip.push(n+' ('+esc(nm(x))+')');});return;}
@@ -1544,7 +1552,7 @@ function applyPend(T){var skip=[],fx=curFx();
     });
   });
   T.forEach(function(c){incSync(c,true);});return skip;}
-function finishPad(){var fx=curFx();ui.dtype=fx&&fx.dt||'';ui.sel={};ui.amt=0;ui.amtO=0;ui.dtO='';ui.ax=0;ui.ex=false;ui.menu=false;ui.pend={};ui.mode='dmg';ui.half=false;ui.mx=false;if(fx&&fx.st)ui.pend[fx.st]=true;ui.mq='';ui.confirmRemove=false;}
+function finishPad(){var fx=curFx();ui.tpk=false;ui.dtype=fx&&fx.dt||'';ui.sel={};ui.amt=0;ui.amtO=0;ui.dtO='';ui.ax=0;ui.ex=false;ui.menu=false;ui.pend={};ui.mode='dmg';ui.half=false;ui.mx=false;if(fx&&fx.st)ui.pend[fx.st]=true;ui.mq='';ui.confirmRemove=false;}
 function nextIdExcluding(T){
   var ids={};T.forEach(function(c){ids[c.id]=true;});
   var O=order();var idx=O.findIndex(function(c){return c.id===S.turnId;});
@@ -1641,7 +1649,6 @@ padEl.addEventListener('click',function(e){
   var a=b.dataset.act;
   var T=S.list.filter(function(c){return ui.sel[c.id];});
   var v=Math.floor(+ui.amt)||0;
-  if(a==='ti'){var tw=$('#twheel');if(tw)tw.scrollTo({top:+b.dataset.i*IH,behavior:'smooth'});return;}
   if(a==='wi'){
     var n=+b.dataset.n,inp=$('#amtin');
     if(n===ui.amt&&inp){inp.value=n;inp.parentNode.classList.add('typing');inp.focus();inp.select();return;}
@@ -1650,24 +1657,22 @@ padEl.addEventListener('click',function(e){
     return;
   }
   if(a==='desel'){finishPad();}
-  else if(a==='pmode'){ui.mode=b.dataset.k;if(ui.mode!=='dmg'){ui.half=false;ui.mx=false;swapSlot(0);ui.ex=false;ui.amtO=0;ui.dtO='';}}
   else if(a==='pslot'){swapSlot(+b.dataset.k);}
   else if(a==='ptog'){var tk=b.dataset.k;if(tk==='half'){ui.half=!ui.half;var fh=curFx();if(fh&&fh.st){if(ui.half)delete ui.pend[fh.st];else ui.pend[fh.st]=true;}}else if(tk==='extra'){ui.ex=!ui.ex;if(ui.ex)swapSlot(1);else{swapSlot(0);ui.amtO=0;ui.dtO='';}}else ui.mx=!ui.mx;}
   else if(a==='papply'){
-    var pk=Object.keys(ui.pend),m0=slot(0),x1=ui.ex&&ui.mode==='dmg'?slot(1):{v:0,dt:''};v=m0.v;if(!(v>0)&&!(x1.v>0)&&!pk.length)return;
+    var pk=Object.keys(ui.pend),SL=padSlots(),D=SL.filter(function(x){return !SPEC[x.dt];});if(!SL.length&&!pk.length)return;
     snap(padSum(pk).replace(/<[^>]+>/g,'')||'apply');
-    var out=[],conc=[];
-    var hv=function(n){return ui.half?Math.floor(n/2):n;},xmax=x1.dt==='maxhp';
-    if(v>0||x1.v>0)T.forEach(function(c){
-      if(ui.mode==='dmg'){var r=v>0?typed(c,hv(v),m0.dt):[0,''],r2=x1.v>0&&!xmax?typed(c,hv(x1.v),x1.dt):[0,''],tot=r[0]+r2[0],nt=[r[1],r2[1]].filter(Boolean).join('; ');
-        if(tot>0)dmg(c,tot);if(ui.mx&&tot>0)maxDown(c,tot);if(xmax&&x1.v>0)maxDown(c,x1.v);
-        if(v>0||!xmax)out.push(esc(c.name)+' '+tot+(nt?' <small>('+nt+')</small>':''));if(xmax&&x1.v>0)out.push(esc(c.name)+' max HP \u2212'+x1.v);var r=[tot];
+    var out=[],conc=[],mxo=[],hv=function(n){return ui.half?Math.floor(n/2):n;};
+    T.forEach(function(c){
+      if(D.length){var tot=0,nt=[];D.forEach(function(x){var r=typed(c,hv(x.v),x.dt);tot+=r[0];if(r[1])nt.push(r[1]);});
+        if(tot>0)dmg(c,tot);if(ui.mx&&tot>0)maxDown(c,tot);out.push(esc(c.name)+' '+tot+(nt.length?' <small>('+nt.join('; ')+')</small>':''));
         var ci=c.conds.indexOf('Concentrating');
-        if(ci>=0&&r[0]>0){if(c.hp<=0){c.conds.splice(ci,1);conc.push(esc(c.name)+' loses concentration (0 HP)');}else conc.push(esc(c.name)+': Con save DC '+Math.min(30,Math.max(10,Math.floor(r[0]/2))));}}
-      else if(ui.mode==='heal')heal(c,v);else c.temp=Math.max(c.temp,v);
+        if(ci>=0&&tot>0){if(c.hp<=0){c.conds.splice(ci,1);conc.push(esc(c.name)+' loses concentration (0 HP)');}else conc.push(esc(c.name)+': Con save DC '+Math.min(30,Math.max(10,Math.floor(tot/2))));}}
+      SL.forEach(function(x){if(x.dt==='heal')heal(c,x.v);else if(x.dt==='temp')c.temp=Math.max(c.temp,x.v);else if(x.dt==='maxhp'){maxDown(c,x.v);mxo.push(esc(c.name)+' \u2212'+x.v);}});
     });
-    var dl=[m0.dt,x1.v>0&&!xmax?x1.dt:''].filter(Boolean).map(function(t){return t[0].toUpperCase()+t.slice(1);}).join(' + ');
-    var msg=out.length&&(dl||out.length>1||xmax)?'<b>'+(dl?dl+' ':'')+'damage:</b> '+out.join(' · '):'';
+    var dl=D.map(function(x){return x.dt;}).filter(Boolean).map(function(t){return t[0].toUpperCase()+t.slice(1);}).join(' + ');
+    var msg=out.length&&(dl||out.length>1)?'<b>'+(dl?dl+' ':'')+'damage:</b> '+out.join(' · '):'';
+    if(mxo.length)msg+=(msg?'<br>':'')+'<b>Max HP:</b> '+mxo.join(' · ');
     if(conc.length)msg+=(msg?'<br>':'')+'<b>Concentration:</b> '+conc.join(' · ');
     var on=pk.filter(function(x){return ui.pend[x];}),sk=applyPend(T);
     if(on.length)msg+=(msg?'<br>':'')+'<b>'+on.map(function(x){return esc(nm(x));}).join(', ')+'</b> applied'+(sk.length?' (Immune, not applied: '+sk.join(', ')+')':'');
@@ -1675,6 +1680,9 @@ padEl.addEventListener('click',function(e){
     if(msg)toast(msg);
     finishPad();
   }
+  else if(a==='ti'){var tw=$('#twheel'),k=+b.dataset.i,N=TL().length;if(k%N===TL().indexOf(ui.dtype||'')){ui.tpk=true;renderPad();return;}if(tw)tw.scrollTo({top:k*IH,behavior:'smooth'});return;}
+  else if(a==='tset'){ui.dtype=b.dataset.t;ui.tpk=false;}
+  else if(a==='tpclose'){ui.tpk=false;}
   else if(a==='padhp'){
     var k=b.dataset.k;
     if(k==='maxreset'){snap('reset max HP');T.forEach(maxReset);finishPad();}
@@ -1728,9 +1736,11 @@ padEl.addEventListener('click',function(e){
 });
 padEl.addEventListener('scroll',function(e){
   if(!e.target)return;
-  if(e.target.id==='twheel'){if(Date.now()<ui.ignoreUntil)return;var L=TL(),k=Math.max(0,Math.min(L.length-1,Math.round(e.target.scrollTop/IH)));if(L[k]!==(ui.dtype||'')){ui.dtype=L[k];var sel=$('#dtype');if(sel)sel.value=L[k];padLive();}return;}
+  if(e.target.id==='twheel'){if(Date.now()<ui.ignoreUntil)return;wheelSettle(e.target);var L=TL(),k=Math.round(e.target.scrollTop/IH),t=L[((k%L.length)+L.length)%L.length];
+    if(t!==(ui.dtype||'')){var was=SPEC[ui.dtype];ui.dtype=t;if(!!SPEC[t]!==!!was&&!ui.ex){var hb=$('#pad [data-k=half]'),mb=$('#pad [data-k=maxdn]');if(hb)hb.disabled=!!SPEC[t];if(mb)mb.disabled=!!SPEC[t];if(SPEC[t]){ui.half=ui.mx=false;if(hb)hb.classList.remove('on');if(mb)mb.classList.remove('on');}}padLive();}return;}
   if(e.target.id!=='wheel')return;
   if(Date.now()<ui.ignoreUntil)return;
+  wheelSettle(e.target);
   var i=Math.max(0,Math.min(WMAX,Math.round(e.target.scrollTop/IH)));
   if(i!==ui.amt){ui.amt=i;var inp=$('#amtin');if(inp)inp.value=i;padLive();}
 },true);

@@ -2,6 +2,15 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-04 — Type wheel v2
+
+| # | Bug | Cause | Fix |
+|---|-----|-------|-----|
+| 20 | Selected damage type sat at the bottom of the wheel's band instead of the middle | The wheel's CSS class `tw` clashed with the table wrapper `.tw` (12 px top margin) | Class renamed; spacer and band positions are now measured from the box, so the middle item is always centred |
+| 21 | Wheels stopped after a fling on iPad/phone and needed a tap before they turned again | CSS `scroll-snap-stop: always` with mandatory snapping (a known iOS sticking issue) | CSS snapping removed; the wheels snap to the nearest item in script once scrolling stops |
+
+- Heal and Temp HP moved into the type wheel (the Damage / Heal / Temp HP buttons are gone), types grouped, the wheel loops (Radiant above Untyped), and tapping the middle item opens a grouped list.
+
 ## 2026-11-04 — Pad wheels
 
 - Damage type is now a second wheel next to the (narrower, 3-digit) number wheel; tapping its middle item opens the full list. The spin hint is gone and Remove is a 🗑 icon.
