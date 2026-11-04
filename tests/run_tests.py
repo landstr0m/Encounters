@@ -786,6 +786,19 @@ def roll_tables_laid_out(b):
 
 
 @test
+def phone_toolbar_one_line(b):
+    a = App(b)
+    J = "(function(){var k=[].slice.call(document.querySelectorAll('#bar>button')).filter(function(x){return x.offsetParent});var t=k.map(function(x){return Math.round(x.getBoundingClientRect().top)});return Math.max.apply(0,t)-Math.min.apply(0,t)+document.documentElement.scrollWidth-innerWidth})()"
+    for w in (320, 360, 412):
+        a.pg.set_viewport_size({"width": w, "height": 800})
+        for started, armed in (("null", "false"), ("null", "true"), ("'z'", "false")):  # Clear is hidden on phones in combat
+            if True:
+                a.e(f"S.turnId={started};ui.undo={{label:'x'}};ui.confirmClear={armed};renderBar()")
+                eq(a.e(J), 0, f"toolbar on one line, no side scroll at {w}px (combat={started}, armed={armed})")
+    check(not a.errors, a.errors)
+
+
+@test
 def phb_spells_and_aliases(b):
     a = App(b)
     a.pg.wait_for_function("window.__e('REF&&REF.spells.length>0')")

@@ -6,6 +6,7 @@ Newest first. Run `python tests/run_tests.py` after every change (see the README
 
 | # | Bug | Cause | Fix |
 |---|-----|-------|-----|
+| 16 | Phone: toolbar wrapped onto two lines when Undo appeared (≈390 px screens) | Phone buttons had a fixed 44 px minimum plus padding and the bar was allowed to wrap | Phone toolbar never wraps; icon buttons shrink to 34 px if needed, the armed Clear button shows its text on two small lines |
 | 15 | Beholder Eye Rays (and other roll tables) were one wall of text, options hard to find | Stat block text was shown as a single paragraph | `blk()` lays out numbered results (`1: Charm Ray.` or `1-4.`) as one row each with the roll number and name as a header, and puts Failure / Success / Failure or Success on their own lines in every entry (from 2026-11-04, Andrew's choice; a compact option is noted in ROADMAP.md). Done at display time, so the JSON is unchanged and imported monster files get it too. Applies to Beholder, Death Tyrant, Beholder Zombie, Spectator, Umber Hulk, Gibbering Mouther, Elemental Cataclysm, in the stat block and the turn card |
 
 ## 2026-11-03 — Player's Handbook spells (`spells-phb.json`)

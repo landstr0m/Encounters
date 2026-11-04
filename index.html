@@ -83,15 +83,16 @@ button.danger.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
 }
 /* Phone: build encounters on the go. Rows become two-line cards, toolbar becomes icons. */
 @media (max-width:600px),(max-height:500px) and (orientation:landscape){
-  .bar{gap:6px;flex-wrap:wrap}
+  .bar{gap:5px;flex-wrap:nowrap}
   .bar>*{flex:none}
+  .bar>button{flex:0 1 44px;min-width:34px;padding-inline:4px}
   .bar .tx{display:none}
   .bar [data-act="present"]{display:none}
   body:not(.idle) .bar [data-act="clear"]:not(.armed){display:none}
   .dh{gap:4px}.dh button{flex:1 1 0;min-width:0;padding-inline:2px;font-size:.85rem}
   .dh .cls{flex:0 0 44px}.dtop .dh .cls .tx{display:none}.dtop .dh .cls .ic{display:inline}
-  .bar button{min-width:44px;padding-inline:10px}
-  .bar .primary{padding-inline:14px;white-space:nowrap}
+  .bar .primary{flex:0 1 auto;padding-inline:12px;white-space:nowrap}
+  .bar .danger.armed{flex:0 1 96px;font-size:.72rem;line-height:1.1;padding:2px 4px}
   .bar .spacer{flex:1 1 0}
   .round{font-size:1.5rem}
   .tok{width:96px;min-height:72px}.tok .nm{font-size:.95rem}.tok .in{font-size:1.2rem}

@@ -117,7 +117,7 @@ Before pushing:
 
 ```bash
 pip install playwright && playwright install chromium
-python tests/run_tests.py            # full browser test battery (46 tests, phone to desktop)
+python tests/run_tests.py            # full browser test battery (47 tests, phone to desktop)
 python tests/run_tests.py typed undo # only tests whose names contain these words
 python tools/check_monsters.py       # data check after changing monsters.json (see BUGS.md)
 ```
