@@ -2,6 +2,11 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-04 — Extra damage on the pad
+
+- Most monster attacks deal two damage types with separate rolls; the pad now has **+ Extra**, a second amount with its own type, applied in the same Apply with independent resistances.
+- Checked `monsters.json` for max HP reductions without damage: Demilich (Energy Drain), Otyugh (Bite, on a failed save), plus slow curses (Mummy, Mummy Lord, Blue Slaad, Death Dog: every 24 h or on rests). Covered by the extra type *Max HP only*.
+
 ## 2026-11-04 — One Apply on the action pad
 
 - Spells that deal damage and add a status (Shocking Grasp, Ray of Frost…) needed two separate applies. The pad now has Damage / Heal / Temp HP, Half and Max HP − toggles, statuses picked with Status ▾ → Done, and one **Apply** that does it all (one undo step). Picking a damage spell's status sets its damage type when none is chosen.

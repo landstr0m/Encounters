@@ -910,6 +910,15 @@ def one_apply_damage_and_status(b):
     check(a.e("document.querySelector('[data-act=ptog][data-k=half]').disabled"), "half only for damage")
     a.click('[data-act="papply"]'); eq(a.c(g)["hp"], 15, "heal mode")
     a.click('[data-act="undo"]'); eq(a.c(g)["hp"], 10, "one undo step")
+    # extra damage: own type, own resistances (skeleton: vulnerable to bludgeoning, immune to poison)
+    k = a.mon("mm-skeleton")[0]; a.e(f"findC({k}).hp=findC({k}).max=30")
+    a.select(k); a.e("ui.amt=4;ui.dtype='bludgeoning';renderPad()")
+    a.click('[data-act="ptog"][data-k="extra"]'); a.e("ui.amt=5;ui.dtype='poison';renderPad()")
+    check("4 bludgeoning + 5 poison damage" in a.pg.inner_text('[data-act="papply"]'), a.pg.inner_text('[data-act="papply"]'))
+    a.click('[data-act="papply"]'); eq(a.c(k)["hp"], 22, "8 bludgeoning (vulnerable) + 0 poison (immune)")
+    # max HP only (Demilich Energy Drain, Otyugh bite): extra slot without damage
+    a.select(g); a.click('[data-act="ptog"][data-k="extra"]'); a.e("ui.amt=4;ui.dtype='maxhp';renderPad()")
+    a.click('[data-act="papply"]'); eq((a.c(g)["hp"], a.c(g)["max"]), (10, 13), "max HP lowered without damage")
     check(not a.errors, a.errors)
 
 

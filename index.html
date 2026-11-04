@@ -260,6 +260,7 @@ tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 
 .amtin{display:none;position:absolute;left:0;right:0;top:44px;height:44px;min-height:0;width:100%;border:0;border-radius:0;text-align:center;font-family:var(--display);font-size:1.6rem;font-weight:700;padding:0;background:var(--surface);box-shadow:inset 0 0 0 2px var(--accent)}
 .wheelbox.typing .amtin{display:block}
 .amtrow span{font-size:.8rem;color:var(--muted)}
+.slots{display:flex;gap:4px;flex-wrap:wrap}.slots button{min-height:36px;padding:0 8px;font-size:.85rem}.slots .on{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent)}
 #dtype{min-height:40px;margin-left:auto;font:inherit;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:0 6px}
 .toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translate(-50%,-150%);max-width:min(92vw,560px);background:var(--ink);color:var(--surface);padding:10px 14px;border-radius:10px;z-index:60;transition:transform .2s;font-size:.95rem;cursor:pointer}
 .ab6{grid-template-columns:repeat(3,1fr)!important}
@@ -1064,9 +1065,10 @@ function renderPad(){
   var fx=curFx(),pk=Object.keys(ui.pend),pn=pk.length,sum=padSum(pk);
   pad.innerHTML='<div class="pi">'+(fx?'<div class="fxb">⚡ <b>'+esc(fx.name)+':</b> '+esc(fxSum(fx))+' <button data-act="fxdone">Done</button></div>':'')+'<div class="pt"><div class="who"><b>'+T.length+' selected</b> · '+names+'</div><button data-act="desel">Deselect</button></div>'+
    '<div class="pmain"><div class="wheelbox"><div class="wheel" id="wheel" aria-label="Amount wheel">'+WHEEL+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount" tabindex="-1"></div>'+
-   '<div class="pr"><div class="amtrow"><span>Spin, or tap the middle number to type</span><select id="dtype" aria-label="Damage type"><option value="">Untyped</option>'+DTYPES.map(function(t){return '<option value="'+t+'"'+(ui.dtype===t?' selected':'')+'>'+DTI[t]+' '+t[0].toUpperCase()+t.slice(1)+'</option>';}).join('')+'</select></div>'+
+   '<div class="pr"><div class="amtrow">'+(ui.ex?'<div class="slots">'+[0,1].map(function(i){var sv=slot(i);return '<button class="'+(ui.ax===i?'on':'')+'" data-act="pslot" data-k="'+i+'">'+(i?'+ Extra ':'Main ')+'<b>'+sv.v+'</b>'+(sv.dt==='maxhp'?' max HP':sv.dt?' '+DTI[sv.dt]:'')+'</button>';}).join('')+'</div>':'<span>Spin, or tap the middle number to type</span>')+'<select id="dtype" aria-label="Damage type"><option value="">Untyped</option>'+(ui.ex&&ui.ax===1?'<option value="maxhp"'+(ui.dtype==='maxhp'?' selected':'')+'>Max HP only (no damage)</option>':'')+DTYPES.map(function(t){return '<option value="'+t+'"'+(ui.dtype===t?' selected':'')+'>'+DTI[t]+' '+t[0].toUpperCase()+t.slice(1)+'</option>';}).join('')+'</select></div>'+
    '<div class="seg" role="group" aria-label="Amount is">'+[['dmg','Damage','d'],['heal','Heal','h'],['temp','Temp HP','']].map(function(x){return '<button class="'+x[2]+(ui.mode===x[0]?' on':'')+'" data-act="pmode" data-k="'+x[0]+'" aria-pressed="'+(ui.mode===x[0])+'">'+x[1]+'</button>';}).join('')+'</div>'+
    '<div class="pacts"><button class="tg'+(ui.half?' on':'')+'" data-act="ptog" data-k="half" aria-pressed="'+!!ui.half+'"'+(ui.mode!=='dmg'?' disabled':'')+'>Half</button>'+
+   '<button class="tg'+(ui.ex?' on':'')+'" data-act="ptog" data-k="extra" aria-pressed="'+!!ui.ex+'"'+(ui.mode!=='dmg'?' disabled':'')+' title="A second amount with its own damage type (or max HP only), applied together">+ Extra</button>'+
    '<button class="tg d'+(ui.mx?' on':'')+'" data-act="ptog" data-k="maxdn" aria-pressed="'+!!ui.mx+'"'+(ui.mode!=='dmg'?' disabled':'')+' title="Also lower max HP by the damage taken (e.g. Life Drain)">Max HP \u2212</button>'+
    '<button class="tg'+(pn?' on':'')+'" data-act="padstatus">Status'+(pn?' ('+pn+')':'')+' ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove">'+(ui.confirmRemove?'Sure?':'Remove')+'</button>'+
    '<button data-act="padmore" aria-expanded="'+!!ui.more+'">'+(ui.more?'Less \u25b4':'More \u25be')+'</button>'+
@@ -1507,7 +1509,14 @@ function findC(id){return S.list.find(function(x){return x.id===+id;});}
 function statPick(){var id=ui.sel[ui.lastSel]?ui.lastSel:(Object.keys(ui.sel)[0]||ui.lastSel),c=id!=null&&findC(id);if(!c||c.kind==='fx')return;S.stat=c.kind==='mon'?c.monId:'pc';S.statC=c.id;}
 function pruneSel(){Object.keys(ui.sel).forEach(function(k){if(!findC(k))delete ui.sel[k];});}
 // Pad summary: everything one Apply will do (amount in the chosen mode, half, max HP, statuses on/off)
-function padSum(pk){var v=ui.amt||0,p=[];
+// Two amount slots: main and extra. ui.amt / ui.dtype always hold the slot being edited, ui.amtO / ui.dtO the other one.
+function slot(i){return i===(ui.ax||0)?{v:ui.amt||0,dt:ui.dtype||''}:{v:ui.amtO||0,dt:ui.dtO||''};}
+function swapSlot(i){if(i===(ui.ax||0))return;var v=ui.amt,d=ui.dtype;ui.amt=ui.amtO||0;ui.dtype=ui.dtO||'';ui.amtO=v;ui.dtO=d;ui.ax=i;}
+function padSum(pk){var m0=slot(0),x=ui.ex&&ui.mode==='dmg'?slot(1):{v:0},v=m0.v,p=[],h=function(n){return ui.half?Math.floor(n/2):n;};
+  if(ui.mode==='dmg'&&(v>0||x.v>0)){var d=[];if(v>0)d.push(h(v)+(m0.dt?' '+m0.dt:''));if(x.v>0&&x.dt!=='maxhp')d.push(h(x.v)+(x.dt?' '+x.dt:''));
+    if(d.length)p.push(d.join(' + ')+' damage'+(ui.half?' (half)':'')+(ui.mx?' and max HP':''));if(x.v>0&&x.dt==='maxhp')p.push('max HP \u2212'+x.v);
+    pk.forEach(function(k){p.push((ui.pend[k]?'+ ':'\u2212 ')+nm(k));});return p.map(esc).join(' \u00b7 ');}
+  v=ui.ax===1?m0.v:v;
   if(v>0){if(ui.mode==='heal')p.push('heal '+v);else if(ui.mode==='temp')p.push(v+' temp HP');
     else p.push((ui.half?Math.floor(v/2)+' (half of '+v+')':v)+(ui.dtype?' '+ui.dtype:'')+' damage'+(ui.mx?' and max HP':''));}
   pk.forEach(function(x){p.push((ui.pend[x]?'+ ':'\u2212 ')+nm(x));});return p.map(esc).join(' \u00b7 ');}
@@ -1522,7 +1531,7 @@ function applyPend(T){var skip=[],fx=curFx();
     });
   });
   T.forEach(function(c){incSync(c,true);});return skip;}
-function finishPad(){var fx=curFx();ui.dtype=fx&&fx.dt||'';ui.sel={};ui.amt=0;ui.menu=false;ui.pend={};ui.mode='dmg';ui.half=false;ui.mx=false;if(fx&&fx.st)ui.pend[fx.st]=true;ui.mq='';ui.confirmRemove=false;}
+function finishPad(){var fx=curFx();ui.dtype=fx&&fx.dt||'';ui.sel={};ui.amt=0;ui.amtO=0;ui.dtO='';ui.ax=0;ui.ex=false;ui.menu=false;ui.pend={};ui.mode='dmg';ui.half=false;ui.mx=false;if(fx&&fx.st)ui.pend[fx.st]=true;ui.mq='';ui.confirmRemove=false;}
 function nextIdExcluding(T){
   var ids={};T.forEach(function(c){ids[c.id]=true;});
   var O=order();var idx=O.findIndex(function(c){return c.id===S.turnId;});
@@ -1555,7 +1564,7 @@ $('#turn').addEventListener('click',function(e){
   if(a==='spl'){openSpell(b.dataset.n);save();renderDrawer();return;}
   var c=findC(S.turnId);if(!c)return;
   if(c.kind==='fx'){if(a==='fxvis')c.vis=!c.vis;else if(a==='fxrm')rmComb(c);
-    else if(a==='fxgo'){ui.fxRun=c.id;ui.dtype=c.dt||'';ui.amt=0;ui.mode='dmg';ui.half=false;ui.mx=false;ui.pend={};if(c.st)ui.pend[c.st]=true;if(c.sv!==''&&c.sv!=null){ui.sv=+c.sv;ui.svLast=ui.sv;}toast('Select who is affected.');}
+    else if(a==='fxgo'){ui.fxRun=c.id;ui.dtype=c.dt||'';ui.amt=0;ui.amtO=0;ui.dtO='';ui.ax=0;ui.ex=false;ui.mode='dmg';ui.half=false;ui.mx=false;ui.pend={};if(c.st)ui.pend[c.st]=true;if(c.sv!==''&&c.sv!=null){ui.sv=+c.sv;ui.svLast=ui.sv;}toast('Select who is affected.');}
     save();renderBoard();return;}
   if(a==='laspend'){var lc=findC(b.dataset.id);if(lc){snap('legendary');lc.la=(lc.la||0)+1;}}
   else if(a==='ladis'){ui.legDis=S.turnId;}
@@ -1613,7 +1622,7 @@ $('#tbl').addEventListener('change',function(e){
   save();renderBoard();
 });
 var padEl=$('#pad');
-padEl.addEventListener('change',function(e){if(e.target.id==='dtype')ui.dtype=e.target.value;});
+padEl.addEventListener('change',function(e){if(e.target.id==='dtype'){ui.dtype=e.target.value;renderPad();}});
 padEl.addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;
   var a=b.dataset.act;
@@ -1627,19 +1636,24 @@ padEl.addEventListener('click',function(e){
     return;
   }
   if(a==='desel'){finishPad();}
-  else if(a==='pmode'){ui.mode=b.dataset.k;if(ui.mode!=='dmg'){ui.half=false;ui.mx=false;}}
-  else if(a==='ptog'){var tk=b.dataset.k;if(tk==='half'){ui.half=!ui.half;var fh=curFx();if(fh&&fh.st){if(ui.half)delete ui.pend[fh.st];else ui.pend[fh.st]=true;}}else ui.mx=!ui.mx;}
+  else if(a==='pmode'){ui.mode=b.dataset.k;if(ui.mode!=='dmg'){ui.half=false;ui.mx=false;swapSlot(0);ui.ex=false;ui.amtO=0;ui.dtO='';}}
+  else if(a==='pslot'){swapSlot(+b.dataset.k);}
+  else if(a==='ptog'){var tk=b.dataset.k;if(tk==='half'){ui.half=!ui.half;var fh=curFx();if(fh&&fh.st){if(ui.half)delete ui.pend[fh.st];else ui.pend[fh.st]=true;}}else if(tk==='extra'){ui.ex=!ui.ex;if(ui.ex)swapSlot(1);else{swapSlot(0);ui.amtO=0;ui.dtO='';}}else ui.mx=!ui.mx;}
   else if(a==='papply'){
-    var pk=Object.keys(ui.pend);if(!(v>0)&&!pk.length)return;
+    var pk=Object.keys(ui.pend),m0=slot(0),x1=ui.ex&&ui.mode==='dmg'?slot(1):{v:0,dt:''};v=m0.v;if(!(v>0)&&!(x1.v>0)&&!pk.length)return;
     snap(padSum(pk).replace(/<[^>]+>/g,'')||'apply');
     var out=[],conc=[];
-    if(v>0)T.forEach(function(c){
-      if(ui.mode==='dmg'){var r=typed(c,ui.half?Math.floor(v/2):v,ui.dtype);dmg(c,r[0]);if(ui.mx&&r[0]>0)maxDown(c,r[0]);out.push(esc(c.name)+' '+r[0]+(r[1]?' <small>('+r[1]+')</small>':''));
+    var hv=function(n){return ui.half?Math.floor(n/2):n;},xmax=x1.dt==='maxhp';
+    if(v>0||x1.v>0)T.forEach(function(c){
+      if(ui.mode==='dmg'){var r=v>0?typed(c,hv(v),m0.dt):[0,''],r2=x1.v>0&&!xmax?typed(c,hv(x1.v),x1.dt):[0,''],tot=r[0]+r2[0],nt=[r[1],r2[1]].filter(Boolean).join('; ');
+        if(tot>0)dmg(c,tot);if(ui.mx&&tot>0)maxDown(c,tot);if(xmax&&x1.v>0)maxDown(c,x1.v);
+        if(v>0||!xmax)out.push(esc(c.name)+' '+tot+(nt?' <small>('+nt+')</small>':''));if(xmax&&x1.v>0)out.push(esc(c.name)+' max HP \u2212'+x1.v);var r=[tot];
         var ci=c.conds.indexOf('Concentrating');
         if(ci>=0&&r[0]>0){if(c.hp<=0){c.conds.splice(ci,1);conc.push(esc(c.name)+' loses concentration (0 HP)');}else conc.push(esc(c.name)+': Con save DC '+Math.min(30,Math.max(10,Math.floor(r[0]/2))));}}
       else if(ui.mode==='heal')heal(c,v);else c.temp=Math.max(c.temp,v);
     });
-    var msg=out.length&&(ui.dtype||out.length>1)?'<b>'+(ui.dtype?ui.dtype[0].toUpperCase()+ui.dtype.slice(1)+' ':'')+'damage:</b> '+out.join(' · '):'';
+    var dl=[m0.dt,x1.v>0&&!xmax?x1.dt:''].filter(Boolean).map(function(t){return t[0].toUpperCase()+t.slice(1);}).join(' + ');
+    var msg=out.length&&(dl||out.length>1||xmax)?'<b>'+(dl?dl+' ':'')+'damage:</b> '+out.join(' · '):'';
     if(conc.length)msg+=(msg?'<br>':'')+'<b>Concentration:</b> '+conc.join(' · ');
     var on=pk.filter(function(x){return ui.pend[x];}),sk=applyPend(T);
     if(on.length)msg+=(msg?'<br>':'')+'<b>'+on.map(function(x){return esc(nm(x));}).join(', ')+'</b> applied'+(sk.length?' (Immune, not applied: '+sk.join(', ')+')':'');
