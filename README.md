@@ -29,7 +29,7 @@ After an update, open the app once while online, then close and reopen it to get
 **3. Run combat**
 1. Type each player's initiative roll into their row, then press **Start combat**. **Next turn ▸** moves on; **↶ Undo** reverses the last change.
 2. The **turn card** shows the current creature's attacks (dice to roll are highlighted), statuses, reminders and death saves. Tap a spell or condition name to read its rule.
-3. **Tap rows to select** creatures, then use the **action pad**: spin the wheel for the amount (tap the middle number to type it), pick a damage type if it matters, and press **Damage**, **Half**, **Heal**, **Temp HP** or **Status ▾**.
+3. **Tap rows to select** creatures, then use the **action pad**: spin the wheel for the amount (tap the middle number to type it), pick a damage type if it matters, choose **Damage / Heal / Temp HP**, toggle **Half** (saved) and **Max HP −** (also lowers max HP by the damage taken) if needed, add statuses with **Status ▾** (→ Done), then one **Apply** does everything. The Apply button lists what will happen, e.g. *7 lightning damage · + Shocking Grasp*. Picking a damage spell's status sets its damage type if none is chosen.
 4. **Saves** shows one saving throw for everyone (useful before a Fireball).
 5. **■ End combat** stops the turn order but keeps creatures, HP and statuses. **Clear** (two taps) empties the tracker.
 
@@ -64,7 +64,7 @@ After an update, open the app once while online, then close and reopen it to get
 **Effects (lair actions, hazards, timers)**
 - **＋ Add → Effects:** name, initiative, a note for you, and whether players see it.
 - Optional payload: damage dice as a reminder (e.g. `2d6`), damage type, save (ability + DC), and a status lasting its normal duration, 1 round, or to the end of the target's next turn.
-- On its turn press **Apply…**: the Saves view opens on that ability and the pad is preloaded. Select the targets, type the roll, then **Damage** (failed save: damage + status), **Half** (saved: half, no status) or **+ Status** (status only). **Done** ends it.
+- On its turn press **Apply…**: the Saves view opens on that ability and the pad is preloaded. Select the targets, type the roll, then **Apply** (failed save: damage + its status, already ticked) or toggle **Half** first (saved: half damage, the status is unticked). Amount 0 applies the status only. **Done** ends it.
 
 **Monsters**
 - 503 stat blocks (currently the 2024 Monster Manual, see *Data*). Full stat block in the drawer (ⓘ or the **Stat block** tab, which shows the creature you last tapped in the table, monster or player, and follows your taps while open).

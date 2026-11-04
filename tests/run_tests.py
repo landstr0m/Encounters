@@ -56,8 +56,11 @@ class App:
         self.e("ui.more=true;ui.sel={};" + "".join(f"ui.sel[{i}]=true;" for i in ids) + "renderBoard()")
 
     def pad(self, kind, amount, dtype=""):
-        self.e(f"ui.amt={amount};ui.dtype='{dtype}';renderPad()")
-        self.click(f'[data-act="padhp"][data-k="{kind}"]')
+        # kind: dmg, half, heal, temp or maxdn (damage that also lowers max HP); one Apply does it all
+        mode = {"half": "dmg", "maxdn": "dmg"}.get(kind, kind)
+        self.e(f"ui.amt={amount};ui.dtype='{dtype}';ui.mode='{mode}';ui.half={'true' if kind == 'half' else 'false'};"
+               f"ui.mx={'true' if kind == 'maxdn' else 'false'};var f=curFx();if(f&&f.st){{if(ui.half)delete ui.pend[f.st];else ui.pend[f.st]=true;}}renderPad()")
+        self.click('[data-act="papply"]')
 
     def mon(self, mid, qty=1):
         return self.e(f"addMon('{mid}',{qty});save();renderBoard();S.list.slice(-{qty}).map(function(c){{return c.id;}})")
@@ -77,6 +80,7 @@ class App:
                 self.pg.wait_for_timeout(150)
             self.click(f'[data-act="mi"][data-c="{n}"]')
         self.click('[data-act="mapply"]')
+        self.click('[data-act="papply"]')
 
     def close(self):
         self.ctx.close()
@@ -476,7 +480,7 @@ def edge_cases(b):
     a.select(m); a.pad("dmg", 10, "force")
     eq(a.c(m)["hp"], 35, "Petrified resists all damage")
     a.e("ui.amt=0;ui.sel={};ui.sel[" + str(m) + "]=true;renderPad()")
-    a.click('[data-act="padhp"][data-k="dmg"]')
+    check(a.e("document.querySelector('[data-act=papply]').disabled"), "nothing to apply: Apply disabled")
     eq(a.c(m)["hp"], 35, "amount 0 does nothing")
     eq(a.errors, [], "errors:")
 
@@ -534,9 +538,9 @@ def simpler_screens(b):
     check("Prone." not in a.pg.inner_text("#tbl"), "rule text hidden on unselected rows")
     a.e(f"ui.more=false;ui.sel={{}};ui.sel[{m}]=true;renderBoard()")
     check("Prone." in a.pg.inner_text("#tbl"), "rule text shown on selected rows")
-    check(not a.pg.query_selector('[data-k="maxdn"]'), "rare pad buttons hidden")
+    check(not a.pg.query_selector('[data-k="maxreset"]'), "rare pad buttons hidden")
     a.click('[data-act="padmore"]')
-    check(a.pg.query_selector('[data-k="maxdn"]'), "More shows them")
+    check(a.pg.query_selector('[data-k="maxreset"]'), "More shows them")
 
 
 @test
@@ -635,8 +639,8 @@ def layout_case(b, w, h):
         const t=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);return !!(t&&t.closest('[data-act=mapply]'))}""")
     eq(vis, True, f"{w}x{h}: status Apply reachable with stat block open")
     a.e("ui.menu=false;" + ("ui.drawer=false;renderDrawer();" if w < 600 else "") + "renderPad()")
-    vis = a.pg.evaluate("""()=>{const b=document.querySelector('[data-act=padhp][data-k=dmg]').getBoundingClientRect();
-        const t=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);return !!(t&&t.closest('[data-act=padhp]'))}""")
+    vis = a.pg.evaluate("""()=>{const b=document.querySelector('[data-act=papply]').getBoundingClientRect();
+        const t=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);return !!(t&&t.closest('[data-act=papply]'))}""")
     eq(vis, True, f"{w}x{h}: Damage button reachable")
     eq(a.errors, [], "errors:")
 
@@ -882,6 +886,30 @@ def dndbeyond_import_and_merge(b):
     check("Mage Armor" in pr and "Shield" in pr, pr)
     a.mon("mm-archmage")
     check("Fly" in a.e("present()") or "Mind Spike" in a.e("present()") or len(a.e("present()")) > len(pr), "monster spellcasting adds its spells")
+    check(not a.errors, a.errors)
+
+
+@test
+def one_apply_damage_and_status(b):
+    a = App(b)
+    g = a.mon("mm-goblin-warrior")[0]
+    a.e(f"findC({g}).hp=findC({g}).max=20")
+    a.e("refLoad()"); a.pg.wait_for_function("window.__e(\"REF && REF.spells && REF.spells.length\") > 0")
+    a.select(g); a.e("ui.amt=7;renderPad()")
+    a.click('[data-act="padstatus"]'); a.pg.fill("#msearch", "shocking"); a.pg.wait_for_timeout(150)
+    a.click('[data-act="mi"][data-c="Shocked"]')
+    eq(a.e("ui.dtype"), "lightning", "picking Shocking Grasp sets lightning")
+    a.click('[data-act="mapply"]')
+    check("7 lightning damage" in a.pg.inner_text('[data-act="papply"]') and "Shocking Grasp" in a.pg.inner_text('[data-act="papply"]'), "Apply button sums it up")
+    a.click('[data-act="papply"]')
+    eq(a.c(g)["hp"], 13, "damage applied"); check("Shocked" in a.c(g)["conds"], "status applied in the same tap")
+    # half + max HP down, then heal mode
+    a.select(g); a.e("ui.amt=6;renderPad()"); a.click('[data-act="ptog"][data-k="half"]'); a.click('[data-act="ptog"][data-k="maxdn"]'); a.click('[data-act="papply"]')
+    eq((a.c(g)["hp"], a.c(g)["max"]), (10, 17), "half damage also lowers max HP")
+    a.select(g); a.e("ui.amt=5;renderPad()"); a.click('[data-act="pmode"][data-k="heal"]')
+    check(a.e("document.querySelector('[data-act=ptog][data-k=half]').disabled"), "half only for damage")
+    a.click('[data-act="papply"]'); eq(a.c(g)["hp"], 15, "heal mode")
+    a.click('[data-act="undo"]'); eq(a.c(g)["hp"], 10, "one undo step")
     check(not a.errors, a.errors)
 
 

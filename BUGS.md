@@ -2,6 +2,13 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-04 — One Apply on the action pad
+
+- Spells that deal damage and add a status (Shocking Grasp, Ray of Frost…) needed two separate applies. The pad now has Damage / Heal / Temp HP, Half and Max HP − toggles, statuses picked with Status ▾ → Done, and one **Apply** that does it all (one undo step). Picking a damage spell's status sets its damage type when none is chosen.
+- Max HP − now lowers max HP by the damage taken (Life Drain style) instead of a separate amount.
+- iPad with the drawer open: the pad was partly under the drawer; it now sits beside it.
+- A group-name variable called `nm` hid the new `nm()` name helper inside the pad handler ("nm is not a function"); renamed.
+
 ## 2026-11-04 — Status list review and D&D Beyond import
 
 - Status list: **General** section (Dodging, Disengaged, Readied, Help / Distracted, half / 3/4 / total cover, Burning) now sits above spells. Spell and feature statuses are shown by their real names (Bless, Hunter’s Mark, Hypnotic Pattern…); saved keys are unchanged, so old encounters still load.
