@@ -40,6 +40,7 @@ Still open (📋): saved target lists, "after N rounds" durations. (Prepared enc
 - "Rounds to defeat" estimate from party damage, as a second balance check.
 
 ### Reference extensions
+- 💡 Optional **compact stat block** setting, if layout changes add up and blocks get too long: Failure / Success inline instead of on their own lines (one switch in `blk()`), maybe roll tables collapsed
 - 📋 **Sort and present effects/spells better:** sort the status/effect list (possibly from D&D Beyond public character profiles: show each character's own spells and abilities first), and find a way to present spell effects so the DM doesn't need to remember 60+ effects. Re-check the effects list now that spells beyond the SRD are loaded.
 - 📋 **Player's Handbook spells (local):** Andrew's PHB 2024 epub has OCR text for all ~390 spells (epub pages 233–341, some OCR errors in headings); a local parser (like the Monster Manual one) writes a spell file that is loaded on the device via Data, merged with `reference.json`, never committed. Needs: the parser, and a "spell file" import in the Data tab. Then non-SRD monster spells (Synaptic Static, Destructive Wave…) link too.
 - 💡 Tap a spell status chip (Bless, Hex…) to open its spell entry.

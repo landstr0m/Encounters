@@ -781,6 +781,7 @@ def roll_tables_laid_out(b):
     check("Charm Ray" in a.e("document.querySelector('#drawer .ro .rh').textContent"), "ray names are headers")
     check(a.e("document.querySelectorAll('#drawer .ro .oc').length") >= 15, "failure/success on their own lines")
     check("<div" not in a.e("blk(rich('Melee Attack Roll: +4, reach 5 ft. Hit: 6 (1d8 + 2) Slashing damage.'))"), "short actions unchanged")
+    check('class="oc"' in a.e("blk(rich('Dexterity Saving Throw: DC 12. Failure: 7 (2d6) Fire damage. Success: Half damage.'))"), "short saves get outcome lines too")
     check(not a.errors, a.errors)
 
 
