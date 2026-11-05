@@ -175,7 +175,7 @@ a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-
 .lim{font-family:var(--body);font-size:.68rem;font-weight:700;letter-spacing:.04em;margin-left:6px;padding:1px 6px;border-radius:999px;border:1px solid var(--line);color:var(--warn);vertical-align:2px;white-space:nowrap}.lim.lt{color:var(--muted)}
 .msum{font-weight:600;color:var(--muted);font-size:.9rem;margin-bottom:4px}
 .nest{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:4px;margin-top:4px;padding-left:8px;border-left:2px solid var(--accent)}.a.na{background:var(--surface);padding:4px 6px}.a.na>b{font-size:1rem}
-.a.multi.wide{grid-column:1/-1}
+.a.wide{grid-column:1/-1}.a.na .rn{display:inline-block;min-width:1.6em;margin-right:4px;padding:0 4px;border-radius:4px;background:var(--accent);color:var(--accent-ink);font-size:.8rem;text-align:center}
 .sgh{font-size:.85rem;color:var(--muted);margin-bottom:2px}.sg{margin:2px 0}.sg>b{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-right:4px}
 .sb .nest{display:block;margin:4px 0 6px;border-left-color:var(--line)}.sb .nest .sba{margin:2px 0}
 .a .tg{float:right;min-height:34px;padding:2px 10px;font-size:.8rem;font-weight:700}
@@ -953,11 +953,15 @@ function short(t){
    .replace(' to hit','').replace(', one target. Hit: ',' \u2192 ').replace(' Hit: ',' \u2192 ');
 }
 // One action card on the turn card; a Multiattack card holds the attacks it uses.
+function bySize(m){return function(a,b){return rawOf(m,a).length-rawOf(m,b).length;};}
 function tcCard(c,m,p,secLab,kids,sub){
   var txt=rawOf(m,p),sp=p.rech&&c.spent&&c.spent[p.key];
-  var body=p.kind==='multi'?'<div class="msum">'+esc(multiSum(p))+'</div>'+(kids.length?'<div class="nest">'+kids.map(function(q){return tcCard(c,m,q,'',[],1);}).join('')+'</div>':'')
-    :p.kind==='spell'?spellsHTML(p,txt):blk(rich(short(txt)));
-  return '<div class="a'+(sub?' na':'')+(sp?' spent':'')+(p.kind==='multi'?' multi'+(kids.length>1?' wide':''):'')+'">'+(p.rech?'<button class="tg" data-act="spent" data-i="'+p.key+'">'+(sp?'Spent':'Ready')+'</button>':'')+
+  kids=kids.slice().sort(bySize(m));
+  var body=p.kind==='multi'?'<div class="msum">'+rich(txt)+'</div>'+(kids.length?'<div class="nest">'+kids.map(function(q){return tcCard(c,m,q,'',[],1);}).join('')+'</div>':'')
+    :p.kind==='spell'?spellsHTML(p,txt)
+    :p.table?(p.table.intro?'<div class="msum">'+rich(short(p.table.intro))+'</div>':'')+'<div class="nest">'+p.table.rows.map(function(r){return '<div class="a na"><b><span class="rn">'+r.r+'</span>'+esc(r.n)+'</b>'+blk(rich(short(r.t)))+'</div>';}).join('')+'</div>'
+    :blk(rich(short(txt)));
+  return '<div class="a'+(sub?' na':'')+(sp?' spent':'')+(p.kind==='multi'?' multi'+(kids.length>1?' wide':''):'')+(p.table?' wide':'')+'">'+(p.rech?'<button class="tg" data-act="spent" data-i="'+p.key+'">'+(sp?'Spent':'Ready')+'</button>':'')+
     '<b>'+esc(p.n)+(secLab?'<span class="sec">'+secLab+'</span>':'')+limHTML(p)+'</b>'+body+'</div>';}
 function renderTurn(){
   var el=$('#turn');
@@ -994,7 +998,8 @@ function renderTurn(){
     var acts=[],SL={a:'',b:'Bonus',r:'Reaction'};
     if(m&&!c.hideBase){var A=actsOf(m).filter(function(p){return p.sec!=='l';}),nested={};
       A.forEach(function(p){nestOf(A,p).forEach(function(q){nested[q.key]=1;});});
-      h+='<div class="acts2">'+A.filter(function(p){return !nested[p.key];}).map(function(p){return tcCard(c,m,p,SL[p.sec],nestOf(A,p));}).join('')+'</div>';}
+      var SO={a:0,b:1,r:2},bs=bySize(m),top=A.filter(function(p){return !nested[p.key];}).sort(function(x,y){return (x.kind==='multi'?-1:x.table?1:0)-(y.kind==='multi'?-1:y.table?1:0)||SO[x.sec]-SO[y.sec]||bs(x,y);});
+      h+='<div class="acts2">'+top.map(function(p){return tcCard(c,m,p,SL[p.sec],nestOf(A,p));}).join('')+'</div>';}
     X.forEach(function(x,i){if(x.t!=='t'&&(x.n||x.d))acts.push(['x'+i,{a:'Extra',b:'Bonus · extra',r:'Reaction · extra'}[x.t]||'Extra',[x.n||'Extra',x.d||''],1]);});
     if(acts.length)h+='<div class="acts2">'+acts.map(function(x){
       var a=x[2],rech=/Recharge/.test(a[0]);var sp=rech&&c.spent&&c.spent[x[0]];
@@ -1209,7 +1214,7 @@ function statHTML(){
   var ex=m.extra.map(function(e){return '<dt>'+esc(e[0])+'</dt><dd>'+(/^(Immune|Resist|Vulnerable)$/.test(e[0])?esc(e[1]).split(';').map(function(part,i){return i?part.replace(CNRE,'<a class="spl cnd" data-act="spl" data-n="$1">$1</a>'):part.replace(DTW,dtSpan).replace(CNRE,'<a class="spl cnd" data-act="spl" data-n="$1">$1</a>');}).join(';'):esc(e[1]))+'</dd>';}).join('');
   var tr=m.traits.map(function(t){return ent(t[0],t[1]);}).join('');
   var A=actsOf(m),nested={};A.forEach(function(p){nestOf(A,p).forEach(function(q){nested[q.key]=1;});});
-  var one=function(p,kids){var txt=rawOf(m,p),body=p.kind==='multi'?esc(multiSum(p))+(kids.length?'<div class="nest">'+kids.map(function(q){return one(q,[]);}).join('')+'</div>':'')
+  var one=function(p,kids){var txt=rawOf(m,p),body=p.kind==='multi'?rich(txt)+(kids.length?'<div class="nest">'+kids.map(function(q){return one(q,[]);}).join('')+'</div>':'')
       :p.kind==='spell'?spellsHTML(p,txt):p.kind==='info'?esc(txt):blk(rich(txt));
     return '<div class="p sba"><b>'+esc(p.n)+'.</b>'+limHTML(p)+' '+body+'</div>';};
   var sec=function(h,k){var L=A.filter(function(p){return p.sec===k&&!nested[p.key];});return L.length?'<h3>'+h+'</h3>'+L.map(function(p){return one(p,nestOf(A,p));}).join(''):'';};
@@ -1529,6 +1534,12 @@ function pSpells(t){
     var list=[],depth=0,cur='';for(var k=0;k<body.length;k++){var ch=body[k];if(ch==='(')depth++;if(ch===')')depth--;if(ch===','&&!depth){list.push(cur.trim());cur='';}else cur+=ch;}if(cur.trim())list.push(cur.trim());
     g.push({per:/at will/i.test(c[2])?'At will':c[3]+'/Day'+(/each/i.test(c[2])?' each':''),n:c[3]?+c[3]:0,list:list});});
   return g;}
+// Roll tables inside an entry ("1: Charm Ray. …", "1-4. The target …") -> {intro, rows:[{r, n, t}]}
+function pTable(t){var re=/([.:;] |^)(\d{1,2})(?:-(\d{1,2}))?[:.] (?=[A-Z])/g,m,cut=[],nx=1;
+  while((m=re.exec(t))){var a=+m[2],z=+(m[3]||m[2]);if(a!==nx)continue;cut.push([m.index+m[1].length,re.lastIndex,m[2]+(m[3]?'–'+m[3]:''),m[0].slice(-2,-1)]);nx=z+1;}
+  if(cut.length<2)return null;
+  return {intro:t.slice(0,cut[0][0]).trim(),rows:cut.map(function(c,i){var x=t.slice(c[1],i+1<cut.length?cut[i+1][0]:t.length).trim(),d=x.indexOf('. '),n='';
+    if(c[3]===':'&&d>0&&d<60){n=x.slice(0,d);x=x.slice(d+2);}return {r:c[2],n:n,t:x};})};}
 function parseAct(name,text,sec,others){
   var t=String(text||''),n=String(name||''),p={raw:n,n:n,sec:sec||'a',cost:sec==='l'?1:0,rech:null,uses:null,tag:'',kind:'other',dmg:[],conds:[],ok:true};
   var paren=n.match(/\s*\(([^)]*)\)\s*$/);
@@ -1540,6 +1551,7 @@ function parseAct(name,text,sec,others){
     else p.tag=q;
     if(p.rech||p.uses||(sec==='l'&&/^Costs?/i.test(q))||p.tag)p.n=n.slice(0,paren.index).trim();}
   if(sec==='l'&&/can't take this action again until the start of its next turn|can’t take this action again until the start of its next turn/i.test(t))p.once=true;
+  var tb=pTable(t);if(tb)p.table=tb;
   if(/^Legendary Action Uses$/i.test(p.n)){p.kind='info';var lu=t.match(/^(\d+)(?: \((\d+) in Lair\))?/);if(lu){p.la=+lu[1];p.lair=lu[2]?+lu[2]:null;}return p;}
   var am=t.match(/^(Melee or Ranged|Melee|Ranged) (?:Attack Roll|Weapon Attack|Spell Attack):\s*([+−-]\d+)(?:,\s*(?:reach (\d+) ft\.)?(?: or )?(?:range ([\d/]+) ft\.)?)?/i);
   var sm=t.match(/^(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) Saving Throw:\s*DC (\d+)(?:,\s*([^.]*))?/);
@@ -1610,7 +1622,7 @@ function spellsHTML(p,txt){
   return (p.dc||p.sat!=null?'<div class="sgh">'+(p.dc?'Spell save <span class="dcx">DC '+p.dc+'</span>':'')+(p.sat!=null?' \u00b7 <span class="hit">'+sgn(p.sat)+'</span> to hit':'')+'</div>':'')+
     p.spells.map(function(g){return '<div class="sg"><b>'+esc(g.per)+'</b> '+lk(g.list)+'</div>';}).join('');}
 // Which actions a Multiattack nests (its referenced actions in the same section, except Spellcasting)
-function nestOf(A,p){var out=[];if(p.kind!=='multi')return out;p.multi.refs.forEach(function(r){r.names.forEach(function(n){var q=A.find(function(x){return x.sec===p.sec&&x.n===n&&x.kind!=='multi'&&x.kind!=='spell';});if(q&&out.indexOf(q)<0)out.push(q);});});return out;}
+function nestOf(A,p){var out=[];if(p.kind!=='multi')return out;p.multi.refs.forEach(function(r){r.names.forEach(function(n){var q=A.find(function(x){return x.sec===p.sec&&x.n===n&&x.kind!=='multi'&&x.kind!=='spell'&&!x.table;});if(q&&out.indexOf(q)<0)out.push(q);});});return out;}
 function multiSum(p){return p.multi.refs.map(function(r,i){var x=(r.any?r.count+'× '+r.names.join(' or '):(r.count>1?r.count+'× ':'')+r.names[0]);
   return (i?(r.alt||(r.rep&&p.multi.refs[i-1].rep)?' or ':r.rep?' · can replace one with ':' + '):'')+x+(r.opt&&!r.rep&&!r.alt?' (if available)':'');}).join('');}
 function openSpell(n){if(!ui.refBack)ui.refBack=ui.drawer?S.tab:'close';ui.drawer=true;S.tab='ref';ui.ref=n;}

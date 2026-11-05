@@ -997,6 +997,12 @@ def action_parser_and_nested_cards(b):
     eq(a.e("document.querySelectorAll('#turn .acts2 > .a').length"), 2, "two top-level cards: Multiattack and Poison Breath")
     check("Rend" in a.e("document.querySelector('#turn .a.multi .nest').textContent"), "Rend nested in Multiattack")
     check("Recharge 5–6" in a.pg.inner_text('#turn'), "recharge shown as a tag")
+    eq(a.e("document.querySelector('#turn .a.multi .msum').textContent"), "The dragon makes two Rend attacks.", "full Multiattack sentence shown")
+    # Beholder: Eye Rays is its own wide card with one sub-card per ray; Bite stays separate
+    a.e("S.list=[];renderBoard()"); bh = a.mon("mm-beholder")[0]; a.pc("Hero2")
+    a.e(f"S.turnId={bh};ui.cardOpen=true;renderBoard()")
+    eq(a.e("document.querySelectorAll('#turn .a.wide .nest > .a.na').length"), 10, "ten eye rays as sub-cards")
+    check(a.e("!document.querySelector('#turn .a.multi .nest')"), "Eye Rays not buried inside Multiattack")
     a.e(f"S.stat='mm-archmage';S.statC=null;S.tab='stat';ui.drawer=true;renderDrawer()")
     t = a.pg.inner_text('#drawer').lower(); check("2/day each" in t and "3/day" in t, "stat block shows spell groups and limits")
     check(not a.errors, a.errors)

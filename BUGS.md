@@ -2,6 +2,12 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-05 — Card layout follow-up
+
+- Nested Multiattack cards were one per row (the inner grid had no columns); now two per row like the top level.
+- Multiattack showed only the parsed summary ("3× Eye Rays"), which hid wording such as "if available" and made it unclear whether Bite was extra; the card now shows the full sentence.
+- Beholder Eye Rays was nested inside Multiattack as one long block; roll-table entries now get their own wide card (after the other actions) with one sub-card per ray. Other cards are sorted shortest first within their section so pairs on a row are similar in height.
+
 ## 2026-11-05 — Action parser and nested cards (roadmap stages A and B)
 
 - `parseAct()` reads attacks (bonus, reach/range, damage parts with types, chosen-type damage, miss effects, riders, escape DC), saves (ability, DC, area, failure damage and conditions, half on success), Multiattack (counts, "in any combination", alternatives, "can replace one attack with"), Spellcasting (At will / X/Day each) and limits from the name (Recharge, X/Day, form-only tags). `tools/check_actions.py`: 503/503 monsters, 307/307 Multiattacks resolved.
