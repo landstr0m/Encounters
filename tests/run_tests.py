@@ -1009,6 +1009,35 @@ def action_parser_and_nested_cards(b):
 
 
 @test
+def action_economy_hides_used(b):
+    a = App(b)
+    d = a.mon("mm-green-dragon-wyrmling")[0]; h = a.pc("Hero")
+    a.e(f"S.list.forEach(function(c){{c.init=c.id==={d}?20:5}});renderBoard()")
+    a.click('[data-act="next"]'); a.e("ui.cardOpen=true;renderBoard()")
+    eq(a.e("S.turnId"), d, "dragon's turn")
+    a.click('#turn [data-act="use"][data-i="a2"]')   # Poison Breath
+    t = a.pg.inner_text('#turn')
+    check("Multiattack" not in t.split("Action used")[0], "other action cards hidden once the action is used")
+    check("Used" in t and "Poison Breath" in t, "the used card stays, marked Used")
+    a.click('[data-act="next"]'); a.click('[data-act="next"]')
+    eq(a.e("S.turnId"), d, "back to the dragon")
+    t = a.pg.inner_text('#turn')
+    check("Multiattack" in t, "action available again next turn")
+    check("recharging" in t, "spent recharge listed, not shown as a card")
+    a.click('#turn .hidl [data-act="unuse"]'); check("Poison Breath" in a.e("document.querySelector('#turn .acts2').textContent"), "tap when recharged brings it back")
+    # per-day spells count per encounter; Start combat resets
+    a.e("S.list=[];S.turnId=null;renderBoard()"); m = a.mon("mm-archmage")[0]; a.pc("Hero3")
+    a.e(f"S.turnId={m};ui.cardOpen=true;renderBoard()")
+    a.click('#turn [data-act="cast"][data-s="Cone of Cold"]')
+    eq(a.e(f"findC({m}).uses['sp:Cone of Cold']"), 1, "1/Day spell spent")
+    check(a.e("!!document.querySelector('#turn .spc.out')"), "spent spell struck through")
+    eq(a.e(f"findC({m}).ue.a"), "a2", "casting uses the action")
+    a.e("S.turnId=null;nextTurn();renderBoard()")
+    eq(a.e(f"(findC({m}).uses||{{}})['sp:Cone of Cold']||0"), 0, "new encounter (Start combat) resets daily uses")
+    check(not a.errors, a.errors)
+
+
+@test
 def wheel_tap_to_type(b):
     a = App(b)
     m = a.mon("mm-goblin-warrior")[0]

@@ -2,6 +2,10 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-05 — Action economy (roadmap stage C)
+
+- Use / Used ↺ on turn-card actions; cards for a used action, bonus action or reaction are hidden until the creature's next turn. X/Day is per encounter (Andrew's choice; no long rest). The Ready/Spent recharge toggle is replaced by Use (spends it) and a "recharging ↺" button under the cards.
+
 ## 2026-11-05 — Card layout follow-up
 
 - Nested Multiattack cards were one per row (the inner grid had no columns); now two per row like the top level.

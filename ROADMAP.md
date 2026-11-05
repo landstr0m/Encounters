@@ -48,10 +48,12 @@ Goal: on a monster's turn, tap an action on its card → pick targets → mark w
 - [x] Multiattack nested: its attacks shown inside it ("2× Rend"), not as a separate card.
 - [x] Each action tagged with its cost (A / BA / R / L2) and limits (Recharge 5–6, 1/Day).
 
-**C. Track what's used**
-- [ ] Action, bonus action and reaction per turn; reset at the start of the creature's turn (reaction already tracked).
-- [ ] Used actions greyed out, like Recharge and legendary actions today.
-- [ ] X/Day uses and monster spells counted for the whole session: End combat keeps them, a **Long rest** button resets them.
+**C. Track what's used** ✅ 5 Nov 2026 (Andrew's rules: no long rest; X/Day = per encounter, since monsters aren't players)
+- [x] **Use** on each action, bonus action and reaction card. The used card stays (marked Used ↺, tap to undo); the other cards needing that resource are hidden until the creature's next turn.
+- [x] A used Multiattack keeps the cards it refers to (Eye Rays, Spellcasting it can swap in).
+- [x] X/Day counted per encounter, reset when combat starts; per-day spells have one pip per use (tap = cast, also uses the action).
+- [x] Spent recharge and used-up abilities are listed under the cards (tap ↺ when it recharges); **Show all** reveals hidden cards.
+- [ ] Legendary actions on the turn card still sit in the Traits fold (pips in the table track them).
 
 **D. Tap-to-use, save actions first (closest to the Effects flow that already works)**
 - [ ] Tap e.g. Poison Breath → target list (players first) → tick targets → mark who saved → damage preloaded with its type(s) from the parser → Apply: failed saves take full damage and statuses, saves take half (or none) per the text.
