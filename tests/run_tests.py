@@ -994,15 +994,19 @@ def action_parser_and_nested_cards(b):
     # turn card: Rend sits inside Multiattack, not as its own card
     c = a.mon("mm-green-dragon-wyrmling")[0]; a.pc("Hero")
     a.e(f"S.turnId={c};ui.cardOpen=true;renderBoard()")
-    eq(a.e("document.querySelectorAll('#turn .acts2 > .a').length"), 2, "two top-level cards: Multiattack and Poison Breath")
-    check("Rend" in a.e("document.querySelector('#turn .a.multi .nest').textContent"), "Rend nested in Multiattack")
+    eq(a.e("document.querySelectorAll('#turn .acts2 > .a').length"), 2, "two cards: Rend and Poison Breath (Multiattack is a line, not a card)")
+    eq(a.e("document.querySelectorAll('#turn .mp').length"), 2, "Rend has two Multiattack uses")
     check("Recharge 5–6" in a.pg.inner_text('#turn'), "recharge shown as a tag")
-    eq(a.e("document.querySelector('#turn .a.multi .msum').textContent"), "The dragon makes two Rend attacks.", "full Multiattack sentence shown")
+    check("The dragon makes two Rend attacks." in a.e("document.querySelector('#turn .mline').textContent"), "full Multiattack sentence shown")
     # Beholder: Eye Rays is its own wide card with one sub-card per ray; Bite stays separate
     a.e("S.list=[];renderBoard()"); bh = a.mon("mm-beholder")[0]; a.pc("Hero2")
     a.e(f"S.turnId={bh};ui.cardOpen=true;renderBoard()")
     eq(a.e("document.querySelectorAll('#turn .a.wide .nest > .a.na').length"), 10, "ten eye rays as sub-cards")
-    check(a.e("!document.querySelector('#turn .a.multi .nest')"), "Eye Rays not buried inside Multiattack")
+    eq(a.e("document.querySelectorAll('#turn [data-act=ray]').length"), 10, "each ray has its own Use")
+    for r in (0, 3, 7):
+        a.click(f'#turn [data-act=ray][data-r="{r}"]')
+    eq(a.e("document.querySelectorAll('#turn [data-act=ray]').length"), 3, "after three rays only the used ones (to undo) remain tappable")
+    check(a.e("document.querySelector('#turn .acts2').textContent.indexOf('Bite')<0"), "Bite hidden: the action went to Multiattack")
     a.e(f"S.stat='mm-archmage';S.statC=null;S.tab='stat';ui.drawer=true;renderDrawer()")
     t = a.pg.inner_text('#drawer').lower(); check("2/day each" in t and "3/day" in t, "stat block shows spell groups and limits")
     check(not a.errors, a.errors)
@@ -1017,12 +1021,12 @@ def action_economy_hides_used(b):
     eq(a.e("S.turnId"), d, "dragon's turn")
     a.click('#turn [data-act="use"][data-i="a2"]')   # Poison Breath
     t = a.pg.inner_text('#turn')
-    check("Multiattack" not in t.split("Action used")[0], "other action cards hidden once the action is used")
+    check(a.e("document.querySelector('#turn .acts2').textContent.indexOf('Rend')<0"), "other action cards hidden once the action is used")
     check("Used" in t and "Poison Breath" in t, "the used card stays, marked Used")
     a.click('[data-act="next"]'); a.click('[data-act="next"]')
     eq(a.e("S.turnId"), d, "back to the dragon")
     t = a.pg.inner_text('#turn')
-    check("Multiattack" in t, "action available again next turn")
+    check("Rend" in a.e("document.querySelector('#turn .acts2').textContent"), "action available again next turn")
     check("recharging" in t, "spent recharge listed, not shown as a card")
     a.click('#turn .hidl [data-act="unuse"]'); check("Poison Breath" in a.e("document.querySelector('#turn .acts2').textContent"), "tap when recharged brings it back")
     # per-day spells count per encounter; Start combat resets
@@ -1034,6 +1038,13 @@ def action_economy_hides_used(b):
     eq(a.e(f"findC({m}).ue.a"), "a2", "casting uses the action")
     a.e("S.turnId=null;nextTurn();renderBoard()")
     eq(a.e(f"(findC({m}).uses||{{}})['sp:Cone of Cold']||0"), 0, "new encounter (Start combat) resets daily uses")
+    # Chimera: Fire Breath replaces the Claw attack specifically
+    a.e("S.list=[];renderBoard()"); ch = a.mon("mm-chimera")[0]; a.pc("Hero4")
+    a.e(f"S.turnId={ch};ui.cardOpen=true;renderBoard()")
+    a.click('#turn [data-act=mrep]')
+    claw = a.e("(function(){var A=actsOf(MON.find(function(m){return m.id==='mm-chimera'})),P=mPools(A);return mLeft(findC(" + str(ch) + "),P,poolOf(P,'Claw'))})()")
+    eq(claw, 0, "Fire Breath used up the Claw attack")
+    eq(a.e(f"findC({ch}).spent.a3||findC({ch}).spent[Object.keys(findC({ch}).spent)[0]]"), True, "and spent its recharge")
     check(not a.errors, a.errors)
 
 

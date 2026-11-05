@@ -2,6 +2,11 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-05 — Multiattack embedded in the attacks
+
+- Multiattack was a separate card with its own Use, so the number of attacks (and the Beholder's 3 rays, each once) wasn't tracked. It is now a line above the cards; each attack it names carries its uses for the turn, shared between attacks for "in any combination"; replacements ("replace the Claw attack with Fire Breath") take the named attack's use; casting a spell that Multiattack allows counts towards it instead of using the whole action.
+- Spellcasting in Multiattack ("can use Spellcasting to cast Web"): casting first no longer hides the attacks.
+
 ## 2026-11-05 — Action economy (roadmap stage C)
 
 - Use / Used ↺ on turn-card actions; cards for a used action, bonus action or reaction are hidden until the creature's next turn. X/Day is per encounter (Andrew's choice; no long rest). The Ready/Spent recharge toggle is replaced by Use (spends it) and a "recharging ↺" button under the cards.

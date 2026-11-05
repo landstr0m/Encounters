@@ -50,7 +50,7 @@ Goal: on a monster's turn, tap an action on its card → pick targets → mark w
 
 **C. Track what's used** ✅ 5 Nov 2026 (Andrew's rules: no long rest; X/Day = per encounter, since monsters aren't players)
 - [x] **Use** on each action, bonus action and reaction card. The used card stays (marked Used ↺, tap to undo); the other cards needing that resource are hidden until the creature's next turn.
-- [x] A used Multiattack keeps the cards it refers to (Eye Rays, Spellcasting it can swap in).
+- [x] Multiattack embedded in the attacks (5 Nov 2026): uses per attack this turn (circles), shared pools for "any combination", alternatives, replacements drawing from the named attack, roll tables with each result once (Beholder: 3 rays, each once).
 - [x] X/Day counted per encounter, reset when combat starts; per-day spells have one pip per use (tap = cast, also uses the action).
 - [x] Spent recharge and used-up abilities are listed under the cards (tap ↺ when it recharges); **Show all** reveals hidden cards.
 - [ ] Legendary actions on the turn card still sit in the Traits fold (pips in the table track them).

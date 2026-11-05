@@ -172,6 +172,9 @@ a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-
 .a{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:.95rem;background:var(--bg)}
 .a>b{font-family:var(--display);font-size:1.15rem;font-weight:700;letter-spacing:.02em;display:block}
 .a.spent{opacity:.5}.a.used{box-shadow:inset 0 0 0 2px var(--ok)}.a .tg.on{background:var(--ok);color:#fff;border-color:var(--ok)}
+.mline{margin-top:8px;padding:4px 8px;border-left:3px solid var(--accent);font-size:.9rem;color:var(--muted)}.mline b{color:var(--ink);margin-right:4px}
+.mpw{float:right;display:flex;gap:6px;align-items:center;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.mp{width:28px;height:28px;min-height:0;min-width:0;padding:0;border-radius:50%;border:2px solid var(--accent);background:transparent}.mp.on{background:var(--accent)}.mp[disabled]{opacity:1;cursor:default}
 .hidl{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px;font-size:.85rem;color:var(--muted)}.hidl span{padding:2px 8px;border:1px dashed var(--line);border-radius:999px}.hidl button{min-height:32px;padding:0 10px;font-size:.82rem}
 .spc{white-space:nowrap}.spc .pip{width:18px;height:18px;min-width:0;margin-left:6px;vertical-align:-3px}.spc.out{opacity:.6}
 .lim{font-family:var(--body);font-size:.68rem;font-weight:700;letter-spacing:.04em;margin-left:6px;padding:1px 6px;border-radius:999px;border:1px solid var(--line);color:var(--warn);vertical-align:2px;white-space:nowrap}.lim.lt{color:var(--muted)}
@@ -756,8 +759,8 @@ function nextTurn(){
   var r=stepFrom(O,idx);if(!r)return;
   if(idx<0)S.round=1;else S.round+=r.wrap;
   var E=S.turnId;S.prevTurn=idx<0?null:E;S.turnId=O[r.i].id;ui.legDis=null;ui.fxRun=null;
-  if(idx<0)S.list.forEach(function(x){x.uses={};x.spent={};x.ue={};});
-  O[r.i].rx=false;O[r.i].la=0;O[r.i].ue={};
+  if(idx<0)S.list.forEach(function(x){x.uses={};x.spent={};x.ue={};x.mu={};x.ray={};x.mrep={};x.msp={};});
+  var nx=O[r.i];nx.rx=false;nx.la=0;nx.ue={};nx.mu={};nx.ray={};nx.mrep={};nx.msp={};
   var gone=expTick(E,S.turnId);if(gone.length)toast('Ended: '+esc(gone.join(', ')));
 }
 function nextId(){
@@ -962,8 +965,27 @@ function short(t){
 function resUsed(c,r){return r==='r'?!!c.rx:!!(c.ue&&c.ue[r]);}
 function usesLeft(c,p){return p.uses?p.uses.n-((c.uses||{})[p.key]||0):null;}
 // Why a top-level card is hidden ('' = available). Cards the used Multiattack refers to stay (Eye Rays, Spellcasting replacement).
-function hideWhy(c,A,p){var ue=c.ue||{},mine=ue[p.sec]===p.key;if(mine)return '';
-  if(p.sec==='a'&&ue.a){var M=A.find(function(x){return x.key===ue.a;});if(!(M&&M.kind==='multi'&&M.multi.refs.some(function(r){return r.names.indexOf(p.n)>=0;})))return 'res';}
+// Multiattack lives on the attacks it names: each reference is a pool of uses this turn (c.mu[i] = used).
+// "in any combination" = one pool shared by several attacks; "can replace one attack with X" draws from the main pool;
+// "X or Y" pools are alternatives (using one closes the other); a roll table (Eye Rays) also allows each result once (c.ray).
+// Taking any Multiattack use sets c.ue.a = 'M'.
+function mPools(A){var M=A.find(function(x){return x.kind==='multi'&&x.sec==='a';});if(!M)return null;
+  var P=M.multi.refs.map(function(r,i){return {i:i,names:r.names,count:r.count,rep:!!r.rep,alt:!!r.alt,opt:!!r.opt,repFor:r.repFor||null};});
+  P.main=Math.max(0,P.findIndex(function(q){return !q.rep;}));P.text=M.multi.text;return P;}
+// The pool a replacement draws from: the named attack ("replace the Claw attack"), else the first pool
+function repPool(P,rq){return (rq&&rq.repFor&&poolOf(P,rq.repFor))||P[P.main];}
+function poolOf(P,n){return P?P.find(function(q){return !q.rep&&q.names.indexOf(n)>=0;}):null;}
+function repOf(P,n){return P?P.find(function(q){return q.rep&&q.names.indexOf(n)>=0;}):null;}
+function mUsed(c,q){return (c.mu||{})[q.i]||0;}
+function mLeft(c,P,q){var j,rival=false;
+  for(j=q.i;j>0&&P[j].alt;j--)if(mUsed(c,P[j-1]))rival=true;           // an earlier alternative was used
+  for(j=q.i+1;j<P.length&&P[j].alt;j++)if(mUsed(c,P[j]))rival=true;     // a later alternative was used
+  return rival?0:q.count-mUsed(c,q);}
+function mIdle(c){return !Object.keys(c.mu||{}).some(function(k){return c.mu[k]>0;});}
+function mSpend(c,q,d){c.ue=c.ue||{};c.mu=c.mu||{};c.mu[q.i]=Math.max(0,mUsed(c,q)+d);if(d>0)c.ue.a='M';else if(mIdle(c)&&c.ue.a==='M'){delete c.ue.a;c.ray={};}}
+function hideWhy(c,A,p){var ue=c.ue||{},mine=ue[p.sec]===p.key||(c.mrep||{})[p.key];if(mine)return '';
+  if(p.sec==='a'&&ue.a==='M'){var P=mPools(A);if(!(poolOf(P,p.n)||repOf(P,p.n)))return 'res';if(repOf(P,p.n)&&!poolOf(P,p.n)&&!(c.mrep||{})[p.key]&&mLeft(c,P,repPool(P,repOf(P,p.n)))<=0)return 'res';}
+  else if(p.sec==='a'&&ue.a)return 'res';
   else if(resUsed(c,p.sec))return 'res';
   if(p.uses&&usesLeft(c,p)<=0)return 'out';
   if(p.rech&&c.spent&&c.spent[p.key])return 'rech';
@@ -972,15 +994,22 @@ function useAct(c,A,key,on){var p=A.find(function(x){return x.key===key;});if(!p
   if(on){c.ue[p.sec]=key;if(p.sec==='r')c.rx=true;if(p.uses)c.uses[key]=(c.uses[key]||0)+1;if(p.rech)c.spent[key]=true;}
   else{if(c.ue[p.sec]===key)delete c.ue[p.sec];if(p.sec==='r')c.rx=false;if(p.uses&&c.uses[key])c.uses[key]--;if(p.rech)delete c.spent[key];}}
 function bySize(m){return function(a,b){return rawOf(m,a).length-rawOf(m,b).length;};}
-function tcCard(c,m,p,secLab,kids,sub,why){
+function mPips(c,P,q,key,ro){var left=mLeft(c,P,q),h='';for(var i=0;i<q.count;i++)h+='<button class="mp'+(i<left?' on':'')+'"'+(ro?' tabindex="-1" disabled':' data-act="mpip" data-i="'+key+'" data-q="'+q.i+'" data-d="'+(i<left?1:-1)+'"')+' aria-label="'+(i<left?'Use one':'Give one back')+'"></button>';return h;}
+function tcCard(c,m,p,secLab,kids,sub,why,P){
   var txt=rawOf(m,p),sp=!!why,mine=!sub&&c.ue&&c.ue[p.sec]===p.key;
+  var q=!sub&&p.sec==='a'?poolOf(P,p.n):null,rq=!sub&&p.sec==='a'&&!q?repOf(P,p.n):null,rays=q&&p.table?(c.ray||{})[p.key]||{}:null;
   kids=kids.slice().sort(bySize(m));
   var body=p.kind==='multi'?'<div class="msum">'+rich(txt)+'</div>'+(kids.length?'<div class="nest">'+kids.map(function(q){return tcCard(c,m,q,'',[],1);}).join('')+'</div>':'')
     :p.kind==='spell'?spellsHTML(p,txt,sub?null:c)
-    :p.table?(p.table.intro?'<div class="msum">'+rich(short(p.table.intro))+'</div>':'')+'<div class="nest">'+p.table.rows.map(function(r){return '<div class="a na"><b><span class="rn">'+r.r+'</span>'+esc(r.n)+'</b>'+blk(rich(short(r.t)))+'</div>';}).join('')+'</div>'
+    :p.table?(p.table.intro?'<div class="msum">'+rich(short(p.table.intro))+'</div>':'')+'<div class="nest">'+p.table.rows.map(function(r,ri){var u=rays&&rays[ri],off=rays&&!u&&mLeft(c,P,q)<=0;
+      return '<div class="a na'+(u?' used':'')+(off?' spent':'')+'">'+(rays&&!RO&&(u||!off)?'<button class="tg'+(u?' on':'')+'" data-act="ray" data-i="'+p.key+'" data-q="'+q.i+'" data-r="'+ri+'">'+(u?'Used \u21ba':'Use')+'</button>':'')+'<b><span class="rn">'+r.r+'</span>'+esc(r.n)+'</b>'+blk(rich(short(r.t)))+'</div>';}).join('')+'</div>'
     :blk(rich(short(txt)));
-  var btn=sub||RO?'':mine?'<button class="tg on" data-act="unuse" data-i="'+p.key+'" title="Tap to undo">Used \u21ba</button>':why?'':'<button class="tg" data-act="use" data-i="'+p.key+'">Use</button>';
+  var mr=rq&&(c.mrep||{})[p.key];
+  var btn=sub||RO?'':q?'<span class="mpw" title="Multiattack: uses this turn">'+(q.names.length>1?'shared ':'')+mPips(c,P,q,p.key,!!p.table)+'</span>'
+    :rq?(mr?'<button class="tg on" data-act="mrep" data-i="'+p.key+'" data-d="-1">Used \u21ba</button>':why?'':'<button class="tg" data-act="mrep" data-i="'+p.key+'" data-d="1" title="Takes the place of one attack">Use (1 attack)</button>')
+    :mine?'<button class="tg on" data-act="unuse" data-i="'+p.key+'" title="Tap to undo">Used \u21ba</button>':why?'':'<button class="tg" data-act="use" data-i="'+p.key+'">Use</button>';
   var lt=p.uses&&!sub?usesLeft(c,p):null;
+  if(q&&mUsed(c,q))mine=true;if(mr)mine=true;
   return '<div class="a'+(sub?' na':'')+(sp?' spent':'')+(mine?' used':'')+(p.kind==='multi'?' multi'+(kids.length>1?' wide':''):'')+(p.table?' wide':'')+'">'+btn+
     '<b>'+esc(p.n)+(secLab?'<span class="sec">'+secLab+'</span>':'')+limHTML(p).replace(/(\d+)\/Day</,function(x,n){return lt!=null&&lt<+n?n+'/Day \u00b7 '+lt+' left<':x;})+'</b>'+body+'</div>';}
 function renderTurn(){
@@ -1016,11 +1045,13 @@ function renderTurn(){
   if(ui.cardOpen&&pb)h+=pb;
   if(ui.cardOpen&&(m||X.length)){
     var acts=[],SL={a:'',b:'Bonus',r:'Reaction'};
-    if(m&&!c.hideBase){var A=actsOf(m).filter(function(p){return p.sec!=='l';}),nested={};
-      A.forEach(function(p){nestOf(A,p).forEach(function(q){nested[q.key]=1;});});
-      var SO={a:0,b:1,r:2},bs=bySize(m),top=A.filter(function(p){return !nested[p.key];}).sort(function(x,y){return (x.kind==='multi'?-1:x.table?1:0)-(y.kind==='multi'?-1:y.table?1:0)||SO[x.sec]-SO[y.sec]||bs(x,y);});
+    if(m&&!c.hideBase){var A=actsOf(m).filter(function(p){return p.sec!=='l';}),P=mPools(A),nested={};
+      A.forEach(function(p){if(p.kind==='multi')nested[p.key]=1;});
+      if(P)h+='<div class="mline"><b>Multiattack</b> '+rich(P.text)+'</div>';
+      var inM=function(p){return p.sec==='a'&&(poolOf(P,p.n)||repOf(P,p.n))?0:1;};
+      var SO={a:0,b:1,r:2},bs=bySize(m),top=A.filter(function(p){return !nested[p.key];}).sort(function(x,y){return (x.table?1:0)-(y.table?1:0)||SO[x.sec]-SO[y.sec]||inM(x)-inM(y)||bs(x,y);});
       var vis=[],hid=[];top.forEach(function(p){var w=hideWhy(c,A,p);(w&&!ui.showAll?hid:vis).push([p,w]);});
-      h+='<div class="acts2">'+vis.map(function(x){return tcCard(c,m,x[0],SL[x[0].sec],nestOf(A,x[0]),0,x[1]);}).join('')+'</div>';
+      h+='<div class="acts2">'+vis.map(function(x){return tcCard(c,m,x[0],SL[x[0].sec],[],0,x[1],P);}).join('')+'</div>';
       var hw=top.filter(function(p){return hideWhy(c,A,p);});
       if(hw.length&&!RO){var grp={res:[],out:[],rech:[]};hw.forEach(function(p){grp[hideWhy(c,A,p)].push(p);});
         var RL={a:'Action used',b:'Bonus action used',r:'Reaction used'},rs=uniq(grp.res.map(function(p){return p.sec;}));
@@ -1621,7 +1652,8 @@ function pMulti(t,others){
     var aft=t.slice(i+x.length,i+x.length+14),end=i+x.length;if(/^ twice/.test(aft))cnt=2;else if(/^ three times/.test(aft))cnt=3;
     var am=aft.match(/^ attacks?/);if(am)end+=am[0].length;
     var sent=t.slice(0,i).split(/\.\s/).pop();
-    refs.push({names:[x],count:cnt,at:i,end:end,rep:/\breplace\b[^.]*\bwith\b/i.test(sent),opt:/if available/i.test(t.slice(i,i+x.length+40).split(/\./)[0])||/\bcan use\b/i.test(sent.slice(-40))});seen[x]=1;blank(i,i+x.length);});
+    var rf=sent.match(/\breplace (?:the|one|a) ([A-Z][\w’' -]*?) attack/);
+    refs.push({names:[x],count:cnt,at:i,end:end,rep:/\breplace\b[^.]*\bwith\b/i.test(sent),repFor:rf?rf[1]:null,opt:/if available/i.test(t.slice(i,i+x.length+40).split(/\./)[0])||/\bcan use\b/i.test(sent.slice(-40))});seen[x]=1;blank(i,i+x.length);});
   if(/use Spellcasting|uses Spellcasting|Spellcasting to cast/i.test(t)&&!seen.Spellcasting){var si=t.indexOf('Spellcasting');refs.push({names:['Spellcasting'],count:1,at:si,end:si+12,rep:/replace/i.test(t),opt:true});}
   refs.sort(function(a,b){return a.at-b.at;});
   // "X or Y", "X, Y, or Z", "… attacks, or it makes three …": alternatives to the previous entry
@@ -1788,7 +1820,7 @@ $('#bar').addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;
   var a=b.dataset.act;
   if(a==='undo'){undo();}
-  else if(a==='endc'){snap('end combat');S.turnId=null;S.round=1;S.prevTurn=null;ui.legDis=null;S.list.forEach(function(c){delete c.exp;c.rx=false;c.la=0;c.ue={};});toast('Combat ended. Creatures, HP and statuses kept.');}
+  else if(a==='endc'){snap('end combat');S.turnId=null;S.round=1;S.prevTurn=null;ui.legDis=null;S.list.forEach(function(c){delete c.exp;c.rx=false;c.la=0;c.ue={};c.mu={};c.ray={};c.mrep={};c.msp={};});toast('Combat ended. Creatures, HP and statuses kept.');}
   else if(a==='next'){snap('next turn');nextTurn();ui.confirmClear=false;}
   else if(a==='openadd'){ui.drawer=true;S.tab='add';}
   else if(a==='saves'){ui.sv=ui.sv>=0?-1:ui.svLast;renderBar();renderTable();return;}
@@ -1816,9 +1848,18 @@ $('#turn').addEventListener('click',function(e){
     var AA=actsOf(mm),pk=AA.find(function(x){return x.key===b.dataset.i;});
     if(a==='unuse'&&pk&&!(c.ue&&c.ue[pk.sec]===pk.key)){if(pk.rech&&c.spent)delete c.spent[pk.key];else if(pk.uses&&c.uses&&c.uses[pk.key])c.uses[pk.key]--;}
     else useAct(c,AA,b.dataset.i,a==='use');}}
-  else if(a==='cast'){var ms=MON.find(function(x){return x.id===c.monId;});if(ms){var A2=actsOf(ms),ps=A2.find(function(x){return x.key===b.dataset.i;}),k2='sp:'+b.dataset.s;c.uses=c.uses||{};
-    if(b.classList.contains('on')){snap('cast '+b.dataset.s);c.uses[k2]=(c.uses[k2]||0)+1;c.ue=c.ue||{};if(ps&&!c.ue[ps.sec])c.ue[ps.sec]=ps.key;}
-    else if(c.uses[k2]){snap('restore '+b.dataset.s);c.uses[k2]--;}}}
+  else if(a==='cast'){var ms=MON.find(function(x){return x.id===c.monId;});if(ms){var A2=actsOf(ms),ps=A2.find(function(x){return x.key===b.dataset.i;}),k2='sp:'+b.dataset.s,P2=mPools(A2),sq=poolOf(P2,'Spellcasting')||repOf(P2,'Spellcasting');c.uses=c.uses||{};
+    if(b.classList.contains('on')){snap('cast '+b.dataset.s);c.uses[k2]=(c.uses[k2]||0)+1;c.ue=c.ue||{};
+      if(sq&&ps&&ps.sec==='a'){var pq=sq.rep?repPool(P2,sq):sq;if(c.ue.a==='M'||!c.ue.a){mSpend(c,pq,1);c.msp=c.msp||{};c.msp[k2]=(c.msp[k2]||0)+1;c.mspq=pq.i;}}
+      else if(ps&&!c.ue[ps.sec])c.ue[ps.sec]=ps.key;}
+    else if(c.uses[k2]){snap('restore '+b.dataset.s);c.uses[k2]--;if(c.msp&&c.msp[k2]&&P2){c.msp[k2]--;mSpend(c,P2[c.mspq||0],-1);}}}}
+  else if(a==='mpip'||a==='ray'||a==='mrep'){var mq=MON.find(function(x){return x.id===c.monId;});if(mq){var A3=actsOf(mq),P3=mPools(A3),pk3=A3.find(function(x){return x.key===b.dataset.i;});
+    if(a==='mpip'){var q3=P3[+b.dataset.q],d3=+b.dataset.d;if(d3>0&&mLeft(c,P3,q3)<=0)return;snap('multiattack: '+(pk3?pk3.n:''));mSpend(c,q3,d3);}
+    else if(a==='ray'){var q4=P3[+b.dataset.q],r4=+b.dataset.r;c.ray=c.ray||{};c.ray[pk3.key]=c.ray[pk3.key]||{};var on4=!c.ray[pk3.key][r4];
+      if(on4&&mLeft(c,P3,q4)<=0)return;snap((on4?'':'undo ')+pk3.table.rows[r4].n);if(on4)c.ray[pk3.key][r4]=1;else delete c.ray[pk3.key][r4];mSpend(c,q4,on4?1:-1);}
+    else{var d5=+b.dataset.d,mainq=repPool(P3,repOf(P3,pk3.n));if(d5>0&&mLeft(c,P3,mainq)<=0)return;snap((d5>0?'':'undo ')+pk3.n);c.mrep=c.mrep||{};
+      if(d5>0){c.mrep[pk3.key]=1;mSpend(c,mainq,1);if(pk3.rech){c.spent=c.spent||{};c.spent[pk3.key]=true;}if(pk3.uses){c.uses=c.uses||{};c.uses[pk3.key]=(c.uses[pk3.key]||0)+1;}}
+      else{delete c.mrep[pk3.key];mSpend(c,mainq,-1);if(pk3.rech&&c.spent)delete c.spent[pk3.key];if(pk3.uses&&c.uses&&c.uses[pk3.key])c.uses[pk3.key]--;}}}}
   else if(a==='showall'){ui.showAll=!ui.showAll;}
   else if(a==='cond'){snap('remove '+b.dataset.c);var i=c.conds.indexOf(b.dataset.c);if(i>=0)c.conds.splice(i,1);incSync(c,false);}
   else if(a.indexOf('ds')===0){snap('death save');dsAct(c,a,b);}
