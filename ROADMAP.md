@@ -34,6 +34,46 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea
 Effects can carry damage dice (rolled at the table), a damage type, a save (ability + DC) and a status with a duration (normal, 1 round, or to the end of the target's next turn). On the effect's turn, **Apply…** opens the Saves view on that ability and preloads the pad: select targets, type the roll, **Damage** = failed save (damage + status), **Half** = saved (no status), **+ Status** = status only.
 Still open (📋): saved target lists, "after N rounds" durations. (Prepared encounters already keep the payload.)
 
+### Tap-to-use monster actions (📋 mini roadmap, agreed 5 Nov 2026)
+Goal: on a monster's turn, tap an action on its card → pick targets → mark who was hit / who saved → type the rolled damage → one Apply does damage (per type, resistances), half on a save, statuses, concentration and expiry. The DM can still change anything before Apply, and Undo covers it. Dice stay physical: the app never rolls.
+
+**A. Read the actions (data, no UI change)**
+- [ ] Parser turns each action's text into a structure: kind (attack / save / other), attack bonus, reach or range, damage parts (dice + type, one per part), save ability and DC, what happens on a fail and on a success (half damage? none?), damage on a miss ("Miss:" / "Hit or Miss"), statuses and their duration or repeat save, escape DC for grapples.
+- [ ] Cost and limits: Action / Bonus Action / Reaction / Legendary (cost 1–3), Recharge X–6, X/Day (each), at-will.
+- [ ] Spellcasting entries split into at will and X/day each, with the spell names linked to statuses and the Rules tab.
+- [ ] Multiattack parsed: "two Rend attacks", "one Bite and two Claw", "replaces one attack with Spellcasting", "or" options.
+- [ ] `tools/check_actions.py`: reports how many of the 503 monsters parse fully, and lists the rest to fix by hand (like `check_monsters.py`).
+
+**B. Cards that show it**
+- [ ] Multiattack nested: its attacks shown inside it ("2× Rend"), not as a separate card.
+- [ ] Each action tagged with its cost (A / BA / R / L2) and limits (Recharge 5–6, 1/Day).
+
+**C. Track what's used**
+- [ ] Action, bonus action and reaction per turn; reset at the start of the creature's turn (reaction already tracked).
+- [ ] Used actions greyed out, like Recharge and legendary actions today.
+- [ ] X/Day uses and monster spells counted for the whole session: End combat keeps them, a **Long rest** button resets them.
+
+**D. Tap-to-use, save actions first (closest to the Effects flow that already works)**
+- [ ] Tap e.g. Poison Breath → target list (players first) → tick targets → mark who saved → damage preloaded with its type(s) from the parser → Apply: failed saves take full damage and statuses, saves take half (or none) per the text.
+- [ ] The pad's Half / + Extra / Status stay available to change things before Apply.
+
+**E. Attacks**
+- [ ] Tap an attack → pick the target → Hit / Miss (target AC shown, including cover and Shield) → damage parts preloaded (e.g. 7 slashing + 3 poison) → Apply.
+- [ ] Crit toggle (reminder that dice double; the DM types the total). Automatic crit hint within 5 ft of a Paralyzed or Unconscious target.
+- [ ] Advantage / disadvantage hints per target from statuses (Prone, Blinded, Invisible, Restrained, Faerie Fire, Dodging, attacker Poisoned or Frightened).
+- [ ] Multiattack steps through its attacks in order, each with its own target.
+
+**F. Spells and riders**
+- [ ] Casting a spell from Spellcasting uses it (X/day count), applies its status and starts concentration on the caster.
+- [ ] Grapples linked to the grappler like concentration (escape DC on the chip; ends if the grappler is Incapacitated or lets go).
+- [ ] Start/end-of-turn damage and repeat saves from riders use the existing turn reminders.
+
+**G. Later**
+- [ ] Target reactions that change the result: Shield (+5 AC turns a hit into a miss), Uncanny Dodge (half), Evasion (Dex save: none / half).
+- [ ] Same flow for player spells and attacks against monsters (from D&D Beyond spell lists), using the monsters' save bonuses and Magic Resistance.
+- [ ] Action log for the session (who did what to whom), feeding the post-session report idea.
+- [ ] Optional table-view line ("Goblin hits Aer: 5 slashing").
+
 ### Encounter difficulty extensions (💡)
 - CR / XP for effects and hazards, counted in the encounter XP.
 - Lair XP (2024 stat blocks list a higher XP in lair).
@@ -43,7 +83,7 @@ Still open (📋): saved target lists, "after N rounds" durations. (Prepared enc
 - 💡 Optional **compact stat block** setting, if layout changes add up and blocks get too long: Failure / Success inline instead of on their own lines (one switch in `blk()`), maybe roll tables collapsed
 - 📋 **Sort and present effects/spells better:** sort the status/effect list (possibly from D&D Beyond public character profiles: show each character's own spells and abilities first), and find a way to present spell effects so the DM doesn't need to remember 60+ effects. Re-check the effects list now that spells beyond the SRD are loaded.
 - 📋 **Player's Handbook spells (local):** Andrew's PHB 2024 epub has OCR text for all ~390 spells (epub pages 233–341, some OCR errors in headings); a local parser (like the Monster Manual one) writes a spell file that is loaded on the device via Data, merged with `reference.json`, never committed. Needs: the parser, and a "spell file" import in the Data tab. Then non-SRD monster spells (Synaptic Static, Destructive Wave…) link too.
-- 💡 **Nest Multiattack:** on monster cards (turn card and stat block), Multiattack takes a whole card only to name other actions. Show the attacks it uses inside it (e.g. "Multiattack: 2× Rend" with Rend's line below), so the card is shorter. Design not decided yet.
+- 📋 **Nest Multiattack:** now part of *Tap-to-use monster actions* (A and B).
 - 💡 Tap a spell status chip (Bless, Hex…) to open its spell entry.
 - 💡 Player spell lists (needs a spell list per character, e.g. a Kanka property).
 

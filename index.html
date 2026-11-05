@@ -280,6 +280,8 @@ td.empty p{margin:0 0 10px}
 .seg{display:flex;margin-bottom:6px}.seg button{flex:1;border-radius:0;font-weight:700;min-height:42px;margin-left:-1px}.seg button:first-child{border-radius:8px 0 0 8px;margin-left:0}.seg button:last-child{border-radius:0 8px 8px 0}
 .seg .d{color:var(--bad)}.seg .h{color:var(--ok)}.seg .on{background:var(--ink);color:var(--surface);border-color:var(--ink);position:relative}
 .pacts .tg.on{background:color-mix(in srgb,var(--accent) 22%,var(--surface));border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}.pacts button[disabled]{opacity:.4}
+.ccask{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));z-index:60;display:flex;gap:8px;align-items:center;max-width:min(560px,calc(100vw - 24px));background:var(--surface);border:2px solid var(--warn);border-radius:12px;padding:8px 10px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.ccask span{flex:1;font-size:.92rem}.ccask button{min-height:40px;padding:0 14px}.ccask .primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
 .papply{width:100%;margin-top:6px;min-height:46px;font-weight:700;background:var(--accent);color:var(--accent-ink);border-color:var(--accent);line-height:1.15;padding:4px 8px}.papply[disabled]{opacity:.45}
 .pacts .rm.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
 .menu{position:absolute;right:0;bottom:calc(100% + 12px);width:min(640px,100%);background:var(--surface);border:2px solid var(--accent);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.35);padding:10px;display:flex;flex-direction:column;gap:8px}
@@ -630,15 +632,18 @@ function remHTML(c){
 // Concentration spells: a status added on someone's turn is linked to that caster. The caster gets Concentrating;
 // when that ends (removed, 0 HP, Incapacitated, a new concentration spell) every linked status is removed.
 var CONC=['Blessed','Baned','Hexed','Marked','Faerie Fire','Hasted','Slowed','Shield of Faith','Blurred','Heroism','Enlarged','Reduced','Dueled','Ensnared','Shining Smite','Heat Metal','Silenced','Protected','Cursed','Entranced','Fear','Spirit Guardians','Stinking Cloud','Laughing','Confused','Levitating','Polymorphed','Banished','Sleeping','Blade Ward','Guidance','Resistance','Stoneskin','Protection from Energy','Elemental Weapon','Crusader’s Mantle','Fly','Spider Climb','Expeditious Retreat','Pass without Trace','Enhance Ability','Beacon of Hope','Holy Aura','Ray of Enfeeblement','Witch Bolt','Mind Spike','Suggestion','Crown of Madness','Phantasmal Force','Phantasmal Killer','Irresistible Dance','Hold Person','Hold Monster','Entangle','Web','Black Tentacles','Flesh to Stone','Dominate Beast','Dominate Person','Dominate Monster','Invisibility','Greater Invisibility'];
+// Spells aimed at specific creatures, with no lasting area and no moving to a new target: when the last affected creature
+// is free (saved, damaged awake, chip removed), the app offers to end the caster's concentration.
+var TARG=['Hold Person','Hold Monster','Entranced','Slowed','Faerie Fire','Baned','Dueled','Dominate Beast','Dominate Person','Dominate Monster','Banished','Polymorphed','Crown of Madness','Laughing','Irresistible Dance','Phantasmal Killer','Ray of Enfeeblement','Flesh to Stone','Confused','Fear','Sleeping'];
 function ccSet(c,x){
   var K=findC(S.turnId);if(CONC.indexOf(x)<0||!K||K.kind==='fx')return;
   ccEnd(K,x);
-  c.cc=c.cc||{};c.cc[x]=K.id;
+  c.cc=c.cc||{};c.cc[x]=K.id;K.ccs=K.ccs||{};K.ccs[x]=1;
   if(K.conds.indexOf('Concentrating')<0&&K.conds.indexOf('Raging')<0)K.conds.push('Concentrating');
 }
 // Remove statuses linked to caster K (all of them, or all but spell 'keep'); returns what ended.
 function ccEnd(K,keep){
-  var gone=[];
+  var gone=[];if(K.ccs)Object.keys(K.ccs).forEach(function(x){if(x!==keep)delete K.ccs[x];});
   S.list.forEach(function(c){if(!c.cc)return;Object.keys(c.cc).forEach(function(x){
     if(c.cc[x]!==K.id||x===keep)return;delete c.cc[x];var i=c.conds.indexOf(x);if(i<0)return;
     c.conds.splice(i,1);incSync(c,false);gone.push(c.name+': '+x);
@@ -657,7 +662,21 @@ function ccSweep(){
     gone=gone.concat(ccEnd(K||{id:+id}));
   });
   if(gone.length){toast('Concentration ended: '+esc(gone.join(', ')));save();}
+  // A targeted spell with nobody left under it: ask (once) whether the caster's concentration ends
+  S.list.forEach(function(K){if(!K.ccs)return;Object.keys(K.ccs).forEach(function(x){
+    if(S.list.some(function(c){return c.cc&&c.cc[x]===K.id;}))return;
+    delete K.ccs[x];
+    if(TARG.indexOf(x)>=0&&K.conds.indexOf('Concentrating')>=0&&!S.list.some(function(c){return c.cc&&Object.keys(c.cc).some(function(y){return c.cc[y]===K.id;});}))ui.ccAsk={k:K.id,x:x};
+  });});
+  ccAskShow();
 }
+function ccAskShow(){var el=$('#ccask'),q=ui.ccAsk,K=q&&findC(q.k);
+  if(!K||K.conds.indexOf('Concentrating')<0||RO){ui.ccAsk=null;if(el)el.hidden=true;return;}
+  if(!el){el=document.createElement('div');el.id='ccask';el.className='ccask';el.setAttribute('role','alertdialog');document.body.appendChild(el);
+    el.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var Q=ui.ccAsk,C=Q&&findC(Q.k);
+      if(b.dataset.v==='end'&&C){snap('end concentration');var i=C.conds.indexOf('Concentrating');if(i>=0)C.conds.splice(i,1);ccEnd(C);save();}
+      ui.ccAsk=null;el.hidden=true;renderBoard();});}
+  el.hidden=false;el.innerHTML='<span><b>'+esc(nm(q.x))+'</b> has no targets left. End <b>'+esc(K.name)+'</b>\u2019s concentration?</span><button data-v="keep">Keep</button><button class="primary" data-v="end">End</button>';}
 var NORX=['Incapacitated','Slowed','Confused','Open Hand'];
 function rxBlocked(c){return c.conds.some(function(x){return NORX.indexOf(x)>=0||CAUSE.indexOf(x)>=0;});}
 function ppOf(c){if(c.kind==='pc'){var l=libOf(c);return l&&l.pp!=null?l.pp:null;}var r=/passive perception\s*(\d+)/.exec(monLine(c,/^sens/i));return r?+r[1]:null;}

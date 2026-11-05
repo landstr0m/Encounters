@@ -2,6 +2,10 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-05 — Concentration with no targets left
+
+- Targeted spells (Hold Person/Monster, Hypnotic Pattern, Slow, Faerie Fire, Bane, Compelled Duel, Dominate ×3, Banishment, Polymorph, Crown of Madness, Hideous Laughter, Irresistible Dance, Phantasmal Killer, Ray of Enfeeblement, Flesh to Stone, Confusion, Fear, Sleep): when the last linked target is free, a prompt offers to end the caster's concentration. Not automatic, because the linked caster is whoever's turn it was (a readied spell links to the wrong creature) and targets may be off the board.
+
 ## 2026-11-04 — Single-condition spells
 
 - Reverses the earlier choice to leave out spells that only impose a condition: 20 added (Charm Person/Monster, Hold Person/Monster, Entangle, Web, Black Tentacles, Flesh to Stone, Color Spray, Blindness/Deafness, Ray of Sickness, Wrathful and Staggering Smite, Dominate Beast/Person/Monster, Power Word Stun, Invisibility, Greater Invisibility). Each adds its condition, linked so it ends with the spell (concentration, expiry or removal). Older statuses that describe a condition (Hypnotic Pattern, Fear, Turn Undead, Hideous Laughter, Sleep, Ensnaring Strike, Suggestion…) now apply it the same way; Hideous Laughter's Prone stays after it ends.

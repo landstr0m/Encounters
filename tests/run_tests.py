@@ -959,6 +959,20 @@ def single_condition_spells_linked(b):
     a.select(g); a.status("Charm Person", search=True)
     a.e(f"var c=findC({g});c.conds.splice(c.conds.indexOf('Charm Person'),1);save();renderBoard()")
     eq(a.c(g)["conds"], ["Charmed"], "earlier Charmed is kept")
+    # last held creature saves: offer to end concentration
+    g2 = a.mon("mm-goblin-warrior")[0]
+    a.e(f"S.turnId={k};renderBoard()"); a.select(g, g2); a.status("Hold Person", search=True)
+    a.e(f"var c=findC({g});c.conds.splice(c.conds.indexOf('Hold Person'),1);save();renderBoard()")
+    check(not a.pg.is_visible('#ccask'), "one target still held: no prompt")
+    a.e(f"var c=findC({g2});c.conds.splice(c.conds.indexOf('Hold Person'),1);save();renderBoard()")
+    check(a.pg.is_visible('#ccask') and "Hold Person" in a.pg.inner_text('#ccask'), "prompt when nobody is held")
+    a.click('#ccask [data-v="end"]')
+    check("Concentrating" not in a.c(k)["conds"], "End removes concentration")
+    # area spells (Web) never ask
+    a.e(f"S.turnId={k};renderBoard()"); a.select(g); a.status("Web", search=True)
+    a.e(f"var c=findC({g});c.conds.splice(c.conds.indexOf('Web'),1);save();renderBoard()")
+    check(not a.pg.is_visible('#ccask'), "Web keeps concentration silently")
+    check("Concentrating" in a.c(k)["conds"], "still concentrating on Web")
     check(not a.errors, a.errors)
 
 
