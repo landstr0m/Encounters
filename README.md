@@ -69,7 +69,7 @@ After an update, open the app once while online, then close and reopen it to get
 - On its turn press **Apply…**: the Saves view opens on that ability and the pad is preloaded. Select the targets, type the roll, then **Apply** (failed save: damage + its status, already ticked) or toggle **Half** first (saved: half damage, the status is unticked). Amount 0 applies the status only. **Done** ends it.
 
 **Monsters**
-- 503 stat blocks (currently the 2024 Monster Manual, see *Data*). Full stat block in the drawer (ⓘ or the **Stat block** tab, which shows the creature you last tapped in the table, monster or player, and follows your taps while open).
+- 503 stat blocks (currently the 2024 Monster Manual, see *Data*). On the turn card and stat block, **Multiattack** shows what it uses ("3× Rend · can replace one with Spellcasting") with those attacks nested inside it, limits are tags (Recharge 5–6, 3/Day, Costs 2, form-only), and **Spellcasting** is split into At will / 2/Day each / 1/Day each lines. Full stat block in the drawer (ⓘ or the **Stat block** tab, which shows the creature you last tapped in the table, monster or player, and follows your taps while open).
 - Roll tables (Beholder Eye Rays, Umber Hulk Confusing Gaze…) are shown as one row per result, and every entry puts Failure / Success on their own lines.
 - Dice to roll are highlighted, attack bonuses green, DCs amber, and damage types have their own colour and symbol (🔥 Fire, ❄️ Cold, ⚡ Lightning, 💀 Necrotic…), also in the defences lines and the damage-type pickers. Spell names (blue) and conditions (red, e.g. *Paralyzed*) are links: tap to read the rule, then **◂ Stat block** to go back. Spells missing from the data (see Rules tab) don't link.
 - ✎ Edit per creature: name, AC, HP, initiative, extra actions/traits/notes (can be copied to every creature of that type), or a custom group.
@@ -145,6 +145,7 @@ Then bump `CACHE` in `sw.js` so installed apps pick up the change. Log bugs and 
 | `spells-phb.json` | **Temporary:** Player's Handbook spells not in the SRD, book-name aliases, and the list of spells still missing |
 | `players.json` | Player characters from Kanka (written by the workflow) |
 | `tools/kanka_players.py` | Kanka → `players.json` |
+| `tools/check_actions.py` | Action parser coverage report (runs the app's `parseAct()` on every monster) |
 | `dndbeyond.txt`, `dndbeyond.json`, `tools/dndbeyond.py` | D&D Beyond links → characters (workflow `dndbeyond-players.yml`) |
 | `tools/build_reference.py` | open5e-api SRD 5.2 data → `reference.json` |
 | `tools/check_monsters.py` | Checks every monster entry (stats, dice, text, spelling); `--fix` normalises dice symbols |

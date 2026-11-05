@@ -37,16 +37,16 @@ Still open (📋): saved target lists, "after N rounds" durations. (Prepared enc
 ### Tap-to-use monster actions (📋 mini roadmap, agreed 5 Nov 2026)
 Goal: on a monster's turn, tap an action on its card → pick targets → mark who was hit / who saved → type the rolled damage → one Apply does damage (per type, resistances), half on a save, statuses, concentration and expiry. The DM can still change anything before Apply, and Undo covers it. Dice stay physical: the app never rolls.
 
-**A. Read the actions (data, no UI change)**
-- [ ] Parser turns each action's text into a structure: kind (attack / save / other), attack bonus, reach or range, damage parts (dice + type, one per part), save ability and DC, what happens on a fail and on a success (half damage? none?), damage on a miss ("Miss:" / "Hit or Miss"), statuses and their duration or repeat save, escape DC for grapples.
-- [ ] Cost and limits: Action / Bonus Action / Reaction / Legendary (cost 1–3), Recharge X–6, X/Day (each), at-will.
-- [ ] Spellcasting entries split into at will and X/day each, with the spell names linked to statuses and the Rules tab.
-- [ ] Multiattack parsed: "two Rend attacks", "one Bite and two Claw", "replaces one attack with Spellcasting", "or" options.
-- [ ] `tools/check_actions.py`: reports how many of the 503 monsters parse fully, and lists the rest to fix by hand (like `check_monsters.py`).
+**A. Read the actions (data, no UI change)** ✅ 5 Nov 2026: 503/503 monsters parse; 17 attacks/saves have text-only effects the DM reads
+- [x] Parser turns each action's text into a structure: kind (attack / save / other), attack bonus, reach or range, damage parts (dice + type, one per part), save ability and DC, what happens on a fail and on a success (half damage? none?), damage on a miss ("Miss:" / "Hit or Miss"), statuses and their duration or repeat save, escape DC for grapples.
+- [x] Cost and limits: Action / Bonus Action / Reaction / Legendary (cost 1–3), Recharge X–6, X/Day (each), at-will.
+- [x] Spellcasting entries split into at will and X/day each, with the spell names linked to statuses and the Rules tab.
+- [x] Multiattack parsed: "two Rend attacks", "one Bite and two Claw", "replaces one attack with Spellcasting", "or" options.
+- [x] `tools/check_actions.py`: reports how many of the 503 monsters parse fully, and lists the rest to fix by hand (like `check_monsters.py`).
 
-**B. Cards that show it**
-- [ ] Multiattack nested: its attacks shown inside it ("2× Rend"), not as a separate card.
-- [ ] Each action tagged with its cost (A / BA / R / L2) and limits (Recharge 5–6, 1/Day).
+**B. Cards that show it** ✅ 5 Nov 2026 (legendary actions still in the Traits fold on the turn card)
+- [x] Multiattack nested: its attacks shown inside it ("2× Rend"), not as a separate card.
+- [x] Each action tagged with its cost (A / BA / R / L2) and limits (Recharge 5–6, 1/Day).
 
 **C. Track what's used**
 - [ ] Action, bonus action and reaction per turn; reset at the start of the creature's turn (reaction already tracked).

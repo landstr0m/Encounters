@@ -23,4 +23,5 @@
 - Buttons: `data-act="..."` handled by one click listener per area (search `act==='name'`).
 - Status mechanics: `SPELLS` table and `EXP` (auto-expiry) in `index.html`; status wording in `statuses.js`.
 - Undo: `snap(label)` before a change.
+- Monster actions: `actsOf(m)` parses (cached) via `parseAct()`; cards use `tcCard()` (turn card) and `one()` in `statHTML()`. After parser changes run `python tools/check_actions.py`.
 - Tests inject `window.__e` to evaluate code inside the app (see `tests/run_tests.py`).

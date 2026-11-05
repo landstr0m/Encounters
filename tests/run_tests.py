@@ -977,6 +977,32 @@ def single_condition_spells_linked(b):
 
 
 @test
+def action_parser_and_nested_cards(b):
+    a = App(b)
+    P = lambda mid, n: a.j(f"actsOf(MON.find(function(m){{return m.id==='{mid}'}})).find(function(x){{return x.n==='{n}'}})")
+    r = P("mm-green-dragon-wyrmling", "Rend")
+    eq((r["kind"], r["atk"]["bonus"], r["atk"]["reach"]), ("atk", 4, 5), "attack roll read")
+    eq([(d["dice"], d["type"]) for d in r["dmg"]], [("1d10+2", "slashing"), ("1d6", "poison")], "two damage parts with types")
+    br = P("mm-green-dragon-wyrmling", "Poison Breath")
+    eq((br["kind"], br["save"]["ab"], br["save"]["dc"], br["succ"], br["rech"]), ("save", 2, 11, "half", "5–6"), "save, DC, half on success, recharge")
+    mu = P("mm-otyugh", "Multiattack")
+    eq([(x["names"], x["count"]) for x in mu["multi"]["refs"]], [(["Bite"], 1), (["Tentacle"], 2)], "multiattack counts")
+    sp = P("mm-archmage", "Spellcasting")
+    eq([g["per"] for g in sp["spells"]], ["At will", "2/Day each", "1/Day each"], "spell groups")
+    check("Fly" in sp["spells"][1]["list"], "per-day list")
+    eq(P("mm-archmage", "Protective Magic")["uses"], {"n": 3, "per": "Day"}, "3/Day read from the name")
+    # turn card: Rend sits inside Multiattack, not as its own card
+    c = a.mon("mm-green-dragon-wyrmling")[0]; a.pc("Hero")
+    a.e(f"S.turnId={c};ui.cardOpen=true;renderBoard()")
+    eq(a.e("document.querySelectorAll('#turn .acts2 > .a').length"), 2, "two top-level cards: Multiattack and Poison Breath")
+    check("Rend" in a.e("document.querySelector('#turn .a.multi .nest').textContent"), "Rend nested in Multiattack")
+    check("Recharge 5–6" in a.pg.inner_text('#turn'), "recharge shown as a tag")
+    a.e(f"S.stat='mm-archmage';S.statC=null;S.tab='stat';ui.drawer=true;renderDrawer()")
+    t = a.pg.inner_text('#drawer').lower(); check("2/day each" in t and "3/day" in t, "stat block shows spell groups and limits")
+    check(not a.errors, a.errors)
+
+
+@test
 def wheel_tap_to_type(b):
     a = App(b)
     m = a.mon("mm-goblin-warrior")[0]

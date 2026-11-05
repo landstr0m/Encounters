@@ -172,6 +172,12 @@ a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-
 .a{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:.95rem;background:var(--bg)}
 .a>b{font-family:var(--display);font-size:1.15rem;font-weight:700;letter-spacing:.02em;display:block}
 .a.spent{opacity:.5}
+.lim{font-family:var(--body);font-size:.68rem;font-weight:700;letter-spacing:.04em;margin-left:6px;padding:1px 6px;border-radius:999px;border:1px solid var(--line);color:var(--warn);vertical-align:2px;white-space:nowrap}.lim.lt{color:var(--muted)}
+.msum{font-weight:600;color:var(--muted);font-size:.9rem;margin-bottom:4px}
+.nest{display:grid;gap:4px;margin-top:4px;padding-left:8px;border-left:2px solid var(--accent)}.a.na{background:var(--surface);padding:4px 6px}.a.na>b{font-size:1rem}
+.a.multi.wide{grid-column:1/-1}
+.sgh{font-size:.85rem;color:var(--muted);margin-bottom:2px}.sg{margin:2px 0}.sg>b{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-right:4px}
+.sb .nest{margin:4px 0 6px;border-left-color:var(--line)}.sb .nest .sba{margin:2px 0}
 .a .tg{float:right;min-height:34px;padding:2px 10px;font-size:.8rem;font-weight:700}
 .turn details{margin-top:6px;font-size:.9rem}
 .turn summary{cursor:pointer;color:var(--muted);font-weight:600}
@@ -946,6 +952,13 @@ function short(t){
    .replace('Melee or Ranged Weapon Attack: ','Melee/ranged ').replace('Melee Weapon Attack: ','Melee ').replace('Ranged Weapon Attack: ','Ranged ')
    .replace(' to hit','').replace(', one target. Hit: ',' \u2192 ').replace(' Hit: ',' \u2192 ');
 }
+// One action card on the turn card; a Multiattack card holds the attacks it uses.
+function tcCard(c,m,p,secLab,kids,sub){
+  var txt=rawOf(m,p),sp=p.rech&&c.spent&&c.spent[p.key];
+  var body=p.kind==='multi'?'<div class="msum">'+esc(multiSum(p))+'</div>'+(kids.length?'<div class="nest">'+kids.map(function(q){return tcCard(c,m,q,'',[],1);}).join('')+'</div>':'')
+    :p.kind==='spell'?spellsHTML(p,txt):blk(rich(short(txt)));
+  return '<div class="a'+(sub?' na':'')+(sp?' spent':'')+(p.kind==='multi'?' multi'+(kids.length>1?' wide':''):'')+'">'+(p.rech?'<button class="tg" data-act="spent" data-i="'+p.key+'">'+(sp?'Spent':'Ready')+'</button>':'')+
+    '<b>'+esc(p.n)+(secLab?'<span class="sec">'+secLab+'</span>':'')+limHTML(p)+'</b>'+body+'</div>';}
 function renderTurn(){
   var el=$('#turn');
   var c=S.list.find(function(x){return x.id===S.turnId;});
@@ -978,10 +991,12 @@ function renderTurn(){
   h+=dsHTML(c);
   if(ui.cardOpen&&pb)h+=pb;
   if(ui.cardOpen&&(m||X.length)){
-    var acts=[];
-    if(m&&!c.hideBase)[['a','',m.actions],['b','Bonus',m.bonus],['r','Reaction',m.react]].forEach(function(g){(g[2]||[]).forEach(function(a,i){acts.push([g[0]+i,g[1],a]);});});
+    var acts=[],SL={a:'',b:'Bonus',r:'Reaction'};
+    if(m&&!c.hideBase){var A=actsOf(m).filter(function(p){return p.sec!=='l';}),nested={};
+      A.forEach(function(p){nestOf(A,p).forEach(function(q){nested[q.key]=1;});});
+      h+='<div class="acts2">'+A.filter(function(p){return !nested[p.key];}).map(function(p){return tcCard(c,m,p,SL[p.sec],nestOf(A,p));}).join('')+'</div>';}
     X.forEach(function(x,i){if(x.t!=='t'&&(x.n||x.d))acts.push(['x'+i,{a:'Extra',b:'Bonus · extra',r:'Reaction · extra'}[x.t]||'Extra',[x.n||'Extra',x.d||''],1]);});
-    h+='<div class="acts2">'+acts.map(function(x){
+    if(acts.length)h+='<div class="acts2">'+acts.map(function(x){
       var a=x[2],rech=/Recharge/.test(a[0]);var sp=rech&&c.spent&&c.spent[x[0]];
       return '<div class="a'+(sp?' spent':'')+'">'+(rech?'<button class="tg" data-act="spent" data-i="'+x[0]+'">'+(sp?'Spent':'Ready')+'</button>':'')+'<b>'+esc(a[0])+(x[1]?'<span class="sec'+(x[3]?' cu':'')+'">'+x[1]+'</span>':'')+'</b>'+blk(rich(short(a[1])))+'</div>';
     }).join('')+'</div>';
@@ -1193,10 +1208,14 @@ function statHTML(){
   }
   var ex=m.extra.map(function(e){return '<dt>'+esc(e[0])+'</dt><dd>'+(/^(Immune|Resist|Vulnerable)$/.test(e[0])?esc(e[1]).split(';').map(function(part,i){return i?part.replace(CNRE,'<a class="spl cnd" data-act="spl" data-n="$1">$1</a>'):part.replace(DTW,dtSpan).replace(CNRE,'<a class="spl cnd" data-act="spl" data-n="$1">$1</a>');}).join(';'):esc(e[1]))+'</dd>';}).join('');
   var tr=m.traits.map(function(t){return ent(t[0],t[1]);}).join('');
-  var sec=function(h,a){return a&&a.length?'<h3>'+h+'</h3>'+a.map(function(t){return ent(t[0],t[1]);}).join(''):'';};
+  var A=actsOf(m),nested={};A.forEach(function(p){nestOf(A,p).forEach(function(q){nested[q.key]=1;});});
+  var one=function(p,kids){var txt=rawOf(m,p),body=p.kind==='multi'?esc(multiSum(p))+(kids.length?'<div class="nest">'+kids.map(function(q){return one(q,[]);}).join('')+'</div>':'')
+      :p.kind==='spell'?spellsHTML(p,txt):p.kind==='info'?esc(txt):blk(rich(txt));
+    return '<div class="p sba"><b>'+esc(p.n)+'.</b>'+limHTML(p)+' '+body+'</div>';};
+  var sec=function(h,k){var L=A.filter(function(p){return p.sec===k&&!nested[p.key];});return L.length?'<h3>'+h+'</h3>'+L.map(function(p){return one(p,nestOf(A,p));}).join(''):'';};
   return '<div class="sb">'+cx+'<img class="thumb" src="img/'+esc(m.srcId||m.id)+'.webp" alt="" onerror="this.remove()"><h2>'+esc(m.name)+'</h2><div class="type">'+esc(m.type)+'</div>'+
    '<dl><dt>AC</dt><dd>'+esc(m.ac)+(m.acn?' ('+esc(m.acn)+')':'')+'</dd><dt>HP</dt><dd>'+esc(m.hp)+' ('+esc(m.dice)+')</dd><dt>Speed</dt><dd>'+esc(m.speed)+'</dd><dt>CR</dt><dd>'+esc(m.cr)+'</dd></dl>'+
-   '<div class="abil">'+ab+'</div><dl>'+ex+'</dl>'+(tr?'<h3>Traits</h3>'+tr:'')+sec('Actions',m.actions)+sec('Bonus actions',m.bonus)+sec('Reactions',m.react)+sec('Legendary actions',m.leg)+'</div>';
+   '<div class="abil">'+ab+'</div><dl>'+ex+'</dl>'+(tr?'<h3>Traits</h3>'+tr:'')+sec('Actions','a')+sec('Bonus actions','b')+sec('Reactions','r')+sec('Legendary actions','l')+'</div>';
 }
 function segHTML(label,key,opts){
   return '<div class="seg"><b>'+label+'</b>'+opts.map(function(o){return '<button data-act="set" data-k="'+key+'" data-v="'+o[0]+'" class="'+(S[key]===o[0]?'on':'')+'">'+o[1]+'</button>';}).join('')+'</div>';
@@ -1486,6 +1505,114 @@ function blk(h){
   return out+'</div>';
 }
 function ent(n,t){var x=blk(rich(t));return x.indexOf('<div')>=0?'<div class="p"><b>'+esc(n)+'.</b> '+x+'</div>':'<p><b>'+esc(n)+'.</b> '+x+'</p>';}
+// ================= ACTION PARSER (roadmap: tap-to-use actions, stage A) =================
+// Turns stat block entries into data: what it costs, how often it can be used, and what it does.
+// parseAct(name, text, sec) -> {n, sec, cost, rech, uses, tag, kind, atk, dmg, save, fail, succ, miss, conds, esc, cast, multi, spells, ok}
+//   sec: a action, b bonus action, r reaction, l legendary, t trait
+//   kind: atk (attack roll), save (saving throw), multi (Multiattack), spell (Spellcasting list), cast (casts one spell), info, other
+var WNUM={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,twice:2,thrice:3};
+var ABN={Strength:0,Dexterity:1,Constitution:2,Intelligence:3,Wisdom:4,Charisma:5};
+function pDmg(t){var o=[],re=/(\d+)(?: \(([^)]*\d+d\d+[^)]*)\))? (Acid|Bludgeoning|Cold|Fire|Force|Lightning|Necrotic|Piercing|Poison|Psychic|Radiant|Slashing|Thunder) damage/g,m;
+  while((m=re.exec(t)))o.push({avg:+m[1],dice:(m[2]||'').replace(/\s+/g,''),type:m[3].toLowerCase()});
+  var T2='(Acid|Bludgeoning|Cold|Fire|Force|Lightning|Necrotic|Piercing|Poison|Psychic|Radiant|Slashing|Thunder)',c2=t.match(new RegExp('(\\d+)(?: \\(([^)]*\\d+d\\d+[^)]*)\\))? '+T2+' or '+T2+' damage'));   // "Necrotic or Radiant damage (its choice)"
+  if(c2)o.push({avg:+c2[1],dice:(c2[2]||'').replace(/\s+/g,''),type:'',choice:[c2[3].toLowerCase(),c2[4].toLowerCase()]});
+  var ch=t.match(/(\d+)(?: \(([^)]*\d+d\d+[^)]*)\))? damage of a type chosen by [^:]*:\s*([^.]*)/);   // "22 (4d10) damage of a type chosen by the cultist: Acid, Cold, …"
+  if(ch)o.push({avg:+ch[1],dice:(ch[2]||'').replace(/\s+/g,''),type:'',choice:ch[3].toLowerCase().replace(/\bor\b/g,'').split(/[,\s]+/).filter(function(x){return DTYPES.indexOf(x)>=0;})});
+  return o;}
+function pConds(t){var o=[];(t.match(/\b(Blinded|Charmed|Deafened|Frightened|Grappled|Incapacitated|Invisible|Paralyzed|Petrified|Poisoned|Prone|Restrained|Stunned|Unconscious)\b/g)||[]).forEach(function(x){if(o.indexOf(x)<0)o.push(x);});
+  if(/Exhaustion level/i.test(t)&&o.indexOf('Exhaustion')<0)o.push('Exhaustion');return o;}
+function pSpells(t){
+  // "At Will: A, B 2/Day Each: C 1/Day: D" -> [{per:'At will',n:0,list:[...]}, {per:'2/Day each',n:2,list:[...]}]
+  var g=[],re=/(At Will|(\d+)\/Day(?: Each)?):\s*/gi,m,cuts=[];
+  while((m=re.exec(t)))cuts.push([m.index,re.lastIndex,m[1],m[2]]);
+  cuts.forEach(function(c,i){var body=t.slice(c[1],i+1<cuts.length?cuts[i+1][0]:t.length).trim().replace(/\.$/,'');
+    var list=[],depth=0,cur='';for(var k=0;k<body.length;k++){var ch=body[k];if(ch==='(')depth++;if(ch===')')depth--;if(ch===','&&!depth){list.push(cur.trim());cur='';}else cur+=ch;}if(cur.trim())list.push(cur.trim());
+    g.push({per:/at will/i.test(c[2])?'At will':c[3]+'/Day'+(/each/i.test(c[2])?' each':''),n:c[3]?+c[3]:0,list:list});});
+  return g;}
+function parseAct(name,text,sec,others){
+  var t=String(text||''),n=String(name||''),p={raw:n,n:n,sec:sec||'a',cost:sec==='l'?1:0,rech:null,uses:null,tag:'',kind:'other',dmg:[],conds:[],ok:true};
+  var paren=n.match(/\s*\(([^)]*)\)\s*$/);
+  if(paren){var q=paren[1],r;
+    if((r=q.match(/^Recharge (\d)(?:-6)?$/i)))p.rech=r[1]==='6'?'6':r[1]+'–6';
+    else if(/^Recharge after a (Short or )?Long Rest$/i.test(q))p.rech='rest';
+    else if((r=q.match(/^(\d+)\/Day$/i)))p.uses={n:+r[1],per:'Day'};
+    else if((r=q.match(/^Costs? (\d) Actions?$/i)))p.cost=+r[1];
+    else p.tag=q;
+    if(p.rech||p.uses||(sec==='l'&&/^Costs?/i.test(q))||p.tag)p.n=n.slice(0,paren.index).trim();}
+  if(sec==='l'&&/can't take this action again until the start of its next turn|can’t take this action again until the start of its next turn/i.test(t))p.once=true;
+  if(/^Legendary Action Uses$/i.test(p.n)){p.kind='info';var lu=t.match(/^(\d+)(?: \((\d+) in Lair\))?/);if(lu){p.la=+lu[1];p.lair=lu[2]?+lu[2]:null;}return p;}
+  var am=t.match(/^(Melee or Ranged|Melee|Ranged) (?:Attack Roll|Weapon Attack|Spell Attack):\s*([+−-]\d+)(?:,\s*(?:reach (\d+) ft\.)?(?: or )?(?:range ([\d/]+) ft\.)?)?/i);
+  var sm=t.match(/^(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) Saving Throw:\s*DC (\d+)(?:,\s*([^.]*))?/);
+  if(/^Multiattack/i.test(p.n)){p.kind='multi';p.multi=pMulti(t,others||[]);p.ok=p.multi.refs.length>0;return p;}
+  if(/^Spellcasting/i.test(p.n)){p.kind='spell';p.spells=pSpells(t);var dc=t.match(/spell save DC (\d+)/);if(dc)p.dc=+dc[1];var ab2=t.match(/\(([+−-]\d+) to hit with spell attacks\)/);if(ab2)p.sat=+ab2[1].replace('−','-');
+    if(!p.spells.length){var c1=t.match(/casts ([A-Z][\w’' ]+?)(?: \(|,| twice| once|$)/);if(c1)p.spells=[{per:'',n:0,list:[c1[1].trim()]}];}
+    p.ok=p.spells.length>0;return p;}
+  if(am){p.kind='atk';p.atk={type:am[1].toLowerCase(),bonus:+am[2].replace('−','-'),reach:am[3]?+am[3]:null,range:am[4]||null};
+    var hit=(t.split(/Hit:/)[1]||'').split(/Miss:|Hit or Miss:/)[0];p.dmg=pDmg(hit);p.conds=pConds(hit);
+    var mi=t.match(/(?:Miss|Hit or Miss):\s*([^]*)$/);if(mi){p.miss=mi[1].trim();p.missDmg=pDmg(p.miss);}
+    var e=hit.match(/escape DC (\d+)/i);if(e)p.esc=+e[1];
+    var hs=hit.match(/(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) Saving Throw:? DC (\d+)|DC (\d+) (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) saving throw/);
+    if(hs)p.rider={ab:ABN[hs[1]||hs[4]],dc:+(hs[2]||hs[3])};
+    p.ok=p.dmg.length>0||p.conds.length>0;if(p.ok&&!p.dmg.length)p.textOnly=true;return p;}
+  if(sm){p.kind='save';p.save={ab:ABN[sm[1]],dc:+sm[2],area:(sm[3]||'').trim()};
+    var fl=t.match(/(?:First )?Failure(?: or Success)?:\s*([^]*?)(?=(?:Success|Failure|First Failure|Second Failure):|$)/);
+    var sc=t.match(/(?:^|[.\s])Success:\s*([^]*?)(?=(?:Failure|First Failure|Second Failure):|$)/);
+    var both=t.match(/Failure or Success:\s*([^]*?)(?=(?:Failure|Success):|$)/);
+    var ft=fl?fl[1]:'';p.fail={dmg:pDmg(ft),conds:pConds(ft)};
+    p.succ=sc?(/^Half damage/i.test(sc[1].trim())?'half':sc[1].trim()):null;
+    if(both)p.both=both[1].trim();
+    p.dmg=p.fail.dmg;p.conds=p.fail.conds;
+    p.ok=!!fl||!!both;if(!p.dmg.length&&!p.conds.length)p.textOnly=true;return p;}
+  var cs=t.match(/\bcasts ([A-Z][A-Za-z’' ]+?)(?: \(level \d+ version\))?(?:,| on | in | or |\.| requiring| using|$)/);
+  if(cs){p.kind='cast';p.cast=[cs[1].trim()];var or=t.match(/\bcasts [A-Z][A-Za-z’' ]+? or ([A-Z][A-Za-z’' ]+?)(?: in |,|\.| requiring)/);if(or)p.cast.push(or[1].trim());}
+  p.dmg=pDmg(t);p.conds=pConds(t);
+  var sv2=t.match(/(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) Saving Throw:? DC (\d+)|DC (\d+) (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) saving throw/);
+  if(sv2)p.rider={ab:ABN[sv2[1]||sv2[4]],dc:+(sv2[2]||sv2[3])};
+  return p;}
+// Multiattack: which actions it uses and how many times. refs = [{name, count, any}] in text order.
+function pMulti(t,others){
+  var names=others.map(function(o){return o.n;}).filter(function(x){return x&&!/^Multiattack/i.test(x);}).sort(function(a,b){return b.length-a.length;});
+  var refs=[],low=t,seen={},blank=function(a,b){low=low.slice(0,a)+Array(b-a+1).join('#')+low.slice(b);};
+  var anyM=t.match(/makes (\w+) attacks?,? using ([^.]*?) in any combination/i);
+  if(anyM){var k=WNUM[anyM[1].toLowerCase()]||+anyM[1]||1,set=names.filter(function(x){return anyM[2].indexOf(x)>=0;}).sort(function(a,b){return anyM[2].indexOf(a)-anyM[2].indexOf(b);});
+    if(set.length){refs.push({names:set,count:k,any:true,at:anyM.index,end:anyM.index+anyM[0].length});set.forEach(function(x){seen[x]=1;});blank(anyM.index,anyM.index+anyM[0].length);}}
+  names.forEach(function(x){if(seen[x])return;var i=low.indexOf(x);if(i<0)return;
+    var bef=low.slice(Math.max(0,i-14),i),cm=bef.match(/(\w+) $/),w=cm&&cm[1].toLowerCase(),cnt=WNUM[w]&&w!=='twice'?WNUM[w]:(cm&&/^\d+$/.test(cm[1])?+cm[1]:1);
+    var aft=t.slice(i+x.length,i+x.length+14),end=i+x.length;if(/^ twice/.test(aft))cnt=2;else if(/^ three times/.test(aft))cnt=3;
+    var am=aft.match(/^ attacks?/);if(am)end+=am[0].length;
+    var sent=t.slice(0,i).split(/\.\s/).pop();
+    refs.push({names:[x],count:cnt,at:i,end:end,rep:/\breplace\b[^.]*\bwith\b/i.test(sent),opt:/if available/i.test(t.slice(i,i+x.length+40).split(/\./)[0])||/\bcan use\b/i.test(sent.slice(-40))});seen[x]=1;blank(i,i+x.length);});
+  if(/use Spellcasting|uses Spellcasting|Spellcasting to cast/i.test(t)&&!seen.Spellcasting){var si=t.indexOf('Spellcasting');refs.push({names:['Spellcasting'],count:1,at:si,end:si+12,rep:/replace/i.test(t),opt:true});}
+  refs.sort(function(a,b){return a.at-b.at;});
+  // "X or Y", "X, Y, or Z", "… attacks, or it makes three …": alternatives to the previous entry
+  for(var r=1;r<refs.length;r++){var gap=t.slice(refs[r-1].end,refs[r].at);if(!refs[r].rep&&/(^|\s|,)or\b/.test(gap)&&!/[.]/.test(gap)||/^,\s*$/.test(gap)&&/,? or /.test(t.slice(refs[r].end,refs[r].end+60))&&r+1<refs.length)refs[r].alt=true;}
+  refs.forEach(function(r){delete r.at;delete r.end;});
+  return {refs:refs,text:t};}
+// Parsed entries per monster (cached on the monster object)
+function actsOf(m){if(m._acts)return m._acts;var all=[];
+  [['a',m.actions],['b',m.bonus],['r',m.react],['l',m.leg]].forEach(function(g){(g[1]||[]).forEach(function(e,i){all.push({sec:g[0],i:i,e:e});});});
+  var base=all.map(function(x){return {n:x.e[0].replace(/\s*\([^)]*\)\s*$/,'')};});
+  m._acts=all.map(function(x){var p=parseAct(x.e[0],x.e[1],x.sec,base);p.i=x.i;p.key=x.sec+x.i;return p;});
+  return m._acts;}
+// ---- Stage B: cards built from the parsed actions (turn card and stat block share these) ----
+var SECF={a:'actions',b:'bonus',r:'react',l:'leg'};
+function rawOf(m,p){return ((m[SECF[p.sec]]||[])[p.i]||['',''])[1];}
+function limHTML(p){var h='';
+  if(p.uses)h+='<span class="lim">'+p.uses.n+'/Day</span>';
+  if(p.rech)h+='<span class="lim">'+(p.rech==='rest'?'Recharge on rest':'Recharge '+p.rech)+'</span>';
+  if(p.cost>1)h+='<span class="lim">Costs '+p.cost+'</span>';
+  if(p.once)h+='<span class="lim">Once per round</span>';
+  if(p.tag)h+='<span class="lim lt">'+esc(p.tag)+'</span>';
+  return h;}
+function spellsHTML(p,txt){
+  if(!p.spells.length||p.spells.some(function(g){return !g.per;}))return blk(rich(txt));
+  var lk=function(l){return rich('cast: '+l.join(', ')).slice(6);};
+  return (p.dc||p.sat!=null?'<div class="sgh">'+(p.dc?'Spell save <span class="dcx">DC '+p.dc+'</span>':'')+(p.sat!=null?' \u00b7 <span class="hit">'+sgn(p.sat)+'</span> to hit':'')+'</div>':'')+
+    p.spells.map(function(g){return '<div class="sg"><b>'+esc(g.per)+'</b> '+lk(g.list)+'</div>';}).join('');}
+// Which actions a Multiattack nests (its referenced actions in the same section, except Spellcasting)
+function nestOf(A,p){var out=[];if(p.kind!=='multi')return out;p.multi.refs.forEach(function(r){r.names.forEach(function(n){var q=A.find(function(x){return x.sec===p.sec&&x.n===n&&x.kind!=='multi'&&x.kind!=='spell';});if(q&&out.indexOf(q)<0)out.push(q);});});return out;}
+function multiSum(p){return p.multi.refs.map(function(r,i){var x=(r.any?r.count+'× '+r.names.join(' or '):(r.count>1?r.count+'× ':'')+r.names[0]);
+  return (i?(r.alt||(r.rep&&p.multi.refs[i-1].rep)?' or ':r.rep?' · can replace one with ':' + '):'')+x+(r.opt&&!r.rep&&!r.alt?' (if available)':'');}).join('');}
 function openSpell(n){if(!ui.refBack)ui.refBack=ui.drawer?S.tab:'close';ui.drawer=true;S.tab='ref';ui.ref=n;}
 var LVN=['Cantrip','1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
 function refHTML(){

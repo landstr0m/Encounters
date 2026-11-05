@@ -2,6 +2,12 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-05 — Action parser and nested cards (roadmap stages A and B)
+
+- `parseAct()` reads attacks (bonus, reach/range, damage parts with types, chosen-type damage, miss effects, riders, escape DC), saves (ability, DC, area, failure damage and conditions, half on success), Multiattack (counts, "in any combination", alternatives, "can replace one attack with"), Spellcasting (At will / X/Day each) and limits from the name (Recharge, X/Day, form-only tags). `tools/check_actions.py`: 503/503 monsters, 307/307 Multiattacks resolved.
+- Known rough edges in Multiattack summaries: Clay Golem reads "2× Slam or Hasten" (the text means three Slams after Hasten); Aboleth's "(if available)" sits on the first of its two options.
+- The nested card's class `sub` clashed with the Add tab's `.sub` (flex row); renamed `na`.
+
 ## 2026-11-05 — Concentration with no targets left
 
 - Targeted spells (Hold Person/Monster, Hypnotic Pattern, Slow, Faerie Fire, Bane, Compelled Duel, Dominate ×3, Banishment, Polymorph, Crown of Madness, Hideous Laughter, Irresistible Dance, Phantasmal Killer, Ray of Enfeeblement, Flesh to Stone, Confusion, Fear, Sleep): when the last linked target is free, a prompt offers to end the caster's concentration. Not automatic, because the linked caster is whoever's turn it was (a readied spell links to the wrong creature) and targets may be off the board.
