@@ -123,7 +123,7 @@ Score 0–5 against popular trackers (D&D Beyond Encounter Builder, Improved Ini
 | Character import | 3 | 4 | Kanka + D&D Beyond; links found in Kanka descriptions import automatically (name/class checked) |
 | Player view on another device | 2 | 3 | Table view line added; still same browser only |
 | Combat log / session record | – | 4 | Per encounter, downloadable; not yet fed into reports |
-| Backup / restore | 3 | 4 | One file with everything incl. monster files; still manual |
+| Backup / restore | – | 4 | One file with everything incl. monster files; still manual |
 | Cross-device sync / cloud save | 0 | 0 | Manual Export/Import (network stage) |
 | Dice roller | 0 | n/a | Deliberately absent: dice are physical |
 | Maps / tokens | 0 | n/a | Out of scope for in-person play |
