@@ -1404,6 +1404,8 @@ def condition_links_inline(b):
     a = App(b)
     a.e("S.tab='stat';S.stat='mm-ghast';ui.drawer=true;renderDrawer()")
     eq(a.e("getComputedStyle(document.querySelector('#drawer a.spl.cnd')).display"), "inline", "condition links stay inline")
+    m = a.mon("mm-archmage")[0]; a.e(f"S.turnId={m};ui.cardOpen=true;renderBoard()")
+    eq(a.e("getComputedStyle(document.querySelector('#turn .sg .spc')).display"), "block", "one castable spell per line")
 
 
 def main():
