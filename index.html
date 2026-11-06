@@ -188,6 +188,7 @@ a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-
 .acth{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:.92rem}.acth button{min-height:36px}
 .rid{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0}.rid label{display:flex;gap:6px;align-items:center;border:1px dashed var(--accent);border-radius:8px;padding:2px 6px}.rid input{width:3em;min-height:34px;text-align:center;font:inherit}
 .ptag{display:inline-block;font-size:.75rem;border:1px solid var(--accent);border-radius:9px;padding:0 6px;margin:2px 4px 0 0}.pgrp button.on{outline:2px solid var(--accent)}
+.dtop .segs{display:flex;flex-wrap:wrap;gap:4px 12px}.dtop .segs>*{flex:1 1 300px;margin:0}.dtop .segs button{white-space:nowrap}.row.upd{align-items:center}.row.upd>button{flex:1}.dtop .search{margin:4px 0}
 .fxt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px}.fxt button{min-height:36px}.fxs{display:inline-flex;gap:2px}
 .data h3{margin:14px 0 4px;border-bottom:1px solid var(--line,#8884);padding-bottom:2px}
 .acth>.aslot{flex:0 0 auto;display:flex;gap:4px;align-items:center}.aslot button{min-width:36px;padding:0}
@@ -1602,7 +1603,22 @@ function encSumHTML(){
    (F.length?'<span class="ec">⚡ '+F.length+'</span>':'')+'</div>';
 }
 function addTopHTML(){
-  return '<div class="sub"><button data-act="sub" data-s="monsters" class="'+(S.sub==='monsters'?'on':'')+'">Monsters</button><button data-act="sub" data-s="party" class="'+(S.sub==='party'?'on':'')+'">Party</button><button data-act="sub" data-s="effects" class="'+(S.sub==='effects'?'on':'')+'">Effects</button></div>'+encSumHTML();
+  return '<div class="sub"><button data-act="sub" data-s="monsters" class="'+(S.sub==='monsters'?'on':'')+'">Monsters</button><button data-act="sub" data-s="party" class="'+(S.sub==='party'?'on':'')+'">Party</button><button data-act="sub" data-s="effects" class="'+(S.sub==='effects'?'on':'')+'">Effects</button></div>'+encSumHTML()+
+   // controls that stay put while scrolling the list below (DM changes them while adding)
+   (S.sub==='monsters'?'<div class="segs">'+segHTML('Initiative','initMode',[['each','Roll each'],['group','One per group']])+segHTML('Hit points','hpMode',[['roll','Roll HD'],['avg','Average']])+'</div>'+
+     '<input class="search" id="search" type="search" placeholder="Search monsters" value="'+esc(ui.q)+'" aria-label="Search monsters">'+filtHTML()
+   :S.sub==='party'?partyTopHTML():'');
+}
+function partyTopHTML(){
+  var q=(ui.pq||'').trim().toLowerCase(),nd=S.lib.filter(khpDiff).length;
+  var inE=function(l){return S.list.some(function(c){return c.libId===l.id;});};
+  // Groups / tags (l.tags): one character can be in several (campaigns, parties, guest lists); ui.pg filters, '-' = untagged
+  var G={};S.lib.forEach(function(l){(l.tags||[]).forEach(function(t){G[t]=(G[t]||0)+1;});});var gk=Object.keys(G).sort(),pg=ui.pg&&(ui.pg==='-'||G[ui.pg])?ui.pg:'';
+  return '<div class="row upd"><b>Update from</b><button data-act="kanka">Kanka</button><button data-act="ddb">D&amp;D Beyond</button>'+(nd?'<button data-act="usekhp" data-l="all">Use Kanka HP for all ('+nd+')</button>':'')+'</div>'+
+   (gk.length?'<div class="fxt pgrp"><b>Groups</b> <button class="'+(pg?'':'on')+'" data-act="pgrp" data-g="">All</button>'+gk.map(function(t){return '<button class="'+(pg===t?'on':'')+'" data-act="pgrp" data-g="'+esc(t)+'">'+esc(t)+' <small>'+G[t]+'</small></button>';}).join('')+'<button class="'+(pg==='-'?'on':'')+'" data-act="pgrp" data-g="-">No group</button>'+
+     (pg&&pg!=='-'?'<button data-act="pgtick" title="Tick everyone in this group">Tick all in '+esc(pg)+'</button>':'')+'</div>':'')+
+   '<datalist id="tagdl">'+gk.map(function(t){return '<option value="'+esc(t)+'">';}).join('')+'</datalist>'+
+   '<input class="search" id="pq" type="search" placeholder="Search '+S.lib.length+' characters" value="'+esc(ui.pq||'')+'" aria-label="Search characters">'+(ui.msg?'<div class="msg" role="status">'+esc(ui.msg)+'</div>':'');
 }
 function partyHTML(){
   var q=(ui.pq||'').trim().toLowerCase(),nd=S.lib.filter(khpDiff).length;
@@ -1620,22 +1636,17 @@ function partyHTML(){
       '<button class="x" data-act="dellib" data-l="'+l.id+'" aria-label="Delete '+esc(l.name)+' from library">×</button></div>'+
       (ui.tagL===l.id?'<div class="row"><input data-tg="'+l.id+'" type="text" list="tagdl" placeholder="Groups, comma separated, e.g. Blackrock, Guests" value="'+esc((l.tags||[]).join(', '))+'" aria-label="Groups for '+esc(l.name)+'"></div>':'');};
   var tk=S.lib.filter(function(l){return S.atTable[l.id]&&!inE(l);});
-  return mergeHTML()+'<div class="row"><button data-act="kanka" style="flex:1">Update from Kanka</button><button data-act="ddb" style="flex:1">Update from D&amp;D Beyond</button>'+(nd?'<button data-act="usekhp" data-l="all">Use Kanka HP for all ('+nd+')</button>':'')+'</div>'+
-   (gk.length?'<div class="fxt pgrp"><b>Groups</b> <button class="'+(pg?'':'on')+'" data-act="pgrp" data-g="">All</button>'+gk.map(function(t){return '<button class="'+(pg===t?'on':'')+'" data-act="pgrp" data-g="'+esc(t)+'">'+esc(t)+' <small>'+G[t]+'</small></button>';}).join('')+'<button class="'+(pg==='-'?'on':'')+'" data-act="pgrp" data-g="-">No group</button>'+
-     (pg&&pg!=='-'?'<button data-act="pgtick" title="Tick everyone in this group">Tick all in '+esc(pg)+'</button>':'')+'</div>':'')+
-   '<datalist id="tagdl">'+gk.map(function(t){return '<option value="'+esc(t)+'">';}).join('')+'</datalist>'+
-   '<input class="search" id="pq" type="search" placeholder="Search '+S.lib.length+' characters" value="'+esc(ui.pq||'')+'" aria-label="Search characters">'+
+  return mergeHTML()+
    '<div id="plist">'+(L.map(row).join('')||'<p class="muted">No character matches.</p>')+'</div>'+
    '<div class="row"><input id="newchar" type="text" placeholder="Name (optional: , AC 15, HP 28, init +3, lvl 2)" aria-label="New character"><button data-act="newchar">Save</button></div>'+
-   '<div class="msg">'+esc(ui.msg||'Saved characters are reused every session. Tick who is at the table today.')+'</div>'+
+   '<div class="msg">Saved characters are reused every session. Tick who is at the table today.</div>'+
    (S.lib.length?'<div class="row"><button class="danger'+(ui.confirmLib?' armed':'')+'" data-act="libclear" style="flex:1">'+(ui.confirmLib?'Tap again: delete all '+S.lib.length+' saved characters (Update from Kanka reloads them; hand-set AC/HP are lost)':'Delete all saved characters…')+'</button></div>':'')+
    '<div class="dfoot"><button class="add" data-act="addparty" style="flex:1"'+(tk.length?'':' disabled')+'>'+(tk.length?'Add '+tk.length+' ticked: '+esc(tk.map(function(l){return l.name;}).join(', ')):'Tick characters to add')+'</button>'+(tk.length?'<button data-act="untick">Untick all</button>':'')+'</div>';
 }
 function addPanelHTML(){
   var h='';
   if(S.sub==='monsters'){
-    h+=segHTML('Initiative','initMode',[['each','Roll each'],['group','One per group']])+segHTML('Hit points','hpMode',[['roll','Roll HD'],['avg','Average']]);
-    h+='<input class="search" id="search" type="search" placeholder="Search monsters" value="'+esc(ui.q)+'" aria-label="Search monsters">'+filtHTML()+'<div id="results">'+resultsHTML()+'</div>';
+    h+='<div id="results">'+resultsHTML()+'</div>';
   }else if(S.sub==='effects'){
     h+=fxPanelHTML();
   }else{

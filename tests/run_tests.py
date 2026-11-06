@@ -1394,6 +1394,8 @@ def party_groups(b):
     eq(a.e("document.querySelectorAll('#plist [data-act=at]').length"), 2, "filtered to group")
     a.click('[data-act="pgtick"]'); eq(a.j("[S.atTable.l1,S.atTable.l2,!!S.atTable.l3]"), [True, True, False], "tick whole group")
     a.click('[data-act="pgrp"][data-g="-"]'); eq(a.e("document.querySelectorAll('#plist [data-act=at]').length"), 1, "no-group filter")
+    check(a.e("!!document.querySelector('.dtop #pq') && !!document.querySelector('.dtop [data-act=kanka]')"), "party controls in the sticky top")
+    a.e("S.sub='monsters';renderDrawer()"); check(a.e("!!document.querySelector('.dtop #search') && !!document.querySelector('.dtop [data-k=initMode], .dtop .segs')"), "monster controls in the sticky top")
     check(not a.errors, a.errors)
 
 
