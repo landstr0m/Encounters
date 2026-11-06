@@ -2,6 +2,10 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Initiative box
+
+- Box was far wider than needed; now ~44 px. Placeholder shows the bonus only ("+3", was "d20+3"). Input capped to two characters and clamped to −4…49 (2024 rules range).
+
 ## 2026-11-06 — Row clean-up, pad chips, code review
 
 - Red box around the current creature's row (and not others): the row's `turn` class also matched the turn card's `.turn` style (border, padding, max-height, scroll). Row class renamed `isturn`; row tint now on the row, not per cell (patchy blocks on phones).

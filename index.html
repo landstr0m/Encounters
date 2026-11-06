@@ -101,14 +101,14 @@ button.danger.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
   .tok{width:96px;min-height:72px}.tok .nm{font-size:.95rem}.tok .in{font-size:1.2rem}
   .tw #tbl,.tw #tbl tbody{display:block;min-width:0;width:100%}
   tr.grp{display:block}tr.grp th{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
-  tr.r{display:grid;grid-template-columns:64px minmax(0,1fr) 92px;grid-template-areas:"in nm ic" "ac hp hp";align-items:center;column-gap:8px;row-gap:2px;padding:8px 8px 10px;border-top:1px solid var(--line)}
+  tr.r{display:grid;grid-template-columns:48px minmax(0,1fr) 92px;grid-template-areas:"in nm ic" "ac hp hp";align-items:center;column-gap:8px;row-gap:2px;padding:8px 8px 10px;border-top:1px solid var(--line)}
   .tw tr.r td{border-top:0;display:block;width:auto;padding:2px 0;background:none}
   tr.r .num{width:100%}tr.r.isturn{box-shadow:inset 4px 0 0 var(--accent)}tr.r.isturn td:first-child{box-shadow:none}tr.r.sel{box-shadow:inset -4px 0 0 var(--ok)}tr.r.isturn.sel{box-shadow:inset 4px 0 0 var(--accent),inset -4px 0 0 var(--ok)}tr.r.sel td:last-child{box-shadow:none}
   tr.r td.c-in{grid-area:in}tr.r td:nth-child(2){grid-area:nm}tr.r td.c-ac{grid-area:ac;width:auto}tr.r td.c-hp{grid-area:hp;width:auto}tr.r td.c-i{grid-area:ic}
   tr.r.fxr{grid-template-areas:"in nm nm"}tr.r.fxr td:nth-child(2){grid-column:2/4}
   tr.r td.c-hp .hpnum{gap:4px}
   .name{font-size:1.15rem}
-  .num{width:46px}
+  .num{width:42px}
   .lib .meta{font-size:.78rem}
 }
 /* Tablet and up: toolbar always on one line. Main labels stay; End combat and Undo are icon-only on every screen
@@ -245,7 +245,8 @@ tr.r.sel td:last-child{box-shadow:inset -4px 0 0 var(--ok)}
 tr.r.down{opacity:.8}
 tr.dead td{font-size:.85rem;color:var(--muted);padding:4px 8px;border-top:1px solid var(--line)}
 tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 0}
-.c-in,.c-ac{width:66px;text-align:center}
+.c-in{width:52px;text-align:center}.c-ac{width:66px;text-align:center}
+.num::-webkit-inner-spin-button,.num::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .acb{min-height:46px;min-width:48px;width:max-content;margin:0 auto;display:flex;align-items:center;justify-content:center;border:0;padding:0 8px 6px;background:no-repeat center/100% 100% url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 46' preserveAspectRatio='none'%3E%3Cpath d='M20 2 L37 8 V22 C37 33 29 40 20 44 C11 40 3 33 3 22 V8 Z' fill='%2394a3b822' stroke='%2394a3b8' stroke-width='2'/%3E%3C/svg%3E");font-family:var(--display);font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums;}
 .acb s,.acp s{font-size:.7em;color:var(--muted);margin-left:4px;font-weight:400}.acb .em,.acp .em{color:var(--accent)}.acb .em.up,.acp .em.up{color:var(--ok)}.acb .em.dn,.acp .em.dn{color:var(--bad)}
 .off{display:flex;flex-wrap:wrap;gap:4px;margin:3px 0;align-items:center}
@@ -261,7 +262,7 @@ tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 
 .a.pcs .sv{font-size:1rem;margin:2px 6px 2px 0}
 .c-hp{width:170px}
 .c-i{width:92px;white-space:nowrap;text-align:right}
-.num{width:54px;text-align:center;font-family:var(--display);font-size:1.3rem;font-weight:700;padding:0;min-height:40px}
+.num{width:44px;text-align:center;-moz-appearance:textfield;font-family:var(--display);font-size:1.3rem;font-weight:700;padding:0;min-height:40px}
 .name{font-family:var(--display);font-size:1.35rem;font-weight:600;line-height:1.1;overflow-wrap:anywhere}
 .tag{margin-left:6px;font-size:.7rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-weight:600}
 .conds{display:flex;flex-wrap:wrap;gap:4px}
@@ -1375,9 +1376,9 @@ function rowHTML(c){
   var pcDead=isPcDead(c);
   var down=c.hp<=0||pcDead;
   var chips=c.conds.map(function(x){var k=c.cc&&c.cc[x]!=null?findC(c.cc[x]):null;return '<button class="chip" data-act="cond" data-c="'+esc(x)+'" title="'+esc(FX[x]||x)+' (tap to remove)">'+esc(nm(x))+(k&&k.id!==c.id?' <small>('+esc(k.name)+')</small>':'')+(x==='Grappled'&&c.gb!=null&&findC(c.gb)?' <small>('+(c.gdc?'escape DC '+c.gdc+', ':'')+esc(findC(c.gb).name)+')</small>':'')+' ×</button>';}).join('');
-  var ph=c.kind==='pc'&&c.ib!=null?'d20'+sgn(c.ib):'—';
+  var ph=c.kind==='pc'&&c.ib!=null?sgn(c.ib):'—';
   return '<tr class="r'+(c.id===S.turnId?' isturn':'')+(down?' down':'')+(ui.sel[c.id]?' sel':'')+'" data-id="'+c.id+'">'+
-   '<td class="c-in"><input class="num" type="number" inputmode="numeric" data-act="init" placeholder="'+esc(ph)+'" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
+   '<td class="c-in"><input class="num" type="number" min="-4" max="49" step="1" data-act="init" placeholder="'+esc(ph)+'" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
    '<td><span class="name">'+esc(c.name)+'</span>'+(c.kind==='pc'?'':'<span class="tag">CR '+esc(c.cr)+'</span>')+(ui.sv>=0?(saveOf(c,ui.sv)||''):'')+offHTML(c)+'<div class="conds">'+chips+'</div>'+(ui.sel[c.id]?fxHTML(c):'')+'</td>'+
    '<td class="c-ac"><span class="acb" role="img" title="Current AC'+(effAC(c)!==+c.ac?' (base '+c.ac+'; ✎ to change)':'')+'" aria-label="AC '+effAC(c)+'">'+(effAC(c)!==+c.ac?'<b class="'+acCls(c)+'">'+effAC(c)+'</b>':''+effAC(c))+'</span></td>'+
    '<td class="c-hp"><div class="hpnum"><span class="cur">'+c.hp+'</span><span class="max">/ '+c.max+'</span>'+(c.base!=null?'<span class="mred">max \u2212'+(c.base-c.max)+'</span>':'')+(c.temp>0?'<span class="temp">+'+c.temp+'</span>':'')+(down?'<span class="state">'+(pcDead?'Dead':'Down')+'</span>':'')+'</div>'+
@@ -1386,7 +1387,7 @@ function rowHTML(c){
   '</tr>';
 }
 function fxRow(c){
-  return '<tr class="r fxr'+(c.id===S.turnId?' isturn':'')+'" data-id="'+c.id+'"><td class="c-in"><input class="num" type="number" inputmode="numeric" data-act="init" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
+  return '<tr class="r fxr'+(c.id===S.turnId?' isturn':'')+'" data-id="'+c.id+'"><td class="c-in"><input class="num" type="number" min="-4" max="49" step="1" data-act="init" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
    '<td colspan="4"><span class="name">'+esc(c.name)+'</span><span class="tag">Effect</span>'+(c.desc?'<div class="fx" style="margin-top:2px">'+esc(c.desc)+'</div>':'')+
    '<div class="dsb" style="margin-top:4px"><button data-act="fxvis">'+(c.vis?'Visible to players':'Hidden from players')+'</button><button data-act="fxrm">Remove</button></div></td></tr>';
 }
@@ -2223,11 +2224,15 @@ $('#tbl').addEventListener('click',function(e){
   if(ui.drawer&&S.tab==='stat'){statPick();save();renderDrawer();}
   renderTable();renderStrip();renderPad();
 });
+// Initiative: 2024 rules keep it between -4 (Dex 1, no bonus) and below 50; at most two characters ("12", "-3")
+function initClamp(v){return Math.max(-4,Math.min(49,v));}
+$('#tbl').addEventListener('input',function(e){var t=e.target;if(t.dataset.act!=='init')return;
+  var m=String(t.value).match(/^-?\d{0,2}/),k=m?m[0]:'';if(/^-\d{2}/.test(k))k=k.slice(0,2);if(k!==String(t.value))t.value=k;});
 $('#tbl').addEventListener('change',function(e){
   var t=e.target,act=t.dataset.act;if(act!=='init'&&act!=='ac')return;
   var row=t.closest('tr.r');var c=findC(row.dataset.id);if(!c)return;
   var v=t.value===''?null:Math.floor(+t.value);
-  if(act==='init'){c.init=v;delete c.grp;}
+  if(act==='init'){if(v!=null){v=initClamp(v);t.value=v;}c.init=v;delete c.grp;}
   else if(v!=null&&v>=0){c.ac=v;}
   save();renderBoard();
 });

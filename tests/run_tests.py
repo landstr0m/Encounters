@@ -1488,6 +1488,20 @@ def pad_selection_chips(b):
     check(not a.errors, a.errors)
 
 
+@test
+def initiative_box_limits(b):
+    a = App(b)
+    p = a.pc("Aer")
+    a.e(f"S.lib.forEach(function(l){{l.ib=3}});var c=findC({p});c.ib=3;c.init=null;renderBoard()")
+    sel = f'tr[data-id="{p}"] [data-act="init"]'
+    eq(a.pg.get_attribute(sel, "placeholder"), "+3", "placeholder is the bonus only")
+    for typed, want in (("123", 12), ("-12", -1), ("-9", -4), ("75", 49), ("7", 7)):
+        a.pg.fill(sel, ""); a.pg.type(sel, typed); a.pg.press(sel, "Tab")
+        eq(a.e(f"findC({p}).init"), want, f"typed {typed}")
+    w = a.e(f"document.querySelector('{sel}').getBoundingClientRect().width")
+    check(w <= 48, f"initiative box is narrow ({w}px)")
+
+
 def main():
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def log_message(self, *a):
