@@ -2,6 +2,12 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Parchment / Dark dungeon theme
+
+- New look: parchment (light) and dark dungeon (dark) tokens, Cormorant Garamond display font (lining, tabular numerals forced so HP reads cleanly).
+- Wider display font pushed the phone toolbar's armed "Tap again to clear" onto two lines at 320 px; round label tightened on phones.
+- New standard tests: core-control visibility on three screen sizes in both themes, plus contrast.
+
 ## 2026-11-06 — Condition and spell links broke lines
 
 - Stat block condition / spell links (`a.spl`) rendered as flex boxes, so each sat on its own line with orphaned commas. Cause: the player spell list container's `.spl{display:flex}` also matched the links; now scoped to `div.spl`. Castable spells (with ▸ or use diamonds) are now one per line on purpose (`.sg .spc` block, no joining commas); spells named in running text stay inline.

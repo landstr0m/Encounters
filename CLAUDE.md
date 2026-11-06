@@ -12,6 +12,7 @@
 - **Every change:** run `python tests/run_tests.py` (all must pass), add a test for new features, bump `CACHE` in `sw.js`, log bugs in `BUGS.md`, tick goals in `ROADMAP.md`, keep `README.md` usage instructions current.
 - **Data changes:** run `python tools/check_monsters.py` after editing `monsters.json`; it should report only known items.
 - **Replies to Andrew:** short. He has a limited token budget. Ask before design choices that aren't obvious.
+- **Visual changes:** keep colours in the `:root` tokens (light = parchment, dark = dark dungeon). `visibility_core_controls` (phone / iPad / laptop × light / dark: core controls on screen and not covered, WCAG 4.5:1 text contrast) and `icon_alignment` must pass.
 - **Rules wording:** use 2024 (SRD 5.2) terms and condition names.
 
 ## Data and licensing (important)

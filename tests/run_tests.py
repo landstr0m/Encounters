@@ -1430,6 +1430,49 @@ def icon_alignment(b):
     check(off and max(off) <= 2, f"stat block damage icons {off}")
 
 
+VIS_JS = """(sel)=>{var r=[];document.querySelectorAll(sel).forEach(function(el){var b=el.getBoundingClientRect();
+ if(!b.width||!b.height){r.push('hidden');return;}var x=Math.min(Math.max(b.left+b.width/2,1),innerWidth-2),y=Math.min(Math.max(b.top+b.height/2,1),innerHeight-2);
+ if(b.bottom<0||b.top>innerHeight||b.right<0||b.left>innerWidth){r.push('offscreen');return;}
+ var h=document.elementFromPoint(x,y);r.push(h&&(el===h||el.contains(h)||h.contains(el))?'ok':'covered by '+(h?h.tagName+'.'+h.className+'#'+h.id:'nothing'));});return r.length?r:['missing'];}"""
+CONTRAST_JS = """()=>{var cs=getComputedStyle(document.documentElement),v=function(n){return cs.getPropertyValue(n).trim();};
+ var L=function(h){h=h.replace('#','');if(h.length===3)h=h.replace(/./g,'$&$&');return [0,2,4].map(function(i){var c=parseInt(h.substr(i,2),16)/255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);}).reduce(function(a,c,i){return a+c*[0.2126,0.7152,0.0722][i];},0);};
+ var cr=function(a,b){var x=L(v(a)),y=L(v(b));return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05);};
+ return {ink:cr('--ink','--surface'),inkBg:cr('--ink','--bg'),muted:cr('--muted','--surface'),mutedS2:cr('--muted','--surface2'),accent:cr('--accent','--surface'),button:cr('--accent-ink','--accent'),bad:cr('--bad','--surface'),ok:cr('--ok','--surface'),warn:cr('--warn','--surface')};}"""
+
+
+@test
+def visibility_core_controls(b):
+    """After any visual change: on phone, iPad and laptop, in light and dark, the core controls are on screen, not covered,
+    and the theme's text colours keep WCAG contrast (4.5:1 text)."""
+    a = App(b)
+    m = a.mon("mm-archmage")[0]; g = a.mon("mm-ghoul", 2); a.pc("Aer", hp=30)
+    a.e("S.list.forEach(function(c,i){c.init=20-i});renderBoard()")
+    a.e(f"S.turnId={m};S.round=1;renderAll()")
+    a.select(g[1]); a.pad("dmg", 1)
+    for th in ["light", "dark"]:
+        a.e(f"document.documentElement.setAttribute('data-theme','{th}')")
+        c = a.pg.evaluate(CONTRAST_JS)
+        for k, v in c.items():
+            check(v >= 4.5, f"{th}: contrast {k} {v:.2f} < 4.5")
+        for w, h, dev in [(390, 844, "phone"), (1024, 768, "iPad"), (1366, 768, "laptop")]:
+            a.pg.set_viewport_size({"width": w, "height": h})
+            a.e("ui.drawer=false;ui.sel={};ui.act=null;renderAll();scrollTo(0,0)")
+            for sel in ['[data-act="next"]', '[data-act="undo"]', '[data-act="openadd"]', '#turn']:
+                r = a.pg.evaluate(VIS_JS, sel); check(r[0] == "ok", f"{th} {dev}: {sel} {r}")
+            # a target selected: the pad's Apply and the selected row stay reachable
+            a.e(f"ui.sel={{}};ui.sel[{g[0]}]=true;renderAll()")
+            r = a.pg.evaluate(VIS_JS, '#pad .papply'); check(r[0] == "ok", f"{th} {dev}: pad Apply {r}")
+            r = a.pg.evaluate(VIS_JS, '#pad [data-act="desel"]'); check(r[0] == "ok", f"{th} {dev}: Deselect {r}")
+            # drawer open: its tabs and close button visible; on iPad/laptop the board's Next stays usable beside it
+            a.e("ui.sel={};ui.drawer=true;S.tab='add';S.sub='monsters';renderAll()")
+            for sel in ['#drawer [data-act="close"]', '#drawer [data-t="data"]', '#drawer #search']:
+                r = a.pg.evaluate(VIS_JS, sel); check(r[0] == "ok", f"{th} {dev}: {sel} {r}")
+            if dev != "phone":
+                r = a.pg.evaluate(VIS_JS, '[data-act="next"]'); check(r[0] == "ok", f"{th} {dev}: Next with drawer open {r}")
+    a.e("ui.drawer=false;renderAll()")
+    check(not a.errors, a.errors)
+
+
 def main():
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def log_message(self, *a):
