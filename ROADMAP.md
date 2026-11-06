@@ -97,7 +97,7 @@ Open follow-ups from A–G:
 - Kanka articles / reports after the session (the combat log can feed them).
 - Lights (Lumi?) and music (Pocket Bard) on scene changes.
 
-## Comparison with other tools (re-scored 6 Nov 2026)
+## Comparison with other tools (re-scored 6 Nov 2026, afternoon)
 
 Score 0–5 against popular trackers (D&D Beyond Encounter Builder, Improved Initiative, Shieldmaiden, Kobold+ Fight Club). "3 Nov" = previous review; – = not scored then.
 
@@ -106,22 +106,24 @@ Score 0–5 against popular trackers (D&D Beyond Encounter Builder, Improved Ini
 | Initiative, rounds, turn card | 5 | 5 | Turn card shows only what the creature can still do |
 | Batch damage/heal/temp HP + Undo | 5 | 5 | One Apply for damage, half on save, statuses; Undo covers the whole action |
 | Damage types (resist/immune/vulnerable) | 5 | 5 | Two damage types per action, each checked separately |
-| Conditions with rule text + auto-effects | 5 | 5 | Single-condition spells linked to their condition |
+| Conditions with rule text + auto-effects | 5 | 5 | Single-condition spells linked; save-ends buttons, staged effects (Petrification, Sleep), damage ends Sleep / Hypnotic Pattern |
 | Concentration links, auto-expiry | 5 | 5 | Prompt to end concentration when no targets are left |
 | Legendary/lair, reactions | 5 | 5 | Legendary actions tappable; reactions flagged on targets |
-| Monster actions: tap to use (attack / save / spell) | – | 5 | Preloaded damage, targets, crit, per-target outcome; no competitor does this offline |
+| Monster actions: tap to use (attack / save / spell) | – | 5 | Preloaded damage, targets, crit, per-target outcome; spells inside other actions, roll-table legendaries (Eye Rays) |
+| Player spells (upcast, multi-ray, cantrip scaling, Hex/Mark riders) | – | 5 | Each ray/beam its own pick; per-hit riders default 0 |
 | Action economy tracking (multiattack, recharge, X/Day) | – | 5 | |
 | Saves view, player DCs | 4 | 5 | DCs from Kanka or D&D Beyond; save bonuses on target chips |
 | Monster library + homebrew import | 4 | 4 | No 2014 toggle |
 | Prepared encounters / reinforcements | 4 | 4 | |
 | Encounter difficulty / XP budget | 4 | 4 | No lair XP or hazard CR yet |
-| Spell / rules lookup | 4 | 4 | PHB spells partly; local PHB import pending |
-| Lair actions / hazards that act | 4 | 4 | |
+| Spell / rules lookup | 4 | 4 | Tab renamed Spells & Conditions; PHB spells partly; local PHB import pending |
+| Lair actions / hazards that act | 4 | 4 | Templates + saved templates; start-of-turn damage one tap. Missing "after N rounds" |
 | Building encounters on a phone | 4 | 4 | |
 | Party library management | 3 | 3 | Groups/tags planned |
-| Character import | 3 | 4 | Kanka + D&D Beyond (public, unofficial) |
+| Character import | 3 | 4 | Kanka + D&D Beyond; links found in Kanka descriptions import automatically (name/class checked) |
 | Player view on another device | 2 | 3 | Table view line added; still same browser only |
 | Combat log / session record | – | 4 | Per encounter, downloadable; not yet fed into reports |
+| Backup / restore | 3 | 4 | One file with everything incl. monster files; still manual |
 | Cross-device sync / cloud save | 0 | 0 | Manual Export/Import (network stage) |
 | Dice roller | 0 | n/a | Deliberately absent: dice are physical |
 | Maps / tokens | 0 | n/a | Out of scope for in-person play |
