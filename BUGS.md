@@ -2,6 +2,10 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Targeting on a phone
+
+- With the turn card and the pad open, the player rows were covered on a phone, so targets couldn't be picked. Targets are now chips inside the pad (opponents first). Miss moved to the pad header (Use → Miss, no target); per-target Hit/Miss buttons removed (a picked attack target is a hit). Save targets: tap a picked chip to switch Failed/Saved, ✕ to remove. Wheels stay hidden until a target is picked.
+
 ## 2026-11-06 — Tap-to-use targeting (roadmap D + E)
 
 - Applying a save action used to take two applies (failed targets: full damage + status; saved targets: half). Now one targeting flow with per-target outcomes and one Apply. Undo used to keep only the last snapshot, so the spend after the damage would have hidden the damage from Undo; the spend inside an apply no longer takes its own snapshot.

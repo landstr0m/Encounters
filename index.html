@@ -173,7 +173,12 @@ a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-
 .a>b{font-family:var(--display);font-size:1.15rem;font-weight:700;letter-spacing:.02em;display:block}
 .a.spent{opacity:.5}.a.used{box-shadow:inset 0 0 0 2px var(--ok)}.a .tg.on{background:var(--ok);color:#fff;border-color:var(--ok)}
 .a.tgt{box-shadow:0 0 0 3px var(--accent);}
-.acth{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:.92rem}.acth button{min-height:36px}
+.tcs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px;max-height:110px;overflow-y:auto}.tch{font-size:.8rem;color:var(--muted)}
+.tc{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:.92rem;user-select:none}
+.tc.ally{opacity:.7;border-style:dashed}.tc.on{background:var(--bad);border-color:var(--bad);color:#fff;opacity:1}.tc.on.sv{background:var(--surface);color:var(--ink);border:2px solid var(--bad)}
+.tc small{font-size:.72rem;opacity:.9}.tc .hint{margin:0;border-color:currentColor;color:inherit}.tc .tx{margin-left:2px;padding:4px 2px 4px 6px;font-weight:700;border-left:1px solid currentColor}
+.amiss{min-height:40px;min-width:84px;font-weight:700}.acth>span{flex:1 1 0;min-width:0}
+.acth{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:.92rem}.acth button{min-height:36px}
 .tgh{padding:10px;border:2px dashed var(--accent);border-radius:10px;text-align:center;color:var(--muted);margin-bottom:6px}
 .tgl{display:grid;gap:4px;margin-bottom:6px;max-height:32vh;overflow-y:auto}.tgr{display:flex;align-items:center;gap:6px}.tgr .tn{flex:1;min-width:0}
 .hint{display:inline-block;margin-left:6px;padding:0 6px;border-radius:999px;border:1px solid var(--line);font-size:.72rem;color:var(--warn);white-space:nowrap}
@@ -1037,13 +1042,18 @@ function atkHints(att,t,d){var h=[],melee=/melee/.test(d.atk.type),has=function(
   return h;}
 function actHead(){var a=ui.act,d=a.d,x=d.kind==='atk'?(d.atk.type[0].toUpperCase()+d.atk.type.slice(1)+' '+sgn(d.atk.bonus)+(d.atk.reach?', reach '+d.atk.reach+' ft.':'')+(d.atk.range?', range '+d.atk.range+' ft.':''))
     :('DC '+d.save.dc+' '+['Str','Dex','Con','Int','Wis','Cha'][d.save.ab]+' save'+(d.succ==='half'?', half on a success':d.succ?'':', nothing on a success'));
-  return '<div class="acth"><span><b>'+esc(a.n)+'</b> \u00b7 '+esc(x)+(d.rider?' \u00b7 then DC '+d.rider.dc+' '+['Str','Dex','Con','Int','Wis','Cha'][d.rider.ab]+' save':'')+'</span><button data-act="actx">Cancel</button></div>';}
-function actRows(T){var a=ui.act,att=findC(a.id);if(!T.length)return '<div class="tgh">Tap the target'+(a.d.kind==='save'?'s':'')+' in the list</div>';
-  return '<div class="tgl">'+T.map(function(t){var o=actOut(t),atk=a.d.kind==='atk',hit=o==='hit'||o==='rsave',H=atk?atkHints(att,t,a.d):[];
-    if(!atk&&o==='fail'&&!ui.out[t.id]&&actOut(t)==='fail'&&t.conds.some(function(x){return ['Paralyzed','Stunned','Unconscious','Petrified'].indexOf(x)>=0;})&&(a.d.save.ab<2))H.push('auto-fail');
-    return '<div class="tgr"><span class="tn"><b>'+esc(t.name)+'</b>'+(atk?' <small>AC '+effAC(t)+'</small>':'')+H.map(function(x){return '<span class="hint">'+esc(x)+'</span>';}).join('')+'</span>'+
-      (atk?'<button class="oc'+(hit?' ok':'')+'" data-act="tout" data-id="'+t.id+'">'+(hit?'Hit':'Miss')+'</button>'+(a.d.rider&&hit?'<button class="oc'+(o==='hit'?' ok':'')+'" data-act="trs" data-id="'+t.id+'">'+(o==='hit'?'Failed':'Saved')+'</button>':'')
-        :'<button class="oc'+(o==='fail'?' ok':'')+'" data-act="tout" data-id="'+t.id+'">'+(o==='fail'?'Failed':'Saved')+'</button>')+'</div>';}).join('')+'</div>';}
+  return '<div class="acth"><span><b>'+esc(a.n)+'</b> \u00b7 '+esc(x)+(d.rider?' \u00b7 then DC '+d.rider.dc+' '+['Str','Dex','Con','Int','Wis','Cha'][d.rider.ab]+' save':'')+'</span>'+
+    (d.kind==='atk'?'<button class="amiss" data-act="amiss" title="The attack missed: spend it, nothing else">Miss</button>':'')+'<button data-act="actx">Cancel</button></div>';}
+// Targets are picked from chips inside the pad (the list behind may be covered on a phone); table taps still work too.
+// Attack: chip on = hit (tap again to drop it). Save / rider save: tap toggles Failed <-> Saved, \u2715 drops it.
+function actRows(T){var a=ui.act,att=findC(a.id),atk=a.d.kind==='atk',tog=!atk||!!a.d.rider;
+  var L=S.list.filter(function(t){return t.kind!=='fx'&&t.id!==a.id&&!(t.kind==='mon'&&t.hp<=0&&!ui.sel[t.id]);});
+  var foe=function(t){return (att&&att.kind==='mon')===(t.kind==='pc')?0:1;};L.sort(function(x,y){return foe(x)-foe(y);});
+  return '<div class="tcs">'+(T.length?'':'<span class="tch">Targets:</span>')+L.map(function(t){var on=!!ui.sel[t.id],o=on?actOut(t):'',sv=o==='save'||o==='rsave',H=on&&atk?atkHints(att,t,a.d):[];
+    if(on&&!atk&&o==='fail'&&!ui.out[t.id]&&a.d.save.ab<2&&t.conds.some(function(x){return ['Paralyzed','Stunned','Unconscious','Petrified'].indexOf(x)>=0;}))H.push('auto-fail');
+    return '<span class="tc'+(on?' on':'')+(sv?' sv':'')+(foe(t)?' ally':'')+'" role="button" tabindex="0" data-act="tchip" data-id="'+t.id+'"><b>'+esc(t.name)+'</b>'+
+      (on&&atk?'<small>AC '+effAC(t)+'</small>':'')+(on&&tog?'<small class="st">'+(sv?'Saved':'Failed')+'</small>':'')+H.map(function(x){return '<small class="hint">'+esc(x)+'</small>';}).join('')+
+      (on&&tog?'<span class="tx" data-act="tdel" data-id="'+t.id+'" role="button" aria-label="Remove '+esc(t.name)+'">\u2715</span>':'')+'</span>';}).join('')+'</div>';}
 // Per target: share of the damage (1, 0.5, 0) and whether statuses apply
 function actFx(t){var a=ui.act,o=actOut(t);if(a.d.kind==='atk')return o==='hit'?[1,true]:o==='rsave'?[1,false]:[0,false];
   return o==='fail'?[1,true]:[a.d.succ==='half'?0.5:0,false];}
@@ -1287,7 +1297,7 @@ function renderPad(){
   var fx=curFx(),pk=Object.keys(ui.pend),pn=pk.length,sum=padSum(pk),nod=SPEC[slot(0).dt]&&(!ui.ex||SPEC[slot(1).dt]);
   if(nod){ui.half=false;ui.mx=false;}
   pad.innerHTML='<div class="pi">'+(fx?'<div class="fxb">⚡ <b>'+esc(fx.name)+':</b> '+esc(fxSum(fx))+' <button data-act="fxdone">Done</button></div>':'')+(ui.act?actHead()+actRows(T):'<div class="pt"><div class="who"><b>'+T.length+' selected</b> · '+names+'</div><button data-act="desel">Deselect</button></div>')+
-   '<div class="pmain"><div class="wheelbox"><div class="wheel" id="wheel" aria-label="Amount wheel">'+WHEEL+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount" tabindex="-1"></div>'+
+   (ui.act&&!T.length?'':('<div class="pmain"><div class="wheelbox"><div class="wheel" id="wheel" aria-label="Amount wheel">'+WHEEL+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount" tabindex="-1"></div>'+
    '<div class="wheelbox tbox"><div class="wheel twh" id="twheel" aria-label="Type wheel: tap the middle for the list">'+tWheel()+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div></div>'+
    '<div class="pr">'+(ui.ex?'<div class="amtrow"><div class="slots">'+[0,1].map(function(i){var sv=slot(i);return '<button class="'+(ui.ax===i?'on':'')+'" data-act="pslot" data-k="'+i+'">'+(i?'+ Extra ':'Main ')+'<b>'+sv.v+'</b>'+(sv.dt?' '+DTI2(sv.dt):'')+'</button>';}).join('')+'</div></div>':'')+
    '<div class="pacts">'+(ui.act?'':'<button class="tg'+(ui.half?' on':'')+'" data-act="ptog" data-k="half" aria-pressed="'+!!ui.half+'"'+(nod?' disabled':'')+'>Half</button>')+
@@ -1296,7 +1306,7 @@ function renderPad(){
    '<button class="tg'+(pn?' on':'')+'" data-act="padstatus">Status'+(pn?' ('+pn+')':'')+' ▾</button>'+(ui.act?'':'<button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove" aria-label="Remove from encounter" title="Remove from encounter">'+(ui.confirmRemove?'🗑 Sure?':'🗑')+'</button>'+
    '<button data-act="padmore" aria-expanded="'+!!ui.more+'">'+(ui.more?'Less \u25b4':'More \u25be')+'</button>')+
    (ui.more&&!ui.act?'<button data-act="padhp" data-k="maxreset">Reset max</button><button data-act="padgroup">'+(T.some(function(c){return c.cg;})&&T.every(function(c){return c.cg&&c.cg===T[0].cg;})?'Ungroup':'Group\u2026')+'</button>':'')+'</div>'+
-   (ui.act?(T.length?'<button class="papply" data-act="papply">Apply: '+actSum(T)+'</button>':''):'<button class="papply" data-act="papply"'+(sum?'':' disabled')+'>'+(sum?'Apply: '+sum:'Pick an amount or a status')+'</button>')+'</div></div>'+
+   (ui.act?(T.length?'<button class="papply" data-act="papply">Apply: '+actSum(T)+'</button>':''):'<button class="papply" data-act="papply"'+(sum?'':' disabled')+'>'+(sum?'Apply: '+sum:'Pick an amount or a status')+'</button>')+'</div></div>'))+
    (ui.menu?menuHTML(T):'')+(ui.tpk?tPick():'')+'</div>';
   var mn=pad.querySelector('.menu');if(mn){mn.style.maxHeight='';mn.style.maxHeight=Math.max(200,mn.getBoundingClientRect().bottom-8)+'px';}
   var w=$('#wheel');
@@ -1991,10 +2001,12 @@ padEl.addEventListener('click',function(e){
   else if(a==='pslot'){swapSlot(+b.dataset.k);}
   else if(a==='ptog'){var tk=b.dataset.k;if(tk==='half'){ui.half=!ui.half;var fh=curFx();if(fh&&fh.st){if(ui.half)delete ui.pend[fh.st];else ui.pend[fh.st]=true;}}else if(tk==='extra'){ui.ex=!ui.ex;if(ui.ex)swapSlot(1);else{swapSlot(0);ui.amtO=0;ui.dtO='';}}else ui.mx=!ui.mx;}
   else if(a==='actx'){ui.act=null;ui.out={};finishPad();}
-  else if(a==='tout'||a==='trs'){var tt=findC(b.dataset.id),o0=actOut(tt);
-    ui.out[tt.id]=a==='trs'?(o0==='hit'?'rsave':'hit'):ui.act.d.kind==='atk'?(o0==='miss'?'hit':'miss'):(o0==='fail'?'save':'fail');
-    // a single target that is missed has nothing to apply: finish straight away
-    if(ui.act.d.kind==='atk'&&ui.out[tt.id]==='miss'&&T.length===1){actApply(T);save();renderBoard();return;}}
+  else if(a==='tdel'){delete ui.sel[b.dataset.id];delete ui.out[b.dataset.id];}
+  else if(a==='tchip'){var tt=findC(b.dataset.id),atk0=ui.act.d.kind==='atk';
+    if(!ui.sel[tt.id])ui.sel[tt.id]=true;
+    else if(atk0&&!ui.act.d.rider){delete ui.sel[tt.id];delete ui.out[tt.id];}
+    else{var o0=actOut(tt);ui.out[tt.id]=atk0?(o0==='hit'?'rsave':'hit'):(o0==='fail'?'save':'fail');}}
+  else if(a==='amiss'){var at0=findC(ui.act.id),h0=ui.act.how,n0=ui.act.n;ui.act=null;ui.out={};doHow(at0,h0);toast('<b>'+esc(n0)+':</b> missed');finishPad();}
   else if(a==='papply'&&ui.act){actApply(T);save();renderBoard();return;}
   else if(a==='papply'){
     var pk=Object.keys(ui.pend),SL=padSlots(),D=SL.filter(function(x){return !SPEC[x.dt];});if(!SL.length&&!pk.length)return;

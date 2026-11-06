@@ -1061,10 +1061,10 @@ def tap_to_use_targets(b):
     tap = lambda i: a.e(f"document.querySelector('tr.r[data-id=\"{i}\"] td:nth-child(2)').click()")
     # save action: three targets, one saves -> one Apply
     a.click('#turn [data-act="use"][data-i="a2"]')
-    check(a.pg.is_visible('#pad .tgh'), "asks for targets")
-    for h in (h1, h2, h3): tap(h)
+    check(a.pg.is_visible('#pad .tcs') and not a.pg.query_selector('#wheel'), "target chips first, wheels after")
+    a.click(f'#pad [data-act=tchip][data-id="{h1}"]'); tap(h2); tap(h3)
     eq(a.e("ui.amt"), 21, "damage preloaded (average)"); eq(a.e("ui.dtype"), "poison", "type preloaded")
-    a.click(f'#pad [data-act=tout][data-id="{h2}"]')
+    a.click(f'#pad [data-act=tchip][data-id="{h2}"]')   # tap a picked chip: Saved
     a.e("ui.amt=18;renderPad()")            # the DM's roll
     a.click('#pad [data-act=papply]')
     eq([a.c(h)["hp"] for h in (h1, h2, h3)], [12, 21, 12], "failed take 18, saved take half (9)")
@@ -1072,21 +1072,22 @@ def tap_to_use_targets(b):
     a.click('[data-act="undo"]'); eq(a.c(h1)["hp"], 30, "one undo reverts damage and the use")
     check(not a.e(f"(findC({d}).spent||{{}}).a2"), "and the recharge")
     # attack via Multiattack circle: preloaded two damage parts, hit applies both
-    a.click('#turn .mp.on'); tap(h1)
+    a.click('#turn .mp.on'); a.click(f'#pad [data-act=tchip][data-id="{h1}"]')
     eq(a.e("[ui.amt,ui.dtype,ui.ex,ui.amtO,ui.dtO]"), [7, "slashing", True, 3, "poison"], "two damage parts preloaded")
     a.click('#pad [data-act=papply]')
     eq(a.c(h1)["hp"], 20, "hit: 7 slashing + 3 poison"); eq(a.e(f"findC({d}).mu[0]"), 1, "one Rend used")
-    # single-target miss: one tap finishes
-    a.click('#turn .mp.on'); tap(h2); a.click(f'#pad [data-act=tout][data-id="{h2}"]')
-    check(not a.pg.is_visible('#pad'), "miss on a single target closes the pad")
+    # miss: Use -> Miss, no target needed
+    a.click('#turn .mp.on'); a.click('#pad [data-act=amiss]')
+    check(not a.pg.is_visible('#pad'), "Miss closes the pad")
     eq((a.c(h2)["hp"], a.e(f"findC({d}).mu[0]")), (30, 2), "no damage, second Rend used")
     # cancel spends nothing
     a.e(f"findC({d}).ue={{}};findC({d}).mu={{}};findC({d}).spent={{}};renderBoard()")
     a.click('#turn [data-act="use"][data-i="a2"]'); a.click('#pad [data-act=actx]')
     check(not a.e(f"(findC({d}).spent||{{}}).a2"), "cancel spends nothing")
     # hints: prone target, melee attack
-    a.e(f"findC({h3}).conds.push('Prone');renderBoard()"); a.click('#turn .mp.on'); tap(h3)
+    a.e(f"findC({h3}).conds.push('Prone');renderBoard()"); a.click('#turn .mp.on'); a.click(f'#pad [data-act=tchip][data-id="{h3}"]')
     check("adv: Prone" in a.pg.inner_text('#pad'), "advantage hint")
+    a.click(f'#pad [data-act=tchip][data-id="{h3}"]'); eq(a.e("Object.keys(ui.sel).length"), 0, "tapping a picked attack chip drops it")
     check(not a.errors, a.errors)
 
 

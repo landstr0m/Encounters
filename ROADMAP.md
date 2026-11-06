@@ -58,7 +58,8 @@ Goal: on a monster's turn, tap an action on its card → pick targets → mark w
 **D + E. Tap-to-use for save actions and attacks** ✅ 6 Nov 2026 (first version, for review at the table)
 - [x] Tap Use (or a Multiattack circle / ray / replacement) on an attack or save action → tap targets → per target Hit/Miss or Failed/Saved (one tap each; defaults Hit / Failed) → damage parts, types and conditions preloaded → set the rolled damage → one Apply (full / half / none per target; statuses only on hit or failed save).
 - [x] Spends the use on Apply only; Cancel spends nothing; one Undo covers it.
-- [x] Single-target miss: the Miss tap finishes (misses have no effect in the 2024 Monster Manual: the 12 "Hit or Miss" lines are thrown weapons returning).
+- [x] Miss: Use → Miss, no target (misses have no effect in the 2024 Monster Manual: the 12 "Hit or Miss" lines are thrown weapons returning).
+- [x] Targets picked from chips inside the pad (works when the list is covered on a phone); wheels appear once a target is picked.
 - [x] AC per target (cover and Shield included), advantage/disadvantage reminders from statuses, crit reminder vs Paralyzed/Unconscious in melee, auto-fail Str/Dex saves when Paralyzed/Stunned/Unconscious/Petrified.
 - [x] Attacks with a rider save (hit, then a save against the status): second Failed/Saved button per hit target.
 - [ ] Crit toggle (the DM types the doubled total for now).
