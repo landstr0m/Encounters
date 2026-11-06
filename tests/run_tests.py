@@ -1183,6 +1183,34 @@ def crit_log_reactions(b):
 
 
 @test
+def player_spells_and_table_line(b):
+    a = App(b)
+    a.e("refLoad()"); a.pg.wait_for_function("window.__e('REF && REF.spells && REF.spells.length') > 0")
+    w = a.pc("Wiz", ac=12, hp=20, abil={"int": 16})
+    a.e("var l=S.lib[S.lib.length-1];l.parsed=[{class:'wizard',subclass:'',level:3}];l.spells=['Fire Bolt','Hold Person','Mage Hand'];save()")
+    g = a.mon("mm-goblin-warrior")[0]
+    a.e(f"S.turnId={w};ui.cardOpen=true;ui.pcSpOpen=true;renderBoard()")
+    check("save DC 13" in a.pg.inner_text('#turn .pcsp') and "+5 to hit" in a.pg.inner_text('#turn .pcsp'), "spell DC and attack from class and Int")
+    check("Mage Hand" not in a.pg.inner_text('#turn .pcsp'), "spells with nothing to apply are left out")
+    a.click('#turn [data-act=pcast][data-s="Hold Person"]')
+    check("DC 13 Wis save" in a.pg.inner_text('#pad .acth'), "Hold Person: DC 13 Wis")
+    a.click(f'#pad [data-act=tchip][data-id="{g}"]')
+    check("Wis" in a.pg.inner_text('#pad .tc.on'), "monster's Wis save bonus on the chip")
+    a.click('#pad [data-act=papply]')
+    cs = a.c(g)["conds"]
+    check("Hold Person" in cs and "Paralyzed" in cs, cs); check("Concentrating" in a.c(w)["conds"], "player concentrates")
+    # monster save action: table view shows DC + ability, then each player's damage
+    d = a.mon("mm-green-dragon-wyrmling")[0]; p2 = a.pc("Bo", hp=40)
+    a.e(f"S.turnId={d};renderBoard()"); a.click('#turn [data-act="use"][data-i="a2"]'); a.click(f'#pad [data-act=tchip][data-id="{p2}"]')
+    a.pg.wait_for_timeout(50)
+    check("DC 11 Constitution saving throw" in a.e("S.ann.h") and "Bo" in a.e("S.ann.h"), "announces the save and who rolls")
+    a.e("ui.amt=20;renderPad()"); a.click('#pad [data-act=papply]')
+    check("20 poison damage" in a.e("S.ann.h"), a.e("S.ann.h"))
+    a.click('[data-act="present"]'); check(a.pg.is_visible('#ann') and "20 poison damage" in a.pg.inner_text('#ann'), "line shown in table view")
+    check(not a.errors, a.errors)
+
+
+@test
 def wheel_tap_to_type(b):
     a = App(b)
     m = a.mon("mm-goblin-warrior")[0]

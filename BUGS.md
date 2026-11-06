@@ -2,6 +2,10 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Table line, player spells, data review
+
+- D&D Beyond characters had no class list, so their spell save DC couldn't be worked out (only Kanka characters had one); `tools/dndbeyond.py` now writes `parsed` like the Kanka export.
+
 ## 2026-11-06 — Crit, reactions, combat log (roadmap G)
 
 - Half damage was rounded down per damage part (7 + 3 halved gave 3 + 1 = 4 instead of 5); the total is now halved once.

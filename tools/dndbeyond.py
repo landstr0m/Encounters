@@ -105,6 +105,8 @@ def convert(d):
         "saves": saves, "saveProf": prof, "advSaves": sorted(set(adv)), "advNote": "; ".join(sorted(set(advn))),
         "resist": defs("resistance"), "immune": defs("immunity"), "vulnerable": defs("vulnerability"), "condImmune": cimm,
         "speed": speed, "senses": senses, "spells": sorted(spells),
+        # same shape as the Kanka export, so the app works out spell save DC / attack bonus the same way for both sources
+        "parsed": [{"class": c["definition"]["name"].lower(), "subclass": ((c.get("subclassDefinition") or {}).get("name") or ""), "level": c["level"]} for c in d["classes"]],
         "image": (d.get("decorations") or {}).get("avatarUrl") or "", "url": d.get("readonlyUrl") or f"https://www.dndbeyond.com/characters/{d['id']}",
         "modified": d.get("dateModified", ""),
     }

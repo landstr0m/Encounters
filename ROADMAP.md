@@ -74,9 +74,10 @@ Goal: on a monster's turn, tap an action on its card → pick targets → mark w
 - [x] Crit toggle (adds the dice again to the preloaded damage).
 - [x] Reactions flagged on picked targets (⟲): uses the reaction, applies Shield's status or halves for Uncanny Dodge; the declared hit is not changed (Andrew: players declare at the table).
 - [x] Combat log per encounter, downloadable from the Data tab.
-- [ ] Same flow for player spells and attacks against monsters (from D&D Beyond spell lists), using the monsters' save bonuses and Magic Resistance.
+- [x] Player spells against monsters (D&D Beyond spell lists; DC from class and ability; monster save bonus and Magic Resistance on the chips; status + player concentration). Player weapon attacks not included (players roll and tell the DM).
 - [ ] Player spell slots (only if the D&D Beyond import proves reliable; it's unofficial and fragile).
-- [ ] Optional table-view line ("Goblin hits Aer: 5 slashing").
+- [x] Table-view line: save DC + ability to roll, then each player's damage (monsters: hit / saved only).
+- [ ] **Data files (reviewed 6 Nov 2026):** Kanka and D&D Beyond exports already share one character shape (D&D Beyond now also writes the class list, so spell DCs work the same way). Monster actions stay as book text and are parsed in the app, because your local Monster Manual files use the same format and must work without a build step. Possible later: write monster saves / resistances / immunities as fields in `monsters.json` (and the local parser) to drop the text matching in `defs()` / `saveOf()` (about 15 lines).
 - [ ] **Data tab clean-up:** group into Backup (export/import), Session (combat log, table window), Sources (monster files, spells, Kanka/D&D Beyond), with short help text.
 
 ### Encounter difficulty extensions (💡)

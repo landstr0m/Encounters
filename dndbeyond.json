@@ -67,6 +67,13 @@
    "Shocking Grasp",
    "Silent Image"
   ],
+  "parsed": [
+   {
+    "class": "wizard",
+    "subclass": "School of Illusion",
+    "level": 3
+   }
+  ],
   "image": "https://www.dndbeyond.com/avatars/58829/261/1581111423-170857457.jpeg?width=150&height=150&fit=crop&quality=95&auto=webp",
   "url": "https://dndbeyond.com/characters/172192516",
   "modified": "2026-11-04T19:34:29.546Z"
