@@ -1399,6 +1399,13 @@ def party_groups(b):
     check(not a.errors, a.errors)
 
 
+@test
+def condition_links_inline(b):
+    a = App(b)
+    a.e("S.tab='stat';S.stat='mm-ghast';ui.drawer=true;renderDrawer()")
+    eq(a.e("getComputedStyle(document.querySelector('#drawer a.spl.cnd')).display"), "inline", "condition links stay inline")
+
+
 def main():
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def log_message(self, *a):

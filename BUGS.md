@@ -2,6 +2,10 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Condition and spell links broke lines
+
+- Stat block condition / spell links (`a.spl`) rendered as flex boxes, so each sat on its own line with orphaned commas. Cause: the player spell list container's `.spl{display:flex}` also matched the links; now scoped to `div.spl`.
+
 ## 2026-11-06 — Sticky add controls
 
 - Monster search, filters and Initiative / HP options scrolled away with the list; now in the sticky top with the encounter summary. Same for Party: Update from Kanka / D&D Beyond, groups and search; update messages show there too.
