@@ -60,7 +60,8 @@
   ],
   "hpEst": 15,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
-  "url": "https://app.kanka.io/w/227292/entities/10017493"
+  "url": "https://app.kanka.io/w/227292/entities/10017493",
+  "ddb": []
  },
  {
   "id": 9864074,
@@ -125,7 +126,8 @@
   ],
   "hpEst": 14,
   "image": "https://th.kanka.io/fpPcDPZZAjkUnJh0QGuD2py9h3g=/40x40/filters:focal(607x568:627x588)/src/campaigns/227292/01a0974e-d9ab-725d-a6cb-86b6f76aa559/1.jpg",
-  "url": "https://app.kanka.io/w/227292/entities/9864074"
+  "url": "https://app.kanka.io/w/227292/entities/9864074",
+  "ddb": []
  },
  {
   "id": 9850236,
@@ -186,7 +188,8 @@
   ],
   "hpEst": 21,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
-  "url": "https://app.kanka.io/w/227292/entities/9850236"
+  "url": "https://app.kanka.io/w/227292/entities/9850236",
+  "ddb": []
  },
  {
   "id": 9810697,
@@ -249,7 +252,8 @@
   ],
   "hpEst": 19,
   "image": "https://th.kanka.io/xizQqgUA9j4OXhQRWwW381xhFLI=/40x40/smart/src/campaigns/227292/01a06b14-40c3-73c7-b813-196997fa7afd/1.png",
-  "url": "https://app.kanka.io/w/227292/entities/9810697"
+  "url": "https://app.kanka.io/w/227292/entities/9810697",
+  "ddb": []
  },
  {
   "id": 10079510,
@@ -308,7 +312,8 @@
   "traits": [],
   "hpEst": 12,
   "image": "https://th.kanka.io/zC6PxCBk8DayL7raG_xQ1JQFsyU=/40x40/filters:focal(231x136:251x156)/src/campaigns/227292/01a172e6-bde1-73a6-a3d1-cb839f954f9d/1.png",
-  "url": "https://app.kanka.io/w/227292/entities/10079510"
+  "url": "https://app.kanka.io/w/227292/entities/10079510",
+  "ddb": []
  },
  {
   "id": 10023006,
@@ -371,7 +376,8 @@
   ],
   "hpEst": 19,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
-  "url": "https://app.kanka.io/w/227292/entities/10023006"
+  "url": "https://app.kanka.io/w/227292/entities/10023006",
+  "ddb": []
  },
  {
   "id": 9854904,
@@ -436,7 +442,8 @@
   ],
   "hpEst": 17,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
-  "url": "https://app.kanka.io/w/227292/entities/9854904"
+  "url": "https://app.kanka.io/w/227292/entities/9854904",
+  "ddb": []
  },
  {
   "id": 9888695,
@@ -499,22 +506,23 @@
   ],
   "hpEst": 16,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
-  "url": "https://app.kanka.io/w/227292/entities/9888695"
+  "url": "https://app.kanka.io/w/227292/entities/9888695",
+  "ddb": []
  },
  {
   "id": 10056489,
   "name": "Fritjof Små",
   "title": "Criminal Playboy",
   "race": "Halfling",
-  "classes": "Rogue - 1",
+  "classes": "Rogue - 2",
   "parsed": [
    {
     "class": "rogue",
     "subclass": "",
-    "level": 1
+    "level": 2
    }
   ],
-  "level": 1,
+  "level": 2,
   "notes": [],
   "abilities": {
    "str": 8,
@@ -558,9 +566,10 @@
     "src": "species"
    }
   ],
-  "hpEst": 9,
+  "hpEst": 15,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
-  "url": "https://app.kanka.io/w/227292/entities/10056489"
+  "url": "https://app.kanka.io/w/227292/entities/10056489",
+  "ddb": []
  },
  {
   "id": 9815497,
@@ -621,7 +630,8 @@
   ],
   "hpEst": 24,
   "image": "https://th.kanka.io/v6rRZ3ksVCe9Q1WaU_jjsiW-oEI=/40x40/filters:focal(1086x1350:1106x1370)/src/campaigns/227292/01a0a167-53d4-71a0-ac96-85e22c8e38d7/1.jpg",
-  "url": "https://app.kanka.io/w/227292/entities/9815497"
+  "url": "https://app.kanka.io/w/227292/entities/9815497",
+  "ddb": []
  },
  {
   "id": 9899034,
@@ -676,7 +686,8 @@
   "traits": [],
   "hpEst": 15,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
-  "url": "https://app.kanka.io/w/227292/entities/9899034"
+  "url": "https://app.kanka.io/w/227292/entities/9899034",
+  "ddb": []
  },
  {
   "id": 9815472,
@@ -742,7 +753,8 @@
   ],
   "hpEst": 15,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
-  "url": "https://app.kanka.io/w/227292/entities/9815472"
+  "url": "https://app.kanka.io/w/227292/entities/9815472",
+  "ddb": []
  },
  {
   "id": 9815460,
@@ -797,7 +809,8 @@
   "traits": [],
   "hpEst": 8,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
-  "url": "https://app.kanka.io/w/227292/entities/9815460"
+  "url": "https://app.kanka.io/w/227292/entities/9815460",
+  "ddb": []
  },
  {
   "id": 9850209,
@@ -852,7 +865,8 @@
   "traits": [],
   "hpEst": 20,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
-  "url": "https://app.kanka.io/w/227292/entities/9850209"
+  "url": "https://app.kanka.io/w/227292/entities/9850209",
+  "ddb": []
  },
  {
   "id": 10022982,
@@ -913,7 +927,8 @@
   ],
   "hpEst": 17,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
-  "url": "https://app.kanka.io/w/227292/entities/10022982"
+  "url": "https://app.kanka.io/w/227292/entities/10022982",
+  "ddb": []
  },
  {
   "id": 10056511,
@@ -976,7 +991,8 @@
   ],
   "hpEst": 17,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
-  "url": "https://app.kanka.io/w/227292/entities/10056511"
+  "url": "https://app.kanka.io/w/227292/entities/10056511",
+  "ddb": []
  },
  {
   "id": 9799958,
@@ -1041,7 +1057,8 @@
   ],
   "hpEst": 28,
   "image": "https://th.kanka.io/hVpeZacQnWVYO67fxWrlK9_nd0E=/40x40/filters:focal(250x167:270x187)/src/campaigns/227292/01a16902-df12-73aa-8470-332e41a576a2/1.png",
-  "url": "https://app.kanka.io/w/227292/entities/9799958"
+  "url": "https://app.kanka.io/w/227292/entities/9799958",
+  "ddb": []
  },
  {
   "id": 9938950,
@@ -1096,7 +1113,8 @@
   "traits": [],
   "hpEst": 18,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
-  "url": "https://app.kanka.io/w/227292/entities/9938950"
+  "url": "https://app.kanka.io/w/227292/entities/9938950",
+  "ddb": []
  },
  {
   "id": 9888842,
@@ -1159,7 +1177,8 @@
   ],
   "hpEst": 17,
   "image": "https://th.kanka.io/pIrDX7ABFgw16t31Sk8oX8R5gGk=/40x40/filters:focal(823x476:843x496)/src/campaigns/227292/01a0a613-d240-7151-8106-135df706749b/1.png",
-  "url": "https://app.kanka.io/w/227292/entities/9888842"
+  "url": "https://app.kanka.io/w/227292/entities/9888842",
+  "ddb": []
  },
  {
   "id": 9996654,
@@ -1214,7 +1233,8 @@
   "traits": [],
   "hpEst": 18,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
-  "url": "https://app.kanka.io/w/227292/entities/9996654"
+  "url": "https://app.kanka.io/w/227292/entities/9996654",
+  "ddb": []
  },
  {
   "id": 9815450,
@@ -1269,7 +1289,8 @@
   "traits": [],
   "hpEst": 21,
   "image": "https://th.kanka.io/uv-4nLmZ5gGuKM3TifrCDkytb1I=/40x40/smart/src/campaigns/227292/01a06b12-c948-7295-a774-4a4e26d679d1/1.png",
-  "url": "https://app.kanka.io/w/227292/entities/9815450"
+  "url": "https://app.kanka.io/w/227292/entities/9815450",
+  "ddb": []
  },
  {
   "id": 9824051,
@@ -1330,6 +1351,7 @@
   ],
   "hpEst": 10,
   "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
-  "url": "https://app.kanka.io/w/227292/entities/9824051"
+  "url": "https://app.kanka.io/w/227292/entities/9824051",
+  "ddb": []
  }
 ]
