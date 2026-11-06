@@ -1005,6 +1005,8 @@ def action_parser_and_nested_cards(b):
     eq(a.e("document.querySelectorAll('#turn [data-act=ray]').length"), 10, "each ray has its own Use")
     for r in (0, 3, 7):
         a.click(f'#turn [data-act=ray][data-r="{r}"]')
+        a.e("var t=S.list.find(function(c){return c.kind==='pc'});ui.sel={};ui.sel[t.id]=true;renderPad()")
+        a.click('#pad [data-act=papply]')
     eq(a.e("document.querySelectorAll('#turn [data-act=ray]').length"), 3, "after three rays only the used ones (to undo) remain tappable")
     check(a.e("document.querySelector('#turn .acts2').textContent.indexOf('Bite')<0"), "Bite hidden: the action went to Multiattack")
     a.e(f"S.stat='mm-archmage';S.statC=null;S.tab='stat';ui.drawer=true;renderDrawer()")
@@ -1019,7 +1021,8 @@ def action_economy_hides_used(b):
     a.e(f"S.list.forEach(function(c){{c.init=c.id==={d}?20:5}});renderBoard()")
     a.click('[data-act="next"]'); a.e("ui.cardOpen=true;renderBoard()")
     eq(a.e("S.turnId"), d, "dragon's turn")
-    a.click('#turn [data-act="use"][data-i="a2"]')   # Poison Breath
+    a.click('#turn [data-act="use"][data-i="a2"]')   # Poison Breath: pick a target, apply
+    a.e(f"ui.sel={{}};ui.sel[{h}]=true;renderPad()"); a.click('#pad [data-act=papply]')
     t = a.pg.inner_text('#turn')
     check(a.e("document.querySelector('#turn .acts2').textContent.indexOf('Rend')<0"), "other action cards hidden once the action is used")
     check("Used" in t and "Poison Breath" in t, "the used card stays, marked Used")
@@ -1042,9 +1045,48 @@ def action_economy_hides_used(b):
     a.e("S.list=[];renderBoard()"); ch = a.mon("mm-chimera")[0]; a.pc("Hero4")
     a.e(f"S.turnId={ch};ui.cardOpen=true;renderBoard()")
     a.click('#turn [data-act=mrep]')
+    a.e(f"ui.sel={{}};ui.sel[S.list.find(function(c){{return c.kind==='pc'}}).id]=true;renderPad()"); a.click('#pad [data-act=papply]')
     claw = a.e("(function(){var A=actsOf(MON.find(function(m){return m.id==='mm-chimera'})),P=mPools(A);return mLeft(findC(" + str(ch) + "),P,poolOf(P,'Claw'))})()")
     eq(claw, 0, "Fire Breath used up the Claw attack")
     eq(a.e(f"findC({ch}).spent.a3||findC({ch}).spent[Object.keys(findC({ch}).spent)[0]]"), True, "and spent its recharge")
+    check(not a.errors, a.errors)
+
+
+@test
+def tap_to_use_targets(b):
+    a = App(b)
+    d = a.mon("mm-green-dragon-wyrmling")[0]
+    h1 = a.pc("Aer", ac=13, hp=30); h2 = a.pc("Bo", ac=16, hp=30); h3 = a.pc("Cy", ac=12, hp=30)
+    a.e(f"S.turnId={d};ui.cardOpen=true;renderBoard()")
+    tap = lambda i: a.e(f"document.querySelector('tr.r[data-id=\"{i}\"] td:nth-child(2)').click()")
+    # save action: three targets, one saves -> one Apply
+    a.click('#turn [data-act="use"][data-i="a2"]')
+    check(a.pg.is_visible('#pad .tgh'), "asks for targets")
+    for h in (h1, h2, h3): tap(h)
+    eq(a.e("ui.amt"), 21, "damage preloaded (average)"); eq(a.e("ui.dtype"), "poison", "type preloaded")
+    a.click(f'#pad [data-act=tout][data-id="{h2}"]')
+    a.e("ui.amt=18;renderPad()")            # the DM's roll
+    a.click('#pad [data-act=papply]')
+    eq([a.c(h)["hp"] for h in (h1, h2, h3)], [12, 21, 12], "failed take 18, saved take half (9)")
+    check(a.e(f"!!findC({d}).spent.a2"), "recharge spent by the apply")
+    a.click('[data-act="undo"]'); eq(a.c(h1)["hp"], 30, "one undo reverts damage and the use")
+    check(not a.e(f"(findC({d}).spent||{{}}).a2"), "and the recharge")
+    # attack via Multiattack circle: preloaded two damage parts, hit applies both
+    a.click('#turn .mp.on'); tap(h1)
+    eq(a.e("[ui.amt,ui.dtype,ui.ex,ui.amtO,ui.dtO]"), [7, "slashing", True, 3, "poison"], "two damage parts preloaded")
+    a.click('#pad [data-act=papply]')
+    eq(a.c(h1)["hp"], 20, "hit: 7 slashing + 3 poison"); eq(a.e(f"findC({d}).mu[0]"), 1, "one Rend used")
+    # single-target miss: one tap finishes
+    a.click('#turn .mp.on'); tap(h2); a.click(f'#pad [data-act=tout][data-id="{h2}"]')
+    check(not a.pg.is_visible('#pad'), "miss on a single target closes the pad")
+    eq((a.c(h2)["hp"], a.e(f"findC({d}).mu[0]")), (30, 2), "no damage, second Rend used")
+    # cancel spends nothing
+    a.e(f"findC({d}).ue={{}};findC({d}).mu={{}};findC({d}).spent={{}};renderBoard()")
+    a.click('#turn [data-act="use"][data-i="a2"]'); a.click('#pad [data-act=actx]')
+    check(not a.e(f"(findC({d}).spent||{{}}).a2"), "cancel spends nothing")
+    # hints: prone target, melee attack
+    a.e(f"findC({h3}).conds.push('Prone');renderBoard()"); a.click('#turn .mp.on'); tap(h3)
+    check("adv: Prone" in a.pg.inner_text('#pad'), "advantage hint")
     check(not a.errors, a.errors)
 
 

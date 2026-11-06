@@ -172,6 +172,12 @@ a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-
 .a{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:.95rem;background:var(--bg)}
 .a>b{font-family:var(--display);font-size:1.15rem;font-weight:700;letter-spacing:.02em;display:block}
 .a.spent{opacity:.5}.a.used{box-shadow:inset 0 0 0 2px var(--ok)}.a .tg.on{background:var(--ok);color:#fff;border-color:var(--ok)}
+.a.tgt{box-shadow:0 0 0 3px var(--accent);}
+.acth{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:.92rem}.acth button{min-height:36px}
+.tgh{padding:10px;border:2px dashed var(--accent);border-radius:10px;text-align:center;color:var(--muted);margin-bottom:6px}
+.tgl{display:grid;gap:4px;margin-bottom:6px;max-height:32vh;overflow-y:auto}.tgr{display:flex;align-items:center;gap:6px}.tgr .tn{flex:1;min-width:0}
+.hint{display:inline-block;margin-left:6px;padding:0 6px;border-radius:999px;border:1px solid var(--line);font-size:.72rem;color:var(--warn);white-space:nowrap}
+.oc{min-width:84px;min-height:40px;font-weight:700}.oc.ok{background:var(--bad);color:#fff;border-color:var(--bad)}
 .mline{margin-top:8px;padding:4px 8px;border-left:3px solid var(--accent);font-size:.9rem;color:var(--muted)}.mline b{color:var(--ink);margin-right:4px}
 .mpw{float:right;display:flex;gap:6px;align-items:center;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .mp{width:28px;height:28px;min-height:0;min-width:0;padding:0;border-radius:50%;border:2px solid var(--accent);background:transparent}.mp.on{background:var(--accent)}.mp[disabled]{opacity:1;cursor:default}
@@ -856,7 +862,7 @@ function typed(c,n,t){
 }
 function condBlocked(c,x){var d=defs(c).cimm;return (CIM[x]||(SPX[x]&&SPX[x].cd?SPX[x].cd.map(function(k){return k.toLowerCase();}):[x.toLowerCase()])).some(function(k){return d.indexOf(k)>=0;});}
 // One-step undo: snapshot the encounter before any change made from the bar, pad, chips or death saves.
-function snap(label){ui.undo={label:label,s:JSON.stringify({list:S.list,round:S.round,turnId:S.turnId,prev:S.prevTurn})};}
+function snap(label){if(ui.noSnap)return;ui.undo={label:label,s:JSON.stringify({list:S.list,round:S.round,turnId:S.turnId,prev:S.prevTurn})};}
 function undo(){if(!ui.undo)return;var o=JSON.parse(ui.undo.s);S.list=o.list;S.round=o.round;S.turnId=o.turnId;S.prevTurn=o.prev;toast('Undid: '+esc(ui.undo.label));ui.undo=null;pruneSel();finishPad();}
 function toast(h){var t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';t.setAttribute('role','status');document.body.appendChild(t);}
   t.innerHTML=h;t.classList.add('on');clearTimeout(toast.tm);toast.tm=setTimeout(function(){t.classList.remove('on');},6000);t.onclick=function(){t.classList.remove('on');};}
@@ -993,6 +999,70 @@ function hideWhy(c,A,p){var ue=c.ue||{},mine=ue[p.sec]===p.key||(c.mrep||{})[p.k
 function useAct(c,A,key,on){var p=A.find(function(x){return x.key===key;});if(!p)return;c.ue=c.ue||{};c.uses=c.uses||{};c.spent=c.spent||{};
   if(on){c.ue[p.sec]=key;if(p.sec==='r')c.rx=true;if(p.uses)c.uses[key]=(c.uses[key]||0)+1;if(p.rech)c.spent[key]=true;}
   else{if(c.ue[p.sec]===key)delete c.ue[p.sec];if(p.sec==='r')c.rx=false;if(p.uses&&c.uses[key])c.uses[key]--;if(p.rech)delete c.spent[key];}}
+// Spend what an action uses (the old one-tap behaviour); how = {a: use|unuse|mpip|ray|mrep, i: card key, q: pool, d: +1/-1, r: ray row}
+function doHow(c,how){var mm=MON.find(function(x){return x.id===c.monId;});if(!mm)return;var A=actsOf(mm),P=mPools(A),pk=A.find(function(x){return x.key===how.i;});if(!pk)return;var a=how.a;
+  if(a==='use'||a==='unuse'){snap((a==='use'?'use ':'undo ')+pk.n);
+    if(a==='unuse'&&!(c.ue&&c.ue[pk.sec]===pk.key)){if(pk.rech&&c.spent)delete c.spent[pk.key];else if(pk.uses&&c.uses&&c.uses[pk.key])c.uses[pk.key]--;}
+    else useAct(c,A,how.i,a==='use');}
+  else if(a==='mpip'){var q3=P[+how.q],d3=+how.d;if(d3>0&&mLeft(c,P,q3)<=0)return;snap('multiattack: '+pk.n);mSpend(c,q3,d3);}
+  else if(a==='ray'){var q4=P[+how.q],r4=+how.r;c.ray=c.ray||{};c.ray[pk.key]=c.ray[pk.key]||{};var on4=!c.ray[pk.key][r4];
+    if(on4&&mLeft(c,P,q4)<=0)return;snap((on4?'':'undo ')+pk.table.rows[r4].n);if(on4)c.ray[pk.key][r4]=1;else delete c.ray[pk.key][r4];mSpend(c,q4,on4?1:-1);}
+  else if(a==='mrep'){var d5=+how.d,mq=repPool(P,repOf(P,pk.n));if(d5>0&&mLeft(c,P,mq)<=0)return;snap((d5>0?'':'undo ')+pk.n);c.mrep=c.mrep||{};
+    if(d5>0){c.mrep[pk.key]=1;mSpend(c,mq,1);if(pk.rech){c.spent=c.spent||{};c.spent[pk.key]=true;}if(pk.uses){c.uses=c.uses||{};c.uses[pk.key]=(c.uses[pk.key]||0)+1;}}
+    else{delete c.mrep[pk.key];mSpend(c,mq,-1);if(pk.rech&&c.spent)delete c.spent[pk.key];if(pk.uses&&c.uses&&c.uses[pk.key])c.uses[pk.key]--;}}}
+// ---- Stages D/E: tap an attack or save action -> pick targets -> Hit/Miss or Failed/Saved per target -> damage preloaded -> one Apply.
+// ui.act = {id: attacker, how, d: parsed attack/save, n: name}; ui.out = {targetId: 'miss' | 'save' | 'rsave'} (default hit / failed).
+function actStart(c,how){if(!(how.a==='use'||(how.a==='mpip'&&+how.d>0)||(how.a==='mrep'&&+how.d>0)||how.a==='ray'))return false;
+  var mm=MON.find(function(x){return x.id===c.monId;});if(!mm)return false;var A=actsOf(mm),P=mPools(A),pk=A.find(function(x){return x.key===how.i;});if(!pk)return false;
+  var d=pk,n=pk.n;
+  if(how.a==='ray'){if(c.ray&&c.ray[pk.key]&&c.ray[pk.key][+how.r])return false;if(mLeft(c,P,P[+how.q])<=0)return false;var row=pk.table.rows[+how.r];d=parseAct(row.n||n,row.t,'a');n=row.n||n;}
+  if(how.a==='mpip'&&mLeft(c,P,P[+how.q])<=0)return false;
+  if(d.kind!=='atk'&&d.kind!=='save')return false;
+  ui.act={id:c.id,how:how,d:d,n:n};ui.out={};ui.sel={};ui.menu=false;ui.tpk=false;ui.mode='dmg';ui.half=false;ui.mx=false;ui.ax=0;ui.pend={};
+  var D=d.dmg||[];ui.amt=D[0]?D[0].avg:0;ui.dtype=D[0]?(D[0].type||''):'';
+  if(D.length>1){ui.ex=true;ui.amtO=D.slice(1).reduce(function(t,x){return t+x.avg;},0);ui.dtO=D[1].type||'';}else{ui.ex=false;ui.amtO=0;ui.dtO='';}
+  (d.conds||[]).forEach(function(x){if(FX[x]||CONDS.indexOf(x)>=0)ui.pend[x]=true;});
+  return true;}
+function actOut(t){var a=ui.act,o=ui.out[t.id];if(o)return o;
+  if(a.d.kind==='save'&&a.d.save&&(a.d.save.ab===0||a.d.save.ab===1)&&t.conds.some(function(x){return ['Paralyzed','Stunned','Unconscious','Petrified'].indexOf(x)>=0;}))return 'fail';
+  return a.d.kind==='atk'?'hit':'fail';}
+// Advantage / disadvantage / crit reminders for an attack against one target
+function atkHints(att,t,d){var h=[],melee=/melee/.test(d.atk.type),has=function(c,x){return c.conds.indexOf(x)>=0;};
+  if(has(t,'Prone'))h.push(melee?'adv: Prone':'disadv: Prone');
+  ['Blinded','Paralyzed','Stunned','Unconscious','Restrained','Petrified'].forEach(function(x){if(has(t,x))h.push('adv: '+x);});
+  if(has(t,'Faerie Fire'))h.push('adv: Faerie Fire');
+  if(melee&&(has(t,'Paralyzed')||has(t,'Unconscious')))h.push('crit if within 5 ft');
+  if(has(t,'Invisible'))h.push('disadv: Invisible');if(has(t,'Dodging'))h.push('disadv: Dodging');if(has(t,'Blurred'))h.push('disadv: Blur');
+  if(att){['Blinded','Poisoned','Frightened','Restrained','Prone'].forEach(function(x){if(has(att,x))h.push('disadv: attacker '+x);});if(has(att,'Invisible'))h.push('adv: attacker Invisible');}
+  return h;}
+function actHead(){var a=ui.act,d=a.d,x=d.kind==='atk'?(d.atk.type[0].toUpperCase()+d.atk.type.slice(1)+' '+sgn(d.atk.bonus)+(d.atk.reach?', reach '+d.atk.reach+' ft.':'')+(d.atk.range?', range '+d.atk.range+' ft.':''))
+    :('DC '+d.save.dc+' '+['Str','Dex','Con','Int','Wis','Cha'][d.save.ab]+' save'+(d.succ==='half'?', half on a success':d.succ?'':', nothing on a success'));
+  return '<div class="acth"><span><b>'+esc(a.n)+'</b> \u00b7 '+esc(x)+(d.rider?' \u00b7 then DC '+d.rider.dc+' '+['Str','Dex','Con','Int','Wis','Cha'][d.rider.ab]+' save':'')+'</span><button data-act="actx">Cancel</button></div>';}
+function actRows(T){var a=ui.act,att=findC(a.id);if(!T.length)return '<div class="tgh">Tap the target'+(a.d.kind==='save'?'s':'')+' in the list</div>';
+  return '<div class="tgl">'+T.map(function(t){var o=actOut(t),atk=a.d.kind==='atk',hit=o==='hit'||o==='rsave',H=atk?atkHints(att,t,a.d):[];
+    if(!atk&&o==='fail'&&!ui.out[t.id]&&actOut(t)==='fail'&&t.conds.some(function(x){return ['Paralyzed','Stunned','Unconscious','Petrified'].indexOf(x)>=0;})&&(a.d.save.ab<2))H.push('auto-fail');
+    return '<div class="tgr"><span class="tn"><b>'+esc(t.name)+'</b>'+(atk?' <small>AC '+effAC(t)+'</small>':'')+H.map(function(x){return '<span class="hint">'+esc(x)+'</span>';}).join('')+'</span>'+
+      (atk?'<button class="oc'+(hit?' ok':'')+'" data-act="tout" data-id="'+t.id+'">'+(hit?'Hit':'Miss')+'</button>'+(a.d.rider&&hit?'<button class="oc'+(o==='hit'?' ok':'')+'" data-act="trs" data-id="'+t.id+'">'+(o==='hit'?'Failed':'Saved')+'</button>':'')
+        :'<button class="oc'+(o==='fail'?' ok':'')+'" data-act="tout" data-id="'+t.id+'">'+(o==='fail'?'Failed':'Saved')+'</button>')+'</div>';}).join('')+'</div>';}
+// Per target: share of the damage (1, 0.5, 0) and whether statuses apply
+function actFx(t){var a=ui.act,o=actOut(t);if(a.d.kind==='atk')return o==='hit'?[1,true]:o==='rsave'?[1,false]:[0,false];
+  return o==='fail'?[1,true]:[a.d.succ==='half'?0.5:0,false];}
+function actSum(T){var a=ui.act;if(!T.length)return '';var base=padSum(Object.keys(ui.pend)),k={};T.forEach(function(t){var o=actOut(t);k[o]=(k[o]||0)+1;});
+  var L={hit:'hit',miss:'missed',rsave:'hit (saved)',fail:'failed',save:'saved'},cnt=Object.keys(k).map(function(x){return k[x]+' '+L[x];}).join(', ');
+  return (T.every(function(t){return actFx(t)[0]===0&&!actFx(t)[1];})?'':base+' \u00b7 ')+cnt;}
+function actApply(T){var a=ui.act,att=findC(a.id);if(!att||!T.length)return;
+  snap(a.n+' \u2192 '+T.map(function(t){return t.name;}).join(', '));
+  var SL=padSlots(),D=SL.filter(function(x){return !SPEC[x.dt];}),out=[],conc=[],stT=[];
+  T.forEach(function(t){var f=actFx(t),tot=0,nt=[];
+    if(f[0]>0)D.forEach(function(x){var r=typed(t,Math.floor(x.v*f[0]),x.dt);tot+=r[0];if(r[1])nt.push(r[1]);});
+    if(tot>0){dmg(t,tot);if(ui.mx)maxDown(t,tot);var ci=t.conds.indexOf('Concentrating');if(ci>=0){if(t.hp<=0){t.conds.splice(ci,1);conc.push(esc(t.name)+' loses concentration (0 HP)');}else conc.push(esc(t.name)+': Con save DC '+Math.min(30,Math.max(10,Math.floor(tot/2))));}}
+    if(f[1]){stT.push(t);SL.forEach(function(x){if(x.dt==='heal')heal(t,x.v);else if(x.dt==='temp')t.temp=Math.max(t.temp,x.v);else if(x.dt==='maxhp')maxDown(t,x.v);});}
+    var o=actOut(t);out.push(esc(t.name)+' '+(o==='miss'?'missed':o==='save'&&!tot?'saved':tot+(o==='save'?' (saved)':'')+(nt.length?' <small>('+nt.join('; ')+')</small>':'')));});
+  var on=Object.keys(ui.pend).filter(function(x){return ui.pend[x];}),sk=stT.length?applyPend(stT):[];
+  var msg='<b>'+esc(a.n)+':</b> '+out.join(' \u00b7 ');if(on.length&&stT.length)msg+='<br><b>'+on.map(function(x){return esc(nm(x));}).join(', ')+'</b> \u2192 '+stT.map(function(t){return esc(t.name);}).join(', ')+(sk.length?' (immune: '+sk.join(', ')+')':'');
+  if(conc.length)msg+='<br><b>Concentration:</b> '+conc.join(' \u00b7 ');
+  var how=a.how;ui.act=null;ui.out={};
+  ui.noSnap=true;doHow(att,how);ui.noSnap=false;toast(msg);finishPad();}
 function bySize(m){return function(a,b){return rawOf(m,a).length-rawOf(m,b).length;};}
 function mPips(c,P,q,key,ro){var left=mLeft(c,P,q),h='';for(var i=0;i<q.count;i++)h+='<button class="mp'+(i<left?' on':'')+'"'+(ro?' tabindex="-1" disabled':' data-act="mpip" data-i="'+key+'" data-q="'+q.i+'" data-d="'+(i<left?1:-1)+'"')+' aria-label="'+(i<left?'Use one':'Give one back')+'"></button>';return h;}
 function tcCard(c,m,p,secLab,kids,sub,why,P){
@@ -1010,7 +1080,8 @@ function tcCard(c,m,p,secLab,kids,sub,why,P){
     :mine?'<button class="tg on" data-act="unuse" data-i="'+p.key+'" title="Tap to undo">Used \u21ba</button>':why?'':'<button class="tg" data-act="use" data-i="'+p.key+'">Use</button>';
   var lt=p.uses&&!sub?usesLeft(c,p):null;
   if(q&&mUsed(c,q))mine=true;if(mr)mine=true;
-  return '<div class="a'+(sub?' na':'')+(sp?' spent':'')+(mine?' used':'')+(p.kind==='multi'?' multi'+(kids.length>1?' wide':''):'')+(p.table?' wide':'')+'">'+btn+
+  var tg=ui.act&&ui.act.id===c.id&&ui.act.how.i===p.key&&!sub;
+  return '<div class="a'+(tg?' tgt':'')+(sub?' na':'')+(sp?' spent':'')+(mine?' used':'')+(p.kind==='multi'?' multi'+(kids.length>1?' wide':''):'')+(p.table?' wide':'')+'">'+btn+
     '<b>'+esc(p.n)+(secLab?'<span class="sec">'+secLab+'</span>':'')+limHTML(p).replace(/(\d+)\/Day</,function(x,n){return lt!=null&&lt<+n?n+'/Day \u00b7 '+lt+' left<':x;})+'</b>'+body+'</div>';}
 function renderTurn(){
   var el=$('#turn');
@@ -1174,7 +1245,7 @@ function wheelSettle(el){clearTimeout(el._st);el._st=setTimeout(function(){var k
   if(el.id==='twheel'){var N=TL().length;if(k<N||k>=2*N){var nk=N+((k%N)+N)%N;ui.ignoreUntil=Date.now()+80;el.scrollTop=el.scrollTop+(nk-k)*IH;k=nk;}}
   if(Math.abs(el.scrollTop-k*IH)>1)el.scrollTo({top:k*IH,behavior:'smooth'});},110);}
 // Keep the Apply label and the slot tabs current while a wheel spins (no full redraw, so the scroll isn't interrupted)
-function padLive(){var b=$('#pad [data-act=papply]');if(b){var sm=padSum(Object.keys(ui.pend));b.disabled=!sm;b.innerHTML=sm?'Apply: '+sm:'Pick an amount or a status';}
+function padLive(){var b=$('#pad [data-act=papply]');if(b&&ui.act){b.innerHTML='Apply: '+actSum(S.list.filter(function(c){return ui.sel[c.id];}));b=null;}if(b){var sm=padSum(Object.keys(ui.pend));b.disabled=!sm;b.innerHTML=sm?'Apply: '+sm:'Pick an amount or a status';}
   var t=$('#pad .slots [data-k="'+(ui.ax||0)+'"]');if(t)t.innerHTML=(ui.ax?'+ Extra ':'Main ')+'<b>'+ui.amt+'</b>'+(ui.dtype?' '+DTI2(ui.dtype):'');}
 var WHEEL='';
 (function(){var s='<div class="sp"></div>';for(var i=0;i<=WMAX;i++)s+='<div class="wi" data-act="wi" data-n="'+i+'">'+i+'</div>';WHEEL=s+'<div class="sp"></div>';})();
@@ -1206,7 +1277,8 @@ function spellGrid(T){
 function renderPad(){
   var T=S.list.filter(function(c){return ui.sel[c.id];});
   var pad=$('#pad');
-  var on=T.length>0&&!ui.present;
+  if(ui.act&&!findC(ui.act.id))ui.act=null;
+  var on=(T.length>0||!!ui.act)&&!ui.present;
   pad.hidden=!on;
   document.body.classList.toggle('padon',on);
   document.body.classList.toggle('menuon',on&&!!ui.menu);
@@ -1214,17 +1286,17 @@ function renderPad(){
   var names=T.map(function(c){return esc(c.name);}).join(', ');
   var fx=curFx(),pk=Object.keys(ui.pend),pn=pk.length,sum=padSum(pk),nod=SPEC[slot(0).dt]&&(!ui.ex||SPEC[slot(1).dt]);
   if(nod){ui.half=false;ui.mx=false;}
-  pad.innerHTML='<div class="pi">'+(fx?'<div class="fxb">⚡ <b>'+esc(fx.name)+':</b> '+esc(fxSum(fx))+' <button data-act="fxdone">Done</button></div>':'')+'<div class="pt"><div class="who"><b>'+T.length+' selected</b> · '+names+'</div><button data-act="desel">Deselect</button></div>'+
+  pad.innerHTML='<div class="pi">'+(fx?'<div class="fxb">⚡ <b>'+esc(fx.name)+':</b> '+esc(fxSum(fx))+' <button data-act="fxdone">Done</button></div>':'')+(ui.act?actHead()+actRows(T):'<div class="pt"><div class="who"><b>'+T.length+' selected</b> · '+names+'</div><button data-act="desel">Deselect</button></div>')+
    '<div class="pmain"><div class="wheelbox"><div class="wheel" id="wheel" aria-label="Amount wheel">'+WHEEL+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount" tabindex="-1"></div>'+
    '<div class="wheelbox tbox"><div class="wheel twh" id="twheel" aria-label="Type wheel: tap the middle for the list">'+tWheel()+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div></div>'+
    '<div class="pr">'+(ui.ex?'<div class="amtrow"><div class="slots">'+[0,1].map(function(i){var sv=slot(i);return '<button class="'+(ui.ax===i?'on':'')+'" data-act="pslot" data-k="'+i+'">'+(i?'+ Extra ':'Main ')+'<b>'+sv.v+'</b>'+(sv.dt?' '+DTI2(sv.dt):'')+'</button>';}).join('')+'</div></div>':'')+
-   '<div class="pacts"><button class="tg'+(ui.half?' on':'')+'" data-act="ptog" data-k="half" aria-pressed="'+!!ui.half+'"'+(nod?' disabled':'')+'>Half</button>'+
+   '<div class="pacts">'+(ui.act?'':'<button class="tg'+(ui.half?' on':'')+'" data-act="ptog" data-k="half" aria-pressed="'+!!ui.half+'"'+(nod?' disabled':'')+'>Half</button>')+
    '<button class="tg'+(ui.ex?' on':'')+'" data-act="ptog" data-k="extra" aria-pressed="'+!!ui.ex+'"'+' title="A second amount with its own damage type (or max HP only), applied together">+ Extra</button>'+
    '<button class="tg d'+(ui.mx?' on':'')+'" data-act="ptog" data-k="maxdn" aria-pressed="'+!!ui.mx+'"'+(nod?' disabled':'')+' title="Also lower max HP by the damage taken (e.g. Life Drain)">Max HP \u2212</button>'+
-   '<button class="tg'+(pn?' on':'')+'" data-act="padstatus">Status'+(pn?' ('+pn+')':'')+' ▾</button><button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove" aria-label="Remove from encounter" title="Remove from encounter">'+(ui.confirmRemove?'🗑 Sure?':'🗑')+'</button>'+
-   '<button data-act="padmore" aria-expanded="'+!!ui.more+'">'+(ui.more?'Less \u25b4':'More \u25be')+'</button>'+
-   (ui.more?'<button data-act="padhp" data-k="maxreset">Reset max</button><button data-act="padgroup">'+(T.some(function(c){return c.cg;})&&T.every(function(c){return c.cg&&c.cg===T[0].cg;})?'Ungroup':'Group\u2026')+'</button>':'')+'</div>'+
-   '<button class="papply" data-act="papply"'+(sum?'':' disabled')+'>'+(sum?'Apply: '+sum:'Pick an amount or a status')+'</button></div></div>'+
+   '<button class="tg'+(pn?' on':'')+'" data-act="padstatus">Status'+(pn?' ('+pn+')':'')+' ▾</button>'+(ui.act?'':'<button class="rm'+(ui.confirmRemove?' armed':'')+'" data-act="padremove" aria-label="Remove from encounter" title="Remove from encounter">'+(ui.confirmRemove?'🗑 Sure?':'🗑')+'</button>'+
+   '<button data-act="padmore" aria-expanded="'+!!ui.more+'">'+(ui.more?'Less \u25b4':'More \u25be')+'</button>')+
+   (ui.more&&!ui.act?'<button data-act="padhp" data-k="maxreset">Reset max</button><button data-act="padgroup">'+(T.some(function(c){return c.cg;})&&T.every(function(c){return c.cg&&c.cg===T[0].cg;})?'Ungroup':'Group\u2026')+'</button>':'')+'</div>'+
+   (ui.act?(T.length?'<button class="papply" data-act="papply">Apply: '+actSum(T)+'</button>':''):'<button class="papply" data-act="papply"'+(sum?'':' disabled')+'>'+(sum?'Apply: '+sum:'Pick an amount or a status')+'</button>')+'</div></div>'+
    (ui.menu?menuHTML(T):'')+(ui.tpk?tPick():'')+'</div>';
   var mn=pad.querySelector('.menu');if(mn){mn.style.maxHeight='';mn.style.maxHeight=Math.max(200,mn.getBoundingClientRect().bottom-8)+'px';}
   var w=$('#wheel');
@@ -1844,22 +1916,13 @@ $('#turn').addEventListener('click',function(e){
   else if(a==='tinfo'){S.stat=c.kind==='mon'?c.monId:'pc';S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
   else if(a==='tedit'){S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
   else if(a==='spent'){c.spent=c.spent||{};c.spent[b.dataset.i]=!c.spent[b.dataset.i];}
-  else if(a==='use'||a==='unuse'){var mm=MON.find(function(x){return x.id===c.monId;});if(mm){snap((a==='use'?'use ':'undo ')+b.dataset.i);
-    var AA=actsOf(mm),pk=AA.find(function(x){return x.key===b.dataset.i;});
-    if(a==='unuse'&&pk&&!(c.ue&&c.ue[pk.sec]===pk.key)){if(pk.rech&&c.spent)delete c.spent[pk.key];else if(pk.uses&&c.uses&&c.uses[pk.key])c.uses[pk.key]--;}
-    else useAct(c,AA,b.dataset.i,a==='use');}}
+  else if(a==='use'||a==='unuse'||a==='mpip'||a==='ray'||a==='mrep'){var how={a:a,i:b.dataset.i,q:b.dataset.q,d:b.dataset.d,r:b.dataset.r};
+    if(!actStart(c,how))doHow(c,how);}
   else if(a==='cast'){var ms=MON.find(function(x){return x.id===c.monId;});if(ms){var A2=actsOf(ms),ps=A2.find(function(x){return x.key===b.dataset.i;}),k2='sp:'+b.dataset.s,P2=mPools(A2),sq=poolOf(P2,'Spellcasting')||repOf(P2,'Spellcasting');c.uses=c.uses||{};
     if(b.classList.contains('on')){snap('cast '+b.dataset.s);c.uses[k2]=(c.uses[k2]||0)+1;c.ue=c.ue||{};
       if(sq&&ps&&ps.sec==='a'){var pq=sq.rep?repPool(P2,sq):sq;if(c.ue.a==='M'||!c.ue.a){mSpend(c,pq,1);c.msp=c.msp||{};c.msp[k2]=(c.msp[k2]||0)+1;c.mspq=pq.i;}}
       else if(ps&&!c.ue[ps.sec])c.ue[ps.sec]=ps.key;}
     else if(c.uses[k2]){snap('restore '+b.dataset.s);c.uses[k2]--;if(c.msp&&c.msp[k2]&&P2){c.msp[k2]--;mSpend(c,P2[c.mspq||0],-1);}}}}
-  else if(a==='mpip'||a==='ray'||a==='mrep'){var mq=MON.find(function(x){return x.id===c.monId;});if(mq){var A3=actsOf(mq),P3=mPools(A3),pk3=A3.find(function(x){return x.key===b.dataset.i;});
-    if(a==='mpip'){var q3=P3[+b.dataset.q],d3=+b.dataset.d;if(d3>0&&mLeft(c,P3,q3)<=0)return;snap('multiattack: '+(pk3?pk3.n:''));mSpend(c,q3,d3);}
-    else if(a==='ray'){var q4=P3[+b.dataset.q],r4=+b.dataset.r;c.ray=c.ray||{};c.ray[pk3.key]=c.ray[pk3.key]||{};var on4=!c.ray[pk3.key][r4];
-      if(on4&&mLeft(c,P3,q4)<=0)return;snap((on4?'':'undo ')+pk3.table.rows[r4].n);if(on4)c.ray[pk3.key][r4]=1;else delete c.ray[pk3.key][r4];mSpend(c,q4,on4?1:-1);}
-    else{var d5=+b.dataset.d,mainq=repPool(P3,repOf(P3,pk3.n));if(d5>0&&mLeft(c,P3,mainq)<=0)return;snap((d5>0?'':'undo ')+pk3.n);c.mrep=c.mrep||{};
-      if(d5>0){c.mrep[pk3.key]=1;mSpend(c,mainq,1);if(pk3.rech){c.spent=c.spent||{};c.spent[pk3.key]=true;}if(pk3.uses){c.uses=c.uses||{};c.uses[pk3.key]=(c.uses[pk3.key]||0)+1;}}
-      else{delete c.mrep[pk3.key];mSpend(c,mainq,-1);if(pk3.rech&&c.spent)delete c.spent[pk3.key];if(pk3.uses&&c.uses&&c.uses[pk3.key])c.uses[pk3.key]--;}}}}
   else if(a==='showall'){ui.showAll=!ui.showAll;}
   else if(a==='cond'){snap('remove '+b.dataset.c);var i=c.conds.indexOf(b.dataset.c);if(i>=0)c.conds.splice(i,1);incSync(c,false);}
   else if(a.indexOf('ds')===0){snap('death save');dsAct(c,a,b);}
@@ -1927,6 +1990,12 @@ padEl.addEventListener('click',function(e){
   if(a==='desel'){finishPad();}
   else if(a==='pslot'){swapSlot(+b.dataset.k);}
   else if(a==='ptog'){var tk=b.dataset.k;if(tk==='half'){ui.half=!ui.half;var fh=curFx();if(fh&&fh.st){if(ui.half)delete ui.pend[fh.st];else ui.pend[fh.st]=true;}}else if(tk==='extra'){ui.ex=!ui.ex;if(ui.ex)swapSlot(1);else{swapSlot(0);ui.amtO=0;ui.dtO='';}}else ui.mx=!ui.mx;}
+  else if(a==='actx'){ui.act=null;ui.out={};finishPad();}
+  else if(a==='tout'||a==='trs'){var tt=findC(b.dataset.id),o0=actOut(tt);
+    ui.out[tt.id]=a==='trs'?(o0==='hit'?'rsave':'hit'):ui.act.d.kind==='atk'?(o0==='miss'?'hit':'miss'):(o0==='fail'?'save':'fail');
+    // a single target that is missed has nothing to apply: finish straight away
+    if(ui.act.d.kind==='atk'&&ui.out[tt.id]==='miss'&&T.length===1){actApply(T);save();renderBoard();return;}}
+  else if(a==='papply'&&ui.act){actApply(T);save();renderBoard();return;}
   else if(a==='papply'){
     var pk=Object.keys(ui.pend),SL=padSlots(),D=SL.filter(function(x){return !SPEC[x.dt];});if(!SL.length&&!pk.length)return;
     snap(padSum(pk).replace(/<[^>]+>/g,'')||'apply');
