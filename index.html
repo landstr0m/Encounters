@@ -187,6 +187,7 @@ a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-
 .pcsp summary{cursor:pointer;font-weight:700;padding:4px 0}.spl{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.spl button{min-height:38px}.spl small{opacity:.6;margin-right:2px}
 .acth{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:.92rem}.acth button{min-height:36px}
 .rid{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0}.rid label{display:flex;gap:6px;align-items:center;border:1px dashed var(--accent);border-radius:8px;padding:2px 6px}.rid input{width:3em;min-height:34px;text-align:center;font:inherit}
+.ptag{display:inline-block;font-size:.75rem;border:1px solid var(--accent);border-radius:9px;padding:0 6px;margin:2px 4px 0 0}.pgrp button.on{outline:2px solid var(--accent)}
 .fxt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px}.fxt button{min-height:36px}.fxs{display:inline-flex;gap:2px}
 .data h3{margin:14px 0 4px;border-bottom:1px solid var(--line,#8884);padding-bottom:2px}
 .acth>.aslot{flex:0 0 auto;display:flex;gap:4px;align-items:center}.aslot button{min-width:36px;padding:0}
@@ -1606,15 +1607,23 @@ function addTopHTML(){
 function partyHTML(){
   var q=(ui.pq||'').trim().toLowerCase(),nd=S.lib.filter(khpDiff).length;
   var inE=function(l){return S.list.some(function(c){return c.libId===l.id;});};
-  var L=S.lib.filter(function(l){return !q||(l.name+' '+(l.cls||'')).toLowerCase().indexOf(q)>=0;});
+  // Groups / tags (l.tags): one character can be in several (campaigns, parties, guest lists); ui.pg filters, '-' = untagged
+  var G={};S.lib.forEach(function(l){(l.tags||[]).forEach(function(t){G[t]=(G[t]||0)+1;});});var gk=Object.keys(G).sort(),pg=ui.pg&&(ui.pg==='-'||G[ui.pg])?ui.pg:'';
+  var inG=function(l){return !pg||(pg==='-'?!(l.tags||[]).length:(l.tags||[]).indexOf(pg)>=0);};
+  var L=S.lib.filter(function(l){return inG(l)&&(!q||(l.name+' '+(l.cls||'')+' '+(l.tags||[]).join(' ')).toLowerCase().indexOf(q)>=0);});
   var rank=function(l){return S.atTable[l.id]?0:inE(l)?2:1;};
   L=L.slice().sort(function(a,b){return rank(a)-rank(b)||a.name.localeCompare(b.name);});
   var row=function(l){var e=inE(l);
-    return '<div class="lib"><label><input type="checkbox" data-act="at" data-l="'+l.id+'"'+(S.atTable[l.id]?' checked':'')+(e?' disabled':'')+'><span><b>'+esc(l.name)+'</b><br><span class="meta">'+(l.chk?'<b>set AC/HP</b> · ':'')+'AC '+l.ac+' · HP '+l.hp+(khpDiff(l)?' (Kanka '+l.hpEst+')':'')+' · init '+sgn(l.ib)+(l.cls?' · '+esc(l.cls):'')+(e?' · in encounter':'')+'</span></span></label>'+
+    return '<div class="lib"><label><input type="checkbox" data-act="at" data-l="'+l.id+'"'+(S.atTable[l.id]?' checked':'')+(e?' disabled':'')+'><span><b>'+esc(l.name)+'</b><br><span class="meta">'+(l.chk?'<b>set AC/HP</b> · ':'')+'AC '+l.ac+' · HP '+l.hp+(khpDiff(l)?' (Kanka '+l.hpEst+')':'')+' · init '+sgn(l.ib)+(l.cls?' · '+esc(l.cls):'')+(e?' · in encounter':'')+' · <i>'+[l.k?'Kanka':'',l.ddb?'D&amp;D Beyond':''].filter(Boolean).join(' + ')+(l.k||l.ddb?'':'by hand')+'</i>'+((l.tags||[]).length?'<br>'+l.tags.map(function(t){return '<span class="ptag">'+esc(t)+'</span>';}).join(''):'')+'</span></span></label>'+
+      '<button data-act="tagl" data-l="'+l.id+'" aria-label="Groups for '+esc(l.name)+'" title="Groups">🏷</button>'+
       (khpDiff(l)?'<button data-act="usekhp" data-l="'+l.id+'" title="Set max HP to the Kanka estimate">Use Kanka HP</button>':'')+
-      '<button class="x" data-act="dellib" data-l="'+l.id+'" aria-label="Delete '+esc(l.name)+' from library">×</button></div>';};
+      '<button class="x" data-act="dellib" data-l="'+l.id+'" aria-label="Delete '+esc(l.name)+' from library">×</button></div>'+
+      (ui.tagL===l.id?'<div class="row"><input data-tg="'+l.id+'" type="text" list="tagdl" placeholder="Groups, comma separated, e.g. Blackrock, Guests" value="'+esc((l.tags||[]).join(', '))+'" aria-label="Groups for '+esc(l.name)+'"></div>':'');};
   var tk=S.lib.filter(function(l){return S.atTable[l.id]&&!inE(l);});
   return mergeHTML()+'<div class="row"><button data-act="kanka" style="flex:1">Update from Kanka</button><button data-act="ddb" style="flex:1">Update from D&amp;D Beyond</button>'+(nd?'<button data-act="usekhp" data-l="all">Use Kanka HP for all ('+nd+')</button>':'')+'</div>'+
+   (gk.length?'<div class="fxt pgrp"><b>Groups</b> <button class="'+(pg?'':'on')+'" data-act="pgrp" data-g="">All</button>'+gk.map(function(t){return '<button class="'+(pg===t?'on':'')+'" data-act="pgrp" data-g="'+esc(t)+'">'+esc(t)+' <small>'+G[t]+'</small></button>';}).join('')+'<button class="'+(pg==='-'?'on':'')+'" data-act="pgrp" data-g="-">No group</button>'+
+     (pg&&pg!=='-'?'<button data-act="pgtick" title="Tick everyone in this group">Tick all in '+esc(pg)+'</button>':'')+'</div>':'')+
+   '<datalist id="tagdl">'+gk.map(function(t){return '<option value="'+esc(t)+'">';}).join('')+'</datalist>'+
    '<input class="search" id="pq" type="search" placeholder="Search '+S.lib.length+' characters" value="'+esc(ui.pq||'')+'" aria-label="Search characters">'+
    '<div id="plist">'+(L.map(row).join('')||'<p class="muted">No character matches.</p>')+'</div>'+
    '<div class="row"><input id="newchar" type="text" placeholder="Name (optional: , AC 15, HP 28, init +3, lvl 2)" aria-label="New character"><button data-act="newchar">Save</button></div>'+
@@ -2336,6 +2345,9 @@ dr.addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;
   var act=b.dataset.act;
   if(act==='qty'||act==='at'||b.tagName==='SELECT')return;
+  if(act==='pgrp'){ui.pg=b.dataset.g;renderDrawer();return;}
+  if(act==='tagl'){ui.tagL=ui.tagL===b.dataset.l?null:b.dataset.l;renderDrawer();var ti=dr.querySelector('[data-tg]');if(ti)ti.focus();return;}
+  if(act==='pgtick'){S.lib.forEach(function(l){if((l.tags||[]).indexOf(ui.pg)>=0&&!S.list.some(function(c){return c.libId===l.id;}))S.atTable[l.id]=true;});save();renderDrawer();return;}
   if(act!=='libclear')ui.confirmLib=false;
   if(act==='export'){doExport();renderDrawer();return;}
   if(act==='expmon'){ui.expMon=b.checked;return;}
@@ -2450,6 +2462,7 @@ dr.addEventListener('change',function(e){
     else if(f==='cg'){setGroup([c],t.value);var ii=dr.querySelector('[data-ed="init"]');if(ii)ii.value=c.init==null?'':c.init;}
     save();renderBoard();return;
   }
+  if(t.dataset.tg){var lt=S.lib.find(function(x){return x.id===t.dataset.tg;});if(lt){lt.tags=uniq(t.value.split(',').map(function(x){return x.trim();}));save();renderDrawer();}return;}
   if(t.dataset.act==='at'){S.atTable[t.dataset.l]=t.checked;save();var ft=dr.querySelector('.dfoot');if(ft){var tmp=document.createElement('div');tmp.innerHTML=partyHTML();ft.outerHTML=tmp.querySelector('.dfoot').outerHTML;}}
   if(t.id==='fxvis')ui.fx.vis=t.checked;
   if(['fxdt','fxsv','fxst','fxdur'].indexOf(t.id)>=0)ui.fx[t.id.slice(2)]=t.value;

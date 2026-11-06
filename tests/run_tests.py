@@ -1383,6 +1383,20 @@ def effect_templates_and_full_backup(b):
     check(a.e("!!MON.find(function(m){return m.id==='hb-x'})"), "monster file merged after reload")
 
 
+@test
+def party_groups(b):
+    a = App(b)
+    a.e("S.lib=[{id:'l1',name:'Aer',ac:13,hp:14,ib:2},{id:'l2',name:'Bo',ac:15,hp:20,ib:0},{id:'l3',name:'Cy',ac:12,hp:9,ib:1}];S.atTable={};S.tab='add';S.sub='party';ui.drawer=true;save();renderDrawer()")
+    a.click('[data-act="tagl"][data-l="l1"]'); a.pg.fill('[data-tg="l1"]', "Blackrock, Guests"); a.pg.press('[data-tg="l1"]', "Enter"); a.pg.locator('#pq').click()
+    a.click('[data-act="tagl"][data-l="l2"]'); a.pg.fill('[data-tg="l2"]', "Blackrock"); a.pg.locator('#pq').click()
+    eq(a.j("S.lib.map(function(l){return l.tags||[]})"), [["Blackrock", "Guests"], ["Blackrock"], []], "tags saved")
+    a.click('[data-act="pgrp"][data-g="Blackrock"]')
+    eq(a.e("document.querySelectorAll('#plist [data-act=at]').length"), 2, "filtered to group")
+    a.click('[data-act="pgtick"]'); eq(a.j("[S.atTable.l1,S.atTable.l2,!!S.atTable.l3]"), [True, True, False], "tick whole group")
+    a.click('[data-act="pgrp"][data-g="-"]'); eq(a.e("document.querySelectorAll('#plist [data-act=at]').length"), 1, "no-group filter")
+    check(not a.errors, a.errors)
+
+
 def main():
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def log_message(self, *a):

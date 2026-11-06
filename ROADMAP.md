@@ -79,7 +79,7 @@ Open follow-ups from A–G:
 
 ### Character library (📋)
 - ✅ Search, ticked first, pinned Add, Delete all; Kanka and D&D Beyond import into one library.
-- 📋 Groups / tags (e.g. "Blackrock regulars", "guest players") and filtering by group; source shown per character.
+- ✅ Groups / tags (e.g. "Blackrock regulars", "guest players"), filter by group, tick whole group; source shown per character.
 
 ### Data and edition (📋)
 - Local monster images (kept out of the repo).
@@ -119,7 +119,7 @@ Score 0–5 against popular trackers (D&D Beyond Encounter Builder, Improved Ini
 | Spell / rules lookup | 4 | 4 | Tab renamed Spells & Conditions; PHB spells partly; local PHB import pending |
 | Lair actions / hazards that act | 4 | 4 | Templates + saved templates; start-of-turn damage one tap. Missing "after N rounds" |
 | Building encounters on a phone | 4 | 4 | |
-| Party library management | 3 | 3 | Groups/tags planned |
+| Party library management | 3 | 4 | Groups/tags, filter, tick a whole group, source per character |
 | Character import | 3 | 4 | Kanka + D&D Beyond; links found in Kanka descriptions import automatically (name/class checked) |
 | Player view on another device | 2 | 3 | Table view line added; still same browser only |
 | Combat log / session record | – | 4 | Per encounter, downloadable; not yet fed into reports |

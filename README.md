@@ -194,6 +194,9 @@ Then bump `CACHE` in `sw.js` so installed apps pick up the change. Log bugs and 
 - `monsters.json` **temporarily contains the 2024 Monster Manual** (imported from the owner's own book for personal use at his table) to make testing easier. Before v1.0 it goes back to SRD-only, and the book data moves to a local file imported on the device (**Data → Monster files**), which is never committed.
 - App data stays in your browser on the current device. Export it regularly as a backup.
 
+## Character groups
+In Add → Party, tap 🏷 on a character and type its groups, comma separated (e.g. `Blackrock, Guests`); a character can be in several. Group buttons above the search filter the list (**No group** shows untagged); **Tick all in <group>** ticks the whole group for the next encounter. Each row also shows where the character came from (Kanka, D&D Beyond or by hand). Groups survive Kanka / D&D Beyond updates and are in the backup.
+
 ## Data tab
 - **Backup:** *Export everything* writes one file with the tracker, saved encounters, characters, effect templates, combat logs, settings and (ticked by default) your monster files. *Import* restores all of it on any device.
 - **Session:** prepared encounters, combat log, table window.
