@@ -2018,7 +2018,7 @@ function ddbSet(l,k,v,p){var A=['str','dex','con','int','wis','cha'];
 function ddbUpdate(P){
   var nw=0,up=0;ui.merge=(ui.merge||[]).filter(function(){return false;});
   P.forEach(function(p){
-    var l=S.lib.find(function(x){return x.ddb===p.id;})||S.lib.find(function(x){return !x.ddb&&x.name.toLowerCase()===p.name.toLowerCase();});
+    var l=S.lib.find(function(x){return x.ddb===p.id;})||(p.kanka?S.lib.find(function(x){return x.k===p.kanka;}):null)||S.lib.find(function(x){return !x.ddb&&x.name.toLowerCase()===p.name.toLowerCase();});
     if(!l){l={id:'l'+(S.libNext++),name:p.name,ac:10,hp:10,ib:0};S.lib.push(l);nw++;DDBF.forEach(function(f){var v=ddbVal(p,f[0]);if(v!=null)ddbSet(l,f[0],v,p);});}
     else{up++;DDBF.forEach(function(f){var k=f[0],v=ddbVal(p,k),c=libVal(l,k),J=JSON.stringify;if(v==null)return;
       if(c==null||c===''){ddbSet(l,k,v,p);return;}

@@ -112,6 +112,18 @@ def convert(d):
     }
 
 
+def check_match(k, p):
+    """'' if a Kanka character and a D&D Beyond sheet look like the same character, else the reason."""
+    w = lambda n: set(re.findall(r"[a-z]+", n.lower()))
+    if not (w(k["name"]) & w(p["name"])):
+        return f"name {p['name']!r} vs {k['name']!r}"
+    kc = {c["class"] for c in k.get("parsed") or []}
+    dc = {c["class"] for c in p.get("parsed") or []}
+    if kc and dc and not (kc & dc):
+        return f"class {', '.join(sorted(dc))} vs {', '.join(sorted(kc))}"
+    return ""
+
+
 def main():
     if len(sys.argv) == 3 and sys.argv[1] == "--file":
         raw = json.load(open(sys.argv[2], encoding="utf-8"))
@@ -123,11 +135,27 @@ def main():
             m = re.search(r"(\d{5,})", line.split("#")[0])
             if m and m.group(1) not in ids:
                 ids.append(m.group(1))
+    # Links found by the Kanka sync (players.json "ddb"), cross-checked by name and class before linking
+    kan = {}
+    if os.path.exists("players.json"):
+        for k in json.load(open("players.json", encoding="utf-8")):
+            for d in k.get("ddb") or []:
+                cid = str(d["id"])
+                kan.setdefault(cid, k)
+                if cid not in ids:
+                    ids.append(cid)
     old = {str(p["id"]): p for p in (json.load(open(OUT, encoding="utf-8")) if os.path.exists(OUT) else [])}
     out, bad = [], 0
     for cid in ids:
         try:
             p = convert(fetch(cid)); out.append(p); print(f"OK   {cid} {p['name']} (AC {p['ac']}, HP {p['hp']}, {len(p['spells'])} spells)")
+            k = kan.get(cid)
+            if k:
+                why = check_match(k, p)
+                if why:
+                    p["kankaMismatch"] = why; print(f"WARN {cid}: Kanka link from {k['name']} not used ({why})")
+                else:
+                    p["kanka"] = k["id"]; print(f"     linked to Kanka {k['name']}")
         except Exception as e:  # keep the last good copy
             bad += 1; print(f"FAIL {cid}: {e}")
             if cid in old:

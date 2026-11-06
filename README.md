@@ -128,7 +128,7 @@ After an update, open the app once while online, then close and reopen it to get
 - The initiative strip is hidden until combat starts.
 
 ## Kanka player sync
-- The sync also scans each character's public description, attributes, posts and links for D&D Beyond sheet links and saves them as `ddb` in `players.json` (the Action log lists what it found).
+- The sync also scans each character's public description, attributes, posts and links for D&D Beyond sheet links and saves them as `ddb` in `players.json` (the Action log lists what it found). The same run then imports those sheets into `dndbeyond.json`, but only links them to the Kanka character if the name and class match (otherwise the log says why); no need to add them to `dndbeyond.txt`.
 
 `tools/kanka_players.py` (Python standard library only) reads the player characters of the Blackrock campaign (`CAMPAIGN` at the top of the script) and writes `players.json`.
 
