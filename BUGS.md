@@ -2,6 +2,14 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Multi-ray spells, upcasting, cast-in-action spells, Eye Rays legendary, developing statuses
+
+- Scorching Ray / Magic Missile / Eldritch Blast gave one roll and one damage; now one target pick per ray/dart/beam ("1 of 3"), same target allowed, cast spent once.
+- Player spells couldn't be upcast; **Slot − +** in the pad header now picks the slot level (upcast dice table, extra rays/darts).
+- Spells inside other actions ("casts Invisibility on itself", Oni bonus action) had no cast token; parsed as `cast` but never wired. Use / ▸ now opens the spell with the caster picked; DC from the Spellcasting action. Spells with only a condition in their text (Invisibility) now preload it.
+- Beholder Glare (legendary → Eye Rays) only showed a toast; now a result picker opens the chosen ray's targeting and spends the legendary use on Apply.
+- Petrification Ray stopped at Restrained; "Second Failure" is now parsed as a stage. `c.stg` shows the repeat save on the target's turn (Failed → Petrified instead of Restrained). Sleep (spell) already applied Incapacitated but never progressed; now Failed → Unconscious (linked to Sleep, so it ends with it). Flesh to Stone counts 3 failures / 3 successes.
+
 ## 2026-11-06 — Review and clean-up
 
 - Leftover CSS from the old pad (`.oc`, `.seg`) also matched the stat block's Failure / Success labels and the drawer's setting buttons, adding a gap after "Failure:" on cards; removed with the other unused rules (`.tgh`, `.tgl`, `.tgr`). Unused Multiattack-card branch and `ui.mode` removed. Test `action_parser_and_nested_cards` renamed `action_parser_and_cards`.

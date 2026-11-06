@@ -186,6 +186,7 @@ a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-
 .ann{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:40;padding:14px 18px;border-radius:14px;background:var(--surface);border:3px solid var(--accent);box-shadow:0 8px 30px rgba(0,0,0,.35);font-size:clamp(1.05rem,2.4vw,1.6rem);line-height:1.35;text-align:center}
 .pcsp summary{cursor:pointer;font-weight:700;padding:4px 0}.spl{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.spl button{min-height:38px}.spl small{opacity:.6;margin-right:2px}
 .acth{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:.92rem}.acth button{min-height:36px}
+.acth>.aslot{flex:0 0 auto;display:flex;gap:4px;align-items:center}.aslot button{min-width:36px;padding:0}
 .hint{display:inline-block;margin-left:6px;padding:0 6px;border-radius:999px;border:1px solid var(--line);font-size:.72rem;color:var(--warn);white-space:nowrap}
 .mline{margin-top:8px;padding:4px 8px;border-left:3px solid var(--accent);font-size:.9rem;color:var(--muted)}.mline b{color:var(--ink);margin-right:4px}
 .mpw{float:right;display:flex;gap:6px;align-items:center;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
@@ -624,6 +625,17 @@ function acHTML(c){var e=effAC(c);return e!==+c.ac?'<b class="'+acCls(c)+'">'+e+
 // c* = same, but counted on the turn of whoever applied it (the creature whose turn it was).
 var EXP={'Color Spray':'ce','Ray of Sickness':'ce','Staggering Smite':'ce','Shield':'s','Dodging':'s','Disengaged':'s','Readied':'s','Reckless':'s','Shocked':'s','Mocked':'e','Frostbitten':'e','Lethargic':'e','Commanded':'e',
  'Chilled':'cs','Stun saved':'cs','Open Hand':'cs','Guiding Bolt':'ce','Chill Touch':'ce','Starry Wisp':'ce','Mind Sliver':'ce'};
+// Developing effects: repeat the save at the end of the target's turn; enough failures turn the first status into the next.
+// c.stg[status] = {to, need, rm (replace the first status), f, s (failures, successes), ab, dc, n (source)}
+var STG={'Sleeping':{to:'Unconscious',need:1},'Flesh to Stone':{to:'Petrified',need:3,rm:1}};
+function stgSet(t,x,o,d,n){if(t.conds.indexOf(x)<0)return;t.stg=t.stg||{};t.stg[x]={to:o.to,need:o.need||1,rm:!!o.rm,f:0,s:0,ab:d.save?d.save.ab:null,dc:d.save?d.save.dc:null,n:n};}
+function stgRoll(c,x,ok){var g=(c.stg||{})[x];if(!g)return;snap((ok?'save vs ':'fail vs ')+nm(x));
+  if(ok){g.s++;if(g.s>=g.need){var i=c.conds.indexOf(x);if(i>=0)c.conds.splice(i,1);delete c.stg[x];linkSweep(c);incSync(c,false);toast(esc(c.name)+': '+esc(nm(x))+' ends');}}
+  else{g.f++;if(g.f>=g.need){if(g.rm){var j=c.conds.indexOf(x);if(j>=0)c.conds.splice(j,1);linkSweep(c);}if(c.conds.indexOf(g.to)<0&&!condBlocked(c,g.to)){c.conds.push(g.to);if(!g.rm){c.lc=c.lc||{};c.lc[g.to]=x;}}incSync(c,true);delete c.stg[x];toast(esc(c.name)+' is now '+esc(nm(g.to)));}}
+  logAdd(esc(c.name)+' \u2014 '+esc(g.n||nm(x))+': '+(ok?'saved':'failed')+(g.need>1?' ('+(ok?g.s:g.f)+'/'+g.need+')':''));}
+function stgHTML(c){var G=c.stg||{};return Object.keys(G).filter(function(x){return c.conds.indexOf(x)>=0;}).map(function(x){var g=G[x];
+  return '<div class="legr tick"><b>End of turn: '+esc(g.n||nm(x))+'</b> \u2014 '+(g.dc?'DC '+g.dc+' ':'')+(g.ab!=null?['Str','Dex','Con','Int','Wis','Cha'][g.ab]+' ':'')+'save'+(g.need>1?' ('+g.f+' failed, '+g.s+' saved of '+g.need+')':'')+
+    ' <button data-act="stg" data-c="'+esc(x)+'" data-r="f">Failed \u2192 '+esc(nm(g.to))+'</button><button data-act="stg" data-c="'+esc(x)+'" data-r="s">Saved</button></div>';}).join('');}
 function expSet(c,x){var k=EXP[x];if(!k)return;var src=k.charAt(0)==='c'?S.turnId:c.id;if(src==null)return;c.exp=c.exp||{};c.exp[x]={src:src,k:k.slice(-1),h:false};}
 // Runs as the turn passes from creature E to creature N; returns 'Name: effect' strings that ended.
 function expTick(E,N){
@@ -657,9 +669,12 @@ function remHTML(c){
     h+='<div class="legr" data-id="'+o.id+'"><b>\u25C6 '+esc(o.name)+': '+left+' legendary action'+(left>1?'s':'')+' left</b> '+
       (LA.length?LA.map(function(p){var no=(p.cost||1)>left||(o.lonce||{})[p.key];return '<button data-act="lact" data-id="'+o.id+'" data-i="'+p.key+'"'+(no?' disabled':'')+'>'+esc(p.n)+((p.cost||1)>1?' <small>('+p.cost+')</small>':'')+'</button>';}).join('')
         :'<button data-act="laspend" data-id="'+o.id+'">Use one</button>')+'<button data-act="ladis" aria-label="Dismiss">\u00D7</button></div>';
+    var pk=ui.legPick&&ui.legPick.id===o.id&&LA.length?actsOf(lm).find(function(x){return x.key===ui.legPick.t;}):null;
+    if(pk&&pk.table)h+='<div class="legr lpick"><b>'+esc(o.name)+': which result? (roll '+esc((rawOf(lm,pk).match(/roll (\d*d\d+)/)||[])[1]||'it')+')</b> '+pk.table.rows.map(function(r,ri){return '<button data-act="lray" data-r="'+ri+'"><small>'+esc(r.r)+'</small> '+esc(r.n)+'</button>';}).join('')+'<button data-act="lrayx">Cancel</button></div>';
   });
   var st=[],en=[];c.conds.forEach(function(x){var t=FX[x]||'';if(/start of each of its turns|start of its turn|starts its turn/i.test(t))st.push(x);if(/end of each (of its )?turns?/i.test(t))en.push(x);});
   if(st.length)h+='<div class="legr tick"><b>Start of turn:</b> '+st.map(function(x){return esc(nm(x));}).join(', ')+' \u2014 roll damage or effect (rule text below)</div>';
+  en=en.filter(function(x){return !(c.stg||{})[x];});h+=stgHTML(c);
   if(en.length)h+='<div class="legr tick"><b>End of turn:</b> '+en.map(function(x){return esc(nm(x));}).join(', ')+' \u2014 save or effect (see rule text)</div>';
   return h;
 }
@@ -1054,6 +1069,8 @@ function actStart(c,how){if(!(how.a==='use'||(how.a==='mpip'&&+how.d>0)||(how.a=
   var d=pk,n=pk.n;
   if(how.a==='ray'){if(c.ray&&c.ray[pk.key]&&c.ray[pk.key][+how.r])return false;if(mLeft(c,P,P[+how.q])<=0)return false;var row=pk.table.rows[+how.r];d=parseAct(row.n||n,row.t,'a');n=row.n||n;}
   if(how.a==='mpip'&&mLeft(c,P,P[+how.q])<=0)return false;
+  if(d.kind==='cast'&&how.a==='use'&&d.cast.length===1){var sd=spellData(d.cast[0],castSp(A,pk));if(!sd)return false;
+    spellBegin(c,sd,pk.n+(pk.n!==sd.n?' \u2192 '+sd.n:''),how);if(/on itself/i.test(rawOf(mm,pk)))ui.sel[c.id]=true;return true;}
   if(d.kind!=='atk'&&d.kind!=='save')return false;
   actBegin(c,d,n,how);return true;}
 function actBegin(c,d,n,how){
@@ -1064,18 +1081,28 @@ function actBegin(c,d,n,how){
   (d.st||[]).forEach(function(x){ui.pend[x]=true;});}
 // ---- Stage F: monster spells. Spell data from the Rules file (save, attack, damage dice and type, upcast table) and the
 // caster's Spellcasting DC / attack bonus; the spell's status (Hold Person, Fly…) is preloaded and starts concentration.
-function spellData(name,sp){if(!REF||!REF.spells||!REF.spells.length)return null;
-  var lv=(name.match(/level (\d+) version/i)||[])[1],base=name.replace(/\s*\(.*$/,'').trim(),key=base.replace(/\u2019/g,"'").toLowerCase();
+function spellData(name,sp,slv){if(!REF||!REF.spells||!REF.spells.length)return null;
+  var lv=slv?String(slv):(name.match(/level (\d+) version/i)||[])[1],base=name.replace(/\s*\(.*$/,'').trim(),key=base.replace(/\u2019/g,"'").toLowerCase();
   var r=REF.spells.find(function(x){return x.n.replace(/\u2019/g,"'").toLowerCase()===key;});if(!r)return null;
   var dice=r.dr||'';if(lv&&r.up)r.up.forEach(function(u){var q=u.split(':');if(q[0]===lv)dice=q[1];});
   var avg=function(ds){var m=ds.match(/(\d+)d(\d+)(?:\s*\+\s*(\d+))?/);return m?Math.floor(+m[1]*(+m[2]+1)/2)+(+m[3]||0):0;};
   var st=SPELLS.map(function(x){return x[0];}).filter(function(x){return spName(x)===key;}).slice(0,1);
-  var d={n:r.n,spell:1,dmg:dice&&r.dt&&r.dt.length?[{avg:avg(dice),dice:dice,type:r.dt[0]}]:[],conds:[],st:st,lvl:lv};
+  var d={n:r.n,spell:1,dmg:dice&&r.dt&&r.dt.length?[{avg:avg(dice),dice:dice,type:r.dt[0]}]:[],conds:[],st:st,lvl:lv,base:r.l,upd:!!(r.up&&r.up.length)};
+  // Several rays / darts / beams: each is its own target pick (same target allowed), one after another
+  var pm=r.tx.match(/\b(two|three|four|five) (?:[a-z-]+ ){0,3}(?:rays|darts|beams|bolts|missiles)\b/i),cnt=pm?WNUM[pm[1].toLowerCase()]:1,pu=(r.hl||'').match(/one (?:more|additional) (?:ray|dart|beam|bolt|missile) for each spell slot level above (\d)/i);
+  if(pu){d.upd=true;if(lv)cnt+=Math.max(0,+lv-+pu[1]);}
+  if(/beams at level 5/i.test(r.hl||'')&&sp&&sp.clv)cnt=1+(sp.clv>=5)+(sp.clv>=11)+(sp.clv>=17);
+  if(cnt>1)d.cnt=cnt;
   if(r.at){d.kind='atk';d.atk={type:/melee spell attack/i.test(r.tx)?'melee spell':'ranged spell',bonus:sp&&sp.sat!=null?sp.sat:null,reach:null,range:null};}
   else if(r.sv){d.kind='save';d.save={ab:ABN[r.sv[0].toUpperCase()+r.sv.slice(1)],dc:sp&&sp.dc!=null?sp.dc:null,area:''};d.succ=/half as much damage/i.test(r.tx)?'half':null;}
   else if(st.length||d.dmg.length)d.kind='buff';
+  else if((d.conds=pConds(r.tx).filter(function(x){return x!=='Incapacitated';})).length)d.kind='buff';
   else return null;
   return d;}
+// Start a spell: several rays/darts become "(1 of N)" picks; the first one spends the cast, the rest are free
+// "casts Invisibility … using the same spellcasting ability as Spellcasting": DC / attack bonus come from the Spellcasting action
+function castSp(A,p){return p.dc||p.sat!=null?p:A.find(function(x){return x.kind==='spell'&&(x.dc||x.sat!=null);})||p;}
+function spellBegin(c,d,n,how){if(d.cnt>1){how.left=d.cnt;how.tot=d.cnt;n+=' (1 of '+d.cnt+')';}actBegin(c,d,n,how);}
 // Which action a legendary action points to ("makes one Rend attack", "uses Fire Ray", "uses Spellcasting to cast Fireball")
 function legRef(m,A,p){var t=rawOf(m,p),names=A.filter(function(x){return x.sec!=='l'&&x.kind!=='multi';}).sort(function(a,b){return b.n.length-a.n.length;});
   var q=names.find(function(x){return t.indexOf(x.n)>=0;});if(!q)return null;
@@ -1107,7 +1134,7 @@ function saveMod(c,ab){var k=['str','dex','con','int','wis','cha'][ab];
   return r?+r[1].replace('\u2212','-'):Math.floor(((m.abil||[])[ab]-10)/2);}
 function magRes(c){var m=c.kind==='mon'&&MON.find(function(x){return x.id===c.monId;});return !!(m&&(m.traits||[]).some(function(t){return /^Magic Resistance/i.test(t[0]);}));}
 // A player's spells (from D&D Beyond) on their turn card: tap one to target monsters; DC / attack bonus from the class
-function pcSpell(l){var d=pcDCs(l).find(function(x){return x.hit!=null;});return d?{dc:d.dc,sat:d.hit}:{dc:null,sat:null};}
+function pcSpell(l){var d=pcDCs(l).find(function(x){return x.hit!=null;});return {dc:d?d.dc:null,sat:d?d.hit:null,clv:l&&+l.level||0};}
 function pcSpellsHTML(c,l){if(!l||!(l.spells||[]).length||RO||ui.present)return '';if(!REF){refLoad();return '';}
   var L=l.spells.map(function(n){var d=spellData(n,pcSpell(l)),r=REF.spells.find(function(x){return x.n===n;});return d?{n:n,lv:r?r.l:0}:null;}).filter(Boolean).sort(function(a,b){return a.lv-b.lv||a.n.localeCompare(b.n);});
   if(!L.length)return '';var ps=pcSpell(l);
@@ -1119,9 +1146,10 @@ function annSave(){var a=ui.act;if(!a||a.d.kind!=='save'||a.d.save.dc==null)retu
   annSet('<b>'+esc(att?att.name:'')+'</b> \u2014 '+esc(a.n)+': <b>DC '+a.d.save.dc+' '+['Strength','Dexterity','Constitution','Intelligence','Wisdom','Charisma'][a.d.save.ab]+' saving throw</b>'+(T.length?' \u00b7 '+T.map(function(c){return esc(c.name);}).join(', '):''));save();}
 function renderAnn(){var el=$('#ann');if(!el){el=document.createElement('div');el.id='ann';el.className='ann';el.setAttribute('role','status');document.body.appendChild(el);}
   var A=S.ann,on=(ui.present||RO)&&A&&(S.tc||0)-A.n<=1;el.hidden=!on;if(on)el.innerHTML=A.h;}
-function actHead(){var a=ui.act,d=a.d,x=d.kind==='buff'?'targets get '+(d.st.length?nm(d.st[0]):'the effect'):d.kind==='atk'?(d.atk.type[0].toUpperCase()+d.atk.type.slice(1)+(d.atk.bonus==null?'':' '+sgn(d.atk.bonus))+(d.atk.reach?', reach '+d.atk.reach+' ft.':'')+(d.atk.range?', range '+d.atk.range+' ft.':''))
+function actHead(){var a=ui.act,d=a.d,x=d.kind==='buff'?(d.st.length?'targets get '+nm(d.st[0]):d.conds.length?'targets get '+nm(d.conds[0]):d.dmg.length?'hits automatically':'targets get the effect'):d.kind==='atk'?(d.atk.type[0].toUpperCase()+d.atk.type.slice(1)+(d.atk.bonus==null?'':' '+sgn(d.atk.bonus))+(d.atk.reach?', reach '+d.atk.reach+' ft.':'')+(d.atk.range?', range '+d.atk.range+' ft.':''))
     :('DC '+(d.save.dc==null?'?':d.save.dc)+' '+['Str','Dex','Con','Int','Wis','Cha'][d.save.ab]+' save'+(d.succ==='half'?', half on a success':d.succ?'':', nothing on a success'));
   return '<div class="acth"><span><b>'+esc(a.n)+'</b> \u00b7 '+esc(x)+(d.rider?' \u00b7 then DC '+d.rider.dc+' '+['Str','Dex','Con','Int','Wis','Cha'][d.rider.ab]+' save':'')+'</span>'+
+    (d.spell&&a.how&&a.how.a==='pcast'&&d.base>0&&d.upd&&!a.how.free?'<span class="aslot" title="Cast with a higher-level spell slot">Slot <b>'+(+d.lvl||d.base)+'</b><button data-act="aslot" data-d="-1"'+((+d.lvl||d.base)<=d.base?' disabled':'')+' aria-label="Lower slot">\u2212</button><button data-act="aslot" data-d="1"'+((+d.lvl||d.base)>=9?' disabled':'')+' aria-label="Higher slot">+</button></span>':'')+
     (d.kind==='atk'?'<button class="tg crit'+(a.crit?' on':'')+'" data-act="acrit" aria-pressed="'+!!a.crit+'" title="Critical hit: adds the damage dice again">Crit</button><button class="amiss" data-act="amiss" title="The attack missed: spend it, nothing else">Miss</button>':'')+'<button data-act="actx">Cancel</button></div>';}
 // Targets are picked from chips inside the pad (the list behind may be covered on a phone); table taps still work too.
 // Attack: chip on = hit (tap again to drop it). Save / rider save: tap toggles Failed <-> Saved, \u2715 drops it.
@@ -1166,6 +1194,7 @@ function actApply(T){var a=ui.act,att=findC(a.id);if(!att||!T.length)return;
     ann.push('<b>'+esc(t.name)+'</b> '+(t.kind==='pc'&&tot?tot+(tl?' '+tl:'')+' damage':a.d.kind==='atk'?'hit':o==='save'?'saved':o==='fail'?'failed':'')+(o==='save'&&t.kind==='pc'&&tot?' (saved)':'')+((x0=(ui.rxs||{})[t.id])?' \u00b7 '+esc(x0.n):''));
     out.push(esc(t.name)+' '+(o==='miss'?'missed':o==='save'&&!tot?'saved':tot+(o==='save'?' (saved)':'')+(nt.length?' <small>('+nt.join('; ')+')</small>':'')));});
   var on=Object.keys(ui.pend).filter(function(x){return ui.pend[x];}),sk=stT.length?applyPend(stT):[];
+  stT.forEach(function(t){if(a.d.stage&&ui.pend[a.d.stage.from])stgSet(t,a.d.stage.from,a.d.stage,a.d,a.n);on.forEach(function(x){if(STG[x])stgSet(t,x,STG[x],a.d,a.n);});});
   var rxl=[];T.forEach(function(t){var x=(ui.rxs||{})[t.id];if(!x)return;t.rx=true;if(x.st&&t.conds.indexOf(x.st)<0){t.conds.push(x.st);expSet(t,x.st);}rxl.push(esc(t.name)+': '+esc(x.n));});
   if(ui.pend.Grappled)stT.forEach(function(t){if(t.conds.indexOf('Grappled')>=0){t.gb=att.id;t.gdc=a.d.esc||null;}});
   var msg='<b>'+esc(a.n)+':</b> '+out.join(' \u00b7 ');if(on.length&&stT.length)msg+='<br><b>'+on.map(function(x){return esc(nm(x));}).join(', ')+'</b> \u2192 '+stT.map(function(t){return esc(t.name);}).join(', ')+(sk.length?' (immune: '+sk.join(', ')+')':'');
@@ -1178,13 +1207,13 @@ function actApply(T){var a=ui.act,att=findC(a.id);if(!att||!T.length)return;
 function actNext(att,a){var h=a.how;if(h&&h.left>1){var h2=Object.assign({},h,{free:true,left:h.left-1});actBegin(att,a.d,a.n.replace(/ \(\d+ of \d+\)$/,'')+' ('+(h.tot-h2.left+1)+' of '+h.tot+')',h2);}}
 function bySize(m){return function(a,b){return rawOf(m,a).length-rawOf(m,b).length;};}
 function mPips(c,P,q,key,ro){var left=mLeft(c,P,q),h='';for(var i=0;i<q.count;i++)h+='<button class="mp'+(i<left?' on':'')+'"'+(ro?' tabindex="-1" disabled':' data-act="mpip" data-i="'+key+'" data-q="'+q.i+'" data-d="'+(i<left?1:-1)+'"')+' aria-label="'+(i<left?'Use one':'Give one back')+'"></button>';return h;}
-function tcCard(c,m,p,secLab,kids,sub,why,P){if(p.kind==='spell'&&!REF)refLoad();
+function tcCard(c,m,p,secLab,kids,sub,why,P){if((p.kind==='spell'||p.kind==='cast')&&!REF)refLoad();
   var txt=rawOf(m,p),sp=!!why,mine=!sub&&c.ue&&c.ue[p.sec]===p.key;
   var q=!sub&&p.sec==='a'?poolOf(P,p.n):null,rq=!sub&&p.sec==='a'&&!q?repOf(P,p.n):null,rays=q&&p.table?(c.ray||{})[p.key]||{}:null;
   var body=p.kind==='spell'?spellsHTML(p,txt,sub?null:c)
     :p.table?(p.table.intro?'<div class="msum">'+rich(short(p.table.intro))+'</div>':'')+'<div class="nest">'+p.table.rows.map(function(r,ri){var u=rays&&rays[ri],off=rays&&!u&&mLeft(c,P,q)<=0;
       return '<div class="a na'+(u?' used':'')+(off?' spent':'')+'">'+(rays&&!RO&&(u||!off)?'<button class="tg'+(u?' on':'')+'" data-act="ray" data-i="'+p.key+'" data-q="'+q.i+'" data-r="'+ri+'">'+(u?'Used \u21ba':'Use')+'</button>':'')+'<b><span class="rn">'+r.r+'</span>'+esc(r.n)+'</b>'+blk(rich(short(r.t)))+'</div>';}).join('')+'</div>'
-    :blk(rich(short(txt)));
+    :blk(rich(short(txt)))+(p.kind==='cast'&&!sub&&!RO?'<div class="sg">'+p.cast.map(function(sp){return '<span class="spc">'+rich('cast: '+sp).slice(6)+'<button class="spcast" data-act="cast" data-aw="1" data-i="'+p.key+'" data-s="'+esc(sp)+'" aria-label="Cast '+esc(sp)+'">\u25b8</button></span>';}).join(', ')+'</div>':'');
   var mr=rq&&(c.mrep||{})[p.key];
   var btn=sub||RO?'':q?'<span class="mpw" title="Multiattack: uses this turn">'+(q.names.length>1?'shared ':'')+mPips(c,P,q,p.key,!!p.table)+'</span>'
     :rq?(mr?'<button class="tg on" data-act="mrep" data-i="'+p.key+'" data-d="-1">Used \u21ba</button>':why?'':'<button class="tg" data-act="mrep" data-i="'+p.key+'" data-d="1" title="Takes the place of one attack">Use (1 attack)</button>')
@@ -1819,6 +1848,8 @@ function parseAct(name,text,sec,others){
     p.succ=sc?(/^Half damage/i.test(sc[1].trim())?'half':sc[1].trim()):null;
     if(both)p.both=both[1].trim();
     p.dmg=p.fail.dmg;p.conds=p.fail.conds;
+    var sf=t.match(/Second Failure:\s*([^]*?)(?=(?:Success|Failure|Third Failure):|$)/),nx=sf?pConds(sf[1]).filter(function(x){return p.fail.conds.indexOf(x)<0&&x!=='Incapacitated';}):[];
+    if(nx.length&&p.fail.conds.length)p.stage={from:p.fail.conds[0],to:nx[0],need:1,rm:/instead/i.test(sf[1])};
     p.ok=!!fl||!!both;if(!p.dmg.length&&!p.conds.length)p.textOnly=true;return p;}
   var cs=t.match(/\bcasts ([A-Z][A-Za-z’' ]+?)(?: \(level \d+ version\))?(?:,| on | in | or |\.| requiring| using|$)/);
   if(cs){p.kind='cast';p.cast=[cs[1].trim()];var or=t.match(/\bcasts [A-Z][A-Za-z’' ]+? or ([A-Z][A-Za-z’' ]+?)(?: in |,|\.| requiring)/);if(or)p.cast.push(or[1].trim());}
@@ -2030,14 +2061,20 @@ $('#turn').addEventListener('click',function(e){
     else if(a==='fxgo'){ui.fxRun=c.id;ui.dtype=c.dt||'';ui.amt=0;ui.amtO=0;ui.dtO='';ui.ax=0;ui.ex=false;ui.half=false;ui.mx=false;ui.pend={};if(c.st)ui.pend[c.st]=true;if(c.sv!==''&&c.sv!=null){ui.sv=+c.sv;ui.svLast=ui.sv;}toast('Select who is affected.');}
     save();renderBoard();return;}
   if(a==='laspend'){var lc=findC(b.dataset.id);if(lc){snap('legendary');lc.la=(lc.la||0)+1;}}
-  else if(a==='pcast'){var lp2=S.lib.find(function(x){return x.id===c.libId;}),sd2=lp2&&spellData(b.dataset.s,pcSpell(lp2));if(sd2){ui.pcSpOpen=true;actBegin(c,sd2,sd2.n,{a:'pcast',s:sd2.n});}}
+  else if(a==='pcast'){var lp2=S.lib.find(function(x){return x.id===c.libId;}),sd2=lp2&&spellData(b.dataset.s,pcSpell(lp2));if(sd2){ui.pcSpOpen=true;spellBegin(c,sd2,sd2.n,{a:'pcast',s:sd2.n});}}
   else if(a==='lact'){var L0=findC(b.dataset.id),lm0=L0&&MON.find(function(x){return x.id===L0.monId;});if(lm0){var LA0=actsOf(lm0),lp=LA0.find(function(x){return x.key===b.dataset.i;}),howL={a:'leg',i:lp.key};
     var d0=lp.kind==='atk'||lp.kind==='save'?lp:null,n0=lp.n,rf=d0?null:legRef(lm0,LA0,lp);
     if(rf&&rf.spell){refLoad();d0=spellData(rf.spell,rf.q);n0=lp.n+' \u2192 '+rf.spell;}
     else if(rf&&(rf.q.kind==='atk'||rf.q.kind==='save')){d0=rf.q;n0=lp.n+(lp.n!==rf.q.n?' \u2192 '+rf.q.n:'');if(rf.cnt>1){howL.left=rf.cnt;howL.tot=rf.cnt;n0+=' (1 of '+rf.cnt+')';}}
-    if(d0){actBegin(L0,d0,n0,howL);}
+    if(d0){if(d0.spell)spellBegin(L0,d0,n0,howL);else actBegin(L0,d0,n0,howL);}
+    else if(rf&&rf.q.table){ui.legPick={id:L0.id,i:lp.key,t:rf.q.key};}
     else{doHow(L0,howL);toast('<b>'+esc(L0.name)+':</b> '+esc(lp.n)+(rf&&rf.q.table?' \u2014 roll for a ray':''));logAdd(esc(L0.name)+' \u2014 legendary: '+esc(lp.n));}}}
   else if(a==='ladis'){ui.legDis=S.turnId;}
+  else if(a==='lrayx'){ui.legPick=null;}
+  else if(a==='stg'){stgRoll(c,b.dataset.c,b.dataset.r==='s');}
+  else if(a==='lray'){var g7=ui.legPick,L7=g7&&findC(g7.id),m7=L7&&MON.find(function(x){return x.id===L7.monId;});ui.legPick=null;if(m7){var A7=actsOf(m7),lp7=A7.find(function(x){return x.key===g7.i;}),tb7=A7.find(function(x){return x.key===g7.t;}),row7=tb7&&tb7.table.rows[+b.dataset.r];
+    if(lp7&&row7){var d7=parseAct(row7.n,row7.t,'a'),h7={a:'leg',i:lp7.key};if(d7.kind==='atk'||d7.kind==='save')actBegin(L7,d7,lp7.n+' \u2192 '+row7.n,h7);
+      else{doHow(L7,h7);toast('<b>'+esc(L7.name)+':</b> '+esc(row7.n)+' \u2014 '+rich(short(row7.t)));logAdd(esc(L7.name)+' \u2014 legendary: '+esc(row7.n));}}}}
   else if(a==='tcol'){ui.cardOpen=!ui.cardOpen;}
   else if(a==='tinfo'){S.stat=c.kind==='mon'?c.monId:'pc';S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
   else if(a==='tedit'){S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
@@ -2045,8 +2082,8 @@ $('#turn').addEventListener('click',function(e){
   else if(a==='use'||a==='unuse'||a==='mpip'||a==='ray'||a==='mrep'){var how={a:a,i:b.dataset.i,q:b.dataset.q,d:b.dataset.d,r:b.dataset.r};
     if(!actStart(c,how))doHow(c,how);}
   else if(a==='cast'){var ms=MON.find(function(x){return x.id===c.monId;});if(ms){var A2=actsOf(ms),ps=A2.find(function(x){return x.key===b.dataset.i;}),k2='sp:'+b.dataset.s,P2=mPools(A2),sq=poolOf(P2,'Spellcasting')||repOf(P2,'Spellcasting');c.uses=c.uses||{};
-    var on2=b.classList.contains('on')||b.dataset.aw==='1',sd=on2&&ps?spellData(b.dataset.full||b.dataset.s,ps):null,how2={a:'cast',i:b.dataset.i,s:b.dataset.s,per:b.dataset.aw!=='1'};
-    if(sd){actBegin(c,sd,sd.n+(sd.lvl?' (level '+sd.lvl+')':''),how2);save();renderBoard();return;}
+    var on2=b.classList.contains('on')||b.dataset.aw==='1',sd=on2&&ps?spellData(b.dataset.full||b.dataset.s,castSp(A2,ps)):null,how2={a:'cast',i:b.dataset.i,s:b.dataset.s,per:b.dataset.aw!=='1'};
+    if(sd){if(ps.kind==='cast'){how2={a:'use',i:ps.key};}spellBegin(c,sd,sd.n+(sd.lvl?' (level '+sd.lvl+')':''),how2);if(ps.kind==='cast'&&/on itself/i.test(rawOf(ms,ps)))ui.sel[c.id]=true;save();renderBoard();return;}
     if(b.dataset.aw==='1'){doHow(c,how2);toast('<b>'+esc(b.dataset.s)+'</b> cast');logAdd(esc(c.name)+' casts '+esc(b.dataset.s));}
     else if(b.classList.contains('on')){snap('cast '+b.dataset.s);logAdd(esc(c.name)+' casts '+esc(b.dataset.s));c.uses[k2]=(c.uses[k2]||0)+1;c.ue=c.ue||{};
       if(sq&&ps&&ps.sec==='a'){var pq=sq.rep?repPool(P2,sq):sq;if(c.ue.a==='M'||!c.ue.a){mSpend(c,pq,1);c.msp=c.msp||{};c.msp[k2]=(c.msp[k2]||0)+1;c.mspq=pq.i;}}
@@ -2121,6 +2158,8 @@ padEl.addEventListener('click',function(e){
   else if(a==='ptog'){var tk=b.dataset.k;if(tk==='half'){ui.half=!ui.half;var fh=curFx();if(fh&&fh.st){if(ui.half)delete ui.pend[fh.st];else ui.pend[fh.st]=true;}}else if(tk==='extra'){ui.ex=!ui.ex;if(ui.ex)swapSlot(1);else{swapSlot(0);ui.amtO=0;ui.dtO='';}}else ui.mx=!ui.mx;}
   else if(a==='actx'){ui.act=null;ui.out={};finishPad();}
   else if(a==='acrit'){actCrit(!ui.act.crit);}
+  else if(a==='aslot'){var A9=ui.act,c9=findC(A9.id),l9=libOf(c9),v9=Math.min(9,Math.max(A9.d.base,(+A9.d.lvl||A9.d.base)+ +b.dataset.d)),d9=l9&&spellData(A9.how.s,pcSpell(l9),v9>A9.d.base?v9:null);
+    if(d9){var s9=ui.sel,o9=ui.out;spellBegin(c9,d9,d9.n+(v9>d9.base?' (slot '+v9+')':''),{a:'pcast',s:A9.how.s});ui.sel=s9;ui.out=o9;}}
   else if(a==='trx'){ui.rxFor=ui.rxFor===b.dataset.id?null:b.dataset.id;}
   else if(a==='trxo'){ui.rxs=ui.rxs||{};var ro=b.dataset.o;if(ro==='none')delete ui.rxs[ui.rxFor];else ui.rxs[ui.rxFor]={n:b.dataset.n,st:b.dataset.st||'',half:b.dataset.half==='1'};ui.rxFor=null;}
   else if(a==='tdel'){setTimeout(annSave,0);delete ui.sel[b.dataset.id];delete ui.out[b.dataset.id];}

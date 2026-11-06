@@ -1246,6 +1246,58 @@ def phb_spells_and_aliases(b):
     check(not a.errors, a.errors)
 
 
+@test
+def rays_upcast_casts_eyerays_stages(b):
+    a = App(b)
+    a.e("refLoad()"); a.pg.wait_for_function("window.__e('REF && REF.spells && REF.spells.length') > 0")
+    w = a.pc("Wiz", ac=12, hp=30, abil={"int": 16})
+    a.e("var l=S.lib[S.lib.length-1];l.level=5;l.parsed=[{class:'wizard',subclass:'',level:5}];l.spells=['Scorching Ray','Magic Missile','Fireball','Sleep'];save()")
+    g = a.mon("mm-goblin-warrior")[0]
+    a.e(f"S.turnId={w};ui.cardOpen=true;ui.pcSpOpen=true;renderBoard()")
+    # 1. Scorching Ray: three rays, one target pick each (same target allowed); 2. slot 3 gives a fourth
+    a.click('#turn [data-act=pcast][data-s="Scorching Ray"]')
+    check("1 of 3" in a.pg.inner_text('#pad .acth'), a.pg.inner_text('#pad .acth'))
+    a.click('#pad [data-act=aslot][data-d="1"]')
+    check("1 of 4" in a.pg.inner_text("#pad .acth") and "(slot 3)" in a.pg.inner_text("#pad .acth"), a.pg.inner_text("#pad .acth"))
+    hp0 = a.c(g)["hp"]
+    for _ in range(4):
+        a.click(f'#pad [data-act=tchip][data-id="{g}"]'); a.e("ui.amt=1;renderPad()"); a.click('#pad [data-act=papply]')
+    eq(a.c(g)["hp"], hp0 - 4, "four separate hits on the same target"); check(not a.e("ui.act"), "done after the last ray")
+    a.click('#turn [data-act=pcast][data-s="Fireball"]'); eq(a.e("ui.amt"), 28, "Fireball 8d6 average")
+    a.click('#pad [data-act=aslot][data-d="1"]'); eq(a.e("ui.amt"), 31, "slot 4: 9d6"); a.click('#pad [data-act=actx]')
+    # 3. Oni: the Invisibility bonus action has a cast token and Use casts it on itself
+    a.e("S.list=[];renderBoard()"); o = a.mon("mm-oni")[0]; a.e(f"S.turnId={o};ui.cardOpen=true;renderBoard()")
+    check(a.pg.query_selector('#turn [data-act=cast][data-i="b0"]'), "cast token on the bonus action")
+    a.click('#turn [data-act=use][data-i="b0"]')
+    check(a.e(f"ui.sel[{o}]"), "self picked"); a.click('#pad [data-act=papply]')
+    check("Invisible" in a.c(o)["conds"] and a.c(o)["ue"].get("b") == "b0", "Invisible, bonus action used")
+    # 4. Beholder Glare: pick the ray result, then target and apply
+    a.e("S.list=[];S.turnId=null;renderBoard()"); bh = a.mon("mm-beholder")[0]; p1 = a.pc("Aer", hp=60); p2 = a.pc("Bo", hp=60)
+    a.e(f"findC({bh}).init=20;findC({p1}).init=15;findC({p2}).init=10;renderBoard()")
+    for _ in range(3): a.click('[data-act="next"]')
+    a.e("[].find.call(document.querySelectorAll('#turn [data-act=lact]'),function(b){return b.textContent==='Glare'}).click()")
+    check(a.pg.query_selector('#turn [data-act=lray]'), "ray picker shown")
+    a.e("[].find.call(document.querySelectorAll('#turn [data-act=lray]'),function(b){return /Petrification/.test(b.textContent)}).click()")
+    check("DC 16 Con" in a.pg.inner_text('#pad .acth'), a.pg.inner_text('#pad .acth'))
+    a.click(f'#pad [data-act=tchip][data-id="{p1}"]'); a.click('#pad [data-act=papply]')
+    eq(a.c(bh)["la"], 1, "legendary use spent"); check("Restrained" in a.c(p1)["conds"], "first failure: Restrained")
+    # 5. on Aer's turn: failed again -> Petrified instead of Restrained
+    a.e(f"S.turnId={p1};renderBoard()")
+    a.click('#turn [data-act=stg][data-r="f"]'); cs = a.c(p1)["conds"]
+    check("Petrified" in cs and "Restrained" not in cs and "Incapacitated" in cs, cs)
+    # Sleep: Incapacitated, then failed second save -> Unconscious (ends with Sleep)
+    a.e("S.list=[];S.turnId=null;renderBoard()"); w = a.pc("Wiz2", ac=12, hp=30)
+    a.e("var l=S.lib[S.lib.length-1];l.level=3;l.parsed=[{class:'wizard',subclass:'',level:3}];l.spells=['Sleep'];save()")
+    g = a.mon("mm-goblin-warrior")[0]; a.e(f"S.turnId={w};ui.cardOpen=true;ui.pcSpOpen=true;renderBoard()")
+    a.click('#turn [data-act=pcast][data-s="Sleep"]'); a.click(f'#pad [data-act=tchip][data-id="{g}"]'); a.click('#pad [data-act=papply]')
+    check("Sleeping" in a.c(g)["conds"] and "Incapacitated" in a.c(g)["conds"], a.c(g)["conds"])
+    a.e(f"S.turnId={g};renderBoard()"); a.click('#turn [data-act=stg][data-r="f"]')
+    check("Unconscious" in a.c(g)["conds"], a.c(g)["conds"])
+    a.e(f"var c=findC({g});c.conds.splice(c.conds.indexOf('Sleeping'),1);linkSweep(c);renderBoard()")
+    check("Unconscious" not in a.c(g)["conds"], "Unconscious ends with Sleep")
+    check(not a.errors, a.errors)
+
+
 def main():
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def log_message(self, *a):

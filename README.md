@@ -82,10 +82,14 @@ After an update, open the app once while online, then close and reopen it to get
 - **Reactions:** a picked target with its reaction ready shows ⟲ on its chip: pick Shield (adds +5 AC until its next turn), Uncanny Dodge (halves its damage), a reaction spell from its D&D Beyond list, a monster's own reaction, or Other. The reaction is used on Apply; the hit stays as declared at the table.
 - **Monster spells:** DC and attack bonus from its Spellcasting, damage from the spell (upcast versions use the right dice), the spell's status preloaded (Hold Person, Fly…), concentration on the caster. Buff spells can target the caster. Spells with nothing to apply are just counted.
 - **Legendary actions:** the between-turns bar has a button per legendary action (cost in brackets). Attacks and spells (Pounce → Rend, Fiery Rays → Scorching Ray) open targeting and spend on Apply or Miss; several attacks (two Bites) step through for one cost; movement-only actions spend at once; once-per-round actions grey out.
+- **Several rays or darts** (Scorching Ray, Magic Missile, Eldritch Blast by character level): each one is its own target pick, shown as "(1 of 3)"; the same target can be picked again. The cast is spent on the first.
+- **Spells in other actions** ("casts Invisibility on itself", e.g. the Oni's bonus action): Use (or the ▸ token) opens the spell with the caster picked.
+- **Roll-table legendary actions** (Beholder Glare → Eye Rays): tap it, pick the rolled result, then target and Apply as usual.
+- **Developing effects** (Petrification Ray, Sleep, Flesh to Stone): on the target's turn the card shows its repeat save with **Failed → Petrified / Unconscious** and **Saved** (Flesh to Stone counts 3 of each).
 - **Grapples** from attacks show the escape DC and the grappler on the chip, and end by themselves if the grappler drops to 0 HP, becomes Incapacitated or leaves.
 
 **Player turns**
-- Players with a D&D Beyond spell list get a **Spells** fold on their turn card (save DC and attack bonus from class and ability). Tap a spell to target monsters as above; Apply puts the spell's status on the monsters and concentration on the player. Player weapon attacks: use the pad (players roll and tell you).
+- Players with a D&D Beyond spell list get a **Spells** fold on their turn card (save DC and attack bonus from class and ability). Tap a spell to target monsters as above; **Slot − +** in the pad header upcasts it (more dice from the spell's table, extra rays or darts); Apply puts the spell's status on the monsters and concentration on the player. Player weapon attacks: use the pad (players roll and tell you).
 
 **Table view line and combat log**
 - When a monster uses a save action, the table view shows the DC and ability to roll (and who rolls) at the bottom; after Apply it shows each player's damage to write down (monsters only show hit / saved / statuses, not their HP). It stays for that turn and the next, also in the table window.
