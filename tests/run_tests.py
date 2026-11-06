@@ -981,7 +981,7 @@ def single_condition_spells_linked(b):
 
 
 @test
-def action_parser_and_nested_cards(b):
+def action_parser_and_cards(b):
     a = App(b)
     P = lambda mid, n: a.j(f"actsOf(MON.find(function(m){{return m.id==='{mid}'}})).find(function(x){{return x.n==='{n}'}})")
     r = P("mm-green-dragon-wyrmling", "Rend")
@@ -1103,8 +1103,7 @@ def tap_to_use_targets(b):
 def spells_grapples_legendary(b):
     a = App(b)
     a.e("refLoad()"); a.pg.wait_for_function("window.__e('REF && REF.spells && REF.spells.length') > 0")
-    # Archmage casts Hold Person? (not on its list) -> use a Mage-type caster with a save spell and concentration: Archmage Cone of Cold is covered;
-    # here: the Archmage's 2/Day Fly on itself (buff: status on the picked target, caster may target itself)
+    # buff spell: the Archmage's 2/Day Fly on itself (status on the picked target; the caster may target itself)
     m = a.mon("mm-archmage")[0]; h = a.pc("Aer", ac=13, hp=60); h2 = a.pc("Bo", ac=15, hp=60)
     a.e(f"S.turnId={m};ui.cardOpen=true;renderBoard()")
     a.click('#turn [data-act="cast"][data-s="Fly"]')

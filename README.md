@@ -28,17 +28,18 @@ After an update, open the app once while online, then close and reopen it to get
 
 **3. Run combat**
 1. Type each player's initiative roll into their row, then press **Start combat**. **Next turn ▸** moves on; **↶ Undo** reverses the last change.
-2. The **turn card** shows the current creature's attacks (dice to roll are highlighted), statuses, reminders and death saves. Tap a spell or condition name to read its rule.
-3. **Tap rows to select** creatures, then use the **action pad**: spin the number wheel for the amount (tap the middle number to type it), spin the type wheel beside it (it loops; tap its middle item for the full list). Wheel order: Untyped; bludgeoning, piercing, slashing; acid, cold, fire, lightning, thunder; force, necrotic, poison, psychic, radiant; then 💔 Max HP − (no damage), 💠 Temp HP and ❤️ Heal, so Heal sits just above Untyped. Toggle **Half** (saved) and **Max HP −** (also lowers max HP by the damage taken) if needed, add statuses with **Status ▾** (→ Done), then one **Apply** does everything. **+ Extra** adds a second amount with its own damage type (e.g. 7 piercing + 4 poison): tap **Main** / **+ Extra** to switch which one the wheel and type picker edit. Each type checks resistances on its own, Half halves both, and the type *Max HP −* lowers max HP without damage (Demilich Energy Drain, Otyugh bite). The Apply button lists what will happen, e.g. *7 lightning damage · + Shocking Grasp*. Picking a damage spell's status sets its damage type if none is chosen.
-4. **Saves** shows one saving throw for everyone (useful before a Fireball).
-5. **■ End combat** stops the turn order but keeps creatures, HP and statuses. **Clear** (two taps) empties the tracker.
+2. **Monster's turn:** the turn card shows only what it can still do. Tap **Use** on an action (or a Multiattack circle). Missed? tap **Miss**. Hit, or a save action? tap the target chips in the pad (tap a save target again for *Saved*), set the wheels to the rolled damage (the average is preloaded) and tap **Apply**. Damage, half on a save, statuses, concentration and the use are all handled in one go.
+3. **Player's turn:** apply what they did with the pad (tap their target rows, spin the amount and type, Apply), or, for players with a D&D Beyond spell list, open **Spells** on their turn card and tap the spell.
+4. **Between turns:** legendary monsters get a bar with their legendary actions; tap one (attacks open targeting, movement just spends the use).
+5. **Anything else** (a trap, a DM ruling, lowering damage to keep the table fun): tap the rows, set amount, type, Half, + Extra or Status on the pad, then Apply. The type wheel also holds 💔 Max HP −, 💠 Temp HP and ❤️ Heal.
+6. **Saves** shows one saving throw for everyone. **■ End combat** stops the turn order but keeps creatures, HP and statuses. **Clear** (two taps) empties the tracker.
 
 **4. Players' screen (optional)**
 - **Table view** (toolbar) switches this screen to what players see: no stat blocks, DM notes or hidden effects.
 - **Data → Open table window** opens a separate read-only window to drag onto a second screen or TV; it updates live. This only works in the same browser on the same device for now (cross-device sync is planned).
 
 **5. After the session**
-**Data → Export** saves everything (encounter, prepared encounters, party, settings) as a file. Do this before and after each session as a backup.
+**Data → Export** saves everything (encounter, prepared encounters, party, settings) as a file. Do this before and after each session as a backup. **Data → Download combat log** saves what happened in each fight.
 
 ## Feature reference
 
@@ -50,10 +51,10 @@ After an update, open the app once while online, then close and reopen it to get
 - **Short effects end by themselves** (Shield, Dodge, Vicious Mockery, Guiding Bolt, Ray of Frost and others), with a toast and Undo.
 - **AC** is shown in a shield on each row: green when raised (Shield, cover, Haste), red when lowered (Slow). Initiative tokens and the turn card also show the base AC struck through. Tap the shield to set base AC.
 - **Reactions:** tap "Reaction ready" when used; it resets on that creature's turn. Shown as "No reactions" while Incapacitated, Slowed etc.
-- **Legendary monsters:** LA and LR pips on the row; **In lair** on the group header switches to lair counts; the turn card reminds you of unused legendary actions after other creatures' turns.
+- **Legendary monsters:** LA and LR pips on the row; **In lair** on the group header switches to lair counts; after other creatures' turns a bar offers their legendary actions (see *Monster turns*).
 - **Turn-card reminders** for start-of-turn effects (Burning, Spirit Guardians…) and end-of-turn saves (Slow, Hideous Laughter…).
 - **Players' turn card:** save DCs and spell attack per class, saves, defences, passive Perception, traits.
-- **Max HP −** (under More on the pad) for effects like a spectre's Life Drain; **Reset max** undoes it.
+- **Max HP −** (pad toggle: lowers max HP by the damage taken, e.g. Life Drain; or the 💔 type for max HP only); **Reset max** (under More) undoes it.
 
 **Statuses and saves**
 - The status menu has three parts: the 15 conditions, **General** statuses for any creature (Dodging, Disengaged, Readied, Help, half / three-quarters / total cover, Burning), then **spells and effects** (Bless, Haste, Mage Armor, Hex, Rage…) with rule text. Spells and features are shown by their own names. AC, speed, save and resistance changes apply automatically (Mage Armor: base AC 13 + Dex). Paralyzed, Stunned etc. add Incapacitated.
@@ -68,22 +69,29 @@ After an update, open the app once while online, then close and reopen it to get
 - Optional payload: damage dice as a reminder (e.g. `2d6`), damage type, save (ability + DC), and a status lasting its normal duration, 1 round, or to the end of the target's next turn.
 - On its turn press **Apply…**: the Saves view opens on that ability and the pad is preloaded. Select the targets, type the roll, then **Apply** (failed save: damage + its status, already ticked) or toggle **Half** first (saved: half damage, the status is unticked). Amount 0 applies the status only. **Done** ends it.
 
-**Monsters**
-- 503 stat blocks (currently the 2024 Monster Manual, see *Data*). On the turn card and stat block, **Multiattack** shows its full sentence with the attacks it uses nested inside it (two per row on the iPad, shortest first); entries with a roll table (Beholder Eye Rays) get a wide card with one sub-card per result, in roll order; limits are tags (Recharge 5–6, 3/Day, Costs 2, form-only), and **Spellcasting** is split into At will / 2/Day each / 1/Day each lines.
-- **Action economy:** tap **Use** on the card the monster uses. That card stays (Used ↺ undoes it) and every other card needing the same resource (action, bonus action or reaction) is hidden until its next turn. Recharge and X/Day abilities (X/Day counts per encounter) disappear when spent and are listed below the cards; tap ↺ when one recharges. Per-day spells have a pip per use: tap to cast. **Show all** shows everything. Starting combat resets all uses.
-- **Tap to use (attacks and save actions):** tap **Use**, a Multiattack circle, a ray's Use or **Use (1 attack)**. The pad shows the action and a row of **target chips** (opponents first, allies dashed), so targets can be picked even when the list is covered on a phone; tapping rows in the list works too.
-  - **Attack:** missed? tap **Miss** straight away (spends the attack, nothing else). Hit: tap the target chip (it shows AC and reminders such as *adv: Prone*; tap again to drop it).
-  - **Save action:** tap each target chip (red = Failed); tap a picked chip again for **Saved**, ✕ removes it. Paralyzed/Stunned targets auto-fail Str/Dex saves.
-  - Once a target is picked, the wheels appear with the damage (both parts and types) and conditions preloaded: set the rolled damage (or lower it to keep the table fun), change the type, add Extra or statuses, then **Apply**. Hits and failed saves take full damage and the statuses, saves half (or nothing, per the text). The use is spent only on Apply or Miss; **Cancel** spends nothing; one Undo reverts the whole action.
-- **Table view line:** when a monster uses a save action, the table view shows the DC and ability to roll (and who rolls) at the bottom; after Apply it shows each player's damage to write down (monsters only show hit / saved / statuses, not their HP). It stays for that turn and the next.
-- **Player spells:** a player with a D&D Beyond spell list gets a **Spells** fold on their turn card (save DC and attack bonus worked out from class and ability). Tap a spell to target monsters: chips show each monster's save bonus and Magic Resistance; Apply puts the spell's status on the monsters and concentration on the player. Spells with nothing to apply are left out.
-- **Crit:** in an attack's pad, **Crit** adds the damage dice again to the preloaded values (tap again to undo); set the rolled total as usual.
-- **Reactions:** a picked target that still has its reaction shows ⟲ on its chip. Tap it to pick the reaction (players: Shield, Uncanny Dodge, a few reaction spells from their D&D Beyond list, Other; monsters: their own reactions). On Apply the reaction is used, Shield adds its status (+5 AC until their next turn), Uncanny Dodge halves that target's damage. The hit itself stays as declared at the table.
-- **Combat log:** every attack, spell, damage, status, reaction, legendary action and undo during combat is logged per encounter (named after the loaded encounter). **Data → Download combat log** saves it as a text file (last 20 combats kept; Clear log empties it).
-- **Monster spells:** tap a per-day spell's diamond, or the ▸ after an at-will spell. Spells with a save, a spell attack, damage or a status open the same targeting: DC and attack bonus come from the monster's Spellcasting, damage from the spell (upcast versions use the right dice), and the spell's status is preloaded (Hold Person, Fly…) and starts the caster's concentration. Buff spells (Fly, Mirror Image) can target the caster. Spells with nothing to apply are just counted.
-- **Grapples:** a Grappled applied by an attack shows the escape DC and the grappler on the chip, and ends by itself if the grappler drops to 0 HP, becomes Incapacitated or leaves.
-- **Legendary actions:** after another creature's turn, the legendary bar shows a button per legendary action (cost in brackets). An action that attacks or casts (Pounce → Rend, Fiery Rays → Scorching Ray) opens targeting and spends its cost on Apply or Miss; one with several attacks (two Bites) steps through them for one cost. Movement-only actions spend the use at once with no pad. "Can't take this action again until its next turn" greys the button out.
-- **Multiattack** is a line above the cards, and its uses sit on the attacks themselves: a Githzerai Monk's Psi Strike shows two circles (tap one per attack), "two attacks using Scratch or Longbow in any combination" shares two circles between both cards, and Beholder Eye Rays allows three rays with each ray once (Use on each ray). "Can replace one attack with Fire Breath" gives that card **Use (1 attack)**, which takes the named attack's circle (the Chimera's Claw). Starting Multiattack hides the actions it doesn't include (e.g. the Beholder's Bite).
+**Monster cards**
+- 503 stat blocks (currently the 2024 Monster Manual, see *Data*). Limits are tags on the card (Recharge 5–6, 3/Day, Costs 2, form-only), **Spellcasting** is split into At will / 2/Day each / 1/Day each, and cards sit two per row on the iPad, shortest first. Roll tables (Beholder Eye Rays) get a wide card with one sub-card per result, in roll order.
+- **Multiattack** is a line above the cards; its uses sit on the attacks as circles (Githzerai Monk: two on Psi Strike). "Any combination" shares the circles between attacks; "can replace one attack with Fire Breath" gives that card **Use (1 attack)**, taking the named attack's circle; Beholder Eye Rays allows three rays, each once.
+- **Action economy:** once an action, bonus action or reaction is used, the other cards needing it are hidden until the creature's next turn (the used card stays, *Used ↺* undoes it). Recharge and X/Day abilities (X/Day counts per encounter) disappear when spent and are listed below the cards: tap ↺ when one recharges. **Show all** shows everything. Starting combat resets all uses.
+
+**Monster turns (tap to use)**
+- Tap **Use**, a circle, a ray's Use, **Use (1 attack)**, a spell's diamond (per day) or ▸ (at will). The card is highlighted and the pad shows the action and **target chips** (opponents first, allies dashed), so targets can be picked even when the list is covered on a phone; tapping rows in the list works too.
+- **Attack:** **Miss** spends it with no target. Hit: tap the target chip (AC and reminders such as *adv: Prone*, *crit if within 5 ft*; tap again to drop it). **Crit** adds the damage dice again to the preloaded values.
+- **Save action or spell:** tap each target chip (red = Failed, tap again = Saved, ✕ removes). Chips show each target's save bonus, *auto-fail* (Paralyzed/Stunned on Str/Dex) and *adv: Magic Resistance* for spells.
+- Once a target is picked the wheels appear with the damage (both parts and types) and conditions preloaded. Change anything, then **Apply**: hits and failed saves take full damage and statuses, saves take half (or nothing, per the text). The use is spent only on Apply or Miss; **Cancel** spends nothing; one Undo reverts the whole action.
+- **Reactions:** a picked target with its reaction ready shows ⟲ on its chip: pick Shield (adds +5 AC until its next turn), Uncanny Dodge (halves its damage), a reaction spell from its D&D Beyond list, a monster's own reaction, or Other. The reaction is used on Apply; the hit stays as declared at the table.
+- **Monster spells:** DC and attack bonus from its Spellcasting, damage from the spell (upcast versions use the right dice), the spell's status preloaded (Hold Person, Fly…), concentration on the caster. Buff spells can target the caster. Spells with nothing to apply are just counted.
+- **Legendary actions:** the between-turns bar has a button per legendary action (cost in brackets). Attacks and spells (Pounce → Rend, Fiery Rays → Scorching Ray) open targeting and spend on Apply or Miss; several attacks (two Bites) step through for one cost; movement-only actions spend at once; once-per-round actions grey out.
+- **Grapples** from attacks show the escape DC and the grappler on the chip, and end by themselves if the grappler drops to 0 HP, becomes Incapacitated or leaves.
+
+**Player turns**
+- Players with a D&D Beyond spell list get a **Spells** fold on their turn card (save DC and attack bonus from class and ability). Tap a spell to target monsters as above; Apply puts the spell's status on the monsters and concentration on the player. Player weapon attacks: use the pad (players roll and tell you).
+
+**Table view line and combat log**
+- When a monster uses a save action, the table view shows the DC and ability to roll (and who rolls) at the bottom; after Apply it shows each player's damage to write down (monsters only show hit / saved / statuses, not their HP). It stays for that turn and the next, also in the table window.
+- Every attack, spell, damage, status, reaction, legendary action and undo during combat is logged per encounter (named after the loaded encounter). **Data → Download combat log** saves it as a text file (last 20 combats kept; **Clear log** empties it).
+
+**Stat block text**
 - Roll tables (Beholder Eye Rays, Umber Hulk Confusing Gaze…) are shown as one row per result, and every entry puts Failure / Success on their own lines.
 - Dice to roll are highlighted, attack bonuses green, DCs amber, and damage types have their own colour and symbol (🔥 Fire, ❄️ Cold, ⚡ Lightning, 💀 Necrotic…), also in the defences lines and the damage-type pickers. Spell names (blue) and conditions (red, e.g. *Paralyzed*) are links: tap to read the rule, then **◂ Stat block** to go back. Spells missing from the data (see Rules tab) don't link.
 - ✎ Edit per creature: name, AC, HP, initiative, extra actions/traits/notes (can be copied to every creature of that type), or a custom group.
@@ -143,16 +151,17 @@ Before pushing:
 
 ```bash
 pip install playwright && playwright install chromium
-python tests/run_tests.py            # full browser test battery (48 tests, phone to desktop)
+python tests/run_tests.py            # full browser test battery (60 tests, phone to desktop)
 python tests/run_tests.py typed undo # only tests whose names contain these words
 python tools/check_monsters.py       # data check after changing monsters.json (see BUGS.md)
+python tools/check_actions.py        # action parser coverage after parser or monster changes
 ```
 
 Then bump `CACHE` in `sw.js` so installed apps pick up the change. Log bugs and fixes in `BUGS.md`; plans live in `ROADMAP.md`. `CLAUDE.md` has the conventions and context for picking the project up again.
 
 | File | Purpose |
 |---|---|
-| `index.html` | The whole app: styles, then a script in 7 sections (see the code map at the top of the script) |
+| `index.html` | The whole app: styles, then a script in 7 sections (see the code map at the top of the script, which also lists the feature blocks) |
 | `statuses.js` | Rule text shown for each status (edit wording here; mechanics are in `index.html`) |
 | `monsters.json` | Monster stat blocks |
 | `reference.json` | SRD 5.2 spells and conditions (built by `tools/build_reference.py`) |
@@ -163,7 +172,7 @@ Then bump `CACHE` in `sw.js` so installed apps pick up the change. Log bugs and 
 | `dndbeyond.txt`, `dndbeyond.json`, `tools/dndbeyond.py` | D&D Beyond links → characters (workflow `dndbeyond-players.yml`) |
 | `tools/build_reference.py` | open5e-api SRD 5.2 data → `reference.json` |
 | `tools/check_monsters.py` | Checks every monster entry (stats, dice, text, spelling); `--fix` normalises dice symbols |
-| `.github/workflows/kanka-players.yml` | Manual GitHub Action for the Kanka sync |
+| `.github/workflows/kanka-players.yml`, `dndbeyond-players.yml` | GitHub Actions for the Kanka sync (manual) and the D&D Beyond import (runs when `dndbeyond.txt` changes) |
 | `tests/run_tests.py` | Browser test battery (Playwright) |
 | `ROADMAP.md`, `BUGS.md`, `CLAUDE.md` | Goals and plans; bug and data-check log; project conventions |
 | `sw.js`, `manifest.webmanifest`, `icon-*.png`, `fonts.css` | Offline cache, install metadata, icons, fonts |

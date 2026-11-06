@@ -2,6 +2,10 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Review and clean-up
+
+- Leftover CSS from the old pad (`.oc`, `.seg`) also matched the stat block's Failure / Success labels and the drawer's setting buttons, adding a gap after "Failure:" on cards; removed with the other unused rules (`.tgh`, `.tgl`, `.tgr`). Unused Multiattack-card branch and `ui.mode` removed. Test `action_parser_and_nested_cards` renamed `action_parser_and_cards`.
+
 ## 2026-11-06 — Table line, player spells, data review
 
 - D&D Beyond characters had no class list, so their spell save DC couldn't be worked out (only Kanka characters had one); `tools/dndbeyond.py` now writes `parsed` like the Kanka export.

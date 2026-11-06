@@ -186,10 +186,7 @@ a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-
 .ann{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:40;padding:14px 18px;border-radius:14px;background:var(--surface);border:3px solid var(--accent);box-shadow:0 8px 30px rgba(0,0,0,.35);font-size:clamp(1.05rem,2.4vw,1.6rem);line-height:1.35;text-align:center}
 .pcsp summary{cursor:pointer;font-weight:700;padding:4px 0}.spl{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.spl button{min-height:38px}.spl small{opacity:.6;margin-right:2px}
 .acth{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:.92rem}.acth button{min-height:36px}
-.tgh{padding:10px;border:2px dashed var(--accent);border-radius:10px;text-align:center;color:var(--muted);margin-bottom:6px}
-.tgl{display:grid;gap:4px;margin-bottom:6px;max-height:32vh;overflow-y:auto}.tgr{display:flex;align-items:center;gap:6px}.tgr .tn{flex:1;min-width:0}
 .hint{display:inline-block;margin-left:6px;padding:0 6px;border-radius:999px;border:1px solid var(--line);font-size:.72rem;color:var(--warn);white-space:nowrap}
-.oc{min-width:84px;min-height:40px;font-weight:700}.oc.ok{background:var(--bad);color:#fff;border-color:var(--bad)}
 .mline{margin-top:8px;padding:4px 8px;border-left:3px solid var(--accent);font-size:.9rem;color:var(--muted)}.mline b{color:var(--ink);margin-right:4px}
 .mpw{float:right;display:flex;gap:6px;align-items:center;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .mp{width:28px;height:28px;min-height:0;min-width:0;padding:0;border-radius:50%;border:2px solid var(--accent);background:transparent}.mp.on{background:var(--accent)}.mp[disabled]{opacity:1;cursor:default}
@@ -306,8 +303,6 @@ td.empty p{margin:0 0 10px}
 .pacts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .pacts button{font-weight:700;padding:0 4px;min-height:42px}
 .pacts .d{color:var(--bad)}.pacts .h{color:var(--ok)}
-.seg{display:flex;margin-bottom:6px}.seg button{flex:1;border-radius:0;font-weight:700;min-height:42px;margin-left:-1px}.seg button:first-child{border-radius:8px 0 0 8px;margin-left:0}.seg button:last-child{border-radius:0 8px 8px 0}
-.seg .d{color:var(--bad)}.seg .h{color:var(--ok)}.seg .on{background:var(--ink);color:var(--surface);border-color:var(--ink);position:relative}
 .pacts .tg.on{background:color-mix(in srgb,var(--accent) 22%,var(--surface));border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}.pacts button[disabled]{opacity:.4}
 .ccask{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));z-index:60;display:flex;gap:8px;align-items:center;max-width:min(560px,calc(100vw - 24px));background:var(--surface);border:2px solid var(--warn);border-radius:12px;padding:8px 10px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
 .ccask span{flex:1;font-size:.92rem}.ccask button{min-height:40px;padding:0 14px}.ccask .primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
@@ -450,6 +445,14 @@ button{touch-action:manipulation}
    - snap('label') before a change makes it undoable (one step).
    - esc() every piece of user or data text that goes into HTML; rich() for stat block text (dice, spell links).
    - Add a test in tests/run_tests.py for each feature; bump CACHE in sw.js when publishing.
+   Main feature blocks (search the comment headings):
+   - "ACTION PARSER": parseAct() / actsOf() turn stat block text into data (attacks, saves, Multiattack, Spellcasting, limits).
+   - "Stage B/C": cards (tcCard, limHTML, spellsHTML), action economy (c.ue per turn, c.uses per encounter, hideWhy, useAct).
+   - "Multiattack lives on the attacks": pools (mPools, mLeft, mSpend), replacements, Eye-Ray style roll tables.
+   - "Stages D/E": tap-to-use targeting (actStart / actBegin -> chips -> actApply), crit, reactions, doHow (spending).
+   - "Stage F": spellData() for monster and player spells, legRef() for legendary actions, grabSweep() for grapples.
+   - "Action log" (S.logs) and "Table view line" (S.ann) for the table window.
+   - Pad: renderPad() + padEl click handler; wheels (amount, type) snap in JS.
 */
 function boot(MON){
 MON.forEach(function(m){if(!m.ctype){var t=(m.type||'').split(',')[0].split(' of ').pop().trim().split(' ').pop().toLowerCase();m.ctype=t.replace(/ies$/,'y').replace(/s$/,'');}});
@@ -748,7 +751,7 @@ var isOut=function(c){return isDead(c)||isPcDead(c);};
 var S={enc:[],encRoll:true,envName:'',envNote:'',round:1,turnId:null,list:[],next:1,libNext:7,tab:'add',sub:'monsters',stat:null,atTable:{},initMode:'each',hpMode:'roll',
  lib:[{id:'l1',name:'Aria (example)',ac:16,hp:31,ib:2},{id:'l2',name:'Brom (example)',ac:18,hp:38,ib:1},{id:'l3',name:'Wren (example)',ac:14,hp:24,ib:3},
       {id:'l4',name:'Tolliver (example)',ac:12,hp:20,ib:1},{id:'l5',name:'Sable (example)',ac:15,hp:27,ib:4},{id:'l6',name:'Marek (example)',ac:17,hp:34,ib:0}]};
-var ui={fxRun:null,fx:{name:'',init:'',desc:'',vis:true,dd:'',dt:'',sv:'',dc:'',st:'',dur:''},fType:'',fMin:'',fMax:'',q:'',qty:{},sel:{},amt:0,mode:'dmg',half:false,mx:false,menu:false,pend:{},confirmRemove:false,confirmClear:false,msg:'',drawer:false,present:false,cardOpen:true,sv:-1,mq:'',encName:'',encNote:'',svLast:1,traitsOpen:false,ignoreUntil:0};
+var ui={fxRun:null,fx:{name:'',init:'',desc:'',vis:true,dd:'',dt:'',sv:'',dc:'',st:'',dur:''},fType:'',fMin:'',fMax:'',q:'',qty:{},sel:{},amt:0,half:false,mx:false,menu:false,pend:{},confirmRemove:false,confirmClear:false,msg:'',drawer:false,present:false,cardOpen:true,sv:-1,mq:'',encName:'',encNote:'',svLast:1,traitsOpen:false,ignoreUntil:0};
 var loaded=false;try{if(RO||sessionStorage.getItem('et-present')==='1')ui.present=true;}catch(e){}
 try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.list){S=Object.assign(S,p);loaded=true;}}}catch(e){}
 function save(){if(RO)return;try{localStorage.setItem(KEY,JSON.stringify(S));ui.saveErr=false;}catch(e){if(!ui.saveErr){ui.saveErr=true;alert('This device\u2019s storage is full, so changes are NOT being saved. Export your encounter (Data tab), then remove a monster file you no longer need.');}}}
@@ -1054,7 +1057,7 @@ function actStart(c,how){if(!(how.a==='use'||(how.a==='mpip'&&+how.d>0)||(how.a=
   if(d.kind!=='atk'&&d.kind!=='save')return false;
   actBegin(c,d,n,how);return true;}
 function actBegin(c,d,n,how){
-  ui.act={id:c.id,how:how,d:d,n:n};ui.rxs={};ui.rxFor=null;setTimeout(annSave,0);ui.out={};ui.sel={};ui.menu=false;ui.tpk=false;ui.mode='dmg';ui.half=false;ui.mx=false;ui.ax=0;ui.pend={};
+  ui.act={id:c.id,how:how,d:d,n:n};ui.rxs={};ui.rxFor=null;setTimeout(annSave,0);ui.out={};ui.sel={};ui.menu=false;ui.tpk=false;ui.half=false;ui.mx=false;ui.ax=0;ui.pend={};
   var D=d.dmg||[];ui.amt=D[0]?D[0].avg:0;ui.dtype=D[0]?(D[0].type||''):'';
   if(D.length>1){ui.ex=true;ui.amtO=D.slice(1).reduce(function(t,x){return t+x.avg;},0);ui.dtO=D[1].type||'';}else{ui.ex=false;ui.amtO=0;ui.dtO='';}
   (d.conds||[]).forEach(function(x){if(FX[x]||CONDS.indexOf(x)>=0)ui.pend[x]=true;});
@@ -1178,9 +1181,7 @@ function mPips(c,P,q,key,ro){var left=mLeft(c,P,q),h='';for(var i=0;i<q.count;i+
 function tcCard(c,m,p,secLab,kids,sub,why,P){if(p.kind==='spell'&&!REF)refLoad();
   var txt=rawOf(m,p),sp=!!why,mine=!sub&&c.ue&&c.ue[p.sec]===p.key;
   var q=!sub&&p.sec==='a'?poolOf(P,p.n):null,rq=!sub&&p.sec==='a'&&!q?repOf(P,p.n):null,rays=q&&p.table?(c.ray||{})[p.key]||{}:null;
-  kids=kids.slice().sort(bySize(m));
-  var body=p.kind==='multi'?'<div class="msum">'+rich(txt)+'</div>'+(kids.length?'<div class="nest">'+kids.map(function(q){return tcCard(c,m,q,'',[],1);}).join('')+'</div>':'')
-    :p.kind==='spell'?spellsHTML(p,txt,sub?null:c)
+  var body=p.kind==='spell'?spellsHTML(p,txt,sub?null:c)
     :p.table?(p.table.intro?'<div class="msum">'+rich(short(p.table.intro))+'</div>':'')+'<div class="nest">'+p.table.rows.map(function(r,ri){var u=rays&&rays[ri],off=rays&&!u&&mLeft(c,P,q)<=0;
       return '<div class="a na'+(u?' used':'')+(off?' spent':'')+'">'+(rays&&!RO&&(u||!off)?'<button class="tg'+(u?' on':'')+'" data-act="ray" data-i="'+p.key+'" data-q="'+q.i+'" data-r="'+ri+'">'+(u?'Used \u21ba':'Use')+'</button>':'')+'<b><span class="rn">'+r.r+'</span>'+esc(r.n)+'</b>'+blk(rich(short(r.t)))+'</div>';}).join('')+'</div>'
     :blk(rich(short(txt)));
@@ -1191,7 +1192,7 @@ function tcCard(c,m,p,secLab,kids,sub,why,P){if(p.kind==='spell'&&!REF)refLoad()
   var lt=p.uses&&!sub?usesLeft(c,p):null;
   if(q&&mUsed(c,q))mine=true;if(mr)mine=true;
   var tg=ui.act&&ui.act.id===c.id&&ui.act.how.i===p.key&&!sub;
-  return '<div class="a'+(tg?' tgt':'')+(sub?' na':'')+(sp?' spent':'')+(mine?' used':'')+(p.kind==='multi'?' multi'+(kids.length>1?' wide':''):'')+(p.table?' wide':'')+'">'+btn+
+  return '<div class="a'+(tg?' tgt':'')+(sub?' na':'')+(sp?' spent':'')+(mine?' used':'')+(p.table?' wide':'')+'">'+btn+
     '<b>'+esc(p.n)+(secLab?'<span class="sec">'+secLab+'</span>':'')+limHTML(p).replace(/(\d+)\/Day</,function(x,n){return lt!=null&&lt<+n?n+'/Day \u00b7 '+lt+' left<':x;})+'</b>'+body+'</div>';}
 function renderTurn(){
   var el=$('#turn');
@@ -1871,7 +1872,7 @@ function spellsHTML(p,txt,c){
       var r=rich('cast: '+sp).slice(6);return '<span class="spc'+(left<=0?' out':'')+'">'+(left<=0?'<s>'+r+'</s>':r)+pp+'</span>';}).join(', ');};
   return (p.dc||p.sat!=null?'<div class="sgh">'+(p.dc?'Spell save <span class="dcx">DC '+p.dc+'</span>':'')+(p.sat!=null?' \u00b7 <span class="hit">'+sgn(p.sat)+'</span> to hit':'')+'</div>':'')+
     p.spells.map(function(g){return '<div class="sg"><b>'+esc(g.per)+'</b> '+lk(g.list,g)+'</div>';}).join('');}
-// Which actions a Multiattack nests (its referenced actions in the same section, except Spellcasting)
+// Stat block only: which actions a Multiattack nests (its referenced actions in the same section, except Spellcasting and roll tables)
 function nestOf(A,p){var out=[];if(p.kind!=='multi')return out;p.multi.refs.forEach(function(r){r.names.forEach(function(n){var q=A.find(function(x){return x.sec===p.sec&&x.n===n&&x.kind!=='multi'&&x.kind!=='spell'&&!x.table;});if(q&&out.indexOf(q)<0)out.push(q);});});return out;}
 function multiSum(p){return p.multi.refs.map(function(r,i){var x=(r.any?r.count+'× '+r.names.join(' or '):(r.count>1?r.count+'× ':'')+r.names[0]);
   return (i?(r.alt||(r.rep&&p.multi.refs[i-1].rep)?' or ':r.rep?' · can replace one with ':' + '):'')+x+(r.opt&&!r.rep&&!r.alt?' (if available)':'');}).join('');}
@@ -1993,7 +1994,7 @@ function applyPend(T){var skip=[],fx=curFx();
     });
   });
   T.forEach(function(c){incSync(c,true);});return skip;}
-function finishPad(){var fx=curFx();ui.tpk=false;ui.dtype=fx&&fx.dt||'';ui.sel={};ui.amt=0;ui.amtO=0;ui.dtO='';ui.ax=0;ui.ex=false;ui.menu=false;ui.pend={};ui.mode='dmg';ui.half=false;ui.mx=false;if(fx&&fx.st)ui.pend[fx.st]=true;ui.mq='';ui.confirmRemove=false;}
+function finishPad(){var fx=curFx();ui.tpk=false;ui.dtype=fx&&fx.dt||'';ui.sel={};ui.amt=0;ui.amtO=0;ui.dtO='';ui.ax=0;ui.ex=false;ui.menu=false;ui.pend={};ui.half=false;ui.mx=false;if(fx&&fx.st)ui.pend[fx.st]=true;ui.mq='';ui.confirmRemove=false;}
 function nextIdExcluding(T){
   var ids={};T.forEach(function(c){ids[c.id]=true;});
   var O=order();var idx=O.findIndex(function(c){return c.id===S.turnId;});
@@ -2026,7 +2027,7 @@ $('#turn').addEventListener('click',function(e){
   if(a==='spl'){openSpell(b.dataset.n);save();renderDrawer();return;}
   var c=findC(S.turnId);if(!c)return;
   if(c.kind==='fx'){if(a==='fxvis')c.vis=!c.vis;else if(a==='fxrm')rmComb(c);
-    else if(a==='fxgo'){ui.fxRun=c.id;ui.dtype=c.dt||'';ui.amt=0;ui.amtO=0;ui.dtO='';ui.ax=0;ui.ex=false;ui.mode='dmg';ui.half=false;ui.mx=false;ui.pend={};if(c.st)ui.pend[c.st]=true;if(c.sv!==''&&c.sv!=null){ui.sv=+c.sv;ui.svLast=ui.sv;}toast('Select who is affected.');}
+    else if(a==='fxgo'){ui.fxRun=c.id;ui.dtype=c.dt||'';ui.amt=0;ui.amtO=0;ui.dtO='';ui.ax=0;ui.ex=false;ui.half=false;ui.mx=false;ui.pend={};if(c.st)ui.pend[c.st]=true;if(c.sv!==''&&c.sv!=null){ui.sv=+c.sv;ui.svLast=ui.sv;}toast('Select who is affected.');}
     save();renderBoard();return;}
   if(a==='laspend'){var lc=findC(b.dataset.id);if(lc){snap('legendary');lc.la=(lc.la||0)+1;}}
   else if(a==='pcast'){var lp2=S.lib.find(function(x){return x.id===c.libId;}),sd2=lp2&&spellData(b.dataset.s,pcSpell(lp2));if(sd2){ui.pcSpOpen=true;actBegin(c,sd2,sd2.n,{a:'pcast',s:sd2.n});}}
