@@ -85,6 +85,8 @@ After an update, open the app once while online, then close and reopen it to get
 - **Several rays or darts** (Scorching Ray, Magic Missile, Eldritch Blast by character level): each one is its own target pick, shown as "(1 of 3)"; the same target can be picked again. The cast is spent on the first.
 - **Spells in other actions** ("casts Invisibility on itself", e.g. the Oni's bonus action): Use (or the ▸ token) opens the spell with the caster picked.
 - **Roll-table legendary actions** (Beholder Glare → Eye Rays): tap it, pick the rolled result, then target and Apply as usual.
+- **Per-hit riders** (Hex, Hunter's Mark, Bestow Curse on a target from this attacker; Divine Favor, Elemental Weapon, Crusader's Mantle, Enlarge, Rage on the attacker): a dashed box per rider appears with the damage, default 0. Type what the player rolled; it is added to each hit with its own type (each ray or beam starts at 0 again). Weapon-only riders are skipped for spell attacks. Also on the plain pad on the attacker's turn.
+- **Start/end-of-turn damage** (Burning, Searing Smite, Ensnaring Strike, Spirit Guardians, Black Tentacles, Phantasmal Killer, Heroism temp HP): tap the effect's ▸ on the turn card to select the creature with the dice and type preloaded.
 - **Developing effects** (Petrification Ray, Sleep, Flesh to Stone): on the target's turn the card shows its repeat save with **Failed → Petrified / Unconscious** and **Saved** (Flesh to Stone counts 3 of each).
 - **Grapples** from attacks show the escape DC and the grappler on the chip, and end by themselves if the grappler drops to 0 HP, becomes Incapacitated or leaves.
 

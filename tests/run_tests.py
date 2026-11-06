@@ -1298,6 +1298,34 @@ def rays_upcast_casts_eyerays_stages(b):
     check(not a.errors, a.errors)
 
 
+@test
+def hex_riders_and_turn_ticks(b):
+    a = App(b)
+    a.e("refLoad()"); a.pg.wait_for_function("window.__e('REF && REF.spells && REF.spells.length') > 0")
+    w = a.pc("Lock", ac=12, hp=30, abil={"cha": 16})
+    a.e("var l=S.lib[S.lib.length-1];l.level=5;l.parsed=[{class:'warlock',subclass:'',level:5}];l.spells=['Eldritch Blast'];save()")
+    g = a.mon("mm-ogre")[0]; o2 = a.mon("mm-ogre")[0]
+    # Hex added on the warlock's turn is linked to the warlock
+    a.e(f"S.turnId={w};var t=findC({g});t.conds.push('Hexed');ccSet(t,'Hexed');ui.cardOpen=true;ui.pcSpOpen=true;renderBoard()")
+    a.click('#turn [data-act=pcast][data-s="Eldritch Blast"]')
+    check("1 of 2" in a.pg.inner_text('#pad .acth'), "level 5: two beams")
+    eq(a.e("spellData('Fire Bolt',{clv:5}).dmg[0].dice"), "2d10", "cantrip upgrade at level 5")
+    a.click(f'#pad [data-act=tchip][data-id="{g}"]')
+    check(a.pg.query_selector('#pad [data-rv="Hexed"]'), "Hex rider row on a hexed target")
+    eq(a.e("+document.querySelector('#pad [data-rv=Hexed]').value"), 0, "default 0")
+    hp0 = a.c(g)["hp"]
+    a.e("ui.amt=5;renderPad()"); a.pg.fill('#pad [data-rv="Hexed"]', "4"); a.click('#pad [data-act=papply]')
+    eq(a.c(g)["hp"], hp0 - 9, "beam 1: 5 force + 4 necrotic")
+    eq(a.e("ui.rv.Hexed||0"), 0, "beam 2 starts at 0")
+    a.click(f'#pad [data-act=tchip][data-id="{o2}"]')
+    check(not a.pg.query_selector('#pad [data-rv="Hexed"]'), "no rider on an unhexed target"); a.click('#pad [data-act=actx]')
+    # Burning: tap the start-of-turn effect -> creature selected, 1d4 fire preloaded
+    a.e(f"S.turnId={o2};findC({o2}).conds.push('Burning');renderBoard()")
+    a.click('#turn [data-act=tick][data-c="Burning"]')
+    check(a.e(f"!!ui.sel[{o2}]") and a.e("ui.dtype") == "fire" and a.e("ui.amt") == 2, "Burning preloaded")
+    check(not a.errors, a.errors)
+
+
 def main():
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def log_message(self, *a):

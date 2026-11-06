@@ -2,6 +2,13 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Spell review: riders, turn damage, cantrips
+
+- Hex / Hunter's Mark (and other per-hit riders) had no damage path; now a rider box per hit, default 0, own damage type, only for targets the attacker hexed/marked.
+- Start-of-turn damage effects (Burning…) were text only; now tappable with dice and type preloaded.
+- Player cantrips used level-1 dice at every level (Fire Bolt 1d10 at level 5); now scale by character level.
+- Guiding Bolt status gave no "adv" hint on attacks against it; added. Melee chips now warn of Armor of Agathys / Fire Shield retaliation.
+
 ## 2026-11-06 — Multi-ray spells, upcasting, cast-in-action spells, Eye Rays legendary, developing statuses
 
 - Scorching Ray / Magic Missile / Eldritch Blast gave one roll and one damage; now one target pick per ray/dart/beam ("1 of 3"), same target allowed, cast spent once.
