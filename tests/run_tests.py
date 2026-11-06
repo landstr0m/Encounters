@@ -1482,8 +1482,8 @@ def visibility_core_controls(b):
             if dev != "phone":
                 r = a.pg.evaluate(VIS_JS, '[data-act="next"]'); check(r[0] == "ok", f"{th} {dev}: Next with drawer open {r}")
             # Defences drawer (an extra tab): every tab and Close still fit
-            a.e("S.tab='def';renderAll()")
-            for sel in ['#drawer [data-act="close"]', '#drawer [data-t="def"]', '#drawer [data-t="data"]', '#drawer [data-act="dsv"]']:
+            a.e("S.tab='def';ui.dmode='def';renderAll()")
+            for sel in ['#drawer [data-act="close"]', '#drawer [data-t="def"]', '#drawer [data-t="stat"]', '#drawer [data-act="dsv"]']:
                 r = a.pg.evaluate(VIS_JS, sel); check(r[0] == "ok", f"{th} {dev}: Defences {sel} {r}")
     a.e("ui.drawer=false;renderAll()")
     check(not a.errors, a.errors)
@@ -1530,6 +1530,28 @@ def player_card_slots_and_identity(b):
     a.click('#turn [data-act="slot"][data-k="3"]'); eq(a.e(f"findC({p}).slu[3]"), 1, "tap marks one used")
     a.click('#turn [data-act="slotr"]'); eq(a.e(f"Object.keys(findC({p}).slu).length"), 0, "reset")
     eq(a.j("[pcSlots({parsed:[{class:'paladin',level:5},{class:'sorcerer',level:3}]}).slots, pcSlots({parsed:[{class:'warlock',level:3}]}).pact]"), [[4, 3, 3], {"n": 2, "lvl": 2}], "multiclass and pact slots")
+    check(not a.errors, a.errors)
+
+
+@test
+def defences_menu(b):
+    a = App(b); a.pg.set_viewport_size({"width": 1024, "height": 768})
+    g = a.mon("mm-ghoul", 2); p = a.pc("Aer")
+    a.click('#bar [data-act="saves"]')
+    tabs = a.j("[].map.call(document.querySelectorAll('#drawer .dh button'),function(x){return x.dataset.t||x.dataset.act})")
+    eq(tabs, ["def", "stat", "close"], "Defences menu: Defences, Stat block, (Edit), Close only")
+    a.click(f'#drawer [data-act="drow"][data-id="{g[1]}"]'); a.click(f'#drawer [data-act="drow"][data-id="{p}"]')
+    eq(a.e(f"[!!ui.sel[{g[1]}],!!ui.sel[{p}],S.edit].join()"), f"true,true,{p}", "rows select; last one is the Edit target")
+    tabs = a.j("[].map.call(document.querySelectorAll('#drawer .dh button'),function(x){return x.dataset.t||x.dataset.act})")
+    eq(tabs, ["def", "stat", "edit", "close"], "Edit tab appears after selecting")
+    a.click('#drawer [data-t="stat"]'); eq(a.e("S.statC"), p, "Stat block shows the last selected")
+    check(a.pg.query_selector('#drawer [data-t="def"]'), "Defences tab still there to go back")
+    a.click('#drawer [data-t="def"]'); check(a.pg.query_selector('#drawer .defs'), "back to Defences")
+    a.click('#drawer [data-act="close"]')
+    check(a.e("!ui.drawer") and a.pg.is_visible('#pad .papply'), "closing keeps the selection and shows the pad")
+    a.click('#bar [data-act="openadd"]')
+    tabs = a.j("[].map.call(document.querySelectorAll('#drawer .dh button'),function(x){return x.dataset.t||x.dataset.act})")
+    check("def" not in tabs and "add" in tabs and "data" in tabs, f"Add menu unchanged: {tabs}")
     check(not a.errors, a.errors)
 
 

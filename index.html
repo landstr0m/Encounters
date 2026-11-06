@@ -192,7 +192,7 @@ a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-
 .dtop .segs{display:flex;flex-wrap:wrap;gap:4px 12px}.dtop .segs>*{flex:1 1 300px;margin:0}.dtop .segs button{white-space:nowrap}.row.upd{align-items:center}.row.upd>button{flex:1}.dtop .search{margin:4px 0}
 .ppl{font-size:.8rem;color:var(--muted);margin:2px 0 4px}.slots2{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:6px 0}.slots2 b{font-size:.9rem}.slv{display:inline-flex;align-items:center;gap:2px}.slv small{color:var(--muted);margin-right:4px;font-weight:700}.slots2 .pip{width:16px;height:16px}.slots2 .pip.on{background:var(--accent)}
 .dsv{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px}.dsv b{margin-right:4px}.dsv button{min-height:38px;padding:2px 12px;font-weight:700}.dsv button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.drow{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:8px 0;border-top:1px solid var(--line)}.drow.down{opacity:.55}.drow .dn{font-family:var(--display);font-size:1.2rem;min-width:8em}.drow .sv{margin-left:0}
+.drow{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:8px 8px;border-top:1px solid var(--line);cursor:pointer;border-radius:6px}.drow.on{background:color-mix(in srgb,var(--ok) 18%,var(--surface));box-shadow:inset -4px 0 0 var(--ok)}.drow.down{opacity:.55}.drow .dn{font-family:var(--display);font-size:1.2rem;min-width:8em}.drow .sv{margin-left:0}
 .dac{position:relative;width:34px;height:39px;display:inline-flex;align-items:center;justify-content:center;padding-bottom:4px;font-family:var(--display);font-weight:700;font-size:1.1rem}.dac svg{position:absolute;inset:0;width:100%;height:100%}.dac path{fill:var(--surface2);stroke:var(--muted);stroke-width:1.4}.dac .acv{position:relative}
 .dd{flex:1 1 220px;font-size:.92rem}.dk{font-weight:700;color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
 .fxt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px}.fxt button{min-height:36px}.fxs{display:inline-flex;gap:2px}
@@ -997,7 +997,7 @@ function renderBar(){
    (ui.undo?'<button data-act="undo" title="Undo: '+esc(ui.undo.label)+'" aria-label="Undo"><span class="ic">↶</span><span class="tx"> Undo</span></button>':'')+
    '<span class="spacer"></span>'+
    '<button class="dmonly" data-act="openadd" aria-label="Add"><span class="ic">＋</span><span class="tx"> Add</span></button>'+
-   '<button class="dmonly'+(ui.drawer&&S.tab==='def'?' on':'')+'" data-act="saves" title="Defences: AC, saving throws, resistances and immunities of every creature" aria-label="Defences"><span class="ic">🛡</span><span class="tx"> Defences</span></button>'+
+   '<button class="dmonly'+(ui.drawer&&ui.dmode==='def'?' on':'')+'" data-act="saves" title="Defences: AC, saving throws, resistances and immunities of every creature" aria-label="Defences"><span class="ic">🛡</span><span class="tx"> Defences</span></button>'+
    '<button data-act="present" aria-label="Table view"><span class="ic">🖥</span><span class="tx"> '+(ui.present?'Exit table view':'Table view')+'</span></button>'+
    '<button class="danger dmonly'+(ui.confirmClear?' armed':'')+'" data-act="clear" aria-label="Clear">'+(ui.confirmClear?'Tap again to clear all':'<span class="ic">🗑</span><span class="tx"> Clear</span>')+'</button>';
   document.body.classList.toggle('idle',!started);
@@ -1371,9 +1371,9 @@ function defHTML(){var k=ui.dsv==null?1:ui.dsv,L=S.list.filter(function(c){retur
   var row=function(c){var d=defs(c),bits=[['Resist',d.res],['Immune',d.imm],['Vulnerable',d.vul],['Cond. immune',d.cimm]].filter(function(x){return x[1].length;})
       .map(function(x){return '<span class="dk">'+x[0]+'</span> '+esc(uniq(x[1]).join(', '));});
     if(magRes(c))bits.push('<span class="dk">Magic Resistance</span>');
-    return '<div class="drow'+(c.hp<=0?' down':'')+'"><b class="dn">'+esc(c.name)+'</b><span class="dac" title="AC">'+SHIELD+'<span class="acv">'+effAC(c)+'</span></span>'+(saveOf(c,k)||'<span class="sv">'+AB[k]+' ?</span>')+
+    return '<div class="drow'+(c.hp<=0?' down':'')+(ui.sel[c.id]?' on':'')+'" role="button" tabindex="0" data-act="drow" data-id="'+c.id+'" aria-pressed="'+!!ui.sel[c.id]+'"><b class="dn">'+esc(c.name)+'</b><span class="dac" title="AC">'+SHIELD+'<span class="acv">'+effAC(c)+'</span></span>'+(saveOf(c,k)||'<span class="sv">'+AB[k]+' ?</span>')+
       '<span class="dd">'+(bits.join(' \u00b7 ')||'<span class="muted">no resistances</span>')+'</span></div>';};
-  return '<div class="defs">'+seg+(L.length?L.map(row).join(''):'<p class="muted">No creatures in the encounter yet.</p>')+'</div>';}
+  return '<div class="defs">'+seg+'<p class="muted" style="margin:0 0 6px;font-size:.85rem">Tap creatures to select them; ✕ closes and keeps them selected for the pad. Stat block / Edit show the last one tapped.</p>'+(L.length?L.map(row).join(''):'<p class="muted">No creatures in the encounter yet.</p>')+'</div>';}
 function saveOf(c,i){
   var r,n;
   if(c.kind==='pc'){
@@ -2070,7 +2070,14 @@ function renderDrawer(){
   dr.hidden=!ui.drawer;
   document.body.classList.toggle('drawon',ui.drawer);
   if(!ui.drawer)return;
-  dr.innerHTML='<div class="dtop"><div class="dh'+((S.edit!=null&&findC(S.edit))||S.tab==='def'?' many':'')+'"><button class="tab'+(S.tab==='add'?' on':'')+'" data-act="tab" data-t="add">Add</button><button class="tab'+(S.tab==='stat'?' on':'')+'" data-act="tab" data-t="stat">Stat block</button>'+(S.edit!=null&&findC(S.edit)?'<button class="tab'+(S.tab==='edit'?' on':'')+'" data-act="tab" data-t="edit">Edit</button>':'')+(S.tab==='def'?'<button class="tab on" data-act="tab" data-t="def">Defences</button>':'')+'<button class="tab'+(S.tab==='ref'?' on':'')+'" data-act="tab" data-t="ref"><span class="lg">Spells &amp; Conditions</span><span class="sh">Spells</span></button><button class="tab'+(S.tab==='data'?' on':'')+'" data-act="tab" data-t="data">Data</button><button data-act="close" class="cls" aria-label="Close panel"><span class="tx">Close</span><span class="ic">✕</span></button></div>'+(S.tab==='add'?addTopHTML():'')+'</div>'+
+  // Two menus share the drawer: the Add menu (+ Add) and the Defences menu (🛡, ui.dmode='def'). Each keeps its own tab bar,
+  // so Stat block / Edit opened from Defences come back to Defences.
+  if(ui.dmode==='def'&&['def','stat','edit'].indexOf(S.tab)<0)ui.dmode='add';  // e.g. a spell link opens Spells: back in the Add menu
+  var tb=function(t,lab){return '<button class="tab'+(S.tab===t?' on':'')+'" data-act="tab" data-t="'+t+'">'+lab+'</button>';},hasEd=S.edit!=null&&findC(S.edit);
+  var cls='<button data-act="close" class="cls" aria-label="Close panel"><span class="tx">Close</span><span class="ic">✕</span></button>';
+  var bar=ui.dmode==='def'?tb('def','Defences')+tb('stat','Stat block')+(hasEd?tb('edit','Edit'):'')+cls
+    :tb('add','Add')+tb('stat','Stat block')+(hasEd?tb('edit','Edit'):'')+tb('ref','<span class="lg">Spells &amp; Conditions</span><span class="sh">Spells</span>')+tb('data','Data')+cls;
+  dr.innerHTML='<div class="dtop"><div class="dh'+(ui.dmode!=='def'&&hasEd?' many':'')+'">'+bar+'</div>'+(S.tab==='add'?addTopHTML():'')+'</div>'+
     (S.tab==='def'?defHTML():S.tab==='add'?addPanelHTML():S.tab==='ref'?refHTML():S.tab==='data'?dataHTML():S.tab==='edit'?editHTML():statHTML());
 }
 // A grapple ends when the grappler is gone, at 0 HP or Incapacitated
@@ -2168,8 +2175,8 @@ $('#bar').addEventListener('click',function(e){
   if(a==='undo'){undo();}
   else if(a==='endc'){logAdd('Combat ended');logEnd();snap('end combat');S.turnId=null;S.round=1;S.prevTurn=null;ui.legDis=null;S.list.forEach(function(c){delete c.exp;c.rx=false;c.la=0;c.ue={};c.mu={};c.ray={};c.mrep={};c.msp={};});toast('Combat ended. Creatures, HP and statuses kept.');}
   else if(a==='next'){snap('next turn');nextTurn();ui.confirmClear=false;}
-  else if(a==='openadd'){ui.drawer=true;S.tab='add';}
-  else if(a==='saves'){if(ui.drawer&&S.tab==='def')ui.drawer=false;else{ui.drawer=true;S.tab='def';}save();renderAll();return;}
+  else if(a==='openadd'){ui.drawer=true;ui.dmode='add';if(S.tab==='def')S.tab='add';}
+  else if(a==='saves'){if(ui.drawer&&ui.dmode==='def')ui.drawer=false;else{ui.drawer=true;ui.dmode='def';S.tab='def';}save();renderAll();return;}
   else if(a==='present'){ui.present=!ui.present;if(ui.present)ui.drawer=false;document.body.classList.toggle('present',ui.present);try{sessionStorage.setItem('et-present',ui.present?'1':'0');}catch(e){}renderBoard();renderDrawer();return;}
   else if(a==='clear'){
     if(ui.confirmClear){snap('clear all');S.list=[];S.turnId=null;S.round=1;S.envName=S.envNote='';S.lair=false;S.prevTurn=null;ui.confirmClear=false;S.atTable={};ui.sel={};}else{ui.confirmClear=true;}
@@ -2204,8 +2211,8 @@ $('#turn').addEventListener('click',function(e){
     if(lp7&&row7){var d7=parseAct(row7.n,row7.t,'a'),h7={a:'leg',i:lp7.key};if(d7.kind==='atk'||d7.kind==='save')actBegin(L7,d7,lp7.n+' \u2192 '+row7.n,h7);
       else{doHow(L7,h7);toast('<b>'+esc(L7.name)+':</b> '+esc(row7.n)+' \u2014 '+rich(short(row7.t)));logAdd(esc(L7.name)+' \u2014 legendary: '+esc(row7.n));}}}}
   else if(a==='tcol'){ui.cardOpen=!ui.cardOpen;}
-  else if(a==='tinfo'){S.stat=c.kind==='mon'?c.monId:'pc';S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
-  else if(a==='tedit'){S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
+  else if(a==='tinfo'){if(!ui.drawer)ui.dmode='add';S.stat=c.kind==='mon'?c.monId:'pc';S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
+  else if(a==='tedit'){if(!ui.drawer)ui.dmode='add';S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
   else if(a==='spent'){c.spent=c.spent||{};c.spent[b.dataset.i]=!c.spent[b.dataset.i];}
   else if(a==='use'||a==='unuse'||a==='mpip'||a==='ray'||a==='mrep'){var how={a:a,i:b.dataset.i,q:b.dataset.q,d:b.dataset.d,r:b.dataset.r};
     if(!actStart(c,how))doHow(c,how);}
@@ -2228,9 +2235,9 @@ $('#tbl').addEventListener('click',function(e){
   if(e.target.closest('input'))return;
   var b=e.target.closest('[data-act]');
   var act=b?b.dataset.act:null;
-  if(act==='start'){ui.drawer=true;S.tab='add';S.sub=b.dataset.s;ui.msg='';save();renderDrawer();return;}
+  if(act==='start'){if(!ui.drawer)ui.dmode='add';ui.drawer=true;S.tab='add';S.sub=b.dataset.s;ui.msg='';save();renderDrawer();return;}
   if(act==='lair'){S.lair=!S.lair;save();renderBoard();return;}
-  if(act==='viewgrp'){S.stat=b.dataset.m;S.statC=null;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
+  if(act==='viewgrp'){if(!ui.drawer)ui.dmode='add';S.stat=b.dataset.m;S.statC=null;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
   if(act==='selgrp'){
     var g=b.dataset.g;
     S.list.forEach(function(c){if(!isDead(c)&&(g==='pc'?c.kind==='pc':(c.kind==='mon'&&gkey(c)===g))){ui.sel[c.id]=true;ui.lastSel=ui.lastSel&&ui.sel[ui.lastSel]?ui.lastSel:c.id;}});
@@ -2246,10 +2253,10 @@ $('#tbl').addEventListener('click',function(e){
   if(c.kind==='fx'){if(act==='fxvis')c.vis=!c.vis;else if(act==='fxrm')rmComb(c);save();renderBoard();return;}
   if(act==='cond'){snap('remove '+b.dataset.c);var i=c.conds.indexOf(b.dataset.c);if(i>=0)c.conds.splice(i,1);incSync(c,false);save();renderBoard();return;}
   if(act&&act.indexOf('ds')===0){snap('death save');dsAct(c,act,b);save();renderBoard();return;}
-  if(act==='info'){S.stat=c.kind==='mon'?c.monId:'pc';S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
+  if(act==='info'){if(!ui.drawer)ui.dmode='add';S.stat=c.kind==='mon'?c.monId:'pc';S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
   if(act==='rx'){snap('reaction');c.rx=!c.rx;save();renderBoard();return;}
   if(act==='pip'){snap('legendary');var k=b.dataset.k;c[k]=(c[k]||0)+(b.classList.contains('on')?1:-1);if(c[k]<0)c[k]=0;save();renderBoard();return;}
-  if(act==='edit'){S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
+  if(act==='edit'){if(!ui.drawer)ui.dmode='add';S.edit=c.id;S.tab='edit';ui.msg='';ui.drawer=true;save();renderDrawer();return;}
   if(ui.sel[c.id])delete ui.sel[c.id];else{ui.sel[c.id]=true;ui.lastSel=c.id;}
   ui.confirmRemove=false;ui.menu=false;ui.pend={};
   if(ui.drawer&&S.tab==='stat'){statPick();save();renderDrawer();}
@@ -2419,6 +2426,7 @@ dr.addEventListener('click',function(e){
   if(act==='rmmonfile'){CUSTOM.splice(+b.dataset.i,1);saveCustom();location.reload();return;}
   if(act==='tablewin'){window.open(location.pathname+'?view=table','_blank');return;}
   if(act==='close'){ui.drawer=false;}
+  else if(act==='drow'){var dc=findC(b.dataset.id);if(dc){if(ui.sel[dc.id])delete ui.sel[dc.id];else{ui.sel[dc.id]=true;ui.lastSel=dc.id;S.edit=dc.id;statPick();}renderBoard();}}
   else if(act==='tab'){S.tab=b.dataset.t;if(S.tab==='stat')statPick();ui.msg=ui.emsg='';ui.refBack=null;if(S.tab!=='ref')ui.ref=null;}
   else if(act==='ref'){ui.ref=b.dataset.n;dr.scrollTop=0;}
   else if(act==='refback'){ui.ref=null;if(ui.refBack){if(ui.refBack==='close')ui.drawer=false;else S.tab=ui.refBack;ui.refBack=null;}}

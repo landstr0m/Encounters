@@ -2,6 +2,10 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Defences menu
+
+- Defences now has its own tab bar (Defences, Stat block, Edit, ✕; `ui.dmode`), rows select creatures, Stat block / Edit follow the last tapped, and the Add menu is unchanged.
+
 ## 2026-11-06 — Defences drawer, player card
 
 - Save badges on every row cluttered the table; the 🛡 button now opens a Defences drawer (one line per creature: AC, chosen save, resistances / immunities). Saves bar removed.
