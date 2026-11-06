@@ -247,7 +247,9 @@ tr.dead td{font-size:.85rem;color:var(--muted);padding:4px 8px;border-top:1px so
 tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 0}
 .c-in{width:52px;text-align:center}.c-ac{width:66px;text-align:center}
 .num::-webkit-inner-spin-button,.num::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-.acb{min-height:46px;min-width:48px;width:max-content;margin:0 auto;display:flex;align-items:center;justify-content:center;border:0;padding:0 8px 6px;background:no-repeat center/100% 100% url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 46' preserveAspectRatio='none'%3E%3Cpath d='M20 2 L37 8 V22 C37 33 29 40 20 44 C11 40 3 33 3 22 V8 Z' fill='%2394a3b822' stroke='%2394a3b8' stroke-width='2'/%3E%3C/svg%3E");font-family:var(--display);font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums;}
+.acb{position:relative;width:44px;height:50px;margin:0 auto;display:flex;align-items:center;justify-content:center;padding:0 0 5px;font-family:var(--display);font-size:1.35rem;font-weight:700;line-height:1}
+.acb svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}.acb path{fill:var(--surface2);stroke:var(--muted);stroke-width:1.4;stroke-linejoin:round}
+.acb .acv{position:relative}/* AC shield: drawn inline so it follows the theme; the number sits on the shield's optical centre (above its middle) */
 .acb s,.acp s{font-size:.7em;color:var(--muted);margin-left:4px;font-weight:400}.acb .em,.acp .em{color:var(--accent)}.acb .em.up,.acp .em.up{color:var(--ok)}.acb .em.dn,.acp .em.dn{color:var(--bad)}
 .off{display:flex;flex-wrap:wrap;gap:4px;margin:3px 0;align-items:center}
 .off span,.off button{font-size:.72rem;font-weight:600;padding:1px 7px;border-radius:999px;border:1px solid var(--line);min-height:0;line-height:1.5}
@@ -1370,6 +1372,7 @@ function offHTML(c){
   if(df)[['Res',df.res],['Imm',df.imm],['Vuln',df.vul]].forEach(function(x){if(x[1].length)t.push('<span>'+x[0]+': '+esc(uniq(x[1]).join(', '))+'</span>');});
   return '<div class="off dmonly">'+t.join('')+'</div>';
 }
+var SHIELD='<svg viewBox="0 0 40 46" aria-hidden="true"><path d="M20 3 L34.6 8.2 C35.2 8.4 35.5 8.9 35.5 9.5 V21.5 C35.5 31.2 28.9 38.9 20 42.8 C11.1 38.9 4.5 31.2 4.5 21.5 V9.5 C4.5 8.9 4.8 8.4 5.4 8.2 Z"/></svg>';
 function rowHTML(c){
   var pct=c.max?Math.max(0,Math.min(100,c.hp/c.max*100)):0;
   var lvl=pct>50?'ok':(pct>25?'warn':'bad');
@@ -1380,7 +1383,7 @@ function rowHTML(c){
   return '<tr class="r'+(c.id===S.turnId?' isturn':'')+(down?' down':'')+(ui.sel[c.id]?' sel':'')+'" data-id="'+c.id+'">'+
    '<td class="c-in"><input class="num" type="number" min="-4" max="49" step="1" data-act="init" placeholder="'+esc(ph)+'" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
    '<td><span class="name">'+esc(c.name)+'</span>'+(c.kind==='pc'?'':'<span class="tag">CR '+esc(c.cr)+'</span>')+(ui.sv>=0?(saveOf(c,ui.sv)||''):'')+offHTML(c)+'<div class="conds">'+chips+'</div>'+(ui.sel[c.id]?fxHTML(c):'')+'</td>'+
-   '<td class="c-ac"><span class="acb" role="img" title="Current AC'+(effAC(c)!==+c.ac?' (base '+c.ac+'; ✎ to change)':'')+'" aria-label="AC '+effAC(c)+'">'+(effAC(c)!==+c.ac?'<b class="'+acCls(c)+'">'+effAC(c)+'</b>':''+effAC(c))+'</span></td>'+
+   '<td class="c-ac"><span class="acb" role="img" title="Current AC'+(effAC(c)!==+c.ac?' (base '+c.ac+'; ✎ to change)':'')+'" aria-label="AC '+effAC(c)+'">'+SHIELD+'<span class="acv">'+(effAC(c)!==+c.ac?'<b class="'+acCls(c)+'">'+effAC(c)+'</b>':''+effAC(c))+'</span></span></td>'+
    '<td class="c-hp"><div class="hpnum"><span class="cur">'+c.hp+'</span><span class="max">/ '+c.max+'</span>'+(c.base!=null?'<span class="mred">max \u2212'+(c.base-c.max)+'</span>':'')+(c.temp>0?'<span class="temp">+'+c.temp+'</span>':'')+(down?'<span class="state">'+(pcDead?'Dead':'Down')+'</span>':'')+'</div>'+
      '<div class="track"><div class="fill '+lvl+'" style="width:'+pct+'%"></div></div>'+(pcDead?'<div class="dsd">Heal 1+ HP to revive</div>':dsHTML(c))+'</td>'+
    '<td class="c-i"><button class="ib" data-act="edit" aria-label="Edit '+esc(c.name)+'" title="Edit">✎</button><button class="ib" data-act="info" aria-label="Stat block for '+esc(c.name)+'">ⓘ</button></td>'+

@@ -2,6 +2,10 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — AC shield
+
+- AC number sat off-centre in a stretched background-image shield. The shield is now drawn inline (theme colours, cleaner outline) with the number on its optical centre; `icon_alignment` checks it (±2 px).
+
 ## 2026-11-06 — Initiative box
 
 - Box was far wider than needed; now ~44 px. Placeholder shows the bonus only ("+3", was "d20+3"). Input capped to two characters and clamped to −4…49 (2024 rules range).

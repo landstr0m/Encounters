@@ -1430,6 +1430,11 @@ def icon_alignment(b):
     a.e("S.tab='stat';S.stat='mm-ghast';ui.drawer=true;renderDrawer()")
     off = a.pg.evaluate(ALIGN_JS, "#drawer .dt i")
     check(off and max(off) <= 2, f"stat block damage icons {off}")
+    # AC number centred in its shield (horizontally; vertically on the shield's optical centre, 45% down)
+    a.e("ui.drawer=false;renderAll()")
+    d = a.pg.evaluate("""()=>[].map.call(document.querySelectorAll('.acb'),function(b){var r=b.getBoundingClientRect(),g=document.createRange();g.selectNodeContents(b.querySelector('.acv'));var t=g.getBoundingClientRect();
+      return Math.max(Math.abs((t.left+t.right)/2-(r.left+r.right)/2),Math.abs((t.top+t.bottom)/2-(r.top+r.height*0.45)));})""")
+    check(d and max(d) <= 2, f"AC numbers off-centre in the shield: {d}")
 
 
 VIS_JS = """(sel)=>{var r=[];document.querySelectorAll(sel).forEach(function(el){var b=el.getBoundingClientRect();
