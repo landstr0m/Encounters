@@ -1408,6 +1408,28 @@ def condition_links_inline(b):
     eq(a.e("getComputedStyle(document.querySelector('#turn .sg .spc')).display"), "block", "one castable spell per line")
 
 
+ALIGN_JS = """(sel)=>{var out=[];document.querySelectorAll(sel).forEach(function(el){var r=el.getBoundingClientRect();if(!r.height)return;
+ var p=el.parentElement,w=document.createTreeWalker(p,NodeFilter.SHOW_TEXT),n,best=null;
+ while(!best&&(n=w.nextNode())){if(el.contains(n)||!n.textContent.trim())continue;var g=document.createRange();g.selectNodeContents(n);
+  [].some.call(g.getClientRects(),function(t){if(Math.abs((t.top+t.bottom)/2-(r.top+r.bottom)/2)<30){best=t;return true;}});}
+ if(best)out.push(Math.abs((r.top+r.bottom)/2-(best.top+best.bottom)/2));});return out;}"""
+
+
+@test
+def icon_alignment(b):
+    """Icons next to text (cast ▸, use diamonds, damage-type symbols) stay vertically centred on their text (±2 px)."""
+    a = App(b); a.pg.set_viewport_size({"width": 420, "height": 900})
+    m = a.mon("mm-archmage")[0]; a.mon("mm-ghast")
+    a.e(f"S.turnId={m};ui.cardOpen=true;renderBoard()")
+    for sel in ["#turn .spcast", "#turn .spc .pip", "#turn .dt i"]:
+        off = a.pg.evaluate(ALIGN_JS, sel)
+        check(off, f"{sel}: nothing measured")
+        check(max(off) <= 2, f"{sel} off-centre by {max(off):.1f}px")
+    a.e("S.tab='stat';S.stat='mm-ghast';ui.drawer=true;renderDrawer()")
+    off = a.pg.evaluate(ALIGN_JS, "#drawer .dt i")
+    check(off and max(off) <= 2, f"stat block damage icons {off}")
+
+
 def main():
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def log_message(self, *a):
