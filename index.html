@@ -2072,10 +2072,10 @@ function renderDrawer(){
   if(!ui.drawer)return;
   // Two menus share the drawer: the Add menu (+ Add) and the Defences menu (🛡, ui.dmode='def'). Each keeps its own tab bar,
   // so Stat block / Edit opened from Defences come back to Defences.
-  if(ui.dmode==='def'&&['def','stat','edit'].indexOf(S.tab)<0)ui.dmode='add';  // e.g. a spell link opens Spells: back in the Add menu
+  if(ui.dmode==='def'&&['def','stat','edit','ref'].indexOf(S.tab)<0)ui.dmode='add';  // a tab the Defences menu doesn't have: back to the Add menu
   var tb=function(t,lab){return '<button class="tab'+(S.tab===t?' on':'')+'" data-act="tab" data-t="'+t+'">'+lab+'</button>';},hasEd=S.edit!=null&&findC(S.edit);
   var cls='<button data-act="close" class="cls" aria-label="Close panel"><span class="tx">Close</span><span class="ic">✕</span></button>';
-  var bar=ui.dmode==='def'?tb('def','Defences')+tb('stat','Stat block')+(hasEd?tb('edit','Edit'):'')+cls
+  var bar=ui.dmode==='def'?tb('def','Defences')+tb('stat','Stat block')+(hasEd?tb('edit','Edit'):'')+tb('ref','Spells')+cls
     :tb('add','Add')+tb('stat','Stat block')+(hasEd?tb('edit','Edit'):'')+tb('ref','<span class="lg">Spells &amp; Conditions</span><span class="sh">Spells</span>')+tb('data','Data')+cls;
   dr.innerHTML='<div class="dtop"><div class="dh'+(ui.dmode!=='def'&&hasEd?' many':'')+'">'+bar+'</div>'+(S.tab==='add'?addTopHTML():'')+'</div>'+
     (S.tab==='def'?defHTML():S.tab==='add'?addPanelHTML():S.tab==='ref'?refHTML():S.tab==='data'?dataHTML():S.tab==='edit'?editHTML():statHTML());

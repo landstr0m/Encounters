@@ -2,6 +2,11 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Spells in the Defences menu; tests stop fast
+
+- Defences menu now includes Spells, so spell links from a stat block stay in that menu.
+- A typo stopped the app from loading and every test then waited 30 s for it (about 36 min in all). The runner now stops after the first "app did not start" (15 s) and says why.
+
 ## 2026-11-06 — Defences menu
 
 - Defences now has its own tab bar (Defences, Stat block, Edit, ✕; `ui.dmode`), rows select creatures, Stat block / Edit follow the last tapped, and the Add menu is unchanged.

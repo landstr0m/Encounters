@@ -22,6 +22,10 @@ def test(fn):
     return fn
 
 
+class AppDidNotLoad(Exception):
+    """The page never booted (e.g. a JavaScript syntax error): every later test would fail the same way."""
+
+
 class App:
     def __init__(self, browser, w=1366, h=900, query=""):
         self.ctx = browser.new_context(viewport={"width": w, "height": h}, accept_downloads=True)
@@ -34,7 +38,10 @@ class App:
         self.prompt_answer = ""
         self.ctx.route("**/index.html*", self._hook)
         self.pg.goto(URL + query)
-        self.pg.wait_for_function("window.__e && window.__e('MON.length') > 0")
+        try:
+            self.pg.wait_for_function("window.__e && window.__e('MON.length') > 0", timeout=15000)
+        except Exception:
+            raise AppDidNotLoad("the app did not start: " + ("; ".join(self.errors[:3]) or "no error reported"))
 
     @staticmethod
     def _hook(route):
@@ -1539,13 +1546,14 @@ def defences_menu(b):
     g = a.mon("mm-ghoul", 2); p = a.pc("Aer")
     a.click('#bar [data-act="saves"]')
     tabs = a.j("[].map.call(document.querySelectorAll('#drawer .dh button'),function(x){return x.dataset.t||x.dataset.act})")
-    eq(tabs, ["def", "stat", "close"], "Defences menu: Defences, Stat block, (Edit), Close only")
+    eq(tabs, ["def", "stat", "ref", "close"], "Defences menu: Defences, Stat block, (Edit), Spells, Close")
     a.click(f'#drawer [data-act="drow"][data-id="{g[1]}"]'); a.click(f'#drawer [data-act="drow"][data-id="{p}"]')
     eq(a.e(f"[!!ui.sel[{g[1]}],!!ui.sel[{p}],S.edit].join()"), f"true,true,{p}", "rows select; last one is the Edit target")
     tabs = a.j("[].map.call(document.querySelectorAll('#drawer .dh button'),function(x){return x.dataset.t||x.dataset.act})")
-    eq(tabs, ["def", "stat", "edit", "close"], "Edit tab appears after selecting")
+    eq(tabs, ["def", "stat", "edit", "ref", "close"], "Edit tab appears after selecting")
     a.click('#drawer [data-t="stat"]'); eq(a.e("S.statC"), p, "Stat block shows the last selected")
     check(a.pg.query_selector('#drawer [data-t="def"]'), "Defences tab still there to go back")
+    a.e("openSpell('Fireball');renderDrawer()"); check(a.e("S.tab==='ref' && ui.dmode==='def'"), "a spell link stays in the Defences menu")
     a.click('#drawer [data-t="def"]'); check(a.pg.query_selector('#drawer .defs'), "back to Defences")
     a.click('#drawer [data-act="close"]')
     check(a.e("!ui.drawer") and a.pg.is_visible('#pad .papply'), "closing keeps the selection and shows the pad")
@@ -1576,6 +1584,9 @@ def main():
             except Exception as ex:
                 RESULTS.append((t.__name__, ex))
                 print(f"FAIL  {t.__name__}: {ex}")
+                if isinstance(ex, AppDidNotLoad):  # stop at once instead of waiting on every remaining test
+                    print("STOP  the app does not load, so the remaining tests were skipped.")
+                    break
                 if os.environ.get("TRACE"):
                     traceback.print_exc()
         b.close()

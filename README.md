@@ -195,7 +195,7 @@ Then bump `CACHE` in `sw.js` so installed apps pick up the change. Log bugs and 
 - App data stays in your browser on the current device. Export it regularly as a backup.
 
 ## Defences
-🛡 **Defences** in the toolbar opens a drawer listing every creature on one line: AC, the saving throw you pick at the top (Str…Cha, with advantage / auto-fail notes), resistances, immunities, vulnerabilities, condition immunities and Magic Resistance. It is its own menu (Defences · Stat block · Edit · ✕): tap creatures to select them, Stat block and Edit show the last one tapped and keep the Defences tabs so you can go back; ✕ closes and leaves them selected with the pad open. Tap 🛡 again to close. **+ Add** opens the usual menu.
+🛡 **Defences** in the toolbar opens a drawer listing every creature on one line: AC, the saving throw you pick at the top (Str…Cha, with advantage / auto-fail notes), resistances, immunities, vulnerabilities, condition immunities and Magic Resistance. It is its own menu (Defences · Stat block · Edit · Spells · ✕): tap creatures to select them, Stat block and Edit show the last one tapped and keep the Defences tabs so you can go back; ✕ closes and leaves them selected with the pad open. Tap 🛡 again to close. **+ Add** opens the usual menu.
 
 ## Player turn card
 Shows race, class (subclass) and level, spell save DC and to-hit, proficiency bonus and the six ability modifiers (save-proficient ones highlighted, modifier only), a small Passive Perception line, and **spell slots** worked out from the class levels (multiclass rules; Warlock Pact Magic separate). Tap a slot to mark it used; **Reset** after a rest.
