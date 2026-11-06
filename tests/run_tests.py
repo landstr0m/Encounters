@@ -568,8 +568,10 @@ def off_turn_info_and_dc(b):
     check("+6 to hit" not in a.pg.inner_text("#turn"), "Hide details hides the player card body")
     a.click('#turn [data-act="tcol"]')
     check("+6 to hit" in a.pg.inner_text("#turn"), "Show details brings it back")
-    a.click(f'tr[data-id="{m}"] .acb')
-    eq((a.e("S.tab"), a.e("S.edit")), ("edit", m), "tapping AC opens Edit for base AC")
+    a.e("ui.drawer=false;S.edit=null;renderAll()"); a.click(f'tr[data-id="{m}"] .acb')
+    check(a.e("!ui.drawer||S.tab!=='edit'"), "tapping AC no longer opens Edit"); check(a.e(f"!!ui.sel[{m}]"), "tapping AC selects the row")
+    a.click(f'tr[data-id="{m}"] [data-act="edit"]')
+    eq((a.e("S.tab"), a.e("S.edit")), ("edit", m), "the pencil opens Edit")
     eq(a.errors, [], "errors:")
 
 
@@ -1470,6 +1472,19 @@ def visibility_core_controls(b):
             if dev != "phone":
                 r = a.pg.evaluate(VIS_JS, '[data-act="next"]'); check(r[0] == "ok", f"{th} {dev}: Next with drawer open {r}")
     a.e("ui.drawer=false;renderAll()")
+    check(not a.errors, a.errors)
+
+
+@test
+def pad_selection_chips(b):
+    a = App(b)
+    g = a.mon("mm-ghoul", 2); p = a.pc("Aer")
+    a.select(g[0])
+    check(a.pg.query_selector(f'#pad [data-act="pchip"][data-id="{g[1]}"]'), "chip for every creature")
+    a.click(f'#pad [data-act="pchip"][data-id="{g[1]}"]'); a.click(f'#pad [data-act="pchip"][data-id="{p}"]')
+    eq(a.e(f"[!!ui.sel[{g[0]}],!!ui.sel[{g[1]}],!!ui.sel[{p}]].join()"), "true,true,true", "chips add to the selection")
+    a.click(f'#pad [data-act="pchip"][data-id="{g[0]}"]'); check(a.e(f"!ui.sel[{g[0]}]"), "chip removes")
+    check(a.e(f"document.querySelector('tr[data-id=\"{g[1]}\"]').classList.contains('sel')"), "row shows selection")
     check(not a.errors, a.errors)
 
 

@@ -101,8 +101,9 @@ button.danger.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
   .tok{width:96px;min-height:72px}.tok .nm{font-size:.95rem}.tok .in{font-size:1.2rem}
   .tw #tbl,.tw #tbl tbody{display:block;min-width:0;width:100%}
   tr.grp{display:block}tr.grp th{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
-  tr.r{display:grid;grid-template-columns:54px 1fr 92px;grid-template-areas:"in nm ic" "ac hp hp";align-items:center;border-top:1px solid var(--line)}
-  .tw tr.r td{border-top:0;display:block;width:auto;padding:4px 6px}
+  tr.r{display:grid;grid-template-columns:64px minmax(0,1fr) 92px;grid-template-areas:"in nm ic" "ac hp hp";align-items:center;column-gap:8px;row-gap:2px;padding:8px 8px 10px;border-top:1px solid var(--line)}
+  .tw tr.r td{border-top:0;display:block;width:auto;padding:2px 0;background:none}
+  tr.r .num{width:100%}tr.r.isturn{box-shadow:inset 4px 0 0 var(--accent)}tr.r.isturn td:first-child{box-shadow:none}tr.r.sel{box-shadow:inset -4px 0 0 var(--ok)}tr.r.isturn.sel{box-shadow:inset 4px 0 0 var(--accent),inset -4px 0 0 var(--ok)}tr.r.sel td:last-child{box-shadow:none}
   tr.r td.c-in{grid-area:in}tr.r td:nth-child(2){grid-area:nm}tr.r td.c-ac{grid-area:ac;width:auto}tr.r td.c-hp{grid-area:hp;width:auto}tr.r td.c-i{grid-area:ic}
   tr.r.fxr{grid-template-areas:"in nm nm"}tr.r.fxr td:nth-child(2){grid-column:2/4}
   tr.r td.c-hp .hpnum{gap:4px}
@@ -235,15 +236,17 @@ tr.r td{border-top:1px solid var(--line)}
 tr.r{cursor:pointer}
 tr.grp th{background:var(--surface2);font-family:var(--display);font-size:1.1rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600;padding:2px 8px}
 tr.grp .gb{min-height:32px;padding:0 10px;margin-left:8px;font-family:var(--body);font-size:.8rem;letter-spacing:0;text-transform:none}
-tr.r.turn td{background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
-tr.r.turn td:first-child{box-shadow:inset 4px 0 0 var(--accent)}
-tr.r.sel td{background:color-mix(in srgb,var(--ok) 22%,var(--surface))}
+/* Row states: the creature whose turn it is (isturn; not .turn, which is the turn card) and selected rows (sel).
+   The tint goes on the row itself so the phone's grid rows read as one block, not patches per cell. */
+tr.r.isturn{background:color-mix(in srgb,var(--accent) 9%,var(--surface))}
+tr.r.isturn td:first-child{box-shadow:inset 4px 0 0 var(--accent)}
+tr.r.sel{background:color-mix(in srgb,var(--ok) 18%,var(--surface))}
 tr.r.sel td:last-child{box-shadow:inset -4px 0 0 var(--ok)}
 tr.r.down{opacity:.8}
 tr.dead td{font-size:.85rem;color:var(--muted);padding:4px 8px;border-top:1px solid var(--line)}
 tr.dead button{min-height:30px;padding:0 8px;font-size:.8rem;margin:2px 4px 2px 0}
 .c-in,.c-ac{width:66px;text-align:center}
-.acb{min-height:46px;min-width:48px;width:auto;margin:0 auto;display:block;border:0;padding:0 8px 6px;background:no-repeat center/100% 100% url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 46' preserveAspectRatio='none'%3E%3Cpath d='M20 2 L37 8 V22 C37 33 29 40 20 44 C11 40 3 33 3 22 V8 Z' fill='%2394a3b822' stroke='%2394a3b8' stroke-width='2'/%3E%3C/svg%3E");font-family:var(--display);font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums;}
+.acb{min-height:46px;min-width:48px;width:max-content;margin:0 auto;display:flex;align-items:center;justify-content:center;border:0;padding:0 8px 6px;background:no-repeat center/100% 100% url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 46' preserveAspectRatio='none'%3E%3Cpath d='M20 2 L37 8 V22 C37 33 29 40 20 44 C11 40 3 33 3 22 V8 Z' fill='%2394a3b822' stroke='%2394a3b8' stroke-width='2'/%3E%3C/svg%3E");font-family:var(--display);font-size:1.3rem;font-weight:700;font-variant-numeric:tabular-nums;}
 .acb s,.acp s{font-size:.7em;color:var(--muted);margin-left:4px;font-weight:400}.acb .em,.acp .em{color:var(--accent)}.acb .em.up,.acp .em.up{color:var(--ok)}.acb .em.dn,.acp .em.dn{color:var(--bad)}
 .off{display:flex;flex-wrap:wrap;gap:4px;margin:3px 0;align-items:center}
 .off span,.off button{font-size:.72rem;font-weight:600;padding:1px 7px;border-radius:999px;border:1px solid var(--line);min-height:0;line-height:1.5}
@@ -462,7 +465,13 @@ button{touch-action:manipulation}
    - "Stages D/E": tap-to-use targeting (actStart / actBegin -> chips -> actApply), crit, reactions, doHow (spending).
    - "Stage F": spellData() for monster and player spells, legRef() for legendary actions, grabSweep() for grapples.
    - "Action log" (S.logs) and "Table view line" (S.ann) for the table window.
-   - Pad: renderPad() + padEl click handler; wheels (amount, type) snap in JS.
+   - Pad: renderPad() + padEl click handler; wheels (amount, type) snap in JS; padChips() = selection chips when no action runs.
+   - Spells in play: spellBegin() (one pick per ray/dart, "(1 of N)"), slot stepper (data-act aslot), castSp() (DC from Spellcasting).
+   - Per-hit riders: RID / riders() / ridFor() (Hex, Hunter's Mark, Divine Favor…), amounts typed per hit, default 0.
+   - Effects over time: STG + stgSet/stgRoll (repeat saves: staged and save-ends), DEND/dmgEnds (ends on damage),
+     tickOf() (start/end-of-turn damage preloaded), EXP (auto-expiry), legPick (roll-table legendary actions).
+   - Drawer extras: FXT / S.fxLib (effect templates), l.tags (party groups, partyTopHTML), doExport/doImport (one backup file).
+   - Look: colours only via :root tokens (light = parchment, dark = dark dungeon); tests check visibility, contrast, icon alignment.
 */
 function boot(MON){
 MON.forEach(function(m){if(!m.ctype){var t=(m.type||'').split(',')[0].split(' of ').pop().trim().split(' ').pop().toLowerCase();m.ctype=t.replace(/ies$/,'y').replace(/s$/,'');}});
@@ -784,8 +793,8 @@ var S={enc:[],encRoll:true,envName:'',envNote:'',round:1,turnId:null,list:[],nex
  lib:[{id:'l1',name:'Aria (example)',ac:16,hp:31,ib:2},{id:'l2',name:'Brom (example)',ac:18,hp:38,ib:1},{id:'l3',name:'Wren (example)',ac:14,hp:24,ib:3},
       {id:'l4',name:'Tolliver (example)',ac:12,hp:20,ib:1},{id:'l5',name:'Sable (example)',ac:15,hp:27,ib:4},{id:'l6',name:'Marek (example)',ac:17,hp:34,ib:0}]};
 var ui={fxRun:null,fx:{name:'',init:'',desc:'',vis:true,dd:'',dt:'',sv:'',dc:'',st:'',dur:''},fType:'',fMin:'',fMax:'',q:'',qty:{},sel:{},amt:0,half:false,mx:false,menu:false,pend:{},confirmRemove:false,confirmClear:false,msg:'',drawer:false,present:false,cardOpen:true,sv:-1,mq:'',encName:'',encNote:'',svLast:1,traitsOpen:false,ignoreUntil:0};
-var loaded=false;try{if(RO||sessionStorage.getItem('et-present')==='1')ui.present=true;}catch(e){}
-try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.list){S=Object.assign(S,p);loaded=true;}}}catch(e){}
+try{if(RO||sessionStorage.getItem('et-present')==='1')ui.present=true;}catch(e){}
+try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.list){S=Object.assign(S,p);}}}catch(e){}
 function save(){if(RO)return;try{localStorage.setItem(KEY,JSON.stringify(S));ui.saveErr=false;}catch(e){if(!ui.saveErr){ui.saveErr=true;alert('This device\u2019s storage is full, so changes are NOT being saved. Export your encounter (Data tab), then remove a monster file you no longer need.');}}}
 function fixIds(){var mx=0;S.list.forEach(function(c){c.id=+c.id;if(c.id>mx)mx=c.id;['ac','hp','max'].forEach(function(k){c[k]=Math.floor(+c[k])||0;});c.temp=Math.floor(+c.temp)||0;if(c.init!=null&&isNaN(+c.init))c.init=null;if(!Array.isArray(c.conds))c.conds=[];});if(!(S.next>mx))S.next=mx+1;}
 fixIds();
@@ -1196,6 +1205,9 @@ function actHead(){var a=ui.act,d=a.d,x=d.kind==='buff'?(d.st.length?'targets ge
     (d.kind==='atk'?'<button class="tg crit'+(a.crit?' on':'')+'" data-act="acrit" aria-pressed="'+!!a.crit+'" title="Critical hit: adds the damage dice again">Crit</button><button class="amiss" data-act="amiss" title="The attack missed: spend it, nothing else">Miss</button>':'')+'<button data-act="actx">Cancel</button></div>';}
 // Targets are picked from chips inside the pad (the list behind may be covered on a phone); table taps still work too.
 // Attack: chip on = hit (tap again to drop it). Save / rider save: tap toggles Failed <-> Saved, \u2715 drops it.
+// Plain pad (no action): every creature as a chip, tap to add or remove it from the selection (like action targets)
+function padChips(){var L=S.list.filter(function(t){return t.kind!=='fx'&&!(t.kind==='mon'&&t.hp<=0&&!ui.sel[t.id]);});
+  return '<div class="tcs">'+L.map(function(t){return '<span class="tc'+(ui.sel[t.id]?' on':'')+(t.kind==='pc'?' ally':'')+'" role="button" tabindex="0" data-act="pchip" data-id="'+t.id+'" aria-pressed="'+!!ui.sel[t.id]+'"><b>'+esc(t.name)+'</b></span>';}).join('')+'</div>';}
 function actRows(T){var a=ui.act,att=findC(a.id),atk=a.d.kind==='atk',tog=a.d.kind==='save'||(atk&&!!a.d.rider);
   var L=S.list.filter(function(t){return t.kind!=='fx'&&(t.id!==a.id||a.d.kind==='buff')&&!(t.kind==='mon'&&t.hp<=0&&!ui.sel[t.id]);});
   var foe=function(t){return (att&&att.kind==='mon')===(t.kind==='pc')?0:1;};L.sort(function(x,y){return foe(x)-foe(y);});
@@ -1221,7 +1233,7 @@ function rxPick(){var t=ui.rxFor&&findC(ui.rxFor);if(!t||!ui.act)return '';
 function actFx(t){var r=actFx0(t),x=(ui.rxs||{})[t.id];if(x&&x.half)r=[r[0]/2,r[1]];return r;}
 function actFx0(t){var a=ui.act,o=actOut(t);if(a.d.kind==='buff')return [1,true];if(a.d.kind==='atk')return o==='hit'?[1,true]:o==='rsave'?[1,false]:[0,false];
   return o==='fail'?[1,true]:[a.d.succ==='half'?0.5:0,false];}
-function actSum(T){var a=ui.act;if(!T.length)return '';var base=padSum(Object.keys(ui.pend)),k={};T.forEach(function(t){var o=actOut(t);k[o]=(k[o]||0)+1;});
+function actSum(T){if(!T.length)return '';var base=padSum(Object.keys(ui.pend)),k={};T.forEach(function(t){var o=actOut(t);k[o]=(k[o]||0)+1;});
   var L={hit:'hit',miss:'missed',rsave:'hit (saved)',fail:'failed',save:'saved'},cnt=Object.keys(k).map(function(x){return k[x]+' '+L[x];}).join(', ');
   return (T.every(function(t){return actFx(t)[0]===0&&!actFx(t)[1];})?'':base+' \u00b7 ')+cnt;}
 function actApply(T){var a=ui.act,att=findC(a.id);if(!att||!T.length)return;
@@ -1364,17 +1376,17 @@ function rowHTML(c){
   var down=c.hp<=0||pcDead;
   var chips=c.conds.map(function(x){var k=c.cc&&c.cc[x]!=null?findC(c.cc[x]):null;return '<button class="chip" data-act="cond" data-c="'+esc(x)+'" title="'+esc(FX[x]||x)+' (tap to remove)">'+esc(nm(x))+(k&&k.id!==c.id?' <small>('+esc(k.name)+')</small>':'')+(x==='Grappled'&&c.gb!=null&&findC(c.gb)?' <small>('+(c.gdc?'escape DC '+c.gdc+', ':'')+esc(findC(c.gb).name)+')</small>':'')+' ×</button>';}).join('');
   var ph=c.kind==='pc'&&c.ib!=null?'d20'+sgn(c.ib):'—';
-  return '<tr class="r'+(c.id===S.turnId?' turn':'')+(down?' down':'')+(ui.sel[c.id]?' sel':'')+'" data-id="'+c.id+'">'+
+  return '<tr class="r'+(c.id===S.turnId?' isturn':'')+(down?' down':'')+(ui.sel[c.id]?' sel':'')+'" data-id="'+c.id+'">'+
    '<td class="c-in"><input class="num" type="number" inputmode="numeric" data-act="init" placeholder="'+esc(ph)+'" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
    '<td><span class="name">'+esc(c.name)+'</span>'+(c.kind==='pc'?'':'<span class="tag">CR '+esc(c.cr)+'</span>')+(ui.sv>=0?(saveOf(c,ui.sv)||''):'')+offHTML(c)+'<div class="conds">'+chips+'</div>'+(ui.sel[c.id]?fxHTML(c):'')+'</td>'+
-   '<td class="c-ac"><button class="acb" data-act="edit" title="Current AC'+(effAC(c)!==+c.ac?' (base '+c.ac+')':'')+'. Tap to set base AC" aria-label="AC '+effAC(c)+' for '+esc(c.name)+', edit">'+(effAC(c)!==+c.ac?'<b class="'+acCls(c)+'">'+effAC(c)+'</b>':''+effAC(c))+'</button></td>'+
+   '<td class="c-ac"><span class="acb" role="img" title="Current AC'+(effAC(c)!==+c.ac?' (base '+c.ac+'; ✎ to change)':'')+'" aria-label="AC '+effAC(c)+'">'+(effAC(c)!==+c.ac?'<b class="'+acCls(c)+'">'+effAC(c)+'</b>':''+effAC(c))+'</span></td>'+
    '<td class="c-hp"><div class="hpnum"><span class="cur">'+c.hp+'</span><span class="max">/ '+c.max+'</span>'+(c.base!=null?'<span class="mred">max \u2212'+(c.base-c.max)+'</span>':'')+(c.temp>0?'<span class="temp">+'+c.temp+'</span>':'')+(down?'<span class="state">'+(pcDead?'Dead':'Down')+'</span>':'')+'</div>'+
      '<div class="track"><div class="fill '+lvl+'" style="width:'+pct+'%"></div></div>'+(pcDead?'<div class="dsd">Heal 1+ HP to revive</div>':dsHTML(c))+'</td>'+
    '<td class="c-i"><button class="ib" data-act="edit" aria-label="Edit '+esc(c.name)+'" title="Edit">✎</button><button class="ib" data-act="info" aria-label="Stat block for '+esc(c.name)+'">ⓘ</button></td>'+
   '</tr>';
 }
 function fxRow(c){
-  return '<tr class="r fxr'+(c.id===S.turnId?' turn':'')+'" data-id="'+c.id+'"><td class="c-in"><input class="num" type="number" inputmode="numeric" data-act="init" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
+  return '<tr class="r fxr'+(c.id===S.turnId?' isturn':'')+'" data-id="'+c.id+'"><td class="c-in"><input class="num" type="number" inputmode="numeric" data-act="init" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
    '<td colspan="4"><span class="name">'+esc(c.name)+'</span><span class="tag">Effect</span>'+(c.desc?'<div class="fx" style="margin-top:2px">'+esc(c.desc)+'</div>':'')+
    '<div class="dsb" style="margin-top:4px"><button data-act="fxvis">'+(c.vis?'Visible to players':'Hidden from players')+'</button><button data-act="fxrm">Remove</button></div></td></tr>';
 }
@@ -1469,10 +1481,9 @@ function renderPad(){
   document.body.classList.toggle('padon',on);
   document.body.classList.toggle('menuon',on&&!!ui.menu);
   if(!on)return;
-  var names=T.map(function(c){return esc(c.name);}).join(', ');
   var fx=curFx(),pk=Object.keys(ui.pend),pn=pk.length,sum=padSum(pk),nod=SPEC[slot(0).dt]&&(!ui.ex||SPEC[slot(1).dt]);
   if(nod){ui.half=false;ui.mx=false;}
-  pad.innerHTML='<div class="pi">'+(fx?'<div class="fxb">⚡ <b>'+esc(fx.name)+':</b> '+esc(fxSum(fx))+' <button data-act="fxdone">Done</button></div>':'')+(ui.act?actHead()+actRows(T):'<div class="pt"><div class="who"><b>'+T.length+' selected</b> · '+names+'</div><button data-act="desel">Deselect</button></div>')+
+  pad.innerHTML='<div class="pi">'+(fx?'<div class="fxb">⚡ <b>'+esc(fx.name)+':</b> '+esc(fxSum(fx))+' <button data-act="fxdone">Done</button></div>':'')+(ui.act?actHead()+actRows(T):'<div class="pt"><div class="who"><b>'+T.length+' selected</b></div><button data-act="desel">Deselect</button></div>'+padChips())+
    (ui.act&&!T.length?'':('<div class="pmain"><div class="wheelbox"><div class="wheel" id="wheel" aria-label="Amount wheel">'+WHEEL+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div><input class="amtin" id="amtin" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" value="'+ui.amt+'" aria-label="Amount" tabindex="-1"></div>'+
    '<div class="wheelbox tbox"><div class="wheel twh" id="twheel" aria-label="Type wheel: tap the middle for the list">'+tWheel()+'</div><div class="wband"></div><div class="wfade t"></div><div class="wfade b"></div></div>'+
    '<div class="pr">'+(ui.ex?'<div class="amtrow"><div class="slots">'+[0,1].map(function(i){var sv=slot(i);return '<button class="'+(ui.ax===i?'on':'')+'" data-act="pslot" data-k="'+i+'">'+(i?'+ Extra ':'Main ')+'<b>'+sv.v+'</b>'+(sv.dt?' '+DTI2(sv.dt):'')+'</button>';}).join('')+'</div></div>':'')+ridHTML(T)+
@@ -1614,8 +1625,7 @@ function addTopHTML(){
    :S.sub==='party'?partyTopHTML():'');
 }
 function partyTopHTML(){
-  var q=(ui.pq||'').trim().toLowerCase(),nd=S.lib.filter(khpDiff).length;
-  var inE=function(l){return S.list.some(function(c){return c.libId===l.id;});};
+  var nd=S.lib.filter(khpDiff).length;
   // Groups / tags (l.tags): one character can be in several (campaigns, parties, guest lists); ui.pg filters, '-' = untagged
   var G={};S.lib.forEach(function(l){(l.tags||[]).forEach(function(t){G[t]=(G[t]||0)+1;});});var gk=Object.keys(G).sort(),pg=ui.pg&&(ui.pg==='-'||G[ui.pg])?ui.pg:'';
   return '<div class="row upd"><b>Update from</b><button data-act="kanka">Kanka</button><button data-act="ddb">D&amp;D Beyond</button>'+(nd?'<button data-act="usekhp" data-l="all">Use Kanka HP for all ('+nd+')</button>':'')+'</div>'+
@@ -1625,10 +1635,10 @@ function partyTopHTML(){
    '<input class="search" id="pq" type="search" placeholder="Search '+S.lib.length+' characters" value="'+esc(ui.pq||'')+'" aria-label="Search characters">'+(ui.msg?'<div class="msg" role="status">'+esc(ui.msg)+'</div>':'');
 }
 function partyHTML(){
-  var q=(ui.pq||'').trim().toLowerCase(),nd=S.lib.filter(khpDiff).length;
+  var q=(ui.pq||'').trim().toLowerCase();
   var inE=function(l){return S.list.some(function(c){return c.libId===l.id;});};
   // Groups / tags (l.tags): one character can be in several (campaigns, parties, guest lists); ui.pg filters, '-' = untagged
-  var G={};S.lib.forEach(function(l){(l.tags||[]).forEach(function(t){G[t]=(G[t]||0)+1;});});var gk=Object.keys(G).sort(),pg=ui.pg&&(ui.pg==='-'||G[ui.pg])?ui.pg:'';
+  var G={};S.lib.forEach(function(l){(l.tags||[]).forEach(function(t){G[t]=(G[t]||0)+1;});});var pg=ui.pg&&(ui.pg==='-'||G[ui.pg])?ui.pg:'';
   var inG=function(l){return !pg||(pg==='-'?!(l.tags||[]).length:(l.tags||[]).indexOf(pg)>=0);};
   var L=S.lib.filter(function(l){return inG(l)&&(!q||(l.name+' '+(l.cls||'')+' '+(l.tags||[]).join(' ')).toLowerCase().indexOf(q)>=0);});
   var rank=function(l){return S.atTable[l.id]?0:inE(l)?2:1;};
@@ -1988,8 +1998,6 @@ function spellsHTML(p,txt,c){
     p.spells.map(function(g){return '<div class="sg"><b>'+esc(g.per)+'</b> '+lk(g.list,g)+'</div>';}).join('');}
 // Stat block only: which actions a Multiattack nests (its referenced actions in the same section, except Spellcasting and roll tables)
 function nestOf(A,p){var out=[];if(p.kind!=='multi')return out;p.multi.refs.forEach(function(r){r.names.forEach(function(n){var q=A.find(function(x){return x.sec===p.sec&&x.n===n&&x.kind!=='multi'&&x.kind!=='spell'&&!x.table;});if(q&&out.indexOf(q)<0)out.push(q);});});return out;}
-function multiSum(p){return p.multi.refs.map(function(r,i){var x=(r.any?r.count+'× '+r.names.join(' or '):(r.count>1?r.count+'× ':'')+r.names[0]);
-  return (i?(r.alt||(r.rep&&p.multi.refs[i-1].rep)?' or ':r.rep?' · can replace one with ':' + '):'')+x+(r.opt&&!r.rep&&!r.alt?' (if available)':'');}).join('');}
 function openSpell(n){if(!ui.refBack)ui.refBack=ui.drawer?S.tab:'close';ui.drawer=true;S.tab='ref';ui.ref=n;}
 var LVN=['Cantrip','1st','2nd','3rd','4th','5th','6th','7th','8th','9th'];
 function refHTML(){
@@ -2247,6 +2255,7 @@ padEl.addEventListener('click',function(e){
   else if(a==='trx'){ui.rxFor=ui.rxFor===b.dataset.id?null:b.dataset.id;}
   else if(a==='trxo'){ui.rxs=ui.rxs||{};var ro=b.dataset.o;if(ro==='none')delete ui.rxs[ui.rxFor];else ui.rxs[ui.rxFor]={n:b.dataset.n,st:b.dataset.st||'',half:b.dataset.half==='1'};ui.rxFor=null;}
   else if(a==='tdel'){setTimeout(annSave,0);delete ui.sel[b.dataset.id];delete ui.out[b.dataset.id];}
+  else if(a==='pchip'){var pid=b.dataset.id;if(ui.sel[pid])delete ui.sel[pid];else ui.sel[pid]=true;renderBoard();return;}
   else if(a==='tchip'){setTimeout(annSave,0);var tt=findC(b.dataset.id),atk0=ui.act.d.kind==='atk';
     if(!ui.sel[tt.id])ui.sel[tt.id]=true;
     else if((atk0&&!ui.act.d.rider)||ui.act.d.kind==='buff'){delete ui.sel[tt.id];delete ui.out[tt.id];}

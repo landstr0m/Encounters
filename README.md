@@ -194,6 +194,9 @@ Then bump `CACHE` in `sw.js` so installed apps pick up the change. Log bugs and 
 - `monsters.json` **temporarily contains the 2024 Monster Manual** (imported from the owner's own book for personal use at his table) to make testing easier. Before v1.0 it goes back to SRD-only, and the book data moves to a local file imported on the device (**Data → Monster files**), which is never committed.
 - App data stays in your browser on the current device. Export it regularly as a backup.
 
+## Selecting creatures
+Tap rows to select them; the pad then lists every creature as a chip, so you can add or remove targets without scrolling. ✎ opens Edit (the AC shield no longer does).
+
 ## Look
 Light mode is **Parchment** (warm paper, deep red accent, Cormorant Garamond for names and numbers); dark mode is **Dark dungeon** (charcoal with a soft gold accent). The app follows the device's light/dark setting. Fonts are built in, so it still works offline.
 

@@ -2,6 +2,14 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Row clean-up, pad chips, code review
+
+- Red box around the current creature's row (and not others): the row's `turn` class also matched the turn card's `.turn` style (border, padding, max-height, scroll). Row class renamed `isturn`; row tint now on the row, not per cell (patchy blocks on phones).
+- Phone rows: initiative box overflowed its 54 px column into the name; column widened, gaps added.
+- Tapping AC opened Edit, getting in the way of selecting; AC is now display-only (✎ edits).
+- Plain pad (no action) now shows every creature as a chip to add / remove from the selection.
+- Code review: removed unused `multiSum`, `loaded` and stray locals; ESLint finds no undefined names; code map updated.
+
 ## 2026-11-06 — Parchment / Dark dungeon theme
 
 - New look: parchment (light) and dark dungeon (dark) tokens, Cormorant Garamond display font (lining, tabular numerals forced so HP reads cleanly).
