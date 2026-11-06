@@ -1265,7 +1265,7 @@ def rays_upcast_casts_eyerays_stages(b):
     a = App(b)
     a.e("refLoad()"); a.pg.wait_for_function("window.__e('REF && REF.spells && REF.spells.length') > 0")
     w = a.pc("Wiz", ac=12, hp=30, abil={"int": 16})
-    a.e("var l=S.lib[S.lib.length-1];l.level=5;l.parsed=[{class:'wizard',subclass:'',level:5}];l.spells=['Scorching Ray','Magic Missile','Fireball','Sleep'];save()")
+    a.e("var l=S.lib[S.lib.length-1];l.level=7;l.parsed=[{class:'wizard',subclass:'',level:7}];l.spells=['Scorching Ray','Magic Missile','Fireball','Sleep'];save()")
     g = a.mon("mm-goblin-warrior")[0]
     a.e(f"S.turnId={w};ui.cardOpen=true;ui.pcSpOpen=true;renderBoard()")
     # 1. Scorching Ray: three rays, one target pick each (same target allowed); 2. slot 3 gives a fourth
@@ -1560,6 +1560,33 @@ def defences_menu(b):
     a.click('#bar [data-act="openadd"]')
     tabs = a.j("[].map.call(document.querySelectorAll('#drawer .dh button'),function(x){return x.dataset.t||x.dataset.act})")
     check("def" not in tabs and "add" in tabs and "data" in tabs, f"Add menu unchanged: {tabs}")
+    check(not a.errors, a.errors)
+
+
+@test
+def player_spells_use_slots(b):
+    a = App(b)
+    a.e("refLoad()"); a.pg.wait_for_function("window.__e('REF && REF.spells && REF.spells.length') > 0")
+    w = a.pc("Wiz", abil={"int": 16})
+    a.e("var l=S.lib[S.lib.length-1];l.parsed=[{class:'wizard',subclass:'',level:1}];l.spells=['Magic Missile','Fire Bolt','Shield'];save()")
+    g = a.mon("mm-ghoul")[0]
+    a.e(f"S.turnId={w};ui.cardOpen=true;ui.pcSpOpen=true;renderBoard()")
+    a.click('#turn [data-act=pcast][data-s="Magic Missile"]')
+    check("Slot" in a.pg.inner_text('#pad .acth') and "2 left" in a.pg.inner_text('#pad .acth'), a.pg.inner_text('#pad .acth'))
+    for _ in range(3):
+        a.click(f'#pad [data-act=tchip][data-id="{g}"]'); a.e("ui.amt=1;renderPad()"); a.click('#pad [data-act=papply]')
+    eq(a.e(f"findC({w}).slu[1]"), 1, "three darts spend one level-1 slot")
+    a.click('#turn [data-act=pcast][data-s="Magic Missile"]'); a.click('#pad [data-act=amiss]') if a.pg.query_selector('#pad [data-act=amiss]') else a.click('#pad [data-act=actx]')
+    a.e(f"findC({w}).slu={{1:2}};renderBoard()")
+    check(a.e("document.querySelector('#turn [data-act=pcast][data-s=\"Magic Missile\"]').disabled"), "no slots left: levelled spell blocked")
+    check(not a.e("document.querySelector('#turn [data-act=pcast][data-s=\"Fire Bolt\"]').disabled"), "cantrips never blocked")
+    a.click('#turn [data-act="slot"][data-k="1"]'); eq(a.e(f"findC({w}).slu[1]"), 1, "slot recovered by hand (Arcane Recovery)")
+    check(not a.e("document.querySelector('#turn [data-act=pcast][data-s=\"Magic Missile\"]').disabled"), "castable again")
+    # non-casters with a spell list (feat / species spells) are never blocked
+    f = a.pc("Fey", abil={"cha": 14})
+    a.e("var l=S.lib[S.lib.length-1];l.parsed=[{class:'fighter',subclass:'',level:3}];l.spells=['Magic Missile'];save()")
+    a.e(f"S.turnId={f};renderBoard()")
+    check(not a.e("document.querySelector('#turn [data-act=pcast][data-s=\"Magic Missile\"]').disabled"), "untracked caster not blocked")
     check(not a.errors, a.errors)
 
 

@@ -2,6 +2,10 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Player spells use slots
+
+- Casting from the player spell list didn't spend a slot. Now the lowest fitting slot is chosen (stepper to change), spent once on Apply / Miss, Undo returns it; spells without a slot left are disabled.
+
 ## 2026-11-06 — Spells in the Defences menu; tests stop fast
 
 - Defences menu now includes Spells, so spell links from a stat block stay in that menu.

@@ -1208,11 +1208,27 @@ function slotsHTML(c,l){var sp=pcSlots(l),u=c.slu||{};if(!sp.slots.length&&!sp.p
   var pips=function(k,n){var used=u[k]||0,o='';for(var i=0;i<n;i++)o+='<button class="pip'+(i<n-used?' on':'')+'" data-act="slot" data-k="'+k+'" aria-label="'+(k==='p'?'Pact':'Level '+k)+' slot '+(i+1)+(i<n-used?'':' (used)')+'"></button>';return o;};
   return '<div class="slots2"><b>Spell slots</b>'+sp.slots.map(function(n,i){return '<span class="slv"><small>'+(i+1)+'</small>'+pips(i+1,n)+'</span>';}).join('')+
     (sp.pact?'<span class="slv"><small>Pact '+sp.pact.lvl+'</small>'+pips('p',sp.pact.n)+'</span>':'')+(Object.keys(u).length?'<button data-act="slotr">Reset</button>':'')+'</div>';}
+// Slots left for a player, as castable options: [{k: level number or 'p' (pact), lvl, left}], lowest level first.
+// tracked = the character has slots at all (racial / feat spells on a non-caster are never blocked).
+function slotOpts(c){var sp=pcSlots(libOf(c)),u=c.slu||{},o=[];sp.slots.forEach(function(n,i){var left=n-(u[i+1]||0);if(left>0)o.push({k:i+1,lvl:i+1,left:left});});
+  if(sp.pact){var pl=sp.pact.n-(u.p||0);if(pl>0)o.push({k:'p',lvl:sp.pact.lvl,left:pl});}
+  o.sort(function(a,b){return a.lvl-b.lvl||(a.k==='p')-(b.k==='p');});o.tracked=!!(sp.slots.length||sp.pact);return o;}
+// Options for the pad's Slot stepper: tracked slots left at or above the spell's level, else every level up to 9
+function slotChoices(c,base){var o=slotOpts(c);if(o.tracked)return o.filter(function(x){return x.lvl>=base;});var a=[];for(var v=base;v<=9;v++)a.push({k:null,lvl:v});return a;}
+function slotStep(a){var c=findC(a.id),O=slotChoices(c,a.d.base),i=O.findIndex(function(o){return o.k===a.how.sk&&o.lvl===(a.how.sl||a.d.base);}),cur=O[i];
+  return '<span class="aslot" title="Spell slot to use'+(a.d.upd?' (higher slots add dice)':'')+'">'+(cur&&cur.k==='p'?'Pact slot':'Slot')+' <b>'+(cur?cur.lvl:a.d.base)+'</b>'+(cur&&cur.left!=null?' <small>('+cur.left+' left)</small>':'')+
+   '<button data-act="aslot" data-d="-1"'+(i<=0?' disabled':'')+' aria-label="Lower slot">\u2212</button><button data-act="aslot" data-d="1"'+(i<0||i>=O.length-1?' disabled':'')+' aria-label="Higher slot">+</button></span>';}
+// A player's cast spends its slot once (the first ray / dart; later picks are free), on Apply or Miss; Undo gives it back
+function slotSpend(c,how){if(how.a!=='pcast'||how.sk==null||how.free)return '';c.slu=c.slu||{};c.slu[how.sk]=(c.slu[how.sk]||0)+1;return ' \u00b7 '+(how.sk==='p'?'Pact slot':'level '+how.sk+' slot')+' used';}
+function slotFor(c,base){return slotOpts(c).filter(function(x){return x.lvl>=base;})[0]||null;}
+// Start a player's levelled spell on a given slot option (dice follow the slot level when the spell upcasts)
+function pcCastBegin(c,name,opt){var l=libOf(c),r=REF.spells.find(function(x){return x.n===name;}),base=r?r.l:0,d=spellData(name,pcSpell(l),opt&&opt.lvl>base?opt.lvl:null);if(!d)return false;
+  spellBegin(c,d,d.n+(opt&&opt.lvl>base?' (slot '+opt.lvl+')':''),{a:'pcast',s:name,sk:opt?opt.k:null,sl:opt?opt.lvl:null});return true;}
 function pcSpellsHTML(c,l){if(!l||!(l.spells||[]).length||RO||ui.present)return '';if(!REF){refLoad();return '';}
   var L=l.spells.map(function(n){var d=spellData(n,pcSpell(l)),r=REF.spells.find(function(x){return x.n===n;});return d?{n:n,lv:r?r.l:0}:null;}).filter(Boolean).sort(function(a,b){return a.lv-b.lv||a.n.localeCompare(b.n);});
-  if(!L.length)return '';var ps=pcSpell(l);
+  if(!L.length)return '';var ps=pcSpell(l),so=slotOpts(c);
   return '<details class="pcsp"'+(ui.pcSpOpen?' open':'')+'><summary>Spells ('+L.length+')'+(ps.dc?' \u00b7 save DC '+ps.dc+' \u00b7 '+sgn(ps.sat)+' to hit':'')+'</summary><div class="spl">'+
-    L.map(function(x){return '<button data-act="pcast" data-s="'+esc(x.n)+'"><small>'+(x.lv?x.lv:'C')+'</small> '+esc(x.n)+'</button>';}).join('')+'</div></details>';}
+    L.map(function(x){var no=x.lv>0&&so.tracked&&!so.some(function(o){return o.lvl>=x.lv;});return '<button data-act="pcast" data-s="'+esc(x.n)+'"'+(no?' disabled title="No spell slot of level '+x.lv+' or higher left"':'')+'><small>'+(x.lv?x.lv:'C')+'</small> '+esc(x.n)+'</button>';}).join('')+'</div></details>';}
 // Table view line: what players need to roll or write down. S.ann = {h: html, n: turn count when made}; shown for that turn and the next.
 function annSet(h){S.tc=S.tc||0;S.ann={h:h,n:S.tc};}
 function annSave(){var a=ui.act;if(!a||a.d.kind!=='save'||a.d.save.dc==null)return;var att=findC(a.id),T=S.list.filter(function(c){return ui.sel[c.id]&&c.kind==='pc';});
@@ -1222,7 +1238,7 @@ function renderAnn(){var el=$('#ann');if(!el){el=document.createElement('div');e
 function actHead(){var a=ui.act,d=a.d,x=d.kind==='buff'?(d.st.length?'targets get '+nm(d.st[0]):d.conds.length?'targets get '+nm(d.conds[0]):d.dmg.length?'hits automatically':'targets get the effect'):d.kind==='atk'?(d.atk.type[0].toUpperCase()+d.atk.type.slice(1)+(d.atk.bonus==null?'':' '+sgn(d.atk.bonus))+(d.atk.reach?', reach '+d.atk.reach+' ft.':'')+(d.atk.range?', range '+d.atk.range+' ft.':''))
     :('DC '+(d.save.dc==null?'?':d.save.dc)+' '+['Str','Dex','Con','Int','Wis','Cha'][d.save.ab]+' save'+(d.succ==='half'?', half on a success':d.succ?'':', nothing on a success'));
   return '<div class="acth"><span><b>'+esc(a.n)+'</b> \u00b7 '+esc(x)+(d.rider?' \u00b7 then DC '+d.rider.dc+' '+['Str','Dex','Con','Int','Wis','Cha'][d.rider.ab]+' save':'')+'</span>'+
-    (d.spell&&a.how&&a.how.a==='pcast'&&d.base>0&&d.upd&&!a.how.free?'<span class="aslot" title="Cast with a higher-level spell slot">Slot <b>'+(+d.lvl||d.base)+'</b><button data-act="aslot" data-d="-1"'+((+d.lvl||d.base)<=d.base?' disabled':'')+' aria-label="Lower slot">\u2212</button><button data-act="aslot" data-d="1"'+((+d.lvl||d.base)>=9?' disabled':'')+' aria-label="Higher slot">+</button></span>':'')+
+    (d.spell&&a.how&&a.how.a==='pcast'&&d.base>0&&!a.how.free?slotStep(a):'')+
     (d.kind==='atk'?'<button class="tg crit'+(a.crit?' on':'')+'" data-act="acrit" aria-pressed="'+!!a.crit+'" title="Critical hit: adds the damage dice again">Crit</button><button class="amiss" data-act="amiss" title="The attack missed: spend it, nothing else">Miss</button>':'')+'<button data-act="actx">Cancel</button></div>';}
 // Targets are picked from chips inside the pad (the list behind may be covered on a phone); table taps still work too.
 // Attack: chip on = hit (tap again to drop it). Save / rider save: tap toggles Failed <-> Saved, \u2715 drops it.
@@ -1280,7 +1296,9 @@ function actApply(T){var a=ui.act,att=findC(a.id);if(!att||!T.length)return;
   if(rxl.length)msg+='<br><b>Reaction:</b> '+rxl.join(' \u00b7 ');
   annSet('<b>'+esc(att.name)+'</b> \u2014 '+esc(a.n)+(a.crit?' (crit)':'')+': '+ann.join(' \u00b7 ')+(on.length&&stT.length?' \u00b7 '+on.map(function(x){return esc(nm(x));}).join(', ')+' \u2192 '+stT.map(function(t){return esc(t.name);}).join(', '):''));
   var how=a.how;ui.act=null;ui.out={};ui.rxs={};ui.rxFor=null;
-  ui.noSnap=true;doHow(att,how);ui.noSnap=false;toast(msg);logAdd(esc(att.name)+' \u2014 '+msg+(a.crit?' (crit)':''));finishPad();actNext(att,a);}
+  ui.noSnap=true;doHow(att,how);ui.noSnap=false;
+  msg+=slotSpend(att,how);
+  toast(msg);logAdd(esc(att.name)+' \u2014 '+msg+(a.crit?' (crit)':''));finishPad();actNext(att,a);}
 // A legendary action with several attacks ("makes two Bite attacks") reopens targeting for the next one without spending again
 function actNext(att,a){var h=a.how;if(h&&h.left>1){var h2=Object.assign({},h,{free:true,left:h.left-1});actBegin(att,a.d,a.n.replace(/ \(\d+ of \d+\)$/,'')+' ('+(h.tot-h2.left+1)+' of '+h.tot+')',h2);}}
 function bySize(m){return function(a,b){return rawOf(m,a).length-rawOf(m,b).length;};}
@@ -2192,7 +2210,9 @@ $('#turn').addEventListener('click',function(e){
     else if(a==='fxgo'){ui.fxRun=c.id;ui.dtype=c.dt||'';ui.amt=0;ui.amtO=0;ui.dtO='';ui.ax=0;ui.ex=false;ui.half=false;ui.mx=false;ui.pend={};if(c.st)ui.pend[c.st]=true;if(c.sv!==''&&c.sv!=null){ui.dsv=+c.sv;}toast('Select who is affected.');}
     save();renderBoard();return;}
   if(a==='laspend'){var lc=findC(b.dataset.id);if(lc){snap('legendary');lc.la=(lc.la||0)+1;}}
-  else if(a==='pcast'){var lp2=S.lib.find(function(x){return x.id===c.libId;}),sd2=lp2&&spellData(b.dataset.s,pcSpell(lp2));if(sd2){ui.pcSpOpen=true;spellBegin(c,sd2,sd2.n,{a:'pcast',s:sd2.n});}}
+  else if(a==='pcast'){var lp2=libOf(c),rr2=REF&&REF.spells.find(function(x){return x.n===b.dataset.s;}),bl2=rr2?rr2.l:0,op2=bl2>0?slotFor(c,bl2):null;
+    if(lp2&&bl2>0&&slotOpts(c).tracked&&!op2){toast(esc(c.name)+': no spell slot of level '+bl2+' or higher left');return;}
+    if(lp2&&pcCastBegin(c,b.dataset.s,op2))ui.pcSpOpen=true;}
   else if(a==='lact'){var L0=findC(b.dataset.id),lm0=L0&&MON.find(function(x){return x.id===L0.monId;});if(lm0){var LA0=actsOf(lm0),lp=LA0.find(function(x){return x.key===b.dataset.i;}),howL={a:'leg',i:lp.key};
     var d0=lp.kind==='atk'||lp.kind==='save'?lp:null,n0=lp.n,rf=d0?null:legRef(lm0,LA0,lp);
     if(rf&&rf.spell){refLoad();d0=spellData(rf.spell,rf.q);n0=lp.n+' \u2192 '+rf.spell;}
@@ -2293,8 +2313,8 @@ padEl.addEventListener('click',function(e){
   else if(a==='ptog'){var tk=b.dataset.k;if(tk==='half'){ui.half=!ui.half;var fh=curFx();if(fh&&fh.st){if(ui.half)delete ui.pend[fh.st];else ui.pend[fh.st]=true;}}else if(tk==='extra'){ui.ex=!ui.ex;if(ui.ex)swapSlot(1);else{swapSlot(0);ui.amtO=0;ui.dtO='';}}else ui.mx=!ui.mx;}
   else if(a==='actx'){ui.act=null;ui.out={};finishPad();}
   else if(a==='acrit'){actCrit(!ui.act.crit);}
-  else if(a==='aslot'){var A9=ui.act,c9=findC(A9.id),l9=libOf(c9),v9=Math.min(9,Math.max(A9.d.base,(+A9.d.lvl||A9.d.base)+ +b.dataset.d)),d9=l9&&spellData(A9.how.s,pcSpell(l9),v9>A9.d.base?v9:null);
-    if(d9){var s9=ui.sel,o9=ui.out;spellBegin(c9,d9,d9.n+(v9>d9.base?' (slot '+v9+')':''),{a:'pcast',s:A9.how.s});ui.sel=s9;ui.out=o9;}}
+  else if(a==='aslot'){var A9=ui.act,c9=findC(A9.id),O9=slotChoices(c9,A9.d.base),i9=O9.findIndex(function(o){return o.k===A9.how.sk&&o.lvl===(A9.how.sl||A9.d.base);}),n9=O9[Math.max(0,Math.min(O9.length-1,i9+ +b.dataset.d))];
+    if(n9){var s9=ui.sel,o9=ui.out;if(pcCastBegin(c9,A9.how.s,n9)){ui.sel=s9;ui.out=o9;}}}
   else if(a==='trx'){ui.rxFor=ui.rxFor===b.dataset.id?null:b.dataset.id;}
   else if(a==='trxo'){ui.rxs=ui.rxs||{};var ro=b.dataset.o;if(ro==='none')delete ui.rxs[ui.rxFor];else ui.rxs[ui.rxFor]={n:b.dataset.n,st:b.dataset.st||'',half:b.dataset.half==='1'};ui.rxFor=null;}
   else if(a==='tdel'){setTimeout(annSave,0);delete ui.sel[b.dataset.id];delete ui.out[b.dataset.id];}
@@ -2303,7 +2323,7 @@ padEl.addEventListener('click',function(e){
     if(!ui.sel[tt.id])ui.sel[tt.id]=true;
     else if((atk0&&!ui.act.d.rider)||ui.act.d.kind==='buff'){delete ui.sel[tt.id];delete ui.out[tt.id];}
     else{var o0=actOut(tt);ui.out[tt.id]=atk0?(o0==='hit'?'rsave':'hit'):(o0==='fail'?'save':'fail');}}
-  else if(a==='amiss'){var a0=ui.act,at0=findC(a0.id),h0=a0.how,n0=a0.n;ui.act=null;ui.out={};doHow(at0,h0);toast('<b>'+esc(n0)+':</b> missed');annSet('<b>'+esc(at0.name)+'</b> \u2014 '+esc(n0)+': missed');logAdd(esc(at0.name)+' \u2014 '+esc(n0)+': missed');finishPad();actNext(at0,a0);}
+  else if(a==='amiss'){var a0=ui.act,at0=findC(a0.id),h0=a0.how,n0=a0.n;ui.act=null;ui.out={};snap('miss');doHow(at0,h0);toast('<b>'+esc(n0)+':</b> missed'+slotSpend(at0,h0));annSet('<b>'+esc(at0.name)+'</b> \u2014 '+esc(n0)+': missed');logAdd(esc(at0.name)+' \u2014 '+esc(n0)+': missed');finishPad();actNext(at0,a0);}
   else if(a==='papply'&&ui.act){actApply(T);save();renderBoard();return;}
   else if(a==='papply'){
     var pk=Object.keys(ui.pend),SL=padSlots(),D=SL.filter(function(x){return !SPEC[x.dt];});if(!SL.length&&!pk.length)return;
