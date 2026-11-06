@@ -2,6 +2,12 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Damage ends, save ends, two-type spells
+
+- Sleep / Hypnotic Pattern / "until it takes damage" conditions stayed after damage; now removed on damage (with linked Unconscious/Incapacitated).
+- Save-ends statuses had only a text reminder; now Failed / Saved buttons on the target's turn (any route that adds the status, not just a cast).
+- Flame Strike, Ice Storm, Meteor Swarm preloaded only the first damage type; both now.
+
 ## 2026-11-06 — Spell review: riders, turn damage, cantrips
 
 - Hex / Hunter's Mark (and other per-hit riders) had no damage path; now a rider box per hit, default 0, own damage type, only for targets the attacker hexed/marked.

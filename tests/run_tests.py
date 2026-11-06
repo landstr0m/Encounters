@@ -1326,6 +1326,39 @@ def hex_riders_and_turn_ticks(b):
     check(not a.errors, a.errors)
 
 
+@test
+def damage_ends_and_save_ends(b):
+    a = App(b)
+    a.e("refLoad()"); a.pg.wait_for_function("window.__e('REF && REF.spells && REF.spells.length') > 0")
+    w = a.pc("Wiz", ac=12, hp=30)
+    a.e("var l=S.lib[S.lib.length-1];l.level=9;l.parsed=[{class:'cleric',subclass:'',level:9}];l.spells=['Sleep','Hold Person','Flame Strike'];save()")
+    g = a.mon("mm-goblin-warrior")[0]; h = a.mon("mm-bandit")[0] if a.e("!!MON.find(function(m){return m.id==='mm-bandit'})") else a.mon("mm-goblin-warrior")[0]
+    a.e(f"S.turnId={w};ui.cardOpen=true;ui.pcSpOpen=true;renderBoard()")
+    # Flame Strike: both damage parts preloaded
+    a.click('#turn [data-act=pcast][data-s="Flame Strike"]')
+    check(a.e("ui.ex") and a.e("ui.dtype") == "fire" and a.e("ui.dtO") == "radiant", "fire + radiant"); a.click('#pad [data-act=actx]')
+    # Sleep ends on damage (and the Unconscious it led to)
+    a.click('#turn [data-act=pcast][data-s="Sleep"]'); a.click(f'#pad [data-act=tchip][data-id="{g}"]'); a.click('#pad [data-act=papply]')
+    a.e(f"S.turnId={g};renderBoard()"); a.click('#turn [data-act=stg][data-r="f"]')
+    check("Unconscious" in a.c(g)["conds"], a.c(g)["conds"])
+    a.select(g); a.pad("dmg", 1)
+    cs = a.c(g)["conds"]; check("Sleeping" not in cs and "Unconscious" not in cs and "Incapacitated" not in cs, cs)
+    # Hold Person: end-of-turn save reminder, Saved ends it (and Paralyzed)
+    a.e(f"S.turnId={w};renderBoard()")
+    a.click('#turn [data-act=pcast][data-s="Hold Person"]'); a.click(f'#pad [data-act=tchip][data-id="{h}"]'); a.click('#pad [data-act=papply]')
+    a.e(f"S.turnId={h};renderBoard()")
+    check("Hold Person" in a.pg.inner_text('#turn'), "save reminder shown")
+    a.click('#turn [data-act=stg][data-r="f"]'); check("Paralyzed" in a.c(h)["conds"], "failed: still held")
+    a.click('#turn [data-act=stg][data-r="s"]'); cs = a.c(h)["conds"]
+    check("Hold Person" not in cs and "Paralyzed" not in cs, cs)
+    # Beholder Sleep Ray: Unconscious ends on damage; Paralyzing Ray repeats its save
+    bh = a.mon("mm-beholder")[0]; p1 = a.pc("Aer", hp=60)
+    A = "actsOf(MON.find(function(m){return m.id==='mm-beholder'})).find(function(p){return p.table}).table.rows"
+    eq(a.j(A + ".map(function(r){var d=parseAct(r.n,r.t,'a');return d.stage?d.stage.from:''})[1]"), "Paralyzed", "Paralyzing Ray: save ends")
+    eq(a.j(A + ".map(function(r){return parseAct(r.n,r.t,'a').dend||''})[6]"), ["Unconscious"], "Sleep Ray: ends on damage")
+    check(not a.errors, a.errors)
+
+
 def main():
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def log_message(self, *a):

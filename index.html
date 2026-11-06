@@ -628,10 +628,14 @@ var EXP={'Color Spray':'ce','Ray of Sickness':'ce','Staggering Smite':'ce','Shie
  'Chilled':'cs','Stun saved':'cs','Open Hand':'cs','Guiding Bolt':'ce','Chill Touch':'ce','Starry Wisp':'ce','Mind Sliver':'ce'};
 // Developing effects: repeat the save at the end of the target's turn; enough failures turn the first status into the next.
 // c.stg[status] = {to, need, rm (replace the first status), f, s (failures, successes), ab, dc, n (source)}
-var STG={'Sleeping':{to:'Unconscious',need:1},'Flesh to Stone':{to:'Petrified',need:3,rm:1}};
+var STG={'Sleeping':{to:'Unconscious',need:1},'Flesh to Stone':{to:'Petrified',need:3,rm:1},'Contagion':{to:null,need:3}};
+// "save at the end of each of its turns ends it": Saved ends the status, Failed keeps it (to: null)
+['Hold Person','Hold Monster','Blindness','Deafness','Wrathful Smite','Power Word Stun','Crown of Madness','Ray of Enfeeblement','Slowed','Phantasmal Killer','Laughing'].forEach(function(x){STG[x]={to:null,need:1};});
 function stgSet(t,x,o,d,n){if(t.conds.indexOf(x)<0)return;t.stg=t.stg||{};t.stg[x]={to:o.to,need:o.need||1,rm:!!o.rm,f:0,s:0,ab:d.save?d.save.ab:null,dc:d.save?d.save.dc:null,n:n};}
 function stgRoll(c,x,ok){var g=(c.stg||{})[x];if(!g)return;snap((ok?'save vs ':'fail vs ')+nm(x));
   if(ok){g.s++;if(g.s>=g.need){var i=c.conds.indexOf(x);if(i>=0)c.conds.splice(i,1);delete c.stg[x];linkSweep(c);incSync(c,false);toast(esc(c.name)+': '+esc(nm(x))+' ends');}}
+  else if(!g.to){g.f++;if(g.need>1&&g.f>=g.need){delete c.stg[x];toast(esc(c.name)+': '+esc(nm(x))+' \u2014 '+g.need+' failures, it lasts (no more saves)');}
+    else{var k9=tickOf(x);if(k9){ui.act=null;finishPad();ui.sel={};ui.sel[c.id]=true;ui.amt=k9.avg;ui.dtype=k9.dt;}toast(esc(c.name)+' fails: '+esc(nm(x))+' continues'+(k9?' \u2014 damage preloaded':''));}}
   else{g.f++;if(g.f>=g.need){if(g.rm){var j=c.conds.indexOf(x);if(j>=0)c.conds.splice(j,1);linkSweep(c);}if(c.conds.indexOf(g.to)<0&&!condBlocked(c,g.to)){c.conds.push(g.to);if(!g.rm){c.lc=c.lc||{};c.lc[g.to]=x;}}incSync(c,true);delete c.stg[x];toast(esc(c.name)+' is now '+esc(nm(g.to)));}}
   logAdd(esc(c.name)+' \u2014 '+esc(g.n||nm(x))+': '+(ok?'saved':'failed')+(g.need>1?' ('+(ok?g.s:g.f)+'/'+g.need+')':''));}
 // A start/end-of-turn effect's damage from its rule text ("1d4 fire", "3d8 radiant or necrotic", "temp HP"): {avg, dt}
@@ -639,7 +643,7 @@ function tickOf(x){var t=FX[x]||'',m=t.match(/(\d+)d(\d+)(?:\s*\+\s*(\d+))? (aci
   if(m)return {avg:Math.floor(+m[1]*(+m[2]+1)/2)+(+m[3]||0),dt:m[4].toLowerCase()};return /temp HP/i.test(t)?{avg:0,dt:'temp'}:null;}
 function stgHTML(c){var G=c.stg||{};return Object.keys(G).filter(function(x){return c.conds.indexOf(x)>=0;}).map(function(x){var g=G[x];
   return '<div class="legr tick"><b>End of turn: '+esc(g.n||nm(x))+'</b> \u2014 '+(g.dc?'DC '+g.dc+' ':'')+(g.ab!=null?['Str','Dex','Con','Int','Wis','Cha'][g.ab]+' ':'')+'save'+(g.need>1?' ('+g.f+' failed, '+g.s+' saved of '+g.need+')':'')+
-    ' <button data-act="stg" data-c="'+esc(x)+'" data-r="f">Failed \u2192 '+esc(nm(g.to))+'</button><button data-act="stg" data-c="'+esc(x)+'" data-r="s">Saved</button></div>';}).join('');}
+    ' <button data-act="stg" data-c="'+esc(x)+'" data-r="f">Failed'+(g.to?' \u2192 '+esc(nm(g.to)):'')+'</button><button data-act="stg" data-c="'+esc(x)+'" data-r="s">Saved'+(g.to||g.need>1?'':' \u2192 ends')+'</button></div>';}).join('');}
 function expSet(c,x){var k=EXP[x];if(!k)return;var src=k.charAt(0)==='c'?S.turnId:c.id;if(src==null)return;c.exp=c.exp||{};c.exp[x]={src:src,k:k.slice(-1),h:false};}
 // Runs as the turn passes from creature E to creature N; returns 'Name: effect' strings that ended.
 function expTick(E,N){
@@ -917,8 +921,15 @@ function doLogDownload(){var name='combat-log-'+new Date().toISOString().slice(0
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();}
 function toast(h){var t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';t.setAttribute('role','status');document.body.appendChild(t);}
   t.innerHTML=h;t.classList.add('on');clearTimeout(toast.tm);toast.tm=setTimeout(function(){t.classList.remove('on');},6000);t.onclick=function(){t.classList.remove('on');};}
+// Statuses that end when the creature takes damage (Sleep, Hypnotic Pattern, plus conditions an action said end on damage: c.dend)
+var DEND=['Sleeping','Entranced'],DREM={'Laughing':'Wis save (adv.) or stays','Charm Person':'ends if the caster or allies did it','Charm Monster':'ends if the caster or allies did it'};
+function dmgEnds(c){ui.ended=ui.ended||[];var gone=c.conds.filter(function(x){return DEND.indexOf(x)>=0||(c.dend||{})[x];});
+  gone.forEach(function(x){c.conds.splice(c.conds.indexOf(x),1);if(c.dend)delete c.dend[x];if(c.stg)delete c.stg[x];});
+  if(gone.length){linkSweep(c);incSync(c,false);ui.ended.push(esc(c.name)+': '+gone.map(function(x){return esc(nm(x));}).join(', ')+' ended');}
+  c.conds.forEach(function(x){if(DREM[x])ui.ended.push(esc(c.name)+': '+esc(nm(x))+' \u2014 '+DREM[x]);});}
+function endedMsg(){var e=ui.ended||[];ui.ended=[];return e.length?'<br><b>Damage:</b> '+e.join(' \u00b7 '):'';}
 function dmg(c,n){
-  var before=c.hp;
+  var before=c.hp;if(n>0)dmgEnds(c);
   var t=Math.min(c.temp,n);c.temp-=t;n-=t;
   c.hp=Math.max(0,c.hp-n);
   if(c.kind==='pc'&&n>0&&!isPcDead(c)){
@@ -1113,6 +1124,8 @@ function spellData(name,sp,slv){if(!REF||!REF.spells||!REF.spells.length)return 
   if(pu){d.upd=true;if(lv)cnt+=Math.max(0,+lv-+pu[1]);}
   if(/beams at level 5/i.test(r.hl||'')&&sp&&sp.clv)cnt=1+(sp.clv>=5)+(sp.clv>=11)+(sp.clv>=17);
   if(cnt>1)d.cnt=cnt;
+  var two=r.tx.match(/(\d+d\d+) (\w+) damage and (\d+d\d+) (\w+) damage/i);
+  if(two&&d.dmg.length&&!/ice knife/i.test(key)){var d2=two[3]===two[1]?dice:two[3];d.dmg.push({avg:avg(d2),dice:d2,type:two[4].toLowerCase()});}
   if(r.at){d.kind='atk';d.atk={type:/melee spell attack/i.test(r.tx)?'melee spell':'ranged spell',bonus:sp&&sp.sat!=null?sp.sat:null,reach:null,range:null};}
   else if(r.sv){d.kind='save';d.save={ab:ABN[r.sv[0].toUpperCase()+r.sv.slice(1)],dc:sp&&sp.dc!=null?sp.dc:null,area:''};d.succ=/half as much damage/i.test(r.tx)?'half':null;}
   else if(st.length||d.dmg.length)d.kind='buff';
@@ -1217,11 +1230,12 @@ function actApply(T){var a=ui.act,att=findC(a.id);if(!att||!T.length)return;
     ann.push('<b>'+esc(t.name)+'</b> '+(t.kind==='pc'&&tot?tot+(tl?' '+tl:'')+' damage':a.d.kind==='atk'?'hit':o==='save'?'saved':o==='fail'?'failed':'')+(o==='save'&&t.kind==='pc'&&tot?' (saved)':'')+((x0=(ui.rxs||{})[t.id])?' \u00b7 '+esc(x0.n):''));
     out.push(esc(t.name)+' '+(o==='miss'?'missed':o==='save'&&!tot?'saved':tot+(o==='save'?' (saved)':'')+(nt.length?' <small>('+nt.join('; ')+')</small>':'')));});
   var on=Object.keys(ui.pend).filter(function(x){return ui.pend[x];}),sk=stT.length?applyPend(stT):[];
-  stT.forEach(function(t){if(a.d.stage&&ui.pend[a.d.stage.from])stgSet(t,a.d.stage.from,a.d.stage,a.d,a.n);on.forEach(function(x){if(STG[x])stgSet(t,x,STG[x],a.d,a.n);});});
+  stT.forEach(function(t){if(a.d.stage&&ui.pend[a.d.stage.from])stgSet(t,a.d.stage.from,a.d.stage,a.d,a.n);(a.d.dend||[]).forEach(function(x){if(ui.pend[x]&&t.conds.indexOf(x)>=0){t.dend=t.dend||{};t.dend[x]=1;}});});
   var rxl=[];T.forEach(function(t){var x=(ui.rxs||{})[t.id];if(!x)return;t.rx=true;if(x.st&&t.conds.indexOf(x.st)<0){t.conds.push(x.st);expSet(t,x.st);}rxl.push(esc(t.name)+': '+esc(x.n));});
   if(ui.pend.Grappled)stT.forEach(function(t){if(t.conds.indexOf('Grappled')>=0){t.gb=att.id;t.gdc=a.d.esc||null;}});
   var msg='<b>'+esc(a.n)+':</b> '+out.join(' \u00b7 ');if(on.length&&stT.length)msg+='<br><b>'+on.map(function(x){return esc(nm(x));}).join(', ')+'</b> \u2192 '+stT.map(function(t){return esc(t.name);}).join(', ')+(sk.length?' (immune: '+sk.join(', ')+')':'');
   if(conc.length)msg+='<br><b>Concentration:</b> '+conc.join(' \u00b7 ');
+  msg+=endedMsg();
   if(rxl.length)msg+='<br><b>Reaction:</b> '+rxl.join(' \u00b7 ');
   annSet('<b>'+esc(att.name)+'</b> \u2014 '+esc(a.n)+(a.crit?' (crit)':'')+': '+ann.join(' \u00b7 ')+(on.length&&stT.length?' \u00b7 '+on.map(function(x){return esc(nm(x));}).join(', ')+' \u2192 '+stT.map(function(t){return esc(t.name);}).join(', '):''));
   var how=a.how;ui.act=null;ui.out={};ui.rxs={};ui.rxFor=null;
@@ -1872,7 +1886,10 @@ function parseAct(name,text,sec,others){
     if(both)p.both=both[1].trim();
     p.dmg=p.fail.dmg;p.conds=p.fail.conds;
     var sf=t.match(/Second Failure:\s*([^]*?)(?=(?:Success|Failure|Third Failure):|$)/),nx=sf?pConds(sf[1]).filter(function(x){return p.fail.conds.indexOf(x)<0&&x!=='Incapacitated';}):[];
-    if(nx.length&&p.fail.conds.length)p.stage={from:p.fail.conds[0],to:nx[0],need:1,rm:/instead/i.test(sf[1])};
+    var fc=p.fail.conds.filter(function(x){return x!=='Incapacitated';});
+    if(nx.length&&fc.length)p.stage={from:fc[0],to:nx[0],need:1,rm:/instead/i.test(sf[1])};
+    else if(fc.length&&/repeats? the save at the end of each of its turns/i.test(ft))p.stage={from:fc[0],to:null,need:1};
+    if(fc.length&&/until it takes damage|ends if the target takes damage|ends if it takes damage/i.test(ft))p.dend=fc;
     p.ok=!!fl||!!both;if(!p.dmg.length&&!p.conds.length)p.textOnly=true;return p;}
   var cs=t.match(/\bcasts ([A-Z][A-Za-z’' ]+?)(?: \(level \d+ version\))?(?:,| on | in | or |\.| requiring| using|$)/);
   if(cs){p.kind='cast';p.cast=[cs[1].trim()];var or=t.match(/\bcasts [A-Z][A-Za-z’' ]+? or ([A-Z][A-Za-z’' ]+?)(?: in |,|\.| requiring)/);if(or)p.cast.push(or[1].trim());}
@@ -2043,7 +2060,7 @@ function applyPend(T){var skip=[],fx=curFx();
     T.forEach(function(c){
       var i=c.conds.indexOf(x);
       if(ui.pend[x]&&condBlocked(c,x)){skip.push(esc(c.name)+' ('+esc(nm(x))+')');return;}
-      if(ui.pend[x]){if(i<0){c.conds.push(x);expSet(c,x);ccSet(c,x);linkAdd(c,x);if(x==='Shield')c.rx=true;}}
+      if(ui.pend[x]){if(i<0){c.conds.push(x);expSet(c,x);ccSet(c,x);linkAdd(c,x);if(x==='Shield')c.rx=true;if(STG[x])stgSet(c,x,STG[x],ui.act?ui.act.d:{},ui.act?ui.act.n:nm(x));}}
       else if(i>=0){c.conds.splice(i,1);if(x==='Dead'&&c.kind==='pc'&&c.hp<=0&&c.ds&&c.ds.f>=3)c.ds.f=2;}
     });
   });
@@ -2209,6 +2226,7 @@ padEl.addEventListener('click',function(e){
     var msg=out.length&&(dl||out.length>1)?'<b>'+(dl?dl+' ':'')+'damage:</b> '+out.join(' · '):'';
     if(mxo.length)msg+=(msg?'<br>':'')+'<b>Max HP:</b> '+mxo.join(' · ');
     if(conc.length)msg+=(msg?'<br>':'')+'<b>Concentration:</b> '+conc.join(' · ');
+    var em=endedMsg();if(em)msg+=msg?em:em.slice(4);
     var on=pk.filter(function(x){return ui.pend[x];}),sk=applyPend(T);
     if(on.length)msg+=(msg?'<br>':'')+'<b>'+on.map(function(x){return esc(nm(x));}).join(', ')+'</b> applied'+(sk.length?' (Immune, not applied: '+sk.join(', ')+')':'');
     else if(sk.length)msg+=(msg?'<br>':'')+'<b>Immune, not applied:</b> '+sk.join(' · ');
