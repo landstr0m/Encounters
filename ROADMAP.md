@@ -41,7 +41,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 - [ ] `monsters.json` back to SRD-only; Monster Manual data as a local file (Data → Monster files)
 - [ ] `spells-phb.json` out of the public repo; load it as a local file (needs a spell-file import in the Data tab)
 - [x] Book checks flagged by the data check (3 Nov)
-- [x] Player's Handbook spells (35 of 51 non-SRD spells; the 16 missing are low priority)
+- [x] Player's Handbook spells (all 51 non-SRD spells)
 
 ## Tap-to-use monster actions (mini roadmap A–G) ✅ complete 6 Nov 2026
 

@@ -117,7 +117,7 @@ After an update, open the app once while online, then close and reopen it to get
 
 **Spells & Conditions tab**
 - 339 SRD 5.2 spells plus 35 more from the Player's Handbook (`spells-phb.json`), and the full text of the 15 conditions. Search and filter by level and class; works offline. Book names of SRD spells (Melf's Acid Arrow, Bigby's Hand…) are found by search and link from stat blocks. Spell text gets the same dice, damage-type and condition highlighting as stat blocks.
-- 16 PHB spells are still missing (OCR too damaged), listed in `spells-phb.json` → `missing`.
+- All 51 PHB spells not in the SRD are included (35 from OCR, 16 pasted from D&D Beyond via `local/phb-spells.txt` and `python tools/txt_spells.py local/phb-spells.txt --merge`).
 
 **Prepared encounters and notes (Data tab)**
 - Save the current monsters and effects with a note; later **Load** (replaces monsters, keeps players) or **Add** (reinforcements). The note shows as a banner above the table. In lair is saved too.
@@ -190,7 +190,7 @@ Then bump `CACHE` in `sw.js` so installed apps pick up the change. Log bugs and 
 ## Data and licence
 
 - Spells, conditions and rules text: SRD 5.2 (CC-BY-4.0), spell data via [open5e-api](https://github.com/open5e/open5e-api).
-- `spells-phb.json` **temporarily contains 35 Player's Handbook 2024 spells** (OCR from the owner's epub, checked and corrected), same arrangement as the monsters below.
+- `spells-phb.json` **temporarily contains 51 Player's Handbook 2024 spells** (OCR from the owner's epub, checked and corrected), same arrangement as the monsters below.
 - `monsters.json` **temporarily contains the 2024 Monster Manual** (imported from the owner's own book for personal use at his table) to make testing easier. Before v1.0 it goes back to SRD-only, and the book data moves to a local file imported on the device (**Data → Monster files**), which is never committed.
 - App data stays in your browser on the current device. Export it regularly as a backup.
 
