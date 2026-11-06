@@ -2,6 +2,12 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Data tab, backup, effect templates
+
+- Export left out monster files (local only), so a new device needed two steps; the backup now includes them (optional tick) and Import restores and reloads.
+- Data tab grouped into Backup / Session / Sources; "Rules" tab renamed "Spells & Conditions" ("Spells" on narrow screens).
+- Effects: built-in templates and saved templates (S.fxLib).
+
 ## 2026-11-06 — Damage ends, save ends, two-type spells
 
 - Sleep / Hypnotic Pattern / "until it takes damage" conditions stayed after damage; now removed on damage (with linked Unconscious/Incapacitated).

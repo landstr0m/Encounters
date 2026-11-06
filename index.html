@@ -62,7 +62,7 @@ input{background:var(--surface);border:1px solid var(--line);border-radius:8px;p
 .tok.sel .lab{color:var(--ok)}
 .xpb{margin-top:10px;padding:8px 12px;border:1px solid var(--line,#8884);border-radius:10px;font-size:.9rem}.xpb .xbar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:6px 0;background:color-mix(in srgb,currentColor 10%,transparent);position:relative}.xpb .xbar i{position:absolute;top:-2px;bottom:-2px;width:2px;background:currentColor;opacity:.5}.xpb .xbar b{display:block;height:8px;flex:none;background:var(--warn)}.xpb .xbar b.over{background:var(--bad,#c33)}
 .dtop{position:sticky;top:calc(-12px - env(safe-area-inset-top,0px));z-index:3;background:var(--surface);margin:calc(-12px - env(safe-area-inset-top,0px)) -12px 8px;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 6px;border-bottom:1px solid var(--line)}
-.dtop .dh{margin-bottom:8px}.dh .cls .ic{display:none}.dtop .sub{margin-bottom:6px}
+.dtop .dh{margin-bottom:8px}.dh .tab .sh{display:none}.dh .cls .ic{display:none}.dtop .sub{margin-bottom:6px}
 .esum{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;font-size:.85rem}
 .esum .et{margin-right:4px}.esum .lv{color:var(--warn)}
 .esum .ec{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:999px;padding:0 0 0 8px;background:var(--surface2);min-height:28px}
@@ -90,7 +90,7 @@ button.danger.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
   .bar [data-act="present"]{display:none}
   body:not(.idle) .bar [data-act="clear"]:not(.armed){display:none}
   .dh{gap:4px}.dh button{flex:1 1 0;min-width:0;padding-inline:2px;font-size:.85rem}
-  .dh .cls{flex:0 0 44px}.dtop .dh .cls .tx{display:none}.dtop .dh .cls .ic{display:inline}
+  .dh .cls{flex:0 0 44px}.dh .tab .lg{display:none}.dh .tab .sh{display:inline}.dtop .dh .cls .tx{display:none}.dtop .dh .cls .ic{display:inline}
   .bar .primary{flex:0 1 auto;padding-inline:12px;white-space:nowrap}
   .bar .danger.armed{flex:0 1 96px;font-size:.72rem;line-height:1.1;padding:2px 4px}
   .bar .spacer{flex:1 1 0}
@@ -187,6 +187,8 @@ a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-
 .pcsp summary{cursor:pointer;font-weight:700;padding:4px 0}.spl{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.spl button{min-height:38px}.spl small{opacity:.6;margin-right:2px}
 .acth{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:.92rem}.acth button{min-height:36px}
 .rid{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0}.rid label{display:flex;gap:6px;align-items:center;border:1px dashed var(--accent);border-radius:8px;padding:2px 6px}.rid input{width:3em;min-height:34px;text-align:center;font:inherit}
+.fxt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px}.fxt button{min-height:36px}.fxs{display:inline-flex;gap:2px}
+.data h3{margin:14px 0 4px;border-bottom:1px solid var(--line,#8884);padding-bottom:2px}
 .acth>.aslot{flex:0 0 auto;display:flex;gap:4px;align-items:center}.aslot button{min-width:36px;padding:0}
 .hint{display:inline-block;margin-left:6px;padding:0 6px;border-radius:999px;border:1px solid var(--line);font-size:.72rem;color:var(--warn);white-space:nowrap}
 .mline{margin-top:8px;padding:4px 8px;border-left:3px solid var(--accent);font-size:.9rem;color:var(--muted)}.mline b{color:var(--ink);margin-right:4px}
@@ -1562,10 +1564,20 @@ function fxApplyStatus(T,fx){
   return skip;
 }
 function curFx(){var f=ui.fxRun!=null&&ui.fxRun===S.turnId?findC(ui.fxRun):null;return f&&f.kind==='fx'?f:null;}
+// Effect templates: a few built-in examples (edit before adding) + the DM's own, saved in S.fxLib (and in the backup)
+var FXT=[{name:'Lair action',init:'20',desc:'Pick one lair action from the stat block',vis:true},
+ {name:'Collapsing ceiling',init:'10',desc:'Area under the cracks',vis:true,dd:'4d10',dt:'bludgeoning',sv:'1',dc:'15',st:'Prone'},
+ {name:'Poison gas',init:'20',desc:'Creatures in the cloud',vis:true,dd:'2d8',dt:'poison',sv:'2',dc:'13',st:'Poisoned'},
+ {name:'Spreading fire',init:'10',desc:'Creatures in burning squares',vis:true,dd:'1d10',dt:'fire',sv:'1',dc:'12',st:'Burning'},
+ {name:'Reinforcements',init:'0',desc:'Arrive at the end of round 3',vis:false}];
+function fxBlank(){return {name:'',init:'',desc:'',vis:true,dd:'',dt:'',sv:'',dc:'',st:'',dur:''};}
+function fxTplHTML(){var L=S.fxLib||[];
+  return '<div class="fxt"><b>Templates</b> '+FXT.map(function(t,i){return '<button data-act="fxtpl" data-i="b'+i+'">'+esc(t.name)+'</button>';}).join('')+
+   L.map(function(t,i){return '<span class="fxs"><button data-act="fxtpl" data-i="s'+i+'">★ '+esc(t.name)+'</button><button class="x" data-act="fxtrm" data-i="'+i+'" aria-label="Delete template '+esc(t.name)+'">×</button></span>';}).join('')+'</div>';}
 function fxPanelHTML(){
   var f=ui.fx;
   var stl=CONDS.concat(SPELLS.map(function(x){return x[0];}));
-  return '<p class="muted" style="font-size:.9rem;margin:0 0 8px">An effect acts at a fixed point in the initiative order, such as a lair action or a timed spell. It is never selected for damage or healing.</p>'+
+  return '<p class="muted" style="font-size:.9rem;margin:0 0 8px">An effect acts at a fixed point in the initiative order, such as a lair action or a timed spell. It is never selected for damage or healing.</p>'+fxTplHTML()+
    '<input class="search" id="fxname" type="text" maxlength="40" placeholder="Name, e.g. Lair action" value="'+esc(f.name)+'" aria-label="Effect name">'+
    '<input class="search" id="fxinit" type="number" inputmode="numeric" placeholder="Initiative number, e.g. 20" value="'+esc(f.init)+'" aria-label="Effect initiative">'+
    '<input class="search" id="fxdesc" type="text" maxlength="200" placeholder="Note for you (players never see it)" value="'+esc(f.desc)+'" aria-label="Note for the DM">'+
@@ -1574,7 +1586,7 @@ function fxPanelHTML(){
    '<div class="flt"><input class="search" id="fxdd" type="text" maxlength="20" placeholder="Damage, e.g. 2d6" value="'+esc(f.dd)+'" aria-label="Damage dice" style="margin:0;max-width:8em">'+selHTML('fxdt','fxdt','Damage type',DTYPES.map(function(t){return [t,DTI[t]+' '+t[0].toUpperCase()+t.slice(1)];}),f.dt)+'</div>'+
    '<div class="flt">'+selHTML('fxsv','fxsv','No save',AB.map(function(a,i){return [String(i),a+' save'];}),f.sv)+'<input class="search" id="fxdc" type="number" inputmode="numeric" min="1" max="30" placeholder="DC" value="'+esc(f.dc)+'" aria-label="Save DC" style="margin:0;max-width:6em"></div>'+
    '<div class="flt">'+selHTML('fxst','fxst','No status',stl.map(function(x){return [x,nm(x)];}).sort(function(a,b){return a[1].localeCompare(b[1]);}),f.st)+selHTML('fxdur','fxdur','Normal duration',FXDUR.slice(1),f.dur)+'</div>'+
-   '<div class="row"><button class="add" data-act="addfx" style="flex:1">Add effect</button></div>'+
+   '<div class="row"><button class="add" data-act="addfx" style="flex:1">Add effect</button><button data-act="fxsave" title="Keep this effect as a template for later">Save as template</button></div>'+
    '<div class="msg">'+esc(ui.msg||'')+'</div>';
 }
 function encSumHTML(){
@@ -1670,19 +1682,24 @@ function encHTML(){
    '<div class="msg">'+esc(ui.emsg||'')+'</div><hr style="border:0;border-top:1px solid var(--line);margin:14px 0 4px">';
 }
 function dataHTML(){
-  return '<div class="data">'+encHTML()+'<p><b>Export</b> saves the whole encounter, saved encounters, party and settings to a file. Do it before and after each session.</p>'+
-   '<div class="row"><button class="add" data-act="export">Export file</button></div>'+
-   '<p><b>Combat log</b>: every attack, spell, damage and status applied during combat, per encounter ('+((S.logs||[]).length)+' saved, last 20 kept).</p>'+
-   '<div class="row"><button data-act="logdl"'+((S.logs||[]).length?'':' disabled')+'>Download combat log</button><button data-act="logclr"'+((S.logs||[]).length?'':' disabled')+'>'+(ui.logClr?'Tap again to clear':'Clear log')+'</button></div>'+
-   '<p><b>Import</b> replaces everything in the app with a saved file.</p>'+
-   '<div class="row"><button data-act="import">Import file…</button><input id="impfile" type="file" accept=".json,application/json" hidden></div>'+
-   '<p><b>Table window</b> opens a read-only player view that follows this one live. Any other window of this app in the same browser follows too, so you can also just open the app in a second window and tap Table view there.</p>'+
+  var nm=CUSTOM.reduce(function(n,f){return n+f.monsters.length;},0),nl=(S.logs||[]).length,ns=REF&&REF.spells?REF.spells.length:0;if(!REF)refLoad();
+  return '<div class="data">'+
+   '<h3>Backup</h3><p class="muted">One file with everything: tracker, saved encounters, characters, effect templates, combat logs, settings'+(CUSTOM.length?' and your monster files':'')+'. Export before and after each session; Import restores it on any device.</p>'+
+   (CUSTOM.length?'<div class="lib"><label><input type="checkbox" data-act="expmon"'+(ui.expMon!==false?' checked':'')+'><span>Include my monster files ('+nm+' stat blocks)</span></label></div>':'')+
+   '<div class="row"><button class="add" data-act="export">Export everything</button><button data-act="import">Import file…</button><input id="impfile" type="file" accept=".json,application/json" hidden></div>'+
+   '<h3>Session</h3>'+encHTML()+
+   '<p><b>Combat log</b>: every attack, spell, damage and status applied during combat, per encounter ('+nl+' saved, last 20 kept).</p>'+
+   '<div class="row"><button data-act="logdl"'+(nl?'':' disabled')+'>Download combat log</button><button data-act="logclr"'+(nl?'':' disabled')+'>'+(ui.logClr?'Tap again to clear':'Clear log')+'</button></div>'+
+   '<p><b>Table window</b>: a read-only player view that follows this one live (or open the app in a second window and tap Table view).</p>'+
    '<div class="row"><button data-act="tablewin">Open table window</button></div>'+
-   '<p><b>Monster files</b> add your own stat blocks (e.g. your Monster Manual file). Where a name matches a built-in monster, yours replaces it. Kept on this device only.</p>'+
+   '<h3>Sources</h3>'+
+   '<p><b>Characters</b>: Kanka (players.json) and D&amp;D Beyond (dndbeyond.json), both written by the GitHub workflows.</p>'+
+   '<div class="row"><button data-act="kanka">Update from Kanka</button><button data-act="ddb">Update from D&amp;D Beyond</button></div>'+
+   '<p><b>Monster files</b>: your own stat blocks (e.g. your Monster Manual file). A matching name replaces the built-in monster. Kept on this device (and in the backup).</p>'+
    '<div class="row"><button data-act="addmonfile">Add monster file…</button><input id="monfile" type="file" accept=".json,application/json" hidden></div>'+
    CUSTOM.map(function(f,i){return '<div class="lib"><span style="flex:1"><b>'+esc(f.name)+'</b><br><span class="meta">'+f.monsters.length+' stat blocks</span></span><button class="x" data-act="rmmonfile" data-i="'+i+'" aria-label="Remove '+esc(f.name)+'">×</button></div>';}).join('')+
-   '<div class="msg">'+esc(ui.msg||'')+'</div>'+
-   '<p class="muted">Monsters: '+MON.length+' stat blocks ('+BUILTIN+' built-in SRD 5.2'+(CUSTOM.length?', '+MERGE.rep+' replaced by yours, '+MERGE.add+' added':'')+'). Works offline.</p></div>';
+   '<p class="muted">Monsters: '+MON.length+' stat blocks ('+BUILTIN+' built-in'+(CUSTOM.length?', '+MERGE.rep+' replaced by yours, '+MERGE.add+' added':'')+'). Spells: '+(ns||'loading…')+' (SRD 5.2'+(REF&&REF.spells&&REF.spells.some(function(x){return x.src==='PHB';})?' + PHB':'')+'). Works offline.</p>'+
+   '<div class="msg">'+esc(ui.msg||'')+'</div></div>';
 }
 function uniq(a){return a.filter(function(x,i){return x&&a.indexOf(x)===i;});}
 var AK=['str','dex','con','int','wis','cha'],DLBL=[['res','Resistances'],['imm','Immunities'],['vul','Vulnerabilities'],['cimm','Condition immunities']];
@@ -1741,8 +1758,9 @@ function editHTML(){
    '<div class="msg">'+esc(ui.msg||'Changes save when you leave a field.')+'</div></div>';
 }
 function doExport(){
-  var obj={app:'encounter-tracker',version:1,edition:'2024',exported:new Date().toISOString(),state:S};
-  var name='encounter-'+new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')+'.json';
+  var obj={app:'encounter-tracker',version:2,edition:'2024',exported:new Date().toISOString(),state:S};
+  if(CUSTOM.length&&ui.expMon!==false)obj.monsterFiles=CUSTOM;
+  var name='encounter-backup-'+new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')+'.json';
   var blob=new Blob([JSON.stringify(obj,null,1)],{type:'application/json'});
   var file=null;try{file=new File([blob],name,{type:'application/json'});}catch(e){}
   if(file&&navigator.canShare&&navigator.canShare({files:[file]})){
@@ -1760,9 +1778,10 @@ function doImport(f){
       var o=JSON.parse(r.result);var st=o&&o.app==='encounter-tracker'?o.state:null;
       if(!st||!Array.isArray(st.list)||!Array.isArray(st.lib))throw new Error('bad');
       st.list.forEach(function(c){if(typeof c.id!=='number'||typeof c.name!=='string'||!Array.isArray(c.conds)||isNaN(+c.hp)||isNaN(+c.max))throw new Error('bad');});
+      var mf=Array.isArray(o.monsterFiles)?o.monsterFiles.filter(function(x){return x&&typeof x.name==='string'&&Array.isArray(x.monsters);}):null;
       S=Object.assign(S,st);fixIds();ui.sel={};ui.drawer=true;S.tab='data';
-      ui.msg='Imported '+st.list.length+' combatants and '+st.lib.length+' saved characters.';
-      save();renderAll();
+      ui.msg='Imported '+st.list.length+' combatants, '+st.lib.length+' characters, '+(S.enc||[]).length+' encounters, '+(S.fxLib||[]).length+' effect templates'+(mf?', '+mf.length+' monster files':'')+'.';
+      save();if(mf){CUSTOM=mf;if(!saveCustom())ui.msg+=' Monster files too large for this device.';else{alert(ui.msg);location.reload();return;}}renderAll();
     }catch(e){ui.msg='That file is not a valid encounter export. Nothing was changed.';renderDrawer();}
   };
   r.onerror=function(){ui.msg='Could not read that file.';renderDrawer();};
@@ -1986,7 +2005,7 @@ function renderDrawer(){
   dr.hidden=!ui.drawer;
   document.body.classList.toggle('drawon',ui.drawer);
   if(!ui.drawer)return;
-  dr.innerHTML='<div class="dtop"><div class="dh"><button class="tab'+(S.tab==='add'?' on':'')+'" data-act="tab" data-t="add">Add</button><button class="tab'+(S.tab==='stat'?' on':'')+'" data-act="tab" data-t="stat">Stat block</button>'+(S.edit!=null&&findC(S.edit)?'<button class="tab'+(S.tab==='edit'?' on':'')+'" data-act="tab" data-t="edit">Edit</button>':'')+'<button class="tab'+(S.tab==='ref'?' on':'')+'" data-act="tab" data-t="ref">Rules</button><button class="tab'+(S.tab==='data'?' on':'')+'" data-act="tab" data-t="data">Data</button><button data-act="close" class="cls" aria-label="Close panel"><span class="tx">Close</span><span class="ic">✕</span></button></div>'+(S.tab==='add'?addTopHTML():'')+'</div>'+
+  dr.innerHTML='<div class="dtop"><div class="dh"><button class="tab'+(S.tab==='add'?' on':'')+'" data-act="tab" data-t="add">Add</button><button class="tab'+(S.tab==='stat'?' on':'')+'" data-act="tab" data-t="stat">Stat block</button>'+(S.edit!=null&&findC(S.edit)?'<button class="tab'+(S.tab==='edit'?' on':'')+'" data-act="tab" data-t="edit">Edit</button>':'')+'<button class="tab'+(S.tab==='ref'?' on':'')+'" data-act="tab" data-t="ref"><span class="lg">Spells &amp; Conditions</span><span class="sh">Spells</span></button><button class="tab'+(S.tab==='data'?' on':'')+'" data-act="tab" data-t="data">Data</button><button data-act="close" class="cls" aria-label="Close panel"><span class="tx">Close</span><span class="ic">✕</span></button></div>'+(S.tab==='add'?addTopHTML():'')+'</div>'+
     (S.tab==='add'?addPanelHTML():S.tab==='ref'?refHTML():S.tab==='data'?dataHTML():S.tab==='edit'?editHTML():statHTML());
 }
 // A grapple ends when the grappler is gone, at 0 HP or Incapacitated
@@ -2319,6 +2338,7 @@ dr.addEventListener('click',function(e){
   if(act==='qty'||act==='at'||b.tagName==='SELECT')return;
   if(act!=='libclear')ui.confirmLib=false;
   if(act==='export'){doExport();renderDrawer();return;}
+  if(act==='expmon'){ui.expMon=b.checked;return;}
   if(act==='logdl'){doLogDownload();return;}
   if(act==='logclr'){if(ui.logClr){S.logs=[];ui.logClr=false;save();}else ui.logClr=true;renderDrawer();return;}
   if(act==='import'){var pf=$('#impfile');if(pf)pf.click();return;}
@@ -2388,6 +2408,9 @@ dr.addEventListener('click',function(e){
   }
   else if(act==='usekhp'){S.lib.forEach(function(l){if(khpDiff(l)&&(b.dataset.l==='all'||l.id===b.dataset.l)){l.hp=l.hpEst;l.hpMan=false;}});ui.msg='Max HP set to the Kanka estimate.';}
   else if(act==='dellib'){S.lib=S.lib.filter(function(l){return l.id!==b.dataset.l;});}
+  else if(act==='fxtpl'){var i3=b.dataset.i,t3=i3[0]==='b'?FXT[+i3.slice(1)]:(S.fxLib||[])[+i3.slice(1)];if(t3)ui.fx=Object.assign(fxBlank(),JSON.parse(JSON.stringify(t3)));ui.msg=t3?'Loaded \u201c'+t3.name+'\u201d: check the numbers, then Add effect.':'';}
+  else if(act==='fxtrm'){(S.fxLib||[]).splice(+b.dataset.i,1);}
+  else if(act==='fxsave'){var t4=JSON.parse(JSON.stringify(ui.fx));t4.name=t4.name.trim();if(!t4.name)ui.msg='Give the effect a name first.';else{S.fxLib=S.fxLib||[];var o4=S.fxLib.findIndex(function(x){return x.name.toLowerCase()===t4.name.toLowerCase();});if(o4>=0)S.fxLib[o4]=t4;else S.fxLib.push(t4);ui.msg=(o4>=0?'Updated':'Saved')+' template \u201c'+t4.name+'\u201d.';}}
   else if(act==='addfx'){
     var f=ui.fx,nm=f.name.trim(),iv=f.init===''?NaN:Math.floor(+f.init);
     if(!nm)ui.msg='Give the effect a name.';

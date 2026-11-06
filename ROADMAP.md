@@ -5,7 +5,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 ## Next steps (start here in a new chat)
 
 1. 📋 **Controlled live table test** on the iPad with the tap-to-use flow (monster turns, legendary bar, player spells, table view line). Log findings in `BUGS.md`, then fix before v1.0.
-2. 📋 **Data tab clean-up:** group into *Backup* (export / import), *Session* (combat log, table window, prepared encounters) and *Sources* (monster files, spells, Kanka / D&D Beyond), with one line of help each.
+2. ✅ **Data tab clean-up** (done 6 Nov: one backup file incl. monster files, effect templates, Rules tab renamed Spells & Conditions): group into *Backup* (export / import), *Session* (combat log, table window, prepared encounters) and *Sources* (monster files, spells, Kanka / D&D Beyond), with one line of help each.
 3. 📋 **v1.0 checklist** (below): Monster Manual and PHB spells out of the public repo, loaded as local files.
 4. Then pick from Stage 2: character library groups, effects "after N rounds", compact stat block, 2014/2024 toggle.
 
@@ -20,7 +20,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 | Monster Manual 2024 import (local) | ✅ | Move MM data out of the public `monsters.json` before v1.0 |
 | Encounter XP / difficulty while planning | ✅ | 2024 DMG budgets; hidden while combat runs |
 | End combat without clearing | ✅ | Keeps creatures, HP and statuses |
-| Rules tab: SRD 5.2 + PHB spells, full condition text, offline | ✅ | `reference.json`, `spells-phb.json` (temporary) |
+| Spells & Conditions tab: SRD 5.2 + PHB spells, full condition text, offline | ✅ | `reference.json`, `spells-phb.json` (temporary) |
 | Effects (lair actions, hazards) with damage / save / status | ✅ | |
 | Action pad: number and type wheels, Half, + Extra, Max HP −, statuses, one Apply | ✅ | Heal / Temp HP / Max HP in the type wheel |
 | Status list: General section, spell names, single-condition spells linked, concentration prompts | ✅ | |

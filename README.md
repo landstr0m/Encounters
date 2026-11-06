@@ -39,7 +39,7 @@ After an update, open the app once while online, then close and reopen it to get
 - **Data → Open table window** opens a separate read-only window to drag onto a second screen or TV; it updates live. This only works in the same browser on the same device for now (cross-device sync is planned).
 
 **5. After the session**
-**Data → Export** saves everything (encounter, prepared encounters, party, settings) as a file. Do this before and after each session as a backup. **Data → Download combat log** saves what happened in each fight.
+**Data → Export** (Export everything) saves the whole app, including effect templates and your monster files, as one file. Do this before and after each session as a backup. **Data → Download combat log** saves what happened in each fight.
 
 ## Feature reference
 
@@ -102,7 +102,7 @@ After an update, open the app once while online, then close and reopen it to get
 
 **Stat block text**
 - Roll tables (Beholder Eye Rays, Umber Hulk Confusing Gaze…) are shown as one row per result, and every entry puts Failure / Success on their own lines.
-- Dice to roll are highlighted, attack bonuses green, DCs amber, and damage types have their own colour and symbol (🔥 Fire, ❄️ Cold, ⚡ Lightning, 💀 Necrotic…), also in the defences lines and the damage-type pickers. Spell names (blue) and conditions (red, e.g. *Paralyzed*) are links: tap to read the rule, then **◂ Stat block** to go back. Spells missing from the data (see Rules tab) don't link.
+- Dice to roll are highlighted, attack bonuses green, DCs amber, and damage types have their own colour and symbol (🔥 Fire, ❄️ Cold, ⚡ Lightning, 💀 Necrotic…), also in the defences lines and the damage-type pickers. Spell names (blue) and conditions (red, e.g. *Paralyzed*) are links: tap to read the rule, then **◂ Stat block** to go back. Spells missing from the data (see Spells & Conditions tab) don't link.
 - ✎ Edit per creature: name, AC, HP, initiative, extra actions/traits/notes (can be copied to every creature of that type), or a custom group.
 - **Data → Monster files:** import your own monster JSON files; they stay on this device and override built-in entries with the same name.
 
@@ -115,7 +115,7 @@ After an update, open the app once while online, then close and reopen it to get
 **Encounter XP (2024 DMG)**
 - While combat isn't running, the XP bar shows the living monsters' XP against the party's Low / Moderate / High budget. Player levels come from Kanka, the sheet's **Level** field, or `Name, lvl 3`.
 
-**Rules tab**
+**Spells & Conditions tab**
 - 339 SRD 5.2 spells plus 35 more from the Player's Handbook (`spells-phb.json`), and the full text of the 15 conditions. Search and filter by level and class; works offline. Book names of SRD spells (Melf's Acid Arrow, Bigby's Hand…) are found by search and link from stat blocks. Spell text gets the same dice, damage-type and condition highlighting as stat blocks.
 - 16 PHB spells are still missing (OCR too damaged), listed in `spells-phb.json` → `missing`.
 
@@ -193,3 +193,12 @@ Then bump `CACHE` in `sw.js` so installed apps pick up the change. Log bugs and 
 - `spells-phb.json` **temporarily contains 35 Player's Handbook 2024 spells** (OCR from the owner's epub, checked and corrected), same arrangement as the monsters below.
 - `monsters.json` **temporarily contains the 2024 Monster Manual** (imported from the owner's own book for personal use at his table) to make testing easier. Before v1.0 it goes back to SRD-only, and the book data moves to a local file imported on the device (**Data → Monster files**), which is never committed.
 - App data stays in your browser on the current device. Export it regularly as a backup.
+
+## Data tab
+- **Backup:** *Export everything* writes one file with the tracker, saved encounters, characters, effect templates, combat logs, settings and (ticked by default) your monster files. *Import* restores all of it on any device.
+- **Session:** prepared encounters, combat log, table window.
+- **Sources:** Kanka and D&D Beyond updates, monster files, and the monster/spell counts.
+
+## Effect templates
+In Add → Effects, tap a template (Lair action, Collapsing ceiling, Poison gas, Spreading fire, Reinforcements) to fill the form, check the numbers, then Add effect. **Save as template** keeps your own (★, × to delete); they are in the backup file.
+

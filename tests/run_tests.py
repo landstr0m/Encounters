@@ -1359,6 +1359,30 @@ def damage_ends_and_save_ends(b):
     check(not a.errors, a.errors)
 
 
+@test
+def effect_templates_and_full_backup(b):
+    a = App(b)
+    a.e("S.sub='effects';S.tab='add';ui.drawer=true;renderDrawer()")
+    a.e("[].find.call(document.querySelectorAll('[data-act=fxtpl]'),function(x){return x.textContent==='Poison gas'}).click()")
+    eq(a.e("ui.fx.dd+' '+ui.fx.dt+' '+ui.fx.st"), "2d8 poison Poisoned", "template fills the form")
+    a.e("ui.fx.name='Swamp gas';renderDrawer()"); a.click('[data-act="fxsave"]')
+    eq(a.e("S.fxLib.length"), 1, "saved as template")
+    # one backup file restores templates, encounters and monster files
+    a.e("CUSTOM=[{name:'hb.json',monsters:[{id:'hb-x',name:'Test Blob',ac:9,hp:5,abil:[1,1,1,1,1,1]}]}];saveCustom();S.enc=[{id:'e1',name:'Ambush',list:[]}];save()")
+    a.e("S.tab='data';renderDrawer()")
+    check("Backup" in a.pg.inner_text('.data') and "Sources" in a.pg.inner_text('.data'), "grouped data tab")
+    with a.pg.expect_download() as dl:
+        a.click('[data-act="export"]')
+    path = os.path.join(tempfile.mkdtemp(), "all.json"); dl.value.save_as(path)
+    eq(len(json.load(open(path))["monsterFiles"]), 1, "monster files in the backup")
+    a.e("S.fxLib=[];S.enc=[];CUSTOM=[];saveCustom();save()")
+    with a.pg.expect_navigation():
+        a.pg.set_input_files("#impfile", path)
+    a.pg.wait_for_function("window.__e && window.__e('MON.length') > 0")
+    eq(a.e("S.fxLib.length+' '+S.enc.length+' '+CUSTOM.length"), "1 1 1", "all restored")
+    check(a.e("!!MON.find(function(m){return m.id==='hb-x'})"), "monster file merged after reload")
+
+
 def main():
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def log_message(self, *a):
