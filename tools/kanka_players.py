@@ -166,6 +166,41 @@ def traits_and_defenses(race, classes, a):
             "condImmune": sorted(cimm), "advSaves": sorted(adv), "traits": traits}, prof
 
 
+DDB_RE = re.compile(r"(?:dndbeyond\.com/(?:profile/[^/\s\"'<>]+/)?characters|ddb\.ac/characters)/(\d{5,})", re.I)
+
+
+def ddb_links(c):
+    """D&D Beyond character ids found anywhere public in a Kanka character: entry, attributes, posts, links."""
+    found = {}
+
+    def scan(where, v):
+        if isinstance(v, dict):
+            for x in v.values():
+                scan(where, x)
+        elif isinstance(v, list):
+            for x in v:
+                scan(where, x)
+        elif isinstance(v, str):
+            for m in DDB_RE.findall(html.unescape(v)):
+                found.setdefault(m, where)
+
+    for k in ("entry", "entry_parsed", "title", "type"):
+        scan("description" if k.startswith("entry") else k, c.get(k))
+    scan("attributes", [x for x in (c.get("attributes") or []) if not x.get("is_private")])
+    posts, links = c.get("posts"), c.get("links")
+    if posts is None:
+        time.sleep(2.5)
+        try: posts = get(f"{API}/entities/{c['entity_id']}/posts")["data"]
+        except Exception: posts = []
+    if links is None:
+        time.sleep(2.5)
+        try: links = get(f"{API}/entities/{c['entity_id']}/entity_links")["data"]
+        except Exception: links = []
+    scan("posts", [p for p in posts if not p.get("is_private") and (p.get("visibility_id") in (None, 1))])
+    scan("links", links)
+    return [{"id": int(i), "from": w} for i, w in found.items()]
+
+
 def main():
     players, url = [], f"{API}/characters?related=1"
     while url:
@@ -219,6 +254,7 @@ def main():
                 "hpEst": est_hp(classes, mods["con"]),
                 "image": c.get("image_thumb"),
                 "url": f"https://app.kanka.io/w/{CAMPAIGN}/entities/{c['entity_id']}",
+                "ddb": ddb_links(c),
             })
         url = page.get("links", {}).get("next")
         if url:
@@ -227,6 +263,10 @@ def main():
     with open("players.json", "w", encoding="utf-8") as f:
         json.dump(players, f, ensure_ascii=False, indent=1)
     print(f"Wrote {len(players)} player characters to players.json")
+    hits = [p for p in players if p["ddb"]]
+    print(f"D&D Beyond links found for {len(hits)} of {len(players)}:")
+    for p in hits:
+        print(f"  {p['name']}: " + ", ".join(f"{d['id']} ({d['from']})" for d in p["ddb"]))
 
 
 if __name__ == "__main__":
