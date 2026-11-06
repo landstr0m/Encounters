@@ -64,7 +64,7 @@ input{background:var(--surface);border:1px solid var(--line);border-radius:8px;p
 .tok.sel .lab{color:var(--ok)}
 .xpb{margin-top:10px;padding:8px 12px;border:1px solid var(--line,#8884);border-radius:10px;font-size:.9rem}.xpb .xbar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:6px 0;background:color-mix(in srgb,currentColor 10%,transparent);position:relative}.xpb .xbar i{position:absolute;top:-2px;bottom:-2px;width:2px;background:currentColor;opacity:.5}.xpb .xbar b{display:block;height:8px;flex:none;background:var(--warn)}.xpb .xbar b.over{background:var(--bad,#c33)}
 .dtop{position:sticky;top:calc(-12px - env(safe-area-inset-top,0px));z-index:3;background:var(--surface);margin:calc(-12px - env(safe-area-inset-top,0px)) -12px 8px;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 6px;border-bottom:1px solid var(--line)}
-.dtop .dh{margin-bottom:8px}.dh .tab .sh{display:none}.dh .cls .ic{display:none}.dtop .sub{margin-bottom:6px}
+.dtop .dh{margin-bottom:8px}.dh.many .tab .lg{display:none}.dh.many .tab .sh{display:inline}.dh.many button{flex:1 1 auto;min-width:0;padding-inline:6px}.dh .tab .sh{display:none}.dh .cls .ic{display:none}.dtop .sub{margin-bottom:6px}
 .esum{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;font-size:.85rem}
 .esum .et{margin-right:4px}.esum .lv{color:var(--warn)}
 .esum .ec{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:999px;padding:0 0 0 8px;background:var(--surface2);min-height:28px}
@@ -77,7 +77,7 @@ button.danger.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
 /* Landscape phone: action pad docks to the right, table stays tappable on the left */
 @media (max-height:500px) and (orientation:landscape){
   body.padon{padding-bottom:16px}
-  body.padon .tw,body.padon .xpb,body.padon .env,body.padon .svb,body.padon .bar,body.padon .strip,body.padon .turn{margin-right:calc(min(330px,44vw) + 8px)}
+  body.padon .tw,body.padon .xpb,body.padon .env,body.padon .bar,body.padon .strip,body.padon .turn{margin-right:calc(min(330px,44vw) + 8px)}
   body .pad{left:auto;top:0;width:min(330px,44vw);border-top:0;border-left:2px solid var(--ok);overflow-y:auto;padding-top:calc(8px + env(safe-area-inset-top,0px))}
   body .pad .pi{max-width:none}body .pad .wheelbox{width:60px;height:110px}body .pad .tbox{width:112px}body .pad .wband,body .pad .amtin,body .pad .tbox #dtype{top:33px}body .pad .wheel .sp{height:33px}body .pad .amtrow span{display:none}
   body .pad .pacts{grid-template-columns:1fr 1fr}body .pad .pacts button{min-height:36px;font-size:.85rem}
@@ -133,8 +133,6 @@ body.idle .strip{display:none}
 a.spl.cnd{color:var(--bad);text-decoration-style:dashed}
 a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-underline-offset:2px;cursor:pointer}
 .refl button{display:block;width:100%;text-align:left;margin:2px 0}.refl small{opacity:.7}
-.svb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
-.svb b{font-size:.9rem}
 .env{margin-top:10px;padding:8px 12px;border:2px solid var(--warn);border-radius:10px;background:color-mix(in srgb,var(--warn) 12%,var(--surface));display:flex;gap:10px;align-items:flex-start}
 .env div{flex:1;white-space:pre-wrap;font-size:.95rem}
 .env b{font-family:var(--display);font-size:1.15rem}
@@ -147,8 +145,7 @@ a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-
 .enc .nt{font-size:.85rem;white-space:pre-wrap;margin-top:4px}
 .data textarea{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:8px;min-height:64px;resize:vertical;font-size:.95rem;margin-top:6px}
 .data .search{margin:6px 0 0}
-.svb button{min-height:38px;padding:2px 12px;font-weight:700}
-.svb button.on,.bar button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.bar button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .sv{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:8px;border:2px solid var(--accent);font-family:var(--display);font-size:1.15rem;font-weight:700;vertical-align:middle;white-space:nowrap}
 .sv.svp{background:color-mix(in srgb,var(--accent) 18%,var(--surface))}
 .sv small{font-family:var(--body);font-size:.7rem;margin-left:4px;color:var(--ok);text-transform:uppercase;letter-spacing:.06em}.sv small.b{color:var(--bad)}
@@ -193,6 +190,11 @@ a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-
 .rid{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0}.rid label{display:flex;gap:6px;align-items:center;border:1px dashed var(--accent);border-radius:8px;padding:2px 6px}.rid input{width:3em;min-height:34px;text-align:center;font:inherit}
 .ptag{display:inline-block;font-size:.75rem;border:1px solid var(--accent);border-radius:9px;padding:0 6px;margin:2px 4px 0 0}.pgrp button.on{outline:2px solid var(--accent)}
 .dtop .segs{display:flex;flex-wrap:wrap;gap:4px 12px}.dtop .segs>*{flex:1 1 300px;margin:0}.dtop .segs button{white-space:nowrap}.row.upd{align-items:center}.row.upd>button{flex:1}.dtop .search{margin:4px 0}
+.ppl{font-size:.8rem;color:var(--muted);margin:2px 0 4px}.slots2{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:6px 0}.slots2 b{font-size:.9rem}.slv{display:inline-flex;align-items:center;gap:2px}.slv small{color:var(--muted);margin-right:4px;font-weight:700}.slots2 .pip{width:16px;height:16px}.slots2 .pip.on{background:var(--accent)}
+.dsv{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px}.dsv b{margin-right:4px}.dsv button{min-height:38px;padding:2px 12px;font-weight:700}.dsv button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.drow{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:8px 0;border-top:1px solid var(--line)}.drow.down{opacity:.55}.drow .dn{font-family:var(--display);font-size:1.2rem;min-width:8em}.drow .sv{margin-left:0}
+.dac{position:relative;width:34px;height:39px;display:inline-flex;align-items:center;justify-content:center;padding-bottom:4px;font-family:var(--display);font-weight:700;font-size:1.1rem}.dac svg{position:absolute;inset:0;width:100%;height:100%}.dac path{fill:var(--surface2);stroke:var(--muted);stroke-width:1.4}.dac .acv{position:relative}
+.dd{flex:1 1 220px;font-size:.92rem}.dk{font-weight:700;color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
 .fxt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px}.fxt button{min-height:36px}.fxs{display:inline-flex;gap:2px}
 .data h3{margin:14px 0 4px;border-bottom:1px solid var(--line,#8884);padding-bottom:2px}
 .acth>.aslot{flex:0 0 auto;display:flex;gap:4px;align-items:center}.aslot button{min-width:36px;padding:0}
@@ -429,7 +431,7 @@ button{touch-action:manipulation}
   .pad .pacts{grid-template-columns:1fr 1fr}
   .pad .pacts button{min-height:38px;font-size:.9rem}
   .pad .menu{right:calc(100% + 12px);bottom:0;width:620px}
-  body.drawon .tw,body.drawon .env,body.drawon .xpb,body.drawon .svb{margin-right:446px}
+  body.drawon .tw,body.drawon .env,body.drawon .xpb{margin-right:446px}
   body.drawon .pad{right:462px}
   body.drawon.padon{padding-bottom:345px}
   body.drawon .pad .menu{left:auto;right:0;bottom:calc(100% + 12px);width:min(620px,calc(100vw - 494px))}
@@ -445,7 +447,6 @@ button{touch-action:manipulation}
 <div class="big" id="big"></div>
 <div class="env dmonly" id="env" hidden></div>
 <div class="xpb dmonly" id="xpb" hidden></div>
-<div class="svb dmonly" id="svb" hidden></div>
 <div class="tw dmonly"><table id="tbl" aria-label="Combatants"></table></div>
 <div class="pad dmonly" id="pad" hidden></div>
 <aside class="drawer" id="drawer" hidden aria-label="Add combatants and stat blocks"></aside>
@@ -795,7 +796,7 @@ var isOut=function(c){return isDead(c)||isPcDead(c);};
 var S={enc:[],encRoll:true,envName:'',envNote:'',round:1,turnId:null,list:[],next:1,libNext:7,tab:'add',sub:'monsters',stat:null,atTable:{},initMode:'each',hpMode:'roll',
  lib:[{id:'l1',name:'Aria (example)',ac:16,hp:31,ib:2},{id:'l2',name:'Brom (example)',ac:18,hp:38,ib:1},{id:'l3',name:'Wren (example)',ac:14,hp:24,ib:3},
       {id:'l4',name:'Tolliver (example)',ac:12,hp:20,ib:1},{id:'l5',name:'Sable (example)',ac:15,hp:27,ib:4},{id:'l6',name:'Marek (example)',ac:17,hp:34,ib:0}]};
-var ui={fxRun:null,fx:{name:'',init:'',desc:'',vis:true,dd:'',dt:'',sv:'',dc:'',st:'',dur:''},fType:'',fMin:'',fMax:'',q:'',qty:{},sel:{},amt:0,half:false,mx:false,menu:false,pend:{},confirmRemove:false,confirmClear:false,msg:'',drawer:false,present:false,cardOpen:true,sv:-1,mq:'',encName:'',encNote:'',svLast:1,traitsOpen:false,ignoreUntil:0};
+var ui={fxRun:null,fx:{name:'',init:'',desc:'',vis:true,dd:'',dt:'',sv:'',dc:'',st:'',dur:''},fType:'',fMin:'',fMax:'',q:'',qty:{},sel:{},amt:0,half:false,mx:false,menu:false,pend:{},confirmRemove:false,confirmClear:false,msg:'',drawer:false,present:false,cardOpen:true,dsv:1,mq:'',encName:'',encNote:'',traitsOpen:false,ignoreUntil:0};
 try{if(RO||sessionStorage.getItem('et-present')==='1')ui.present=true;}catch(e){}
 try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.list){S=Object.assign(S,p);}}}catch(e){}
 function save(){if(RO)return;try{localStorage.setItem(KEY,JSON.stringify(S));ui.saveErr=false;}catch(e){if(!ui.saveErr){ui.saveErr=true;alert('This device\u2019s storage is full, so changes are NOT being saved. Export your encounter (Data tab), then remove a monster file you no longer need.');}}}
@@ -996,7 +997,7 @@ function renderBar(){
    (ui.undo?'<button data-act="undo" title="Undo: '+esc(ui.undo.label)+'" aria-label="Undo"><span class="ic">↶</span><span class="tx"> Undo</span></button>':'')+
    '<span class="spacer"></span>'+
    '<button class="dmonly" data-act="openadd" aria-label="Add"><span class="ic">＋</span><span class="tx"> Add</span></button>'+
-   '<button class="dmonly'+(ui.sv>=0?' on':'')+'" data-act="saves" title="Show saving throw modifiers" aria-label="Saves"><span class="ic">🛡</span><span class="tx"> Saves</span></button>'+
+   '<button class="dmonly'+(ui.drawer&&S.tab==='def'?' on':'')+'" data-act="saves" title="Defences: AC, saving throws, resistances and immunities of every creature" aria-label="Defences"><span class="ic">🛡</span><span class="tx"> Defences</span></button>'+
    '<button data-act="present" aria-label="Table view"><span class="ic">🖥</span><span class="tx"> '+(ui.present?'Exit table view':'Table view')+'</span></button>'+
    '<button class="danger dmonly'+(ui.confirmClear?' armed':'')+'" data-act="clear" aria-label="Clear">'+(ui.confirmClear?'Tap again to clear all':'<span class="ic">🗑</span><span class="tx"> Clear</span>')+'</button>';
   document.body.classList.toggle('idle',!started);
@@ -1190,6 +1191,23 @@ function saveMod(c,ab){var k=['str','dex','con','int','wis','cha'][ab];
 function magRes(c){var m=c.kind==='mon'&&MON.find(function(x){return x.id===c.monId;});return !!(m&&(m.traits||[]).some(function(t){return /^Magic Resistance/i.test(t[0]);}));}
 // A player's spells (from D&D Beyond) on their turn card: tap one to target monsters; DC / attack bonus from the class
 function pcSpell(l){var d=pcDCs(l).find(function(x){return x.hit!=null;});return {dc:d?d.dc:null,sat:d?d.hit:null,clv:l&&+l.level||0};}
+// Spell slots from class levels (2024 PHB). Full casters count their level, Paladin / Ranger (and Artificer) half rounded up,
+// Eldritch Knight / Arcane Trickster a third (rounded up alone, down when multiclassed); Warlock Pact Magic is separate.
+var SLOTS=[[],[2],[3],[4,2],[4,3],[4,3,2],[4,3,3],[4,3,3,1],[4,3,3,2],[4,3,3,3,1],[4,3,3,3,2],[4,3,3,3,2,1],[4,3,3,3,2,1],[4,3,3,3,2,1,1],[4,3,3,3,2,1,1],
+ [4,3,3,3,2,1,1,1],[4,3,3,3,2,1,1,1],[4,3,3,3,2,1,1,1,1],[4,3,3,3,3,1,1,1,1],[4,3,3,3,3,2,1,1,1],[4,3,3,3,3,2,2,1,1]];
+function pcSlots(l){var P=((l&&l.parsed)||[]).filter(function(p){return +p.level;}),pact=null,K=[];
+  P.forEach(function(p){var c=(p.class||'').toLowerCase(),sub=(p.subclass||'').toLowerCase(),n=+p.level;
+    if(c==='warlock')pact={n:n>=17?4:n>=11?3:n>=2?2:1,lvl:Math.min(5,Math.ceil(n/2))};
+    var f=/^(bard|cleric|druid|sorcerer|wizard)$/.test(c)?1:/^(paladin|ranger|artificer)$/.test(c)?2:((c==='fighter'&&/eldritch knight/.test(sub))||(c==='rogue'&&/arcane trickster/.test(sub)))?3:0;
+    if(f)K.push([f,n]);});
+  var lv=K.length===1?Math.ceil(K[0][1]/K[0][0]):K.reduce(function(a,k){return a+(k[0]===1?k[1]:k[0]===2?Math.ceil(k[1]/2):Math.floor(k[1]/3));},0);
+  return {slots:SLOTS[Math.min(20,lv)]||[],pact:pact};}
+function cap(t){t=String(t||'');return t.charAt(0).toUpperCase()+t.slice(1);}
+// Slot pips on the player's turn card: tap to mark used (c.slu, kept for the encounter), Reset when the party rests.
+function slotsHTML(c,l){var sp=pcSlots(l),u=c.slu||{};if(!sp.slots.length&&!sp.pact)return '';
+  var pips=function(k,n){var used=u[k]||0,o='';for(var i=0;i<n;i++)o+='<button class="pip'+(i<n-used?' on':'')+'" data-act="slot" data-k="'+k+'" aria-label="'+(k==='p'?'Pact':'Level '+k)+' slot '+(i+1)+(i<n-used?'':' (used)')+'"></button>';return o;};
+  return '<div class="slots2"><b>Spell slots</b>'+sp.slots.map(function(n,i){return '<span class="slv"><small>'+(i+1)+'</small>'+pips(i+1,n)+'</span>';}).join('')+
+    (sp.pact?'<span class="slv"><small>Pact '+sp.pact.lvl+'</small>'+pips('p',sp.pact.n)+'</span>':'')+(Object.keys(u).length?'<button data-act="slotr">Reset</button>':'')+'</div>';}
 function pcSpellsHTML(c,l){if(!l||!(l.spells||[]).length||RO||ui.present)return '';if(!REF){refLoad();return '';}
   var L=l.spells.map(function(n){var d=spellData(n,pcSpell(l)),r=REF.spells.find(function(x){return x.n===n;});return d?{n:n,lv:r?r.l:0}:null;}).filter(Boolean).sort(function(a,b){return a.lv-b.lv||a.n.localeCompare(b.n);});
   if(!L.length)return '';var ps=pcSpell(l);
@@ -1296,14 +1314,16 @@ function renderTurn(){
     '<span class="st"><i>AC</i>'+(effAC(c)!==+c.ac?'<s>'+c.ac+'</s> <b class="'+acCls(c)+'">'+effAC(c)+'</b>':c.ac)+'</span><span class="st"><i>HP</i>'+c.hp+'/'+c.max+(c.base!=null?' (max \u2212'+(c.base-c.max)+')':'')+(c.temp>0?' +'+c.temp:'')+'</span>';
   var l=libOf(c),dcs=pcDCs(l),X=c.x||[],dv=uniq(dcs.map(function(d){return d.dc;}).filter(function(v){return v!=null;}));
   if(dv.length)h+='<span class="st"><i>DC</i>'+dv.join('/')+'</span>';
-  h+=(m?'<span class="st"><i>SPEED</i>'+(effSpeed(c,m.speed)!==m.speed?'<s>'+esc(m.speed)+'</s> <b class="em">'+esc(effSpeed(c,m.speed))+'</b>':esc(m.speed))+'</span><span class="st"><i>CR</i>'+esc(m.cr)+'</span>':'<span class="st muted">'+(c.kind==='pc'?'Player turn':'Stat block not loaded')+'</span>');
+  h+=(m?'<span class="st"><i>SPEED</i>'+(effSpeed(c,m.speed)!==m.speed?'<s>'+esc(m.speed)+'</s> <b class="em">'+esc(effSpeed(c,m.speed))+'</b>':esc(m.speed))+'</span><span class="st"><i>CR</i>'+esc(m.cr)+'</span>':'<span class="st muted">'+(c.kind==='pc'?(l?esc([l.race,(l.parsed||[]).length?l.parsed.map(function(p){return cap(p.class)+(p.subclass?' ('+p.subclass+')':'')+' '+(p.level||'');}).join(' / '):(l.cls||'')].filter(Boolean).join(' \u00b7 ')||'Player turn'):'Player turn'):'Stat block not loaded')+'</span>');
   // Player card body: DCs, saves, defences and traits (so Show/Hide has something to show).
   var pb='';
   if(l){
     pb+=dcs.map(function(d){return '<div class="a"><b>'+(d.dc==null?'DC ?':'DC '+d.dc)+(d.hit!=null?' \u00b7 '+sgn(d.hit)+' to hit':'')+'</b>'+esc(d.what)+'</div>';}).join('');
-    var sv=AB.map(function(a,i){return saveOf(c,i)||'';}).join('');
+    // ability modifiers for attack rolls (save proficiencies highlighted, modifier only), proficiency bonus
+    var ab=l.abil||{},ap=l.saveProf||[],am=AK.map(function(k,i){var v=ab[k];return '<span class="sv'+(ap.indexOf(k)>=0?' svp':'')+'" title="'+(ap.indexOf(k)>=0?'Save proficiency':'')+'">'+AB[i]+' '+(v==null?'?':sgn(Math.floor((v-10)/2)))+'</span>';}).join('');
     var df=defs(c),dl=[['Resists',df.res],['Immune',df.imm],['Vulnerable',df.vul],['Cond. immune',df.cimm]].filter(function(x){return x[1].length;}).map(function(x){return x[0]+' '+uniq(x[1]).join(', ');}).join(' \u00b7 ');
-    pb='<div class="acts2">'+pb+(sv?'<div class="a pcs"><b>Saves</b>'+sv+'</div>':'')+(dl||ppOf(c)!=null?'<div class="a"><b>'+(ppOf(c)!=null?'Passive Perception '+ppOf(c):'Defences')+'</b>'+esc(dl)+'</div>':'')+'</div>';
+    pb='<div class="acts2">'+pb+'<div class="a pcs"><b>Proficiency '+sgn(pcPb(l))+'</b>'+am+'</div>'+(dl?'<div class="a"><b>Defences</b>'+esc(dl)+'</div>':'')+'</div>'+
+      (ppOf(c)!=null?'<div class="ppl">Passive Perception '+ppOf(c)+'</div>':'')+slotsHTML(c,l);
     pb+=pcSpellsHTML(c,l);
     if((l.traits||[]).length)pb+='<details'+(ui.traitsOpen?' open':'')+'><summary>Traits ('+l.traits.length+')</summary>'+l.traits.map(function(t){return '<p><b>'+esc(t.name)+'.</b> '+esc(t.text)+'</p>';}).join('')+'</details>';
   }
@@ -1345,12 +1365,23 @@ function renderTurn(){
   el.innerHTML=h;
 }
 var AB=['STR','DEX','CON','INT','WIS','CHA'];
+// Defences drawer (toolbar 🛡): every creature on one line: AC, the chosen saving throw, resistances / immunities / vulnerabilities.
+function defHTML(){var k=ui.dsv==null?1:ui.dsv,L=S.list.filter(function(c){return c.kind!=='fx';}).slice().sort(function(a,b){return (b.init==null?-99:b.init)-(a.init==null?-99:a.init);});
+  var seg='<div class="dsv"><b>Saving throw</b>'+AB.map(function(a,i){return '<button data-act="dsv" data-n="'+i+'" class="'+(i===k?'on':'')+'" aria-pressed="'+(i===k)+'">'+a+'</button>';}).join('')+'</div>';
+  var row=function(c){var d=defs(c),bits=[['Resist',d.res],['Immune',d.imm],['Vulnerable',d.vul],['Cond. immune',d.cimm]].filter(function(x){return x[1].length;})
+      .map(function(x){return '<span class="dk">'+x[0]+'</span> '+esc(uniq(x[1]).join(', '));});
+    if(magRes(c))bits.push('<span class="dk">Magic Resistance</span>');
+    return '<div class="drow'+(c.hp<=0?' down':'')+'"><b class="dn">'+esc(c.name)+'</b><span class="dac" title="AC">'+SHIELD+'<span class="acv">'+effAC(c)+'</span></span>'+(saveOf(c,k)||'<span class="sv">'+AB[k]+' ?</span>')+
+      '<span class="dd">'+(bits.join(' \u00b7 ')||'<span class="muted">no resistances</span>')+'</span></div>';};
+  return '<div class="defs">'+seg+(L.length?L.map(row).join(''):'<p class="muted">No creatures in the encounter yet.</p>')+'</div>';}
 function saveOf(c,i){
   var r,n;
   if(c.kind==='pc'){
     var l=S.lib.find(function(x){return x.id===c.libId;}),k=AB[i].toLowerCase();
-    if(!l||!l.saves||l.saves[k]==null)return null;
-    n=l.saves[k];r=(l.saveProf||[]).indexOf(k)>=0;var spAdv=(l.adv||[]).indexOf(k)>=0;
+    if(!l)return null;
+    if(l.saves&&l.saves[k]!=null)n=l.saves[k];
+    else if(l.abil&&l.abil[k]!=null)n=Math.floor((l.abil[k]-10)/2)+((l.saveProf||[]).indexOf(k)>=0?pcPb(l):0);
+    else return null;r=(l.saveProf||[]).indexOf(k)>=0;var spAdv=(l.adv||[]).indexOf(k)>=0;
   }else{
     var m=MON.find(function(x){return x.id===c.monId;});if(!m)return null;
     var sv=(m.extra.find(function(e){return /^sav/i.test(e[0]);})||[])[1]||'';
@@ -1382,7 +1413,7 @@ function rowHTML(c){
   var ph=c.kind==='pc'&&c.ib!=null?sgn(c.ib):'—';
   return '<tr class="r'+(c.id===S.turnId?' isturn':'')+(down?' down':'')+(ui.sel[c.id]?' sel':'')+'" data-id="'+c.id+'">'+
    '<td class="c-in"><input class="num" type="number" min="-4" max="49" step="1" data-act="init" placeholder="'+esc(ph)+'" value="'+(c.init==null?'':c.init)+'" aria-label="Initiative for '+esc(c.name)+'"></td>'+
-   '<td><span class="name">'+esc(c.name)+'</span>'+(c.kind==='pc'?'':'<span class="tag">CR '+esc(c.cr)+'</span>')+(ui.sv>=0?(saveOf(c,ui.sv)||''):'')+offHTML(c)+'<div class="conds">'+chips+'</div>'+(ui.sel[c.id]?fxHTML(c):'')+'</td>'+
+   '<td><span class="name">'+esc(c.name)+'</span>'+(c.kind==='pc'?'':'<span class="tag">CR '+esc(c.cr)+'</span>')+offHTML(c)+'<div class="conds">'+chips+'</div>'+(ui.sel[c.id]?fxHTML(c):'')+'</td>'+
    '<td class="c-ac"><span class="acb" role="img" title="Current AC'+(effAC(c)!==+c.ac?' (base '+c.ac+'; ✎ to change)':'')+'" aria-label="AC '+effAC(c)+'">'+SHIELD+'<span class="acv">'+(effAC(c)!==+c.ac?'<b class="'+acCls(c)+'">'+effAC(c)+'</b>':''+effAC(c))+'</span></span></td>'+
    '<td class="c-hp"><div class="hpnum"><span class="cur">'+c.hp+'</span><span class="max">/ '+c.max+'</span>'+(c.base!=null?'<span class="mred">max \u2212'+(c.base-c.max)+'</span>':'')+(c.temp>0?'<span class="temp">+'+c.temp+'</span>':'')+(down?'<span class="state">'+(pcDead?'Dead':'Down')+'</span>':'')+'</div>'+
      '<div class="track"><div class="fill '+lvl+'" style="width:'+pct+'%"></div></div>'+(pcDead?'<div class="dsd">Heal 1+ HP to revive</div>':dsHTML(c))+'</td>'+
@@ -1413,8 +1444,6 @@ function renderTable(){
   var xb=$('#xpb'),xh=S.turnId==null?xpHTML():'';xb.hidden=!xh;xb.innerHTML=xh;
   var ev=$('#env');ev.hidden=!String(S.envNote||'').trim();
   if(!ev.hidden)ev.innerHTML='<div><b>'+esc(S.envName||'Notes')+'</b>\n'+esc(S.envNote)+'</div><button data-act="envx" aria-label="Hide encounter notes">Hide</button>';
-  var sb=$('#svb');sb.hidden=ui.sv<0;
-  if(ui.sv>=0)sb.innerHTML='<b>Saving throw:</b>'+AB.map(function(a,i){return '<button data-act="sv" data-n="'+i+'" class="'+(i===ui.sv?'on':'')+'">'+a+'</button>';}).join('')+'<button data-act="sv" data-n="-1" aria-label="Hide saves">Hide</button><span class="muted" style="font-size:.8rem">Shaded = proficient · players need Kanka data</span>';
   var pcs=S.list.filter(function(c){return c.kind==='pc';});
   if(pcs.length){h+='<tr class="grp"><th colspan="5">Players · '+pcs.length+'<button class="gb" data-act="selgrp" data-g="pc">Select all</button></th></tr>'+pcs.map(rowHTML).join('');}
   var seen=[],groups={};
@@ -2041,8 +2070,8 @@ function renderDrawer(){
   dr.hidden=!ui.drawer;
   document.body.classList.toggle('drawon',ui.drawer);
   if(!ui.drawer)return;
-  dr.innerHTML='<div class="dtop"><div class="dh"><button class="tab'+(S.tab==='add'?' on':'')+'" data-act="tab" data-t="add">Add</button><button class="tab'+(S.tab==='stat'?' on':'')+'" data-act="tab" data-t="stat">Stat block</button>'+(S.edit!=null&&findC(S.edit)?'<button class="tab'+(S.tab==='edit'?' on':'')+'" data-act="tab" data-t="edit">Edit</button>':'')+'<button class="tab'+(S.tab==='ref'?' on':'')+'" data-act="tab" data-t="ref"><span class="lg">Spells &amp; Conditions</span><span class="sh">Spells</span></button><button class="tab'+(S.tab==='data'?' on':'')+'" data-act="tab" data-t="data">Data</button><button data-act="close" class="cls" aria-label="Close panel"><span class="tx">Close</span><span class="ic">✕</span></button></div>'+(S.tab==='add'?addTopHTML():'')+'</div>'+
-    (S.tab==='add'?addPanelHTML():S.tab==='ref'?refHTML():S.tab==='data'?dataHTML():S.tab==='edit'?editHTML():statHTML());
+  dr.innerHTML='<div class="dtop"><div class="dh'+((S.edit!=null&&findC(S.edit))||S.tab==='def'?' many':'')+'"><button class="tab'+(S.tab==='add'?' on':'')+'" data-act="tab" data-t="add">Add</button><button class="tab'+(S.tab==='stat'?' on':'')+'" data-act="tab" data-t="stat">Stat block</button>'+(S.edit!=null&&findC(S.edit)?'<button class="tab'+(S.tab==='edit'?' on':'')+'" data-act="tab" data-t="edit">Edit</button>':'')+(S.tab==='def'?'<button class="tab on" data-act="tab" data-t="def">Defences</button>':'')+'<button class="tab'+(S.tab==='ref'?' on':'')+'" data-act="tab" data-t="ref"><span class="lg">Spells &amp; Conditions</span><span class="sh">Spells</span></button><button class="tab'+(S.tab==='data'?' on':'')+'" data-act="tab" data-t="data">Data</button><button data-act="close" class="cls" aria-label="Close panel"><span class="tx">Close</span><span class="ic">✕</span></button></div>'+(S.tab==='add'?addTopHTML():'')+'</div>'+
+    (S.tab==='def'?defHTML():S.tab==='add'?addPanelHTML():S.tab==='ref'?refHTML():S.tab==='data'?dataHTML():S.tab==='edit'?editHTML():statHTML());
 }
 // A grapple ends when the grappler is gone, at 0 HP or Incapacitated
 function grabSweep(){S.list.forEach(function(t){if(t.gb==null)return;if(t.conds.indexOf('Grappled')<0){delete t.gb;delete t.gdc;return;}
@@ -2140,7 +2169,7 @@ $('#bar').addEventListener('click',function(e){
   else if(a==='endc'){logAdd('Combat ended');logEnd();snap('end combat');S.turnId=null;S.round=1;S.prevTurn=null;ui.legDis=null;S.list.forEach(function(c){delete c.exp;c.rx=false;c.la=0;c.ue={};c.mu={};c.ray={};c.mrep={};c.msp={};});toast('Combat ended. Creatures, HP and statuses kept.');}
   else if(a==='next'){snap('next turn');nextTurn();ui.confirmClear=false;}
   else if(a==='openadd'){ui.drawer=true;S.tab='add';}
-  else if(a==='saves'){ui.sv=ui.sv>=0?-1:ui.svLast;renderBar();renderTable();return;}
+  else if(a==='saves'){if(ui.drawer&&S.tab==='def')ui.drawer=false;else{ui.drawer=true;S.tab='def';}save();renderAll();return;}
   else if(a==='present'){ui.present=!ui.present;if(ui.present)ui.drawer=false;document.body.classList.toggle('present',ui.present);try{sessionStorage.setItem('et-present',ui.present?'1':'0');}catch(e){}renderBoard();renderDrawer();return;}
   else if(a==='clear'){
     if(ui.confirmClear){snap('clear all');S.list=[];S.turnId=null;S.round=1;S.envName=S.envNote='';S.lair=false;S.prevTurn=null;ui.confirmClear=false;S.atTable={};ui.sel={};}else{ui.confirmClear=true;}
@@ -2153,7 +2182,7 @@ $('#turn').addEventListener('click',function(e){
   if(a==='spl'){openSpell(b.dataset.n);save();renderDrawer();return;}
   var c=findC(S.turnId);if(!c)return;
   if(c.kind==='fx'){if(a==='fxvis')c.vis=!c.vis;else if(a==='fxrm')rmComb(c);
-    else if(a==='fxgo'){ui.fxRun=c.id;ui.dtype=c.dt||'';ui.amt=0;ui.amtO=0;ui.dtO='';ui.ax=0;ui.ex=false;ui.half=false;ui.mx=false;ui.pend={};if(c.st)ui.pend[c.st]=true;if(c.sv!==''&&c.sv!=null){ui.sv=+c.sv;ui.svLast=ui.sv;}toast('Select who is affected.');}
+    else if(a==='fxgo'){ui.fxRun=c.id;ui.dtype=c.dt||'';ui.amt=0;ui.amtO=0;ui.dtO='';ui.ax=0;ui.ex=false;ui.half=false;ui.mx=false;ui.pend={};if(c.st)ui.pend[c.st]=true;if(c.sv!==''&&c.sv!=null){ui.dsv=+c.sv;}toast('Select who is affected.');}
     save();renderBoard();return;}
   if(a==='laspend'){var lc=findC(b.dataset.id);if(lc){snap('legendary');lc.la=(lc.la||0)+1;}}
   else if(a==='pcast'){var lp2=S.lib.find(function(x){return x.id===c.libId;}),sd2=lp2&&spellData(b.dataset.s,pcSpell(lp2));if(sd2){ui.pcSpOpen=true;spellBegin(c,sd2,sd2.n,{a:'pcast',s:sd2.n});}}
@@ -2167,6 +2196,9 @@ $('#turn').addEventListener('click',function(e){
   else if(a==='ladis'){ui.legDis=S.turnId;}
   else if(a==='lrayx'){ui.legPick=null;}
   else if(a==='tick'){var k8=tickOf(b.dataset.c);if(k8){ui.act=null;finishPad();ui.sel={};ui.sel[c.id]=true;ui.amt=k8.avg;ui.dtype=k8.dt;toast(esc(nm(b.dataset.c))+': '+esc(c.name)+' selected, adjust to the roll and Apply');}}
+  else if(a==='slot'){var sk=b.dataset.k,sn=sk==='p'?(pcSlots(libOf(c)).pact||{}).n:pcSlots(libOf(c)).slots[sk-1];c.slu=c.slu||{};snap('spell slot');
+    c.slu[sk]=b.classList.contains('on')?Math.min(sn,(c.slu[sk]||0)+1):Math.max(0,(c.slu[sk]||0)-1);if(!c.slu[sk])delete c.slu[sk];}
+  else if(a==='slotr'){snap('reset spell slots');c.slu={};}
   else if(a==='stg'){stgRoll(c,b.dataset.c,b.dataset.r==='s');}
   else if(a==='lray'){var g7=ui.legPick,L7=g7&&findC(g7.id),m7=L7&&MON.find(function(x){return x.id===L7.monId;});ui.legPick=null;if(m7){var A7=actsOf(m7),lp7=A7.find(function(x){return x.key===g7.i;}),tb7=A7.find(function(x){return x.key===g7.t;}),row7=tb7&&tb7.table.rows[+b.dataset.r];
     if(lp7&&row7){var d7=parseAct(row7.n,row7.t,'a'),h7={a:'leg',i:lp7.key};if(d7.kind==='atk'||d7.kind==='save')actBegin(L7,d7,lp7.n+' \u2192 '+row7.n,h7);
@@ -2192,10 +2224,6 @@ $('#turn').addEventListener('click',function(e){
 });
 $('#turn').addEventListener('toggle',function(e){if(e.target.tagName==='DETAILS'){if(e.target.classList.contains('pcsp'))ui.pcSpOpen=e.target.open;else ui.traitsOpen=e.target.open;}},true);
 $('#env').addEventListener('click',function(e){if(e.target.closest('[data-act="envx"]')){S.envName=S.envNote='';save();renderTable();}});
-$('#svb').addEventListener('click',function(e){
-  var b=e.target.closest('[data-act="sv"]');if(!b)return;
-  ui.sv=+b.dataset.n;if(ui.sv>=0)ui.svLast=ui.sv;renderBar();renderTable();
-});
 $('#tbl').addEventListener('click',function(e){
   if(e.target.closest('input'))return;
   var b=e.target.closest('[data-act]');
@@ -2377,6 +2405,7 @@ dr.addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;
   var act=b.dataset.act;
   if(act==='qty'||act==='at'||b.tagName==='SELECT')return;
+  if(act==='dsv'){ui.dsv=+b.dataset.n;renderDrawer();return;}
   if(act==='pgrp'){ui.pg=b.dataset.g;renderDrawer();return;}
   if(act==='tagl'){ui.tagL=ui.tagL===b.dataset.l?null:b.dataset.l;renderDrawer();var ti=dr.querySelector('[data-tg]');if(ti)ti.focus();return;}
   if(act==='pgtick'){S.lib.forEach(function(l){if((l.tags||[]).indexOf(ui.pg)>=0&&!S.list.some(function(c){return c.libId===l.id;}))S.atTable[l.id]=true;});save();renderDrawer();return;}

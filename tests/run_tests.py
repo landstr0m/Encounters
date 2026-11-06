@@ -243,10 +243,15 @@ def saves_view(b):
     a.mon("mm-skeleton")
     a.pc("Hero", saves={"str": 1, "dex": 5, "con": 2, "int": 0, "wis": 1, "cha": 0}, saveProf=["dex"], adv=["dex"])
     a.click('[data-act="saves"]')
-    a.click('[data-act="sv"][data-n="1"]')
-    t = a.pg.inner_text("#tbl")
+    check(a.e("ui.drawer && S.tab==='def'"), "Defences opens as a drawer")
+    a.click('[data-act="dsv"][data-n="1"]')
+    t = a.pg.inner_text("#drawer .defs")
     check("DEX +3" in t, "skeleton Dex save shown (ability mod)")
     check("DEX +5" in t and "ADV" in t.upper(), "player Dex save with species advantage")
+    check("VULNERABLE" in t.upper() and "bludgeoning" in t, "skeleton defences on its line")
+    eq(a.e("document.querySelectorAll('#drawer .drow').length"), 2, "one line per creature")
+    check("DEX" not in a.pg.inner_text("#tbl"), "no save badges cluttering the rows")
+    a.e("document.querySelector('#bar [data-act=saves]').click()"); check(a.e("!ui.drawer"), "tapping again closes")
 
 
 @test
@@ -563,7 +568,7 @@ def off_turn_info_and_dc(b):
     a.click('[data-act="next"]')
     t = a.pg.inner_text("#turn")
     check("DC 14" in t and "+6 to hit" in t and "DC 11" in t, "multiclass DCs: bard 8+3+3, arcane trickster 8+3+0")
-    check("Saves" in t, "player card shows saves")
+    check("Saves" not in t and "Proficiency +" in t and "STR " in t, "player card: proficiency and ability modifiers, no saves")
     a.click('#turn [data-act="tcol"]')
     check("+6 to hit" not in a.pg.inner_text("#turn"), "Hide details hides the player card body")
     a.click('#turn [data-act="tcol"]')
@@ -718,7 +723,7 @@ def effect_damage_and_status(b):
     a.click('[data-act="next"]')
     check("DEX save DC 13" in a.pg.inner_text('#turn'), "turn card shows payload")
     a.click('[data-act="fxgo"]')
-    check(a.e("ui.sv") == 1, "Saves view opens on DEX")
+    check(a.e("ui.dsv") == 1, "Defences drawer set to DEX")
     a.select(2, 3)
     a.pad("dmg", 7)
     check(a.e("S.list[1].hp") == a.e("S.list[1].max") - 7, "damage applied")
@@ -1476,6 +1481,10 @@ def visibility_core_controls(b):
                 r = a.pg.evaluate(VIS_JS, sel); check(r[0] == "ok", f"{th} {dev}: {sel} {r}")
             if dev != "phone":
                 r = a.pg.evaluate(VIS_JS, '[data-act="next"]'); check(r[0] == "ok", f"{th} {dev}: Next with drawer open {r}")
+            # Defences drawer (an extra tab): every tab and Close still fit
+            a.e("S.tab='def';renderAll()")
+            for sel in ['#drawer [data-act="close"]', '#drawer [data-t="def"]', '#drawer [data-t="data"]', '#drawer [data-act="dsv"]']:
+                r = a.pg.evaluate(VIS_JS, sel); check(r[0] == "ok", f"{th} {dev}: Defences {sel} {r}")
     a.e("ui.drawer=false;renderAll()")
     check(not a.errors, a.errors)
 
@@ -1505,6 +1514,23 @@ def initiative_box_limits(b):
         eq(a.e(f"findC({p}).init"), want, f"typed {typed}")
     w = a.e(f"document.querySelector('{sel}').getBoundingClientRect().width")
     check(w <= 48, f"initiative box is narrow ({w}px)")
+
+
+@test
+def player_card_slots_and_identity(b):
+    a = App(b)
+    p = a.pc("Wiz", abil={"str": 8, "dex": 14, "con": 12, "int": 18, "wis": 10, "cha": 10}, saveProf=["int", "wis"])
+    a.e("var l=S.lib[S.lib.length-1];l.race='Elf';l.parsed=[{class:'wizard',subclass:'Evoker',level:5}];save()")
+    a.e(f"S.turnId={p};ui.cardOpen=true;renderBoard()")
+    t = a.pg.inner_text("#turn")
+    check("Elf" in t and "Wizard (Evoker) 5" in t, "race, class, subclass and level on the card")
+    check(a.pg.query_selector('#turn .sv.svp') and "INT +4" in a.pg.inner_text('#turn .sv.svp'), "save-proficient ability highlighted, modifier only")
+    eq(a.e("document.querySelectorAll('#turn [data-act=slot][data-k=\"1\"]').length"), 4, "level 5 wizard: 4 first-level slots")
+    eq(a.e("document.querySelectorAll('#turn [data-act=slot][data-k=\"3\"]').length"), 2, "and 2 third-level")
+    a.click('#turn [data-act="slot"][data-k="3"]'); eq(a.e(f"findC({p}).slu[3]"), 1, "tap marks one used")
+    a.click('#turn [data-act="slotr"]'); eq(a.e(f"Object.keys(findC({p}).slu).length"), 0, "reset")
+    eq(a.j("[pcSlots({parsed:[{class:'paladin',level:5},{class:'sorcerer',level:3}]}).slots, pcSlots({parsed:[{class:'warlock',level:3}]}).pact]"), [[4, 3, 3], {"n": 2, "lvl": 2}], "multiclass and pact slots")
+    check(not a.errors, a.errors)
 
 
 def main():

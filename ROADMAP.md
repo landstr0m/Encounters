@@ -56,7 +56,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 
 Open follow-ups from A–G:
 - 📋 Legendary actions still also listed in the turn card's Traits fold (the between-turns bar is the tappable version).
-- 💡 Player spell slots, only if the D&D Beyond import proves reliable.
+- ✅ Player spell slots (from class levels, tap to use).
 - 💡 Clay Golem's and Aboleth's Multiattack summaries read slightly off (see BUGS.md); the full sentence is shown, so low priority.
 
 ## Stage 2: planned features

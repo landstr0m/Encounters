@@ -194,6 +194,12 @@ Then bump `CACHE` in `sw.js` so installed apps pick up the change. Log bugs and 
 - `monsters.json` **temporarily contains the 2024 Monster Manual** (imported from the owner's own book for personal use at his table) to make testing easier. Before v1.0 it goes back to SRD-only, and the book data moves to a local file imported on the device (**Data → Monster files**), which is never committed.
 - App data stays in your browser on the current device. Export it regularly as a backup.
 
+## Defences
+🛡 **Defences** in the toolbar opens a drawer listing every creature on one line: AC, the saving throw you pick at the top (Str…Cha, with advantage / auto-fail notes), resistances, immunities, vulnerabilities, condition immunities and Magic Resistance. Tap 🛡 again to close.
+
+## Player turn card
+Shows race, class (subclass) and level, spell save DC and to-hit, proficiency bonus and the six ability modifiers (save-proficient ones highlighted, modifier only), a small Passive Perception line, and **spell slots** worked out from the class levels (multiclass rules; Warlock Pact Magic separate). Tap a slot to mark it used; **Reset** after a rest.
+
 ## Selecting creatures
 Tap rows to select them; the pad then lists every creature as a chip, so you can add or remove targets without scrolling. ✎ opens Edit (the AC shield no longer does).
 

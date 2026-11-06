@@ -2,6 +2,13 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Defences drawer, player card
+
+- Save badges on every row cluttered the table; the 🛡 button now opens a Defences drawer (one line per creature: AC, chosen save, resistances / immunities). Saves bar removed.
+- Player card: saves replaced by proficiency bonus + ability modifiers (save proficiencies highlighted), race / class / level in the header, smaller Passive Perception, spell slots by class (tap to use, Reset).
+- Player saves showed "?" without an imported save list; now computed from ability + proficiency.
+- Seven drawer tabs overflowed (Close cut off); tabs shorten when Edit / Defences are open; visibility test covers it.
+
 ## 2026-11-06 — AC shield
 
 - AC number sat off-centre in a stretched background-image shield. The shield is now drawn inline (theme colours, cleaner outline) with the number on its optical centre; `icon_alignment` checks it (±2 px).
