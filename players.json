@@ -127,7 +127,12 @@
   "hpEst": 14,
   "image": "https://th.kanka.io/fpPcDPZZAjkUnJh0QGuD2py9h3g=/40x40/filters:focal(607x568:627x588)/src/campaigns/227292/01a0974e-d9ab-725d-a6cb-86b6f76aa559/1.jpg",
   "url": "https://app.kanka.io/w/227292/entities/9864074",
-  "ddb": []
+  "ddb": [
+   {
+    "id": 172192516,
+    "from": "description"
+   }
+  ]
  },
  {
   "id": 9850236,
