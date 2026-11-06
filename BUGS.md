@@ -2,6 +2,10 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Crit, reactions, combat log (roadmap G)
+
+- Half damage was rounded down per damage part (7 + 3 halved gave 3 + 1 = 4 instead of 5); the total is now halved once.
+
 ## 2026-11-06 — Spells, grapples, legendary actions (roadmap F)
 
 - Spell attack bonus was only read when written as "(+9 to hit with spell attacks)"; dragons write "(spell save DC 20, +12 to hit with spell attacks)", so their Scorching Ray showed +0. Fixed.

@@ -70,11 +70,14 @@ Goal: on a monster's turn, tap an action on its card → pick targets → mark w
 - [x] Legendary actions as buttons in the between-turns bar: attacks and spells open targeting (cost spent on Apply/Miss, multi-attack legendary actions step through for one cost), movement-only ones spend straight away, once-per-round ones grey out.
 - [ ] Start/end-of-turn damage and repeat saves from riders use the existing turn reminders (no change).
 
-**G. Later**
-- [ ] Target reactions that change the result: Shield (+5 AC turns a hit into a miss), Uncanny Dodge (half), Evasion (Dex save: none / half).
+**G. Crit, reactions, log** ✅ 6 Nov 2026
+- [x] Crit toggle (adds the dice again to the preloaded damage).
+- [x] Reactions flagged on picked targets (⟲): uses the reaction, applies Shield's status or halves for Uncanny Dodge; the declared hit is not changed (Andrew: players declare at the table).
+- [x] Combat log per encounter, downloadable from the Data tab.
 - [ ] Same flow for player spells and attacks against monsters (from D&D Beyond spell lists), using the monsters' save bonuses and Magic Resistance.
-- [ ] Action log for the session (who did what to whom), feeding the post-session report idea.
+- [ ] Player spell slots (only if the D&D Beyond import proves reliable; it's unofficial and fragile).
 - [ ] Optional table-view line ("Goblin hits Aer: 5 slashing").
+- [ ] **Data tab clean-up:** group into Backup (export/import), Session (combat log, table window), Sources (monster files, spells, Kanka/D&D Beyond), with short help text.
 
 ### Encounter difficulty extensions (💡)
 - CR / XP for effects and hazards, counted in the encounter XP.

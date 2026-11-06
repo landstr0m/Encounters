@@ -180,6 +180,9 @@ a.spl{color:var(--accent);font-weight:600;text-decoration:underline dotted;text-
 .amiss{min-height:40px;min-width:84px;font-weight:700}.acth>span{flex:1 1 0;min-width:0}
 .spcast{min-height:0;min-width:0;width:26px;height:26px;padding:0;margin-left:4px;border-radius:50%;font-size:.8rem;vertical-align:-1px}
 .legr button[disabled]{opacity:.4}
+.tc .trx{padding:4px 2px 4px 6px;border-left:1px solid currentColor;font-weight:700}.tc .rxo{font-weight:700}
+.rxp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px;padding:6px;border:2px solid var(--accent);border-radius:10px;font-size:.88rem}.rxp button{min-height:38px}
+.crit.on{background:var(--warn);color:#fff;border-color:var(--warn)}.acth .crit{min-height:40px}
 .acth{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:.92rem}.acth button{min-height:36px}
 .tgh{padding:10px;border:2px dashed var(--accent);border-radius:10px;text-align:center;color:var(--muted);margin-bottom:6px}
 .tgl{display:grid;gap:4px;margin-bottom:6px;max-height:32vh;overflow-y:auto}.tgr{display:flex;align-items:center;gap:6px}.tgr .tn{flex:1;min-width:0}
@@ -774,9 +777,11 @@ function nextTurn(){
   var r=stepFrom(O,idx);if(!r)return;
   if(idx<0)S.round=1;else S.round+=r.wrap;
   var E=S.turnId;S.prevTurn=idx<0?null:E;S.turnId=O[r.i].id;ui.legDis=null;ui.fxRun=null;
+  if(idx<0){logStart();}
   if(idx<0)S.list.forEach(function(x){x.uses={};x.spent={};x.ue={};x.mu={};x.ray={};x.mrep={};x.msp={};});
   var nx=O[r.i];nx.rx=false;nx.la=0;nx.lonce={};nx.ue={};nx.mu={};nx.ray={};nx.mrep={};nx.msp={};
   var gone=expTick(E,S.turnId);if(gone.length)toast('Ended: '+esc(gone.join(', ')));
+  logAdd('\u2014 Round '+S.round+': '+nx.name+'\u2019s turn');
 }
 function nextId(){
   var O=order();var idx=O.findIndex(function(c){return c.id===S.turnId;});
@@ -872,7 +877,19 @@ function typed(c,n,t){
 function condBlocked(c,x){var d=defs(c).cimm;return (CIM[x]||(SPX[x]&&SPX[x].cd?SPX[x].cd.map(function(k){return k.toLowerCase();}):[x.toLowerCase()])).some(function(k){return d.indexOf(k)>=0;});}
 // One-step undo: snapshot the encounter before any change made from the bar, pad, chips or death saves.
 function snap(label){if(ui.noSnap)return;ui.undo={label:label,s:JSON.stringify({list:S.list,round:S.round,turnId:S.turnId,prev:S.prevTurn})};}
-function undo(){if(!ui.undo)return;var o=JSON.parse(ui.undo.s);S.list=o.list;S.round=o.round;S.turnId=o.turnId;S.prevTurn=o.prev;toast('Undid: '+esc(ui.undo.label));ui.undo=null;pruneSel();finishPad();}
+function undo(){if(!ui.undo)return;logAdd('Undid: '+ui.undo.label);var o=JSON.parse(ui.undo.s);S.list=o.list;S.round=o.round;S.turnId=o.turnId;S.prevTurn=o.prev;toast('Undid: '+esc(ui.undo.label));ui.undo=null;pruneSel();finishPad();}
+// ---- Action log: one entry list per combat (S.logs), started when combat starts; downloadable from the Data tab.
+function logAdd(h){if(RO||S.turnId==null)return;S.logs=S.logs||[];var L=S.logs[S.logs.length-1];if(!L||L.end)return;
+  L.e.push([new Date().toISOString(),S.round,String(h).replace(/<br>/g,' \u00b7 ').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'").replace(/&quot;/g,'"')]);}
+function logStart(){S.logs=(S.logs||[]).slice(-19);S.logs.push({name:S.envName||'Encounter',start:new Date().toISOString(),e:[]});}
+function logEnd(){var L=(S.logs||[])[S.logs.length-1];if(L&&!L.end)L.end=new Date().toISOString();}
+function logText(){var t='# Combat log\n';(S.logs||[]).forEach(function(L){var d=new Date(L.start);
+  t+='\n## '+L.name+' \u2014 '+d.toLocaleDateString()+' '+d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})+'\n\n';
+  L.e.forEach(function(x){t+=(/^\u2014/.test(x[2])?'\n**'+x[2].replace(/^\u2014 /,'')+'**\n':'- '+x[2]+'\n');});});return t;}
+function doLogDownload(){var name='combat-log-'+new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')+'.md',blob=new Blob([logText()],{type:'text/markdown'});
+  var file=null;try{file=new File([blob],name,{type:'text/markdown'});}catch(e){}
+  if(file&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:name}).catch(function(){});return;}
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();}
 function toast(h){var t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';t.setAttribute('role','status');document.body.appendChild(t);}
   t.innerHTML=h;t.classList.add('on');clearTimeout(toast.tm);toast.tm=setTimeout(function(){t.classList.remove('on');},6000);t.onclick=function(){t.classList.remove('on');};}
 function dmg(c,n){
@@ -1035,7 +1052,7 @@ function actStart(c,how){if(!(how.a==='use'||(how.a==='mpip'&&+how.d>0)||(how.a=
   if(d.kind!=='atk'&&d.kind!=='save')return false;
   actBegin(c,d,n,how);return true;}
 function actBegin(c,d,n,how){
-  ui.act={id:c.id,how:how,d:d,n:n};ui.out={};ui.sel={};ui.menu=false;ui.tpk=false;ui.mode='dmg';ui.half=false;ui.mx=false;ui.ax=0;ui.pend={};
+  ui.act={id:c.id,how:how,d:d,n:n};ui.rxs={};ui.rxFor=null;ui.out={};ui.sel={};ui.menu=false;ui.tpk=false;ui.mode='dmg';ui.half=false;ui.mx=false;ui.ax=0;ui.pend={};
   var D=d.dmg||[];ui.amt=D[0]?D[0].avg:0;ui.dtype=D[0]?(D[0].type||''):'';
   if(D.length>1){ui.ex=true;ui.amtO=D.slice(1).reduce(function(t,x){return t+x.avg;},0);ui.dtO=D[1].type||'';}else{ui.ex=false;ui.amtO=0;ui.dtO='';}
   (d.conds||[]).forEach(function(x){if(FX[x]||CONDS.indexOf(x)>=0)ui.pend[x]=true;});
@@ -1073,10 +1090,15 @@ function atkHints(att,t,d){var h=[],melee=/melee/.test(d.atk.type),has=function(
   if(has(t,'Invisible'))h.push('disadv: Invisible');if(has(t,'Dodging'))h.push('disadv: Dodging');if(has(t,'Blurred'))h.push('disadv: Blur');
   if(att){['Blinded','Poisoned','Frightened','Restrained','Prone'].forEach(function(x){if(has(att,x))h.push('disadv: attacker '+x);});if(has(att,'Invisible'))h.push('adv: attacker Invisible');}
   return h;}
+// Crit: adds the dice part of each preloaded damage again (the DM rolls; this only moves the starting value)
+function diceAvg(ds){var m=String(ds||'').match(/(\d+)d(\d+)/);return m?Math.floor(+m[1]*(+m[2]+1)/2):0;}
+function setSlot(i,v){if(i===(ui.ax||0))ui.amt=v;else ui.amtO=v;}
+function actCrit(on){var D=ui.act.d.dmg||[],e0=D[0]?diceAvg(D[0].dice):0,e1=D.slice(1).reduce(function(t,x){return t+diceAvg(x.dice);},0),k=on?1:-1;
+  setSlot(0,Math.max(0,slot(0).v+k*e0));if(ui.ex)setSlot(1,Math.max(0,slot(1).v+k*e1));ui.act.crit=on;}
 function actHead(){var a=ui.act,d=a.d,x=d.kind==='buff'?'targets get '+(d.st.length?nm(d.st[0]):'the effect'):d.kind==='atk'?(d.atk.type[0].toUpperCase()+d.atk.type.slice(1)+' '+sgn(d.atk.bonus)+(d.atk.reach?', reach '+d.atk.reach+' ft.':'')+(d.atk.range?', range '+d.atk.range+' ft.':''))
     :('DC '+d.save.dc+' '+['Str','Dex','Con','Int','Wis','Cha'][d.save.ab]+' save'+(d.succ==='half'?', half on a success':d.succ?'':', nothing on a success'));
   return '<div class="acth"><span><b>'+esc(a.n)+'</b> \u00b7 '+esc(x)+(d.rider?' \u00b7 then DC '+d.rider.dc+' '+['Str','Dex','Con','Int','Wis','Cha'][d.rider.ab]+' save':'')+'</span>'+
-    (d.kind==='atk'?'<button class="amiss" data-act="amiss" title="The attack missed: spend it, nothing else">Miss</button>':'')+'<button data-act="actx">Cancel</button></div>';}
+    (d.kind==='atk'?'<button class="tg crit'+(a.crit?' on':'')+'" data-act="acrit" aria-pressed="'+!!a.crit+'" title="Critical hit: adds the damage dice again">Crit</button><button class="amiss" data-act="amiss" title="The attack missed: spend it, nothing else">Miss</button>':'')+'<button data-act="actx">Cancel</button></div>';}
 // Targets are picked from chips inside the pad (the list behind may be covered on a phone); table taps still work too.
 // Attack: chip on = hit (tap again to drop it). Save / rider save: tap toggles Failed <-> Saved, \u2715 drops it.
 function actRows(T){var a=ui.act,att=findC(a.id),atk=a.d.kind==='atk',tog=a.d.kind==='save'||(atk&&!!a.d.rider);
@@ -1086,9 +1108,22 @@ function actRows(T){var a=ui.act,att=findC(a.id),atk=a.d.kind==='atk',tog=a.d.ki
     if(on&&!atk&&o==='fail'&&!ui.out[t.id]&&a.d.save.ab<2&&t.conds.some(function(x){return ['Paralyzed','Stunned','Unconscious','Petrified'].indexOf(x)>=0;}))H.push('auto-fail');
     return '<span class="tc'+(on?' on':'')+(sv?' sv':'')+(foe(t)?' ally':'')+'" role="button" tabindex="0" data-act="tchip" data-id="'+t.id+'"><b>'+esc(t.name)+'</b>'+
       (on&&atk?'<small>AC '+effAC(t)+'</small>':'')+(on&&tog?'<small class="st">'+(sv?'Saved':'Failed')+'</small>':'')+H.map(function(x){return '<small class="hint">'+esc(x)+'</small>';}).join('')+
-      (on&&tog?'<span class="tx" data-act="tdel" data-id="'+t.id+'" role="button" aria-label="Remove '+esc(t.name)+'">\u2715</span>':'')+'</span>';}).join('')+'</div>';}
+      (on&&(ui.rxs||{})[t.id]?'<small class="rxo">\u27f2 '+esc(ui.rxs[t.id].n)+'</small>':'')+
+      (on&&!t.rx&&!rxBlocked(t)?'<span class="trx" data-act="trx" data-id="'+t.id+'" role="button" aria-label="'+esc(t.name)+' uses a reaction" title="Uses a reaction">\u27f2</span>':'')+
+      (on&&tog?'<span class="tx" data-act="tdel" data-id="'+t.id+'" role="button" aria-label="Remove '+esc(t.name)+'">\u2715</span>':'')+'</span>';}).join('')+'</div>'+rxPick();}
+// Reaction options for one picked target: the reaction is used and its status applied on Apply (the outcome stays as declared)
+function rxOpts(t){var o=[],atk=ui.act.d.kind==='atk';
+  if(t.kind==='pc'){var l=S.lib.find(function(x){return x.id===t.libId;}),sp=l&&l.spells;
+    if(!sp||sp.indexOf('Shield')>=0)o.push({n:'Shield',st:'Shield'});if(atk)o.push({n:'Uncanny Dodge',half:1});
+    (sp||[]).forEach(function(x){if(['Absorb Elements','Hellish Rebuke','Silvery Barbs'].indexOf(x)>=0)o.push({n:x});});}
+  else{var m=MON.find(function(x){return x.id===t.monId;});(m?actsOf(m).filter(function(p){return p.sec==='r';}):[]).forEach(function(p){var tx=rawOf(m,p);o.push({n:p.n,st:/\bShield\b/.test(tx)?'Shield':''});});}
+  o.push({n:'Other reaction'});return o;}
+function rxPick(){var t=ui.rxFor&&findC(ui.rxFor);if(!t||!ui.act)return '';
+  return '<div class="rxp"><b>'+esc(t.name)+'\u2019s reaction:</b> '+rxOpts(t).map(function(o){return '<button data-act="trxo" data-n="'+esc(o.n)+'" data-st="'+(o.st||'')+'" data-half="'+(o.half?1:0)+'">'+esc(o.n)+(o.half?' <small>(half)</small>':'')+'</button>';}).join('')+
+    ((ui.rxs||{})[t.id]?'<button data-act="trxo" data-o="none">None</button>':'')+'</div>';}
 // Per target: share of the damage (1, 0.5, 0) and whether statuses apply
-function actFx(t){var a=ui.act,o=actOut(t);if(a.d.kind==='buff')return [1,true];if(a.d.kind==='atk')return o==='hit'?[1,true]:o==='rsave'?[1,false]:[0,false];
+function actFx(t){var r=actFx0(t),x=(ui.rxs||{})[t.id];if(x&&x.half)r=[r[0]/2,r[1]];return r;}
+function actFx0(t){var a=ui.act,o=actOut(t);if(a.d.kind==='buff')return [1,true];if(a.d.kind==='atk')return o==='hit'?[1,true]:o==='rsave'?[1,false]:[0,false];
   return o==='fail'?[1,true]:[a.d.succ==='half'?0.5:0,false];}
 function actSum(T){var a=ui.act;if(!T.length)return '';var base=padSum(Object.keys(ui.pend)),k={};T.forEach(function(t){var o=actOut(t);k[o]=(k[o]||0)+1;});
   var L={hit:'hit',miss:'missed',rsave:'hit (saved)',fail:'failed',save:'saved'},cnt=Object.keys(k).map(function(x){return k[x]+' '+L[x];}).join(', ');
@@ -1097,16 +1132,20 @@ function actApply(T){var a=ui.act,att=findC(a.id);if(!att||!T.length)return;
   snap(a.n+' \u2192 '+T.map(function(t){return t.name;}).join(', '));
   var SL=padSlots(),D=SL.filter(function(x){return !SPEC[x.dt];}),out=[],conc=[],stT=[];
   T.forEach(function(t){var f=actFx(t),tot=0,nt=[];
-    if(f[0]>0)D.forEach(function(x){var r=typed(t,Math.floor(x.v*f[0]),x.dt);tot+=r[0];if(r[1])nt.push(r[1]);});
+    // half / quarter damage: the whole amount is halved and rounded down once (remainder goes to the first part)
+    if(f[0]>0){var amt=D.map(function(x){return Math.floor(x.v*f[0]);}),H=Math.floor(D.reduce(function(q,x){return q+x.v;},0)*f[0]);if(amt.length)amt[0]+=H-amt.reduce(function(q,v){return q+v;},0);
+      D.forEach(function(x,k){var r=typed(t,amt[k],x.dt);tot+=r[0];if(r[1])nt.push(r[1]);});}
     if(tot>0){dmg(t,tot);if(ui.mx)maxDown(t,tot);var ci=t.conds.indexOf('Concentrating');if(ci>=0){if(t.hp<=0){t.conds.splice(ci,1);conc.push(esc(t.name)+' loses concentration (0 HP)');}else conc.push(esc(t.name)+': Con save DC '+Math.min(30,Math.max(10,Math.floor(tot/2))));}}
     if(f[1]){stT.push(t);SL.forEach(function(x){if(x.dt==='heal')heal(t,x.v);else if(x.dt==='temp')t.temp=Math.max(t.temp,x.v);else if(x.dt==='maxhp')maxDown(t,x.v);});}
     var o=actOut(t);out.push(esc(t.name)+' '+(o==='miss'?'missed':o==='save'&&!tot?'saved':tot+(o==='save'?' (saved)':'')+(nt.length?' <small>('+nt.join('; ')+')</small>':'')));});
   var on=Object.keys(ui.pend).filter(function(x){return ui.pend[x];}),sk=stT.length?applyPend(stT):[];
+  var rxl=[];T.forEach(function(t){var x=(ui.rxs||{})[t.id];if(!x)return;t.rx=true;if(x.st&&t.conds.indexOf(x.st)<0){t.conds.push(x.st);expSet(t,x.st);}rxl.push(esc(t.name)+': '+esc(x.n));});
   if(ui.pend.Grappled)stT.forEach(function(t){if(t.conds.indexOf('Grappled')>=0){t.gb=att.id;t.gdc=a.d.esc||null;}});
   var msg='<b>'+esc(a.n)+':</b> '+out.join(' \u00b7 ');if(on.length&&stT.length)msg+='<br><b>'+on.map(function(x){return esc(nm(x));}).join(', ')+'</b> \u2192 '+stT.map(function(t){return esc(t.name);}).join(', ')+(sk.length?' (immune: '+sk.join(', ')+')':'');
   if(conc.length)msg+='<br><b>Concentration:</b> '+conc.join(' \u00b7 ');
-  var how=a.how;ui.act=null;ui.out={};
-  ui.noSnap=true;doHow(att,how);ui.noSnap=false;toast(msg);finishPad();actNext(att,a);}
+  if(rxl.length)msg+='<br><b>Reaction:</b> '+rxl.join(' \u00b7 ');
+  var how=a.how;ui.act=null;ui.out={};ui.rxs={};ui.rxFor=null;
+  ui.noSnap=true;doHow(att,how);ui.noSnap=false;toast(msg);logAdd(esc(att.name)+' \u2014 '+msg+(a.crit?' (crit)':''));finishPad();actNext(att,a);}
 // A legendary action with several attacks ("makes two Bite attacks") reopens targeting for the next one without spending again
 function actNext(att,a){var h=a.how;if(h&&h.left>1){var h2=Object.assign({},h,{free:true,left:h.left-1});actBegin(att,a.d,a.n.replace(/ \(\d+ of \d+\)$/,'')+' ('+(h.tot-h2.left+1)+' of '+h.tot+')',h2);}}
 function bySize(m){return function(a,b){return rawOf(m,a).length-rawOf(m,b).length;};}
@@ -1540,6 +1579,8 @@ function encHTML(){
 function dataHTML(){
   return '<div class="data">'+encHTML()+'<p><b>Export</b> saves the whole encounter, saved encounters, party and settings to a file. Do it before and after each session.</p>'+
    '<div class="row"><button class="add" data-act="export">Export file</button></div>'+
+   '<p><b>Combat log</b>: every attack, spell, damage and status applied during combat, per encounter ('+((S.logs||[]).length)+' saved, last 20 kept).</p>'+
+   '<div class="row"><button data-act="logdl"'+((S.logs||[]).length?'':' disabled')+'>Download combat log</button><button data-act="logclr"'+((S.logs||[]).length?'':' disabled')+'>'+(ui.logClr?'Tap again to clear':'Clear log')+'</button></div>'+
    '<p><b>Import</b> replaces everything in the app with a saved file.</p>'+
    '<div class="row"><button data-act="import">Import file…</button><input id="impfile" type="file" accept=".json,application/json" hidden></div>'+
    '<p><b>Table window</b> opens a read-only player view that follows this one live. Any other window of this app in the same browser follows too, so you can also just open the app in a second window and tap Table view there.</p>'+
@@ -1943,7 +1984,7 @@ $('#bar').addEventListener('click',function(e){
   var b=e.target.closest('[data-act]');if(!b)return;
   var a=b.dataset.act;
   if(a==='undo'){undo();}
-  else if(a==='endc'){snap('end combat');S.turnId=null;S.round=1;S.prevTurn=null;ui.legDis=null;S.list.forEach(function(c){delete c.exp;c.rx=false;c.la=0;c.ue={};c.mu={};c.ray={};c.mrep={};c.msp={};});toast('Combat ended. Creatures, HP and statuses kept.');}
+  else if(a==='endc'){logAdd('Combat ended');logEnd();snap('end combat');S.turnId=null;S.round=1;S.prevTurn=null;ui.legDis=null;S.list.forEach(function(c){delete c.exp;c.rx=false;c.la=0;c.ue={};c.mu={};c.ray={};c.mrep={};c.msp={};});toast('Combat ended. Creatures, HP and statuses kept.');}
   else if(a==='next'){snap('next turn');nextTurn();ui.confirmClear=false;}
   else if(a==='openadd'){ui.drawer=true;S.tab='add';}
   else if(a==='saves'){ui.sv=ui.sv>=0?-1:ui.svLast;renderBar();renderTable();return;}
@@ -1967,7 +2008,7 @@ $('#turn').addEventListener('click',function(e){
     if(rf&&rf.spell){refLoad();d0=spellData(rf.spell,rf.q);n0=lp.n+' \u2192 '+rf.spell;}
     else if(rf&&(rf.q.kind==='atk'||rf.q.kind==='save')){d0=rf.q;n0=lp.n+(lp.n!==rf.q.n?' \u2192 '+rf.q.n:'');if(rf.cnt>1){howL.left=rf.cnt;howL.tot=rf.cnt;n0+=' (1 of '+rf.cnt+')';}}
     if(d0){actBegin(L0,d0,n0,howL);}
-    else{doHow(L0,howL);toast('<b>'+esc(L0.name)+':</b> '+esc(lp.n)+(rf&&rf.q.table?' \u2014 roll for a ray':''));}}}
+    else{doHow(L0,howL);toast('<b>'+esc(L0.name)+':</b> '+esc(lp.n)+(rf&&rf.q.table?' \u2014 roll for a ray':''));logAdd(esc(L0.name)+' \u2014 legendary: '+esc(lp.n));}}}
   else if(a==='ladis'){ui.legDis=S.turnId;}
   else if(a==='tcol'){ui.cardOpen=!ui.cardOpen;}
   else if(a==='tinfo'){S.stat=c.kind==='mon'?c.monId:'pc';S.statC=c.id;S.tab='stat';ui.drawer=true;save();renderDrawer();return;}
@@ -1978,8 +2019,8 @@ $('#turn').addEventListener('click',function(e){
   else if(a==='cast'){var ms=MON.find(function(x){return x.id===c.monId;});if(ms){var A2=actsOf(ms),ps=A2.find(function(x){return x.key===b.dataset.i;}),k2='sp:'+b.dataset.s,P2=mPools(A2),sq=poolOf(P2,'Spellcasting')||repOf(P2,'Spellcasting');c.uses=c.uses||{};
     var on2=b.classList.contains('on')||b.dataset.aw==='1',sd=on2&&ps?spellData(b.dataset.full||b.dataset.s,ps):null,how2={a:'cast',i:b.dataset.i,s:b.dataset.s,per:b.dataset.aw!=='1'};
     if(sd){actBegin(c,sd,sd.n+(sd.lvl?' (level '+sd.lvl+')':''),how2);save();renderBoard();return;}
-    if(b.dataset.aw==='1'){doHow(c,how2);toast('<b>'+esc(b.dataset.s)+'</b> cast');}
-    else if(b.classList.contains('on')){snap('cast '+b.dataset.s);c.uses[k2]=(c.uses[k2]||0)+1;c.ue=c.ue||{};
+    if(b.dataset.aw==='1'){doHow(c,how2);toast('<b>'+esc(b.dataset.s)+'</b> cast');logAdd(esc(c.name)+' casts '+esc(b.dataset.s));}
+    else if(b.classList.contains('on')){snap('cast '+b.dataset.s);logAdd(esc(c.name)+' casts '+esc(b.dataset.s));c.uses[k2]=(c.uses[k2]||0)+1;c.ue=c.ue||{};
       if(sq&&ps&&ps.sec==='a'){var pq=sq.rep?repPool(P2,sq):sq;if(c.ue.a==='M'||!c.ue.a){mSpend(c,pq,1);c.msp=c.msp||{};c.msp[k2]=(c.msp[k2]||0)+1;c.mspq=pq.i;}}
       else if(ps&&!c.ue[ps.sec])c.ue[ps.sec]=ps.key;}
     else if(c.uses[k2]){snap('restore '+b.dataset.s);c.uses[k2]--;if(c.msp&&c.msp[k2]&&P2){c.msp[k2]--;mSpend(c,P2[c.mspq||0],-1);}}}}
@@ -2051,12 +2092,15 @@ padEl.addEventListener('click',function(e){
   else if(a==='pslot'){swapSlot(+b.dataset.k);}
   else if(a==='ptog'){var tk=b.dataset.k;if(tk==='half'){ui.half=!ui.half;var fh=curFx();if(fh&&fh.st){if(ui.half)delete ui.pend[fh.st];else ui.pend[fh.st]=true;}}else if(tk==='extra'){ui.ex=!ui.ex;if(ui.ex)swapSlot(1);else{swapSlot(0);ui.amtO=0;ui.dtO='';}}else ui.mx=!ui.mx;}
   else if(a==='actx'){ui.act=null;ui.out={};finishPad();}
+  else if(a==='acrit'){actCrit(!ui.act.crit);}
+  else if(a==='trx'){ui.rxFor=ui.rxFor===b.dataset.id?null:b.dataset.id;}
+  else if(a==='trxo'){ui.rxs=ui.rxs||{};var ro=b.dataset.o;if(ro==='none')delete ui.rxs[ui.rxFor];else ui.rxs[ui.rxFor]={n:b.dataset.n,st:b.dataset.st||'',half:b.dataset.half==='1'};ui.rxFor=null;}
   else if(a==='tdel'){delete ui.sel[b.dataset.id];delete ui.out[b.dataset.id];}
   else if(a==='tchip'){var tt=findC(b.dataset.id),atk0=ui.act.d.kind==='atk';
     if(!ui.sel[tt.id])ui.sel[tt.id]=true;
     else if((atk0&&!ui.act.d.rider)||ui.act.d.kind==='buff'){delete ui.sel[tt.id];delete ui.out[tt.id];}
     else{var o0=actOut(tt);ui.out[tt.id]=atk0?(o0==='hit'?'rsave':'hit'):(o0==='fail'?'save':'fail');}}
-  else if(a==='amiss'){var a0=ui.act,at0=findC(a0.id),h0=a0.how,n0=a0.n;ui.act=null;ui.out={};doHow(at0,h0);toast('<b>'+esc(n0)+':</b> missed');finishPad();actNext(at0,a0);}
+  else if(a==='amiss'){var a0=ui.act,at0=findC(a0.id),h0=a0.how,n0=a0.n;ui.act=null;ui.out={};doHow(at0,h0);toast('<b>'+esc(n0)+':</b> missed');logAdd(esc(at0.name)+' \u2014 '+esc(n0)+': missed');finishPad();actNext(at0,a0);}
   else if(a==='papply'&&ui.act){actApply(T);save();renderBoard();return;}
   else if(a==='papply'){
     var pk=Object.keys(ui.pend),SL=padSlots(),D=SL.filter(function(x){return !SPEC[x.dt];});if(!SL.length&&!pk.length)return;
@@ -2077,6 +2121,7 @@ padEl.addEventListener('click',function(e){
     if(on.length)msg+=(msg?'<br>':'')+'<b>'+on.map(function(x){return esc(nm(x));}).join(', ')+'</b> applied'+(sk.length?' (Immune, not applied: '+sk.join(', ')+')':'');
     else if(sk.length)msg+=(msg?'<br>':'')+'<b>Immune, not applied:</b> '+sk.join(' · ');
     if(msg)toast(msg);
+    logAdd(T.map(function(c){return esc(c.name);}).join(', ')+': '+padSum(pk));
     finishPad();
   }
   else if(a==='ti'){var tw=$('#twheel'),k=+b.dataset.i,N=TL().length;if(k%N===TL().indexOf(ui.dtype||'')){ui.tpk=true;renderPad();return;}if(tw)tw.scrollTo({top:k*IH,behavior:'smooth'});return;}
@@ -2162,6 +2207,8 @@ dr.addEventListener('click',function(e){
   if(act==='qty'||act==='at'||b.tagName==='SELECT')return;
   if(act!=='libclear')ui.confirmLib=false;
   if(act==='export'){doExport();renderDrawer();return;}
+  if(act==='logdl'){doLogDownload();return;}
+  if(act==='logclr'){if(ui.logClr){S.logs=[];ui.logClr=false;save();}else ui.logClr=true;renderDrawer();return;}
   if(act==='import'){var pf=$('#impfile');if(pf)pf.click();return;}
   if(act==='addmonfile'){var mf=$('#monfile');if(mf)mf.click();return;}
   if(act==='rmmonfile'){CUSTOM.splice(+b.dataset.i,1);saveCustom();location.reload();return;}

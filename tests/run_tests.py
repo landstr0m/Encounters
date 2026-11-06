@@ -1148,6 +1148,41 @@ def spells_grapples_legendary(b):
 
 
 @test
+def crit_log_reactions(b):
+    a = App(b)
+    a.e("S.envName='Bridge ambush';save()")
+    d = a.mon("mm-green-dragon-wyrmling")[0]; h = a.pc("Aer", ac=13, hp=60); h2 = a.pc("Bo", ac=15, hp=60)
+    a.e(f"findC({d}).init=20;findC({h}).init=10;findC({h2}).init=5;renderBoard()")
+    a.click('[data-act="next"]'); a.e("ui.cardOpen=true;renderBoard()")
+    # crit adds the dice again: Rend 7 (1d10+2) + 3 (1d6) -> 12 + 6
+    a.click('#turn .mp.on'); a.click('#pad [data-act=acrit]')
+    eq(a.e("[slot(0).v,slot(1).v]"), [12, 6], "crit preloads extra dice")
+    a.click('#pad [data-act=acrit]'); eq(a.e("[slot(0).v,slot(1).v]"), [7, 3], "crit off restores")
+    a.click('#pad [data-act=acrit]')
+    # reaction on a picked target: Shield status + reaction used, damage as declared
+    a.click(f'#pad [data-act=tchip][data-id="{h}"]'); a.click(f'#pad [data-act=trx][data-id="{h}"]')
+    a.click('#pad .rxp [data-n="Shield"]')
+    check("Shield" in a.pg.inner_text('#pad .tc.on'), "chip shows the reaction")
+    a.click('#pad [data-act=papply]')
+    eq(a.c(h)["hp"], 42, "hit as declared: 18 crit damage"); check(a.c(h)["rx"] and "Shield" in a.c(h)["conds"], "reaction used, Shield on")
+    # Uncanny Dodge halves for that target
+    a.click('#turn .mp.on'); a.click(f'#pad [data-act=tchip][data-id="{h2}"]'); a.click(f'#pad [data-act=trx][data-id="{h2}"]')
+    a.click('#pad .rxp [data-n="Uncanny Dodge"]'); a.click('#pad [data-act=papply]')
+    eq(a.c(h2)["hp"], 55, "Uncanny Dodge: 10 halved to 5")
+    a.e(f"findC({d}).mu={{}};renderBoard()"); a.click('#turn .mp.on'); a.click(f'#pad [data-act=tchip][data-id="{h2}"]')
+    check(not a.pg.query_selector(f'#pad [data-act=trx][data-id="{h2}"]'), "no reaction button once used"); a.click('#pad [data-act=actx]')
+    # log
+    L = a.e("S.logs[S.logs.length-1]")
+    eq(L["name"], "Bridge ambush", "log named after the encounter")
+    txt = a.e("logText()")
+    check("Round 1" in txt and "Rend" in txt and "(crit)" in txt and "Shield" in txt and "Uncanny Dodge" in txt, txt)
+    a.click('[data-act="endc"]') if a.pg.query_selector('[data-act="endc"]') else None
+    a.e("ui.drawer=true;S.tab='data';renderDrawer()")
+    check(not a.e("document.querySelector('#drawer [data-act=logdl]').disabled"), "download button in Data tab")
+    check(not a.errors, a.errors)
+
+
+@test
 def wheel_tap_to_type(b):
     a = App(b)
     m = a.mon("mm-goblin-warrior")[0]
