@@ -64,10 +64,11 @@ Goal: on a monster's turn, tap an action on its card → pick targets → mark w
 - [x] Attacks with a rider save (hit, then a save against the status): second Failed/Saved button per hit target.
 - [ ] Crit toggle (the DM types the doubled total for now).
 
-**F. Spells and riders**
-- [ ] Casting a spell from Spellcasting uses it (X/day count), applies its status and starts concentration on the caster.
-- [ ] Grapples linked to the grappler like concentration (escape DC on the chip; ends if the grappler is Incapacitated or lets go).
-- [ ] Start/end-of-turn damage and repeat saves from riders use the existing turn reminders.
+**F. Spells, grapples and legendary actions** ✅ 6 Nov 2026
+- [x] Casting from Spellcasting (per-day diamonds, ▸ for at-will) opens targeting with the spell's save/attack, damage (upcast dice) and status; uses the daily count and starts concentration on the caster.
+- [x] Grapples linked to the grappler (escape DC on the chip; ends if the grappler is at 0 HP, Incapacitated or gone).
+- [x] Legendary actions as buttons in the between-turns bar: attacks and spells open targeting (cost spent on Apply/Miss, multi-attack legendary actions step through for one cost), movement-only ones spend straight away, once-per-round ones grey out.
+- [ ] Start/end-of-turn damage and repeat saves from riders use the existing turn reminders (no change).
 
 **G. Later**
 - [ ] Target reactions that change the result: Shield (+5 AC turns a hit into a miss), Uncanny Dodge (half), Evasion (Dex save: none / half).

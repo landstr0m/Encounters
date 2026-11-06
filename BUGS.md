@@ -2,6 +2,11 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-06 — Spells, grapples, legendary actions (roadmap F)
+
+- Spell attack bonus was only read when written as "(+9 to hit with spell attacks)"; dragons write "(spell save DC 20, +12 to hit with spell attacks)", so their Scorching Ray showed +0. Fixed.
+- The legendary bar's "Use one" is replaced by a button per legendary action (kept for creatures whose legendary actions aren't listed).
+
 ## 2026-11-06 — Targeting on a phone
 
 - With the turn card and the pad open, the player rows were covered on a phone, so targets couldn't be picked. Targets are now chips inside the pad (opponents first). Miss moved to the pad header (Use → Miss, no target); per-target Hit/Miss buttons removed (a picked attack target is a hit). Save targets: tap a picked chip to switch Failed/Saved, ✕ to remove. Wheels stay hidden until a target is picked.
