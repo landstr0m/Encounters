@@ -20,10 +20,12 @@ jobs:
         run: python tools/kanka_players.py
       - name: Import linked D&D Beyond sheets
         run: python tools/dndbeyond.py
+      - name: Check levels against session reports
+        run: python tools/kanka_levels.py
       - name: Commit players.json if changed
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add players.json dndbeyond.json
+          git add players.json dndbeyond.json kanka_levels.md
           git diff --cached --quiet || git commit -m "Update players from Kanka (and linked D&D Beyond sheets)"
           git push

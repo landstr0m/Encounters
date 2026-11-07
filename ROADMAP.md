@@ -15,7 +15,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 |---|---|---|
 | Initiative, HP, AC, conditions, death saves, Undo | ✅ | |
 | Damage types, resistances/immunities, concentration, legendary/lair, reactions | ✅ | |
-| Kanka player sync (GitHub Action) | ✅ | |
+| Kanka player sync (GitHub Action) | ✅ | Also checks levels against session reports |
 | D&D Beyond public character import (GitHub Action), per-field Keep / Use merge | ✅ | Unofficial and fragile; public sheets only |
 | Monster Manual 2024 import (local) | ✅ | Move MM data out of the public `monsters.json` before v1.0 |
 | Encounter XP / difficulty while planning | ✅ | 2024 DMG budgets; hidden while combat runs |
@@ -85,6 +85,10 @@ Open follow-ups from A–G:
 - Local monster images (kept out of the repo).
 - 2014 / 2024 rules toggle with a small variants table.
 - 💡 Data files (reviewed 6 Nov 2026): Kanka and D&D Beyond exports share one character shape. Monster actions stay as book text parsed in the app (local Monster Manual files use the same format and need no build step). Possible later: monster saves / resistances / immunities as fields in `monsters.json` (and the local parser) to drop about 15 lines of text matching in `defs()` / `saveOf()`.
+
+### Blackrock levelling (Kanka)
+- ✅ Level check in the Kanka workflow: sessions per character from report links, expected level, Discord message for the Loremasters (`kanka_levels.md`). Flags reports with no characters named.
+- 💡 If Andrew gets edit rights on the Blackrock Kanka: write the new level to each character's "Class, Subclass & Levels" field automatically after each report (needs a token with write access and a way to pick which class gets the level for multiclass characters).
 
 ## Stage 3: network features (📋, deliberately postponed)
 - Cross-device table view through a free realtime service (today: same browser only).

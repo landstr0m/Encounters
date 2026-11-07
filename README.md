@@ -140,6 +140,11 @@ After an update, open the app once while online, then close and reopen it to get
 - **Estimated HP** = max hit die at level 1, average after, plus Con per level. Feats like Tough aren't included; override by hand.
 - Extra defences: give the character a Kanka property `Resistances`, `Immunities` or `Vulnerabilities` (comma-separated).
 
+### Level check (Loremaster message)
+- The same workflow runs `tools/kanka_levels.py`: it counts the session reports (Kanka → Reports) that link each player character, works out the level from the Character Creation rules (1 / 3 / 6 / 10 / 14 sessions, then every 4; Act 1 cap 5) and compares it with the Kanka level.
+- The result is in `kanka_levels.md` and on the Actions run page: a ready-to-paste Discord message with level-ups to log, reports that name no characters, and sessions per character.
+- Sessions that don't count (a character played as an NPC) are listed in `EXCLUDE` at the top of the script. Characters typed or tagged NPC are skipped.
+
 ## D&D Beyond player import
 
 Works on its own (no Kanka needed), for public characters only (character sheet privacy: Public). Unofficial: D&D Beyond has no public API, so it may break if they change their data.
