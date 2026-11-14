@@ -9,7 +9,8 @@ Each test gets a fresh browser context (empty localStorage). A small hook (windo
 added by the test browser) evaluates code in the page, so tests can set up state
 and inspect it; the app itself is not changed.
 """
-import functools, http.server, json, multiprocessing as mp, os, sys, tempfile, threading, time, traceback
+import functools
+import http.server, json, multiprocessing as mp, os, sys, tempfile, threading, time, traceback
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,10 +24,12 @@ def test(fn):
     return fn
 
 
-# Some tests exercise large real stat blocks and spells that are not part of the open data in this repository. They run
-# when you keep a file of your own at local/my-books.json (the folder is git-ignored) and are skipped otherwise, so the
-# battery passes on a fresh clone and on GitHub. A test marked @own_file starts with that file loaded as "Your files".
-OWN_FILE = os.path.join(ROOT, "local", "my-books.json")
+# Some tests need stat blocks and spells with mechanics the open data lacks (a ray roll table, lair uses, an upcast
+# spell, aliases, habitat lists). They use a made-up book, tests/fixtures/test-book.json, so they run everywhere,
+# GitHub included: a test marked @test_book starts with that file loaded as "Your files". A test marked @real_file
+# checks your own file at local/my-books.json (the folder is git-ignored) and is skipped where there is none.
+OWN_FILE = os.path.join(ROOT, "tests", "fixtures", "test-book.json")
+REAL_FILE = os.path.join(ROOT, "local", "my-books.json")
 USE_OWN_FILE = False
 
 
@@ -34,17 +37,26 @@ class Skip(Exception):
     pass
 
 
-def own_file(fn):
+def test_book(fn):
+    """The test starts with the made-up book (tests/fixtures/test-book.json) loaded as "Your files"."""
     @functools.wraps(fn)
     def run(b):
         global USE_OWN_FILE
-        if not os.path.exists(OWN_FILE):
-            raise Skip("needs local/my-books.json")
         USE_OWN_FILE = True
         try:
             fn(b)
         finally:
             USE_OWN_FILE = False
+    return run
+
+
+def real_file(fn):
+    """Only with your own file at local/my-books.json (git-ignored); skipped everywhere else."""
+    @functools.wraps(fn)
+    def run(b):
+        if not os.path.exists(REAL_FILE):
+            raise Skip("needs local/my-books.json")
+        fn(b)
     return run
 
 
@@ -67,7 +79,7 @@ class App:
         self.ctx.add_init_script("window.__e = function (c) { return (0, eval)(c); };")
         if USE_OWN_FILE:  # put the file where "Add file" would store it, once, before the app starts
             f = json.load(open(OWN_FILE, encoding="utf-8"))
-            f = {"name": "my-books.json", "monsters": f.get("monsters", []), "spells": f.get("spells", []), "aliases": f.get("aliases", {})}
+            f = {"name": "test-book.json", "monsters": f.get("monsters", []), "spells": f.get("spells", []), "aliases": f.get("aliases", {})}
             self.ctx.add_init_script("if(!localStorage.getItem('test-own-file')){localStorage.setItem('test-own-file','1');"
                                      "localStorage.setItem('encounter-tracker-monsters'," + json.dumps(json.dumps([f])) + ");}")
         self.pg.goto(URL + query)
@@ -635,7 +647,7 @@ def off_turn_info_and_dc(b):
 
 
 @test
-@own_file
+@test_book
 def legendary_and_auto_expiry(b):
     a = App(b)
     d = a.e("MON.find(function(m){return /in Lair/.test(((m.leg||[])[0]||['',''])[1])}).id")
@@ -841,16 +853,16 @@ def stat_block_dice_and_spell_links(b):
 
 
 @test
-@own_file
+@test_book
 def roll_tables_laid_out(b):
     a = App(b)
     n = a.e("MON.filter(function(m){return ['traits','actions','bonus','react','leg'].some(function(k){return (m[k]||[]).some(function(t){return blk(rich(t[1])).indexOf('class=\"ro\"')>=0;});});}).map(function(m){return m.name;}).sort().join(',')")
-    for x in ["Beholder", "Death Tyrant", "Spectator", "Beholder Zombie", "Umber Hulk", "Gibbering Mouther", "Elemental Cataclysm"]:
+    for x in ["Gloom Watcher", "Daze Crawler", "Gibbering Mouther"]:
         check(x in n.split(","), x + " roll table laid out: " + n)
-    a.e("ui.drawer=true;S.tab='stat';S.stat='mm-beholder';S.statC=null;renderDrawer()")
-    eq(a.e("document.querySelectorAll('#drawer .ro>div').length"), 10, "ten eye rays")
-    check("Charm Ray" in a.e("document.querySelector('#drawer .ro .rh').textContent"), "ray names are headers")
-    check(a.e("document.querySelectorAll('#drawer .ro .oc').length") >= 15, "failure/success on their own lines")
+    a.e("ui.drawer=true;S.tab='stat';S.stat='tb-gloom-watcher';S.statC=null;renderDrawer()")
+    eq(a.e("document.querySelectorAll('#drawer .ro>div').length"), 10, "ten rays")
+    check("Befriending Ray" in a.e("document.querySelector('#drawer .ro .rh').textContent"), "ray names are headers")
+    check(a.e("document.querySelectorAll('#drawer .ro .oc').length") >= 12, "failure/success on their own lines")
     check("<div" not in a.e("blk(rich('Melee Attack Roll: +4, reach 5 ft. Hit: 6 (1d8 + 2) Slashing damage.'))"), "short actions unchanged")
     check('class="oc"' in a.e("blk(rich('Dexterity Saving Throw: DC 12. Failure: 7 (2d6) Fire damage. Success: Half damage.'))"), "short saves get outcome lines too")
     check(not a.errors, a.errors)
@@ -1043,7 +1055,7 @@ def single_condition_spells_linked(b):
 
 
 @test
-@own_file
+@test_book
 def action_parser_and_cards(b):
     a = App(b)
     P = lambda mid, n: a.j(f"actsOf(MON.find(function(m){{return m.id==='{mid}'}})).find(function(x){{return x.n==='{n}'}})")
@@ -1065,10 +1077,10 @@ def action_parser_and_cards(b):
     eq(a.e("document.querySelectorAll('#turn .mp').length"), 2, "Rend has two Multiattack uses")
     check("Recharge 5–6" in a.pg.inner_text('#turn'), "recharge shown as a tag")
     check("The dragon makes two Rend attacks." in a.e("document.querySelector('#turn .mline').textContent"), "full Multiattack sentence shown")
-    # Beholder: Eye Rays is its own wide card with one sub-card per ray; Bite stays separate
-    a.e("S.list=[];renderBoard()"); bh = a.mon("mm-beholder")[0]; a.pc("Hero2")
+    # Gloom Watcher (made up): Gaze Rays is its own wide card with one sub-card per ray; Bite stays separate
+    a.e("S.list=[];renderBoard()"); bh = a.mon("tb-gloom-watcher")[0]; a.pc("Hero2")
     a.e(f"S.turnId={bh};ui.cardOpen=true;renderBoard()")
-    eq(a.e("document.querySelectorAll('#turn .a.wide .nest > .a.na').length"), 10, "ten eye rays as sub-cards")
+    eq(a.e("document.querySelectorAll('#turn .a.wide .nest > .a.na').length"), 10, "ten rays as sub-cards")
     eq(a.e("document.querySelectorAll('#turn [data-act=ray]').length"), 10, "each ray has its own Use")
     for r in (0, 3, 7):
         a.click(f'#turn [data-act=ray][data-r="{r}"]')
@@ -1082,7 +1094,7 @@ def action_parser_and_cards(b):
 
 
 @test
-@own_file
+@test_book
 def action_economy_hides_used(b):
     a = App(b)
     d = a.mon("mm-green-dragon-wyrmling")[0]; h = a.pc("Hero")
@@ -1101,16 +1113,16 @@ def action_economy_hides_used(b):
     check("recharging" in t, "spent recharge listed, not shown as a card")
     a.click('#turn .hidl [data-act="unuse"]'); check("Poison Breath" in a.e("document.querySelector('#turn .acts2').textContent"), "tap when recharged brings it back")
     # per-day spells count per encounter; Start combat resets
-    a.e("S.list=[];S.turnId=null;renderBoard()"); m = a.mon("mm-archmage")[0]; a.pc("Hero3")
+    a.e("S.list=[];S.turnId=null;renderBoard()"); m = a.mon("tb-vault-magus")[0]; a.pc("Hero3")
     a.e(f"S.turnId={m};ui.cardOpen=true;renderBoard()")
     a.e("refLoad()"); a.pg.wait_for_function("window.__e('REF && REF.spells && REF.spells.length') > 0")
     a.click('#turn [data-act="cast"][data-s="Cone of Cold"]')
-    check("DC 17 Con save" in a.pg.inner_text('#pad'), "Cone of Cold: save and DC from the Archmage")
+    check("DC 17 Con save" in a.pg.inner_text('#pad'), "Cone of Cold: save and DC from the caster")
     eq(a.e("[ui.amt,ui.dtype]"), [54, "cold"], "level 9 version: 12d8 → 54 cold preloaded")
     a.click('#pad [data-act=tchip]'); a.click('#pad [data-act=papply]')
     eq(a.e(f"findC({m}).uses['sp:Cone of Cold']"), 1, "1/Day spell spent")
     check(a.e("!!document.querySelector('#turn .spc.out')"), "spent spell struck through")
-    eq(a.e(f"findC({m}).ue.a"), "a2", "casting uses the action")
+    eq(a.e(f"findC({m}).ue.a"), "a1", "casting uses the action")
     a.e("S.turnId=null;nextTurn();renderBoard()")
     eq(a.e(f"(findC({m}).uses||{{}})['sp:Cone of Cold']||0"), 0, "new encounter (Start combat) resets daily uses")
     # Chimera: Fire Breath replaces the Claw attack specifically
@@ -1296,24 +1308,24 @@ def wheel_tap_to_type(b):
 
 
 @test
-@own_file
+@test_book
 def own_file_spells_and_aliases(b):
     a = App(b)
     a.pg.wait_for_function("window.__e('REF&&REF.spells.length>0')")
-    check(a.e("REF.spells.some(function(x){return x.n==='Hunger of Hadar'&&x.src==='my-books.json';})"), "spell from the file loaded")
-    h = a.e("rich('The vampire casts Hunger of Hadar (level 5 version). The dragon casts Melf\u2019s Acid Arrow.')")
-    check('data-n="Hunger of Hadar"' in h and 'Melf' in h and 'Acid Arrow</a>' in h, h)
+    check(a.e("REF.spells.some(function(x){return x.n==='Maw of Night'&&x.src==='test-book.json';})"), "spell from the file loaded")
+    h = a.e("rich('The vampire casts Maw of Night (level 5 version). The dragon casts Zed\u2019s Acid Arrow.')")
+    check('data-n="Maw of Night"' in h and 'Zed' in h and 'Acid Arrow</a>' in h, h)
     a.e("ui.drawer=true;S.tab='ref';ui.ref=null;ui.rq='';renderDrawer()")
     names = a.pg.inner_text('#refl')
-    check("Melf" not in names, "aliases hidden from the unfiltered list")
-    a.pg.fill('#refq', 'melf')
-    check("Melf" in a.pg.inner_text('#refl'), "aliases found by search")
-    a.e("ui.ref='Hunger of Hadar';renderDrawer()"); check("Source: your file my-books.json" in a.pg.inner_text('#drawer'), "the entry names its file")
+    check("Zed" not in names, "aliases hidden from the unfiltered list")
+    a.pg.fill('#refq', 'zed')
+    check("Zed" in a.pg.inner_text('#refl'), "aliases found by search")
+    a.e("ui.ref='Maw of Night';renderDrawer()"); check("Source: your file test-book.json" in a.pg.inner_text('#drawer'), "the entry names its file")
     check(not a.errors, a.errors)
 
 
 @test
-@own_file
+@test_book
 def rays_upcast_casts_eyerays_stages(b):
     a = App(b)
     a.e("refLoad()"); a.pg.wait_for_function("window.__e('REF && REF.spells && REF.spells.length') > 0")
@@ -1338,13 +1350,13 @@ def rays_upcast_casts_eyerays_stages(b):
     a.click('#turn [data-act=use][data-i="b0"]')
     check(a.e(f"ui.sel[{o}]"), "self picked"); a.click('#pad [data-act=papply]')
     check("Invisible" in a.c(o)["conds"] and a.c(o)["ue"].get("b") == "b0", "Invisible, bonus action used")
-    # 4. Beholder Glare: pick the ray result, then target and apply
-    a.e("S.list=[];S.turnId=null;renderBoard()"); bh = a.mon("mm-beholder")[0]; p1 = a.pc("Aer", hp=60); p2 = a.pc("Bo", hp=60)
+    # 4. Gloom Watcher Glare: pick the ray result, then target and apply
+    a.e("S.list=[];S.turnId=null;renderBoard()"); bh = a.mon("tb-gloom-watcher")[0]; p1 = a.pc("Aer", hp=60); p2 = a.pc("Bo", hp=60)
     a.e(f"findC({bh}).init=20;findC({p1}).init=15;findC({p2}).init=10;renderBoard()")
     for _ in range(3): a.click('[data-act="next"]')
     a.e("[].find.call(document.querySelectorAll('#turn [data-act=lact]'),function(b){return b.textContent==='Glare'}).click()")
     check(a.pg.query_selector('#turn [data-act=lray]'), "ray picker shown")
-    a.e("[].find.call(document.querySelectorAll('#turn [data-act=lray]'),function(b){return /Petrification/.test(b.textContent)}).click()")
+    a.e("[].find.call(document.querySelectorAll('#turn [data-act=lray]'),function(b){return /Stonebind/.test(b.textContent)}).click()")
     check("DC 16 Con" in a.pg.inner_text('#pad .acth'), a.pg.inner_text('#pad .acth'))
     a.click(f'#pad [data-act=tchip][data-id="{p1}"]'); a.click('#pad [data-act=papply]')
     eq(a.c(bh)["la"], 1, "legendary use spent"); check("Restrained" in a.c(p1)["conds"], "first failure: Restrained")
@@ -1394,7 +1406,7 @@ def hex_riders_and_turn_ticks(b):
 
 
 @test
-@own_file
+@test_book
 def damage_ends_and_save_ends(b):
     a = App(b)
     a.e("refLoad()"); a.pg.wait_for_function("window.__e('REF && REF.spells && REF.spells.length') > 0")
@@ -1419,11 +1431,11 @@ def damage_ends_and_save_ends(b):
     a.click('#turn [data-act=stg][data-r="f"]'); check("Paralyzed" in a.c(h)["conds"], "failed: still held")
     a.click('#turn [data-act=stg][data-r="s"]'); cs = a.c(h)["conds"]
     check("Hold Person" not in cs and "Paralyzed" not in cs, cs)
-    # Beholder Sleep Ray: Unconscious ends on damage; Paralyzing Ray repeats its save
-    bh = a.mon("mm-beholder")[0]; p1 = a.pc("Aer", hp=60)
-    A = "actsOf(MON.find(function(m){return m.id==='mm-beholder'})).find(function(p){return p.table}).table.rows"
-    eq(a.j(A + ".map(function(r){var d=parseAct(r.n,r.t,'a');return d.stage?d.stage.from:''})[1]"), "Paralyzed", "Paralyzing Ray: save ends")
-    eq(a.j(A + ".map(function(r){return parseAct(r.n,r.t,'a').dend||''})[6]"), ["Unconscious"], "Sleep Ray: ends on damage")
+    # Slumber Ray: Unconscious ends on damage; Stiffening Ray repeats its save
+    bh = a.mon("tb-gloom-watcher")[0]; p1 = a.pc("Aer", hp=60)
+    A = "actsOf(MON.find(function(m){return m.id==='tb-gloom-watcher'})).find(function(p){return p.table}).table.rows"
+    eq(a.j(A + ".map(function(r){var d=parseAct(r.n,r.t,'a');return d.stage?d.stage.from:''})[1]"), "Paralyzed", "Stiffening Ray: save ends")
+    eq(a.j(A + ".map(function(r){return parseAct(r.n,r.t,'a').dend||''})[6]"), ["Unconscious"], "Slumber Ray: ends on damage")
     check(not a.errors, a.errors)
 
 
@@ -2000,13 +2012,81 @@ def your_file_by_link(b):
 
 
 @test
-@own_file
+def hostile_or_broken_file_is_harmless(b):
+    # A file is not trusted. (1) Script hidden in any text field is shown as text, never run, on this device and on
+    # the table view. (2) Wrong types, unknown fields and oversized values are dropped or cut on the way in, so a
+    # broken file cannot stop the app from starting. (3) The file is added through the app, as a person would.
+    X = '<img src=x onerror="window.PWNED=1">'
+    evil = {"id": "x-evil" + X, "name": "Evil" + X, "type": "Fiend" + X, "cr": "1", "ac": 10, "acn": X, "hp": 5, "dice": "1d8", "speed": "30 ft." + X,
+            "abil": [10, 10, 10, 10, 10, 10], "hab": ["forest" + X], "aka": ["Old" + X], "extra": [["Senses" + X, X], ["Immune", X]],
+            "traits": [["Aura" + X, "Text " + X]], "bonus": [["Dash" + X, X]], "react": [["Parry" + X, X]],
+            "actions": [["Bite" + X, "Melee Attack Roll: +4, reach 5 ft. Hit: 6 (1d8 + 2) Slashing damage. " + X],
+                        ["Rays" + X, "Roll. 1: Ray" + X + ". Text" + X + ". 2: Other" + X + ". Text."]],
+            "leg": [["Legendary Action Uses", "3" + X], ["Snap" + X, "The evil makes one Bite attack." + X]],
+            "onload": "alert(1)", "extraField": {"deep": [1, 2, 3]}}
+    odd = {"id": "x-odd", "name": "Odd", "ac": "12", "hp": "9", "abil": ["a", None, {}, [], 1, 999], "cr": {"a": 1}, "type": 5, "speed": ["x"],
+           "extra": [5, None, ["a"], "s"], "traits": [None, 5, [1, 2], ["n"]], "actions": [[{"a": 1}, {"b": 2}], "str", [None, None], ["Long", "y" * 50000]],
+           "bonus": {"a": 1}, "react": "x", "leg": [[5, 5]], "hab": "forest", "aka": "Orc"}
+    spell = {"n": "Hex" + X, "tx": "text" + X, "l": X, "sc": X, "t": X, "r": X, "c": X, "d": X, "cl": [X], "hl": X, "dt": [X], "dr": X, "sv": X}
+    oddsp = {"n": "OddSpell", "tx": "t", "l": {"a": 1}, "cl": "x", "dt": 5, "up": "zz", "cn": "yes"}
+    body = {"monsters": [evil, odd, {"name": "No id"}, None, 7, "x"], "spells": [spell, oddsp, {"n": 5}, None],
+            "aliases": {"Al" + X: "Hex" + X, "__proto__": "Fireball", "constructor": "Fireball", "Num": 5}}
+    tmp = os.path.join(tempfile.mkdtemp(), "bad" + "x" * 300 + ".json")[:250] + ".json"
+    json.dump(body, open(tmp, "w", encoding="utf-8"))
+    a = App(b, query="?net=local")
+    a.click('[data-act="openadd"]'); a.e("S.tab='data';S.dsec='src';renderDrawer()")
+    with a.pg.expect_navigation():
+        a.pg.set_input_files('#monfile', tmp)
+    a.pg.wait_for_function("window.STARTED === true")
+    eq(a.errors, [], "the app starts with the file stored:")
+    f = a.j("CUSTOM[0]")
+    eq([len(f["monsters"]), len(f["spells"]), sorted(f["aliases"])], [2, 2, ["Al" + X]], "entries without the required fields and unsafe alias names are dropped")
+    ev, od = f["monsters"]
+    check("onload" not in ev and "extraField" not in ev, "unknown fields are not stored")
+    eq([od["ac"], od["hp"], od["abil"], od["cr"], od["type"], od["speed"], od["extra"], od["traits"], od["bonus"], od["react"], od["leg"], od.get("hab"), od.get("aka")],
+       [12, 9, [0, 0, 0, 0, 1, 99], "0", "5", "", [], [], [], [], [], None, None], "wrong types become safe values")
+    eq([len(od["actions"]), len(od["actions"][0][1])], [1, 20000], "broken entries dropped, very long text cut")
+    eq([f["spells"][1]["l"], f["spells"][1]["cl"], f["spells"][1]["up"], f["spells"][1]["cn"], f["spells"][0]["l"]], [0, [], [], False, 0], "spell fields forced to their types")
+    check(len(f["name"]) <= 200, "file name cut")
+    eq(a.e("({}).Fireball===undefined && !Object.prototype.hasOwnProperty.call(Object.prototype,'Fireball')"), True, "no change to built-in objects")
+    # draw everything that shows file text
+    ids = a.e("var m=MON.filter(function(m){return /^(Evil|Odd)/.test(m.name)});m.forEach(function(x){addMon(x.id,1)});save();renderAll();S.list.map(function(c){return c.id})")
+    a.pc("Hero")
+    for cid in ids:
+        a.e(f"S.turnId={cid};ui.cardOpen=true;renderAll();ui.drawer=true;S.tab='stat';S.stat=findC({cid}).monId;S.statC=null;renderDrawer()")
+    a.e("S.tab='add';S.sub='monsters';ui.q='evil';renderDrawer();ui.q='old';renderDrawer()")
+    for sec in ("src", "bak", "enc", "sess"):
+        a.e(f"S.tab='data';S.dsec='{sec}';renderDrawer()")
+    a.e("refLoad()"); a.pg.wait_for_function("window.__e('REF && REF.spells && REF.spells.length') > 0")
+    a.e("S.tab='ref';ui.ref=null;ui.rq='hex';renderDrawer();ui.ref=REF.spells.find(function(x){return /^Hex/.test(x.n)}).n;renderDrawer()")
+    a.e("ui.ref='OddSpell';renderDrawer();S.tab='def';renderDrawer()")
+    a.e(f"S.turnId={ids[0]};renderAll()"); a.click('#turn [data-act="use"]')
+    a.click('#pad [data-act=tchip]'); a.click('#pad [data-act=papply]')
+    a.e("sessStart()")                                     # the only thing other devices get is the table snapshot
+    t = a.ctx.new_page(); terr = []; t.on("pageerror", lambda e: terr.append(str(e)))
+    t.goto(a.e("sessLink(null)")); t.wait_for_function("window.STARTED === true && window.__e('NET.last') > 0", timeout=8000)
+    check("Evil<img" in t.inner_text("body"), "the table view shows the name as plain text")
+    a.pg.wait_for_timeout(300)
+    eq([a.e("window.PWNED||0"), t.evaluate("window.PWNED||0"), a.e("document.querySelectorAll('img[src=x]').length"), t.evaluate("document.querySelectorAll('img[src=x]').length")],
+       [0, 0, 0, 0], "no script from the file ran and no element from it was created (DM, table)")
+    eq(a.errors + terr, [], "no errors:")
+    # too large: refused before it is read
+    big = os.path.join(tempfile.mkdtemp(), "big.json")
+    with open(big, "w") as fh:
+        fh.write('{"monsters":[],"pad":"' + "x" * 20_000_100 + '"}')
+    a.e("S.tab='data';S.dsec='src';renderDrawer()"); a.pg.set_input_files('#monfile', big)
+    a.pg.wait_for_function("window.__e('String(ui.msg)').indexOf('too large') > 0")
+    eq(a.e("CUSTOM.length"), 1, "an oversized file changes nothing")
+
+
+@test
+@test_book
 def own_file_end_to_end(b):
     # The real upgrade path: a device with saved fights that use stat blocks which are not built in. The app must keep
     # working without the file, and everything must come back when the file is added through Data > Sources.
     a = App(b)                                            # 1. everything available: build and save a fight
     n_all = a.e("MON.length")
-    a.pc("Aer"); ids = a.mon("mm-beholder", 2) + a.mon("mm-ghoul", 1)
+    a.pc("Aer"); ids = a.mon("tb-gloom-watcher", 2) + a.mon("mm-ghoul", 1)
     a.e(f"S.turnId={ids[0]};S.enc=[{{name:'Saved',notes:'',list:clone(S.list.filter(function(c){{return c.kind==='mon';}}))}}];save()")
     state = a.e("localStorage.getItem('encounter-tracker-app-v1')")
     a.ctx.close()
@@ -2018,7 +2098,7 @@ def own_file_end_to_end(b):
     a.e("ui.cardOpen=true;renderAll()")
     eq(a.errors, [], "no errors while the stat block is missing:")
     t = a.pg.inner_text("body")
-    check("Stat block not loaded" in t and "beholder (stat block not loaded)" in t.lower() and "mm-beholder" not in t.lower(), "missing stat block is named, not shown as an id")
+    check("Stat block not loaded" in t and "gloom watcher (stat block not loaded)" in t.lower() and "tb-gloom-watcher" not in t.lower(), "missing stat block is named, not shown as an id")
     eq(a.j("[S.list.length,CUSTOM.length]"), [4, 0], "rows are kept")
     hp = a.e(f"findC({ids[0]}).hp"); a.e(f"ui.sel={{{ids[0]}:true}};ui.amt=10;renderPad()"); a.click('#pad [data-act="papply"]')
     eq(a.e(f"findC({ids[0]}).hp"), hp - 10, "HP tracking still works on such a row")
@@ -2027,30 +2107,50 @@ def own_file_end_to_end(b):
         a.pg.set_input_files('#monfile', OWN_FILE)
     a.pg.wait_for_function("window.STARTED === true")
     eq(a.errors, [], "no errors after adding the file:")
-    eq(a.j("[MON.length,CUSTOM.length,CUSTOM[0].monsters.length>400,CUSTOM[0].spells.length>0]"), [n_all, 1, True, True], "the file is stored and merged")
+    eq(a.j("[MON.length,CUSTOM.length,CUSTOM[0].monsters.length>5,CUSTOM[0].spells.length>0]"), [n_all, 1, True, True], "the file is stored and merged")
     a.e("ui.cardOpen=true;renderAll()")
-    t = a.pg.inner_text("body"); check("not loaded" not in t and "Eye Rays" in a.pg.inner_text("#turn"), "the saved fight has its stat block and actions back")
+    t = a.pg.inner_text("body"); check("not loaded" not in t and "Gaze Rays" in a.pg.inner_text("#turn"), "the saved fight has its stat block and actions back")
     eq(a.e(f"findC({ids[0]}).hp"), hp - 10, "the fight carried on where it was")
     a.e("refLoad()"); a.pg.wait_for_function("window.__e('REF && REF.spells && REF.spells.length') > 0")
-    check(a.e("REF.spells.some(function(x){return x.n==='Hunger of Hadar'&&x.src==='my-books.json';})"), "spells from the file are in the reference")
+    check(a.e("REF.spells.some(function(x){return x.n==='Maw of Night'&&x.src==='test-book.json';})"), "spells from the file are in the reference")
     eq(a.j("[MON.find(function(m){return m.name==='Winter Wolf'}).hab,MON.find(function(m){return m.name==='Balor'}).hab]"), [["arctic"], []], "habitat lists come with the file")
     a.e("ui.drawer=true;S.tab='add';S.sub='monsters';ui.q='orc';renderDrawer()")
     check("Tough" in a.pg.inner_text('#drawer') and "2014: Orc" in a.pg.inner_text('#drawer'), "a 2014 name finds the 2024 stat block")
     a.e("ui.q='veteran';renderDrawer()"); check("2014: Veteran" not in a.pg.inner_text('#drawer .res'), "no 2014 label when the name itself matches")
     a.e("S.tab='data';S.dsec='enc';renderDrawer()")       # 4. the prepared encounter loads with full stat blocks
     a.click('#drawer [data-act="encload"]')
-    check(a.e("S.list.filter(function(c){return c.monId==='mm-beholder';}).length") == 2 and not a.errors, "prepared encounter loads")
+    check(a.e("S.list.filter(function(c){return c.monId==='tb-gloom-watcher';}).length") == 2 and not a.errors, "prepared encounter loads")
     a.e("S.tab='data';S.dsec='bak';renderDrawer()")       # 5. the backup carries the file to another device
     with a.pg.expect_download() as dl:
         a.click('#drawer [data-act="export"]')
     bk = json.load(open(dl.value.path(), encoding="utf-8"))
-    eq([len(bk["monsterFiles"]), len(bk["monsterFiles"][0]["monsters"]) > 400, len(bk["monsterFiles"][0]["spells"]) > 0], [1, True, True], "backup includes the file with its spells")
+    eq([len(bk["monsterFiles"]), len(bk["monsterFiles"][0]["monsters"]) > 5, len(bk["monsterFiles"][0]["spells"]) > 0], [1, True, True], "backup includes the file with its spells")
     used = a.e("JSON.stringify(localStorage).length")
     check(used < 2_000_000, f"storage used ({used} characters) stays well under the 2.5 million an iPad allows")
     a.click('[data-act="openadd"]') if not a.e("ui.drawer") else None
     a.e("S.tab='data';S.dsec='src';renderDrawer()"); a.click('#drawer [data-act="rmmonfile"]')   # 6. removing it is safe too
     a.pg.wait_for_function("window.STARTED === true && window.__e('CUSTOM.length') === 0")
     a.e("renderAll()"); eq(a.errors, [], "no errors after removing the file:")
+
+
+@test
+@real_file
+def real_book_file_loads(b):
+    # Not part of the public battery: checks your own book file on your own computer. It must load through the app,
+    # every entry must parse without an error, and it must fit in the storage an iPad allows.
+    a = App(b)
+    n = a.e("MON.length")
+    a.click('[data-act="openadd"]'); a.e("S.tab='data';S.dsec='src';renderDrawer()")
+    with a.pg.expect_navigation():
+        a.pg.set_input_files('#monfile', REAL_FILE)
+    a.pg.wait_for_function("window.STARTED === true")
+    eq(a.e("CUSTOM.length"), 1, "the file is stored")
+    check(a.e("MON.length") >= n, "stat blocks merged")
+    bad = a.j("MON.filter(function(m){try{actsOf(m);return false;}catch(e){return true;}}).map(function(m){return m.name;})")
+    eq(bad, [], "stat blocks that fail to parse:")
+    used = a.e("JSON.stringify(localStorage).length")
+    check(used < 2_000_000, f"storage used ({used} characters) stays well under the 2.5 million an iPad allows")
+    eq(a.errors, [], "no errors:")
 
 
 # ---------------------------------------------------------------- runner

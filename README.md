@@ -110,6 +110,7 @@ After an update, open the app once while online, then close and reopen it to get
 - **Or add it by link** (same card): paste a link to the file and press **Add link**. The app reads it once and stores it like a picked file, so the table still works offline; **Update** reads the link again after you change the file. This saves copying the file to each device by hand. The link stays on the device and in your backup, never in the repository or on players' devices.
   - A web page can only read from hosts that allow it. **Works as it is:** a Dropbox share link, the *Raw* link of a secret GitHub Gist, a Supabase Storage link.
   - **Google Drive** only answers through its API: share the file as *Anyone with the link: Viewer*, then create a free API key once (Google Cloud Console → new project → enable **Google Drive API** → Credentials → **Create API key**; restrict it to the Drive API and to the website `landstr0m.io/*`) and paste it in the key box.
+- **Files are checked on the way in.** Only the known fields are kept, each forced to its expected type; unknown fields are dropped, very long text is cut, and a file over 20 MB is refused. Text from a file is always shown as text, never run as code. A file can only change what is stored in the app on the device that loaded it; players on the table or player links receive names, never the file.
   - Whoever has the link can read the file, so treat the link like a password: do not post it, and do not put a file there that you may not share that way.
 
 **Players (party library)**
@@ -224,7 +225,8 @@ pip install playwright && playwright install chromium
 python tests/run_tests.py            # full browser test battery (phone to desktop), run in parallel workers
 python tests/run_tests.py typed undo # only tests whose names contain these words
 python tests/run_tests.py -j1        # one at a time, in order (use this if a failure is hard to read)
-# A few tests need a file of your own at local/my-books.json and are skipped without it.
+# Tests that need stat blocks beyond the open data use a made-up book, tests/fixtures/test-book.json, so all of them run here and on GitHub.
+# One optional test (real_book_file_loads) checks a file of your own at local/my-books.json and is skipped without it.
 python tools/check_monsters.py       # data check after changing monsters.json (see BUGS.md)
 python tools/check_actions.py        # action parser coverage after parser or monster changes
 ```

@@ -45,6 +45,10 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 | D&D Beyond public character import (GitHub Action), per-field Keep / Use merge | ✅ | Unofficial and fragile; public sheets only |
 | Your files: own stat blocks and spells, loaded on the device (Data → Sources) | ✅ | Kept on the device and in the backup |
 | Your files by link (Dropbox, Gist, Supabase Storage; Google Drive with an API key), with Update | ✅ | 14 Nov; read once and stored, so still offline at the table |
+| File integrity check: known fields only, forced types, size limits; script in file text never runs | ✅ | 14 Nov; `cleanMon()` / `cleanSpell()` / `cleanAliases()`; test `hostile_or_broken_file_is_harmless` |
+| Tests run everywhere on a made-up book (`tests/fixtures/test-book.json`); own file only for one optional check | ✅ | 14 Nov; 86 tests on GitHub, none skipped there |
+| Content-Security-Policy on the page (second lock: even a missed escape could not run script or send data elsewhere) | 📋 | Needs the inline handlers and allowed hosts (Supabase, Discord, Drive) listed first |
+| Tell the user what a file check dropped or cut, per entry | 💡 | Today only the count of skipped entries is shown |
 | Encounter XP / difficulty while planning | ✅ | 2024 DMG budgets; hidden while combat runs |
 | End combat without clearing | ✅ | Keeps creatures, HP and statuses |
 | Spells & Conditions tab: SRD 5.2 spells (SRD 5.1 for 2014 rules), full condition text, offline | ✅ | `reference.json`, `reference-2014.json` |

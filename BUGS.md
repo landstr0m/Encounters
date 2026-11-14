@@ -2,6 +2,14 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-14 — Files are not trusted
+
+| # | Finding | Cause | Fix / status |
+|---|---------|-------|--------------|
+| F1 | A file with a wrong type in a field (for example a number as a creature's type) stopped the app from starting, and it stayed that way until the browser storage was cleared | Only name, id, AC, HP and abilities were checked on the way in; the rest was used as found | Every entry is cleaned on the way in and when stored data or a backup is read: known fields only, each forced to its type, long text cut (`cleanMon()`, `cleanSpell()`, `cleanAliases()`, limits in `FMAX`). Test `hostile_or_broken_file_is_harmless` |
+| F2 | No size limit on a file or link | Not considered | Over 20 MB is refused before it is read |
+| F3 | Checked, no change needed: script hidden in file text (names, actions, spells, the file name) | Text is escaped wherever it is drawn | Shown as plain text on the DM device and on the table view; covered by the same test |
+
 ## 2026-11-14 — Code review, Data tab, habitats
 
 | # | Finding | Cause | Fix / status |

@@ -55,20 +55,15 @@ function okFiles(L) {
     })
     .map(function (f) {
       var o = {
-        name: f.name,
-        monsters: Array.isArray(f.monsters) ? f.monsters.filter(okMon) : [],
-        spells: Array.isArray(f.spells) ? f.spells.filter(okSpell) : [],
-        aliases: f.aliases && typeof f.aliases === "object" ? f.aliases : {},
+        name: cStr(f.name) || "file",
+        monsters: cleanAll(f.monsters, cleanMon),
+        spells: cleanAll(f.spells, cleanSpell),
+        aliases: cleanAliases(f.aliases),
       };
-      if (typeof f.url === "string") o.url = f.url; // a linked file: where Update reads it again
-      if (typeof f.key === "string") o.key = f.key;
+      if (typeof f.url === "string") o.url = f.url.slice(0, 2000); // a linked file: where Update reads it again
+      if (typeof f.key === "string") o.key = f.key.slice(0, 200);
       return o;
     });
-}
-try {
-  CUSTOM = okFiles(JSON.parse(localStorage.getItem(CKEY) || "[]"));
-} catch (e) {
-  CUSTOM = [];
 }
 function saveCustom() {
   try {
@@ -143,10 +138,102 @@ function mergeMon(base) {
 function okSpell(x) {
   return x && typeof x.n === "string" && x.n && typeof x.tx === "string";
 }
+// ---- Files are not trusted. Whatever is in a file (picked, linked, from a backup or already stored), only the known
+// fields are kept, each forced to its expected type and a sane length; anything else is dropped. The rest of the app
+// can then rely on the shape (a number where it expects text used to stop the app from starting). Text is still
+// escaped when drawn (esc(), rich()): this is about shape and size, that is about script injection.
+var FMAX = { bytes: 20e6, items: 5000, list: 100, name: 200, text: 20000 };
+function cStr(v, max) {
+  return (typeof v === "string" ? v : typeof v === "number" && isFinite(v) ? String(v) : "").slice(0, max || FMAX.name);
+}
+function cNum(v, lo, hi) {
+  v = +v;
+  return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : lo;
+}
+function cList(v, max) {
+  return (Array.isArray(v) ? v : [])
+    .filter(function (x) {
+      return typeof x === "string" && x;
+    })
+    .slice(0, FMAX.list)
+    .map(function (x) {
+      return x.slice(0, max || FMAX.name);
+    });
+}
+function cPairs(v) {
+  return (Array.isArray(v) ? v : [])
+    .filter(function (t) {
+      return Array.isArray(t) && typeof t[0] === "string" && typeof t[1] === "string";
+    })
+    .slice(0, FMAX.list)
+    .map(function (t) {
+      return [t[0].slice(0, FMAX.name), t[1].slice(0, FMAX.text)];
+    });
+}
+function cleanMon(m) {
+  if (!okMon(m) || !m.name.trim() || !m.id.trim()) return null;
+  var o = {
+    id: cStr(m.id),
+    name: cStr(m.name),
+    type: cStr(m.type),
+    cr: cStr(m.cr, 10) || "0",
+    ac: cNum(m.ac, 0, 99),
+    acn: cStr(m.acn),
+    hp: Math.round(cNum(m.hp, 0, 99999)),
+    dice: cStr(m.dice, 40),
+    speed: cStr(m.speed),
+    abil: m.abil.map(function (x) {
+      return Math.round(cNum(x, 0, 99));
+    }),
+  };
+  ["extra", "traits", "actions", "bonus", "react", "leg"].forEach(function (k) {
+    o[k] = cPairs(m[k]);
+  });
+  if (Array.isArray(m.hab)) o.hab = cList(m.hab, 40);
+  if (Array.isArray(m.aka)) o.aka = cList(m.aka);
+  if (m.ed === "2014" || m.ed === "2024") o.ed = m.ed;
+  return o;
+}
+function cleanSpell(x) {
+  if (!okSpell(x) || !x.n.trim()) return null;
+  var o = { n: cStr(x.n), tx: x.tx.slice(0, FMAX.text), l: Math.round(cNum(x.l, 0, 9)) };
+  ["sc", "t", "r", "c", "d", "sv", "dr"].forEach(function (k) {
+    o[k] = cStr(x[k], 400);
+  });
+  o.hl = cStr(x.hl, FMAX.text);
+  ["cn", "ri", "at"].forEach(function (k) {
+    o[k] = x[k] === true;
+  });
+  ["cl", "dt", "up"].forEach(function (k) {
+    o[k] = cList(x[k], 60);
+  });
+  return o;
+}
+function cleanAliases(A) {
+  var o = {};
+  if (!A || typeof A !== "object" || Array.isArray(A)) return o;
+  Object.keys(A)
+    .slice(0, FMAX.items)
+    .forEach(function (k) {
+      if (typeof A[k] === "string" && k.trim() && ["__proto__", "constructor", "prototype"].indexOf(k) < 0)
+        o[k.slice(0, FMAX.name)] = A[k].slice(0, FMAX.name);
+    });
+  return o;
+}
+function cleanAll(L, fn) {
+  return (Array.isArray(L) ? L : []).slice(0, FMAX.items).map(fn).filter(Boolean);
+}
+// Load what is stored (after the checks above are defined, as they use FMAX).
+try {
+  CUSTOM = okFiles(JSON.parse(localStorage.getItem(CKEY) || "[]"));
+} catch (e) {
+  CUSTOM = [];
+}
 // Read a file picked in Data > Sources > Your files. It may hold stat blocks, spells or both:
 //   a list of stat blocks, or {"monsters": [...], "spells": [...], "aliases": {"Other name": "Spell name"}}
 // Valid entries are kept on this device (and in the backup); nothing changes when the file has none.
 function readMonFile(file, done) {
+  if (file.size > FMAX.bytes) return done("That file is too large (over 20 MB). Nothing was changed.");
   var r = new FileReader();
   r.onload = function () {
     readMonText(file.name, r.result, done);
@@ -181,6 +268,7 @@ function readMonLink(url, key, done, name) {
     get = function (u) {
       return fetch(u, { cache: "no-store" }).then(function (r) {
         if (!r.ok) throw r.status;
+        if (+r.headers.get("content-length") > FMAX.bytes) throw 0;
         return r.text();
       });
     };
@@ -209,7 +297,8 @@ function readMonLink(url, key, done, name) {
     });
 }
 function readMonText(fname, text, done, link) {
-  var file = { name: fname };
+  var file = { name: cStr(fname) || "file" };
+  if (String(text).length > FMAX.bytes) return done("That file is too large (over 20 MB). Nothing was changed.");
   (function () {
     try {
       var j = JSON.parse(String(text).replace(/^\uFEFF/, "")),
@@ -217,8 +306,9 @@ function readMonText(fname, text, done, link) {
         SP = (!Array.isArray(j) && j && j.spells) || [],
         AL = (!Array.isArray(j) && j && j.aliases) || {};
       if (!Array.isArray(L) || !Array.isArray(SP) || typeof AL !== "object") throw 0;
-      var good = L.filter(okMon),
-        spells = SP.filter(okSpell),
+      AL = cleanAliases(AL);
+      var good = cleanAll(L, cleanMon),
+        spells = cleanAll(SP, cleanSpell),
         bad = L.length - good.length + (SP.length - spells.length);
       if (!good.length && !spells.length) {
         done("No valid stat blocks or spells found in " + file.name + ". Nothing was changed.");
