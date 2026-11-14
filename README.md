@@ -107,6 +107,10 @@ After an update, open the app once while online, then close and reopen it to get
 - Dice to roll are highlighted, attack bonuses green, DCs amber, and damage types have their own colour and symbol (🔥 Fire, ❄️ Cold, ⚡ Lightning, 💀 Necrotic…), also in the defences lines and the damage-type pickers. Spell names (blue) and conditions (red, e.g. *Paralyzed*) are links: tap to read the rule, then **◂ Stat block** to go back. Spells missing from the data (see Spells & Conditions tab) don't link.
 - ✎ Edit per creature: name, AC, HP, initiative, extra actions/traits/notes (can be copied to every creature of that type), or a custom group.
 - **Data → Sources → Your files:** import your own monster JSON files; they stay on this device and override built-in entries with the same name.
+- **Or add it by link** (same card): paste a link to the file and press **Add link**. The app reads it once and stores it like a picked file, so the table still works offline; **Update** reads the link again after you change the file. This saves copying the file to each device by hand. The link stays on the device and in your backup, never in the repository or on players' devices.
+  - A web page can only read from hosts that allow it. **Works as it is:** a Dropbox share link, the *Raw* link of a secret GitHub Gist, a Supabase Storage link.
+  - **Google Drive** only answers through its API: share the file as *Anyone with the link: Viewer*, then create a free API key once (Google Cloud Console → new project → enable **Google Drive API** → Credentials → **Create API key**; restrict it to the Drive API and to the website `landstr0m.io/*`) and paste it in the key box.
+  - Whoever has the link can read the file, so treat the link like a password: do not post it, and do not put a file there that you may not share that way.
 
 **Players (party library)**
 - Search, ticked characters first, **Add N ticked** and **Untick all** pinned at the bottom.

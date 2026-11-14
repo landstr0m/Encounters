@@ -54,12 +54,15 @@ function okFiles(L) {
       return f && typeof f.name === "string" && (Array.isArray(f.monsters) || Array.isArray(f.spells));
     })
     .map(function (f) {
-      return {
+      var o = {
         name: f.name,
         monsters: Array.isArray(f.monsters) ? f.monsters.filter(okMon) : [],
         spells: Array.isArray(f.spells) ? f.spells.filter(okSpell) : [],
         aliases: f.aliases && typeof f.aliases === "object" ? f.aliases : {},
       };
+      if (typeof f.url === "string") o.url = f.url; // a linked file: where Update reads it again
+      if (typeof f.key === "string") o.key = f.key;
+      return o;
     });
 }
 try {
@@ -146,8 +149,70 @@ function okSpell(x) {
 function readMonFile(file, done) {
   var r = new FileReader();
   r.onload = function () {
+    readMonText(file.name, r.result, done);
+  };
+  r.readAsText(file);
+}
+// The same for a link (Data > Sources > Your files > Add link). The link, like the file, is kept on this device and in
+// the backup only. A web page may only read from hosts that allow it:
+//   Dropbox share links and "raw" links (a secret GitHub Gist, Supabase Storage) work as they are;
+//   Google Drive only answers through its API, which needs an API key (the file must be shared "anyone with the link").
+function linkUrl(u, key) {
+  u = String(u || "").trim();
+  var g = /^https:\/\/(?:drive|docs)\.google\.com\/.*?(?:\/d\/|[?&]id=)([\w-]{10,})/.exec(u);
+  if (g)
+    return key
+      ? { drive: g[1], url: "https://www.googleapis.com/drive/v3/files/" + g[1] + "?alt=media&key=" + encodeURIComponent(key) }
+      : { err: "A Google Drive link needs a Google API key (see the README). Nothing was changed." };
+  if (/^https:\/\/(?:www\.)?dropbox\.com\//.test(u))
+    return { url: u.replace(/^https:\/\/(?:www\.)?dropbox\.com/, "https://dl.dropboxusercontent.com") };
+  if (/^https:\/\/\S+$/.test(u) || u.indexOf(location.origin + "/") === 0) return { url: u };
+  return { err: "That is not a link (it should start with https://). Nothing was changed." };
+}
+function linkName(u) {
+  var a = document.createElement("a");
+  a.href = u;
+  var n = decodeURIComponent(a.pathname.split("/").pop() || "");
+  return /\.json$/i.test(n) ? n : a.hostname + " link";
+}
+function readMonLink(url, key, done, name) {
+  key = String(key || "").trim();
+  var L = linkUrl(url, key),
+    get = function (u) {
+      return fetch(u, { cache: "no-store" }).then(function (r) {
+        if (!r.ok) throw r.status;
+        return r.text();
+      });
+    };
+  if (L.err) return done(L.err);
+  var named = name
+    ? Promise.resolve(name)
+    : L.drive
+      ? get("https://www.googleapis.com/drive/v3/files/" + L.drive + "?fields=name&key=" + encodeURIComponent(key)).then(function (t) {
+          return JSON.parse(t).name;
+        })
+      : Promise.resolve(linkName(L.url));
+  named
+    .then(function (n) {
+      return get(L.url).then(function (text) {
+        var link = { url: String(url).trim() };
+        if (L.drive) link.key = key;
+        readMonText(n, text, done, link);
+      });
+    })
+    .catch(function (e) {
+      done(
+        "Could not read that link" +
+          (typeof e === "number" ? " (the host answered " + e + ")" : "") +
+          ". Check that you are online, that the file is shared so anyone with the link can view it, and that the host lets web apps read it (see the README). Nothing was changed.",
+      );
+    });
+}
+function readMonText(fname, text, done, link) {
+  var file = { name: fname };
+  (function () {
     try {
-      var j = JSON.parse(String(r.result).replace(/^\uFEFF/, "")),
+      var j = JSON.parse(String(text).replace(/^\uFEFF/, "")),
         L = Array.isArray(j) ? j : (j && j.monsters) || [],
         SP = (!Array.isArray(j) && j && j.spells) || [],
         AL = (!Array.isArray(j) && j && j.aliases) || {};
@@ -173,7 +238,7 @@ function readMonFile(file, done) {
         keep = CUSTOM.filter(function (f) {
           return f.name !== file.name;
         });
-      CUSTOM = keep.concat([{ name: file.name, monsters: good, spells: spells, aliases: AL }]);
+      CUSTOM = keep.concat([Object.assign({ name: file.name, monsters: good, spells: spells, aliases: AL }, link || {})]);
       if (!saveCustom()) {
         CUSTOM = before;
         saveCustom();
@@ -207,8 +272,7 @@ function readMonFile(file, done) {
     } catch (e) {
       done("That file is not a valid monster or spell file. Nothing was changed.");
     }
-  };
-  r.readAsText(file);
+  })();
 }
 
 // ================= START-UP: load monsters.json (+ files imported on this device), then the parts =================

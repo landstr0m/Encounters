@@ -44,6 +44,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 | Kanka player sync (GitHub Action) | ✅ | Also checks levels against session reports |
 | D&D Beyond public character import (GitHub Action), per-field Keep / Use merge | ✅ | Unofficial and fragile; public sheets only |
 | Your files: own stat blocks and spells, loaded on the device (Data → Sources) | ✅ | Kept on the device and in the backup |
+| Your files by link (Dropbox, Gist, Supabase Storage; Google Drive with an API key), with Update | ✅ | 14 Nov; read once and stored, so still offline at the table |
 | Encounter XP / difficulty while planning | ✅ | 2024 DMG budgets; hidden while combat runs |
 | End combat without clearing | ✅ | Keeps creatures, HP and statuses |
 | Spells & Conditions tab: SRD 5.2 spells (SRD 5.1 for 2014 rules), full condition text, offline | ✅ | `reference.json`, `reference-2014.json` |

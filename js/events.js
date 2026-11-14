@@ -1117,6 +1117,23 @@ dr.addEventListener("click", function (e) {
     if (mf) mf.click();
     return;
   }
+  if (act === "addmonlink" || act === "updmonlink") {
+    var lf = act === "updmonlink" ? CUSTOM[+b.dataset.i] : null,
+      lu = lf ? lf.url : ($("#monurl") || {}).value,
+      lk = (lf && lf.key) || ($("#mongkey") || {}).value;
+    ui.msg = "Reading the link…";
+    renderDrawer();
+    readMonLink(
+      lu,
+      lk,
+      function (msg) {
+        ui.msg = msg;
+        renderDrawer();
+      },
+      lf && lf.name,
+    );
+    return;
+  }
   if (act === "rmmonfile") {
     CUSTOM.splice(+b.dataset.i, 1);
     saveCustom();

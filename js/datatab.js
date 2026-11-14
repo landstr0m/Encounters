@@ -1210,8 +1210,18 @@ function dataSrcHTML() {
     ) +
     dcard(
       "Your files",
-      "Stat blocks and spells of your own. A matching name replaces the built-in entry. Kept on this device and in the backup, never uploaded.",
+      "Stat blocks and spells of your own. A matching name replaces the built-in entry. Kept on this device and in the backup, never uploaded. A link is read once and stored the same way; Update reads it again.",
       '<div class="row"><button data-act="addmonfile">Add file…</button><input id="monfile" type="file" accept=".json,application/json" hidden></div>' +
+        '<div class="row"><input id="monurl" class="grow" type="url" placeholder="or paste a link (https://…)" aria-label="Link to your file"><button data-act="addmonlink">Add link</button></div>' +
+        '<div class="row"><input id="mongkey" class="grow" type="text" autocomplete="off" placeholder="Google API key (only for Google Drive links)" aria-label="Google API key" value="' +
+        esc(
+          (
+            CUSTOM.filter(function (f) {
+              return f.key;
+            })[0] || {}
+          ).key || "",
+        ) +
+        '"></div>' +
         CUSTOM.map(function (f, i) {
           return (
             '<div class="lib"><span class="grow"><b>' +
@@ -1220,7 +1230,10 @@ function dataSrcHTML() {
             f.monsters.length +
             " stat blocks" +
             ((f.spells || []).length ? ", " + f.spells.length + " spells" : "") +
-            '</span></span><button class="x" data-act="rmmonfile" data-i="' +
+            (f.url ? ", linked" : "") +
+            "</span></span>" +
+            (f.url ? '<button data-act="updmonlink" data-i="' + i + '">Update</button>' : "") +
+            '<button class="x" data-act="rmmonfile" data-i="' +
             i +
             '" aria-label="Remove ' +
             esc(f.name) +

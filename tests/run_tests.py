@@ -1944,6 +1944,62 @@ def startup_problems_are_reported(b):
 
 
 @test
+def your_file_by_link(b):
+    # Your files can also come from a link: read once, stored like a picked file, Update reads it again.
+    # Made-up data, served by the test instead of a real host. Google Drive links go through its API with a key.
+    body = {"monsters": [{"name": "Test Lurker", "id": "t-lurker", "ac": 13, "hp": 22, "abil": [10, 12, 14, 8, 10, 6]}],
+            "spells": [{"n": "Test Spark", "tx": "A made-up spell."}]}
+    seen = []
+
+    def serve(route):
+        u = route.request.url
+        seen.append(u)
+        if "fields=name" in u:
+            return route.fulfill(status=200, content_type="application/json", headers={"access-control-allow-origin": "*"}, body='{"name":"drive-book.json"}')
+        if "denied" in u:
+            return route.fulfill(status=403, headers={"access-control-allow-origin": "*"}, body="no")
+        route.fulfill(status=200, content_type="application/json", headers={"access-control-allow-origin": "*"}, body=json.dumps(body))
+
+    def open_src(a):
+        a.click('[data-act="openadd"]'); a.e("S.tab='data';S.dsec='src';renderDrawer()")
+
+    a = App(b)
+    for pat in ("https://files.example/**", "https://www.googleapis.com/**", "https://dl.dropboxusercontent.com/**"):
+        a.ctx.route(pat, serve)
+    n = a.e("MON.length"); open_src(a)
+    a.pg.fill("#monurl", "not a link"); a.click('[data-act="addmonlink"]')
+    check("not a link" in a.pg.inner_text("#drawer") and a.e("CUSTOM.length") == 0, "a non-link is refused")
+    a.pg.fill("#monurl", "https://drive.google.com/file/d/1AbCdEfGhIjKlMnOp/view?usp=sharing"); a.click('[data-act="addmonlink"]')
+    check("needs a Google API key" in a.pg.inner_text("#drawer"), "a Drive link without a key says what is missing")
+    a.pg.fill("#monurl", "https://files.example/denied/book.json"); a.click('[data-act="addmonlink"]')
+    a.pg.wait_for_function("window.__e('ui.msg').indexOf('Could not read') === 0")
+    a.errors.clear()                                       # the 403 above is the point of that step
+    eq(a.e("CUSTOM.length"), 0, "a refused link changes nothing")
+    a.pg.fill("#monurl", "https://files.example/my/book.json")
+    with a.pg.expect_navigation():
+        a.click('[data-act="addmonlink"]')
+    a.pg.wait_for_function("window.STARTED === true")
+    eq(a.j("[MON.length,CUSTOM[0].name,CUSTOM[0].url,CUSTOM[0].monsters.length,CUSTOM[0].spells.length]"),
+       [n + 1, "book.json", "https://files.example/my/book.json", 1, 1], "the linked file is stored and merged")
+    body["monsters"][0]["hp"] = 30                         # the file changes at its host: Update fetches it again
+    open_src(a); check("linked" in a.pg.inner_text("#drawer"), "the list marks it as linked")
+    with a.pg.expect_navigation():
+        a.click('[data-act="updmonlink"]')
+    a.pg.wait_for_function("window.STARTED === true")
+    eq(a.j("[CUSTOM.length,CUSTOM[0].monsters[0].hp,MON.find(function(m){return m.name==='Test Lurker'}).hp]"), [1, 30, 30], "Update replaces the same file")
+    open_src(a)                                            # Google Drive: share link + key become an API request
+    a.pg.fill("#monurl", "https://drive.google.com/file/d/1AbCdEfGhIjKlMnOp/view?usp=sharing"); a.pg.fill("#mongkey", "KEY123")
+    with a.pg.expect_navigation():
+        a.click('[data-act="addmonlink"]')
+    a.pg.wait_for_function("window.STARTED === true")
+    check("https://www.googleapis.com/drive/v3/files/1AbCdEfGhIjKlMnOp?alt=media&key=KEY123" in seen, "Drive is read through its API")
+    eq(a.j("CUSTOM.map(function(f){return [f.name,f.key||''];})"), [["book.json", ""], ["drive-book.json", "KEY123"]], "the Drive file keeps its name and key")
+    eq(a.e("linkUrl('https://www.dropbox.com/scl/fi/abc/book.json?rlkey=x&dl=0').url"), "https://dl.dropboxusercontent.com/scl/fi/abc/book.json?rlkey=x&dl=0", "Dropbox share link becomes its direct form")
+    check("files.example" not in a.e("JSON.stringify(tableSnap())"), "the link is not sent to other devices")
+    eq(a.errors, [], "no errors:")
+
+
+@test
 @own_file
 def own_file_end_to_end(b):
     # The real upgrade path: a device with saved fights that use stat blocks which are not built in. The app must keep

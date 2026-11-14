@@ -2762,6 +2762,9 @@ button {
 .data .row button {
   flex: 1;
 }
+.data .row input.grow {
+  flex: 3;
+}
 /* Edit panel */
 .ed h2 {
   font-family: var(--display);
