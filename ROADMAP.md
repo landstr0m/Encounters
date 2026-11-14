@@ -13,7 +13,9 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 4. 📋 **Player link: temp HP.**
 5. 📋 **Dungeon Master's Vault import:** waiting for the sheet link.
 6. 📋 Saved target lists for effects; local monster images.
-7. Decisions waiting for Andrew (`DESIGN.md`): A publish only after tests pass (a repository setting), B storage beyond `localStorage`, C leave the Discord webhook out of the backup unless ticked.
+7. 🔨 **Publish only after tests pass:** workflow built (14 Nov); Andrew switches Settings → Pages → Source to **GitHub Actions**, then one run confirms it.
+
+Decided 14 Nov (`DESIGN.md` A to C): publish after tests; stay with `localStorage` until size is a problem (plan in Stage 3); the Discord webhook link is left out of the backup file (done).
 
 ✅ **Closed 14 Nov (before table test 2):** security policy on the page (Content-Security-Policy) with the host list agreed (file hosts for links; D&D Beyond, Kanka, Open5e, D&D 5e API and Dungeon Master's Vault listed ahead of use), timed effects (start round, number of rounds), legendary actions listed once.
 
@@ -131,6 +133,12 @@ Open follow-ups from A–G:
 ## Stage 3: network features (📋, deliberately postponed)
 - ✅ Cross-device table view and player links (Supabase Realtime Broadcast, see README *Remote session*); confirmed on two devices 13 Nov.
 - Cloud backup / sync of app state (today: manual Export / Import).
+- 💡 **Storage beyond `localStorage`** (decided 14 Nov: not until needed). Today everything is in the browser's `localStorage`: about 5 MB per device, one browser only. Move when storage used (Data → Sources → Loaded now) passes about 3.5 MB, a save fails, or local monster images arrive. Steps, smallest first:
+  1. A warning in the app when storage used passes 70 %.
+  2. Monster files (the largest part) into IndexedDB: no practical size limit, same offline behaviour; state stays where it is.
+  3. Ask the browser to keep the data (`navigator.storage.persist()`), so iOS does not clear it after a week unused.
+  4. Images in IndexedDB as well (they do not fit in `localStorage` at all).
+  5. Cloud backup (above), which also covers a lost or replaced device.
 
 ## Later ideas (from the original plan)
 - 💡 Encounters generated from DM notes: an AI writes a prepared-encounter file (documented schema) that the app imports with Load / Add.

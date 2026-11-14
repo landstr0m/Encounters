@@ -1,4 +1,5 @@
 # Runs the browser test battery on every push, so a broken change shows up as a red cross on the commit.
+# On main, the site is published only after the tests pass (Settings → Pages → Source must be "GitHub Actions").
 name: Tests
 on:
   push:
@@ -6,6 +7,12 @@ on:
     paths-ignore: ["**.md"]
   pull_request:
   workflow_dispatch:
+  workflow_run: # the player updates commit with the workflow's own token, which does not count as a push: publish after them too
+    workflows: ["Update players from Kanka", "Update players from D&D Beyond"]
+    types: [completed]
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -20,3 +27,23 @@ jobs:
       - run: python tools/check_monsters.py
       - name: Formatting (Prettier)
         run: npx --yes prettier@3.10.1 --check .
+      - name: Collect the site (the app only: no tests, tools or notes)
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: rsync -a --exclude '.*' --exclude tests --exclude tools --exclude local --exclude node_modules --exclude '*.md' --exclude _site ./ _site/
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        with:
+          path: _site
+  publish:
+    needs: tests # skipped when a test fails, so the last good version stays online
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

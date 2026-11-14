@@ -292,7 +292,14 @@ function editHTML() {
 }
 // Download the one backup file: state, and (optionally) the monster files kept on this device.
 function doExport() {
-  var obj = { app: "encounter-tracker", version: 2, edition: "2024", exported: new Date().toISOString(), state: S };
+  // The Discord webhook link is a secret (whoever has it can post to the channel): it stays on this device, out of the file
+  var obj = {
+    app: "encounter-tracker",
+    version: 2,
+    edition: "2024",
+    exported: new Date().toISOString(),
+    state: Object.assign({}, S, { hook: undefined }),
+  };
   if (CUSTOM.length && ui.expMon !== false) obj.monsterFiles = CUSTOM;
   var name = "encounter-backup-" + new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-") + ".json";
   var blob = new Blob([JSON.stringify(obj, null, 1)], { type: "application/json" });
@@ -337,6 +344,7 @@ function doImport(f) {
           throw new Error("bad");
       });
       var mf = Array.isArray(o.monsterFiles) ? okFiles(o.monsterFiles) : null;
+      delete st.hook; // an older backup may still hold a webhook link: this device keeps its own
       S = Object.assign(S, st);
       fixIds();
       ui.sel = {};

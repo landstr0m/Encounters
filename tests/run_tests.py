@@ -430,15 +430,20 @@ def prepared_encounters(b):
 def export_import_roundtrip(b):
     a = App(b)
     a.pc("Hero"); a.mon("mm-skeleton", 2)
-    a.e("S.tab='data';S.dsec='bak';ui.drawer=true;renderDrawer()")
+    a.e("S.hook='https://discord.com/api/webhooks/123456/abc-DEF_1';S.tab='data';S.dsec='bak';ui.drawer=true;renderDrawer()")
     with a.pg.expect_download() as dl:
         a.click('[data-act="export"]')
     path = os.path.join(tempfile.mkdtemp(), "x.json")
     dl.value.save_as(path)
+    check("webhooks" not in open(path, encoding="utf-8").read(), "the Discord webhook link is not in the backup file")
+    old = os.path.join(tempfile.mkdtemp(), "old.json")        # a backup from before this rule still carries one
+    o = json.load(open(path, encoding="utf-8")); o["state"]["hook"] = "https://discord.com/api/webhooks/999/other"
+    json.dump(o, open(old, "w", encoding="utf-8"))
     a.e("S.list=[];save();renderBoard()")
-    a.pg.set_input_files("#impfile", path)
+    a.pg.set_input_files("#impfile", old)
     a.pg.wait_for_timeout(400)
     eq(a.e("S.list.length"), 3, "import restores the encounter")
+    eq(a.e("S.hook"), "https://discord.com/api/webhooks/123456/abc-DEF_1", "import keeps this device's webhook link, never the file's")
     bad = os.path.join(tempfile.mkdtemp(), "bad.json")
     open(bad, "w").write('{"nope":1}')
     a.pg.set_input_files("#impfile", bad)

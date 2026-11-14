@@ -30,15 +30,18 @@ Written 14 Nov 2026 after a code review. Each point says what was chosen, why, a
 - *Why there:* its "1 round (until it acts again)" statuses end at that same moment, so nothing is left behind. Undo brings it back.
 - *Open choice:* "Starts in round" is the round number shown in the top bar, not "N rounds from now". A waiting effect is hidden from players even if its name is set to visible (no spoilers). Say if either should be the other way.
 
-## Open: needs a decision
+## Decided 14 Nov 2026 (were open)
 
-**A. A push to `main` is live at once.** GitHub Pages publishes `main` directly, so a bad push reaches the iPad even if the tests fail.
-- *Better:* let the Tests workflow publish the site only after the tests pass (Settings → Pages → Source: GitHub Actions). Needs a repository setting only Andrew can change.
+**A. The site is published only after the tests pass.** GitHub Pages used to publish `main` directly, so a bad push reached the iPad even with failing tests. The Tests workflow now has a `publish` step that runs only when every test passed; a failing change leaves the last good version online.
+- *Needs once:* Settings → Pages → Source: **GitHub Actions** (only Andrew can change it).
+- *What it costs:* a change is live about 3 minutes after the push (tests first), not after 1. The Kanka and D&D Beyond updates publish through the same workflow.
 
-**B. Everything is stored in the browser's `localStorage`.** Simple and offline, but limited to about 5 MB, tied to one browser on one device, and iOS may clear it for a site that is not on the Home Screen and unused for a week.
-- *Today's answer:* Export before and after each session. *Later:* IndexedDB for the monster files (no size worry), and the planned cloud backup.
+**B. Stay with `localStorage` until the size is a problem.** Simple and offline, but limited to about 5 MB, tied to one browser on one device, and iOS may clear it for a site that is not on the Home Screen and unused for a week.
+- *Today:* Export before and after each session; "Loaded now" (Data → Sources) shows storage used; a failed save shows a warning.
+- *When to move (see ROADMAP, Stage 3):* storage used passes about 3.5 MB, a save fails, or local monster images arrive.
 
-**C. The Discord webhook address is inside the backup file.** Anyone with that address can post to the channel, so do not share a backup file. *Later:* leave it out of the export unless ticked.
+**C. The Discord webhook link is not in the backup file.** Anyone with that link can post to the channel, and it takes a minute to paste again on a new device. Export leaves it out; Import never takes one from a file (older backups still contain it) and keeps the device's own.
+- *Still in the backup, on purpose for now:* the Google API key and file links of linked files (when *your files* are ticked). The key only works for the Drive API from this website if restricted as the README says; say if these should be left out too.
 
 ## Kept on purpose
 
