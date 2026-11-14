@@ -1465,9 +1465,11 @@ dr.addEventListener("click", function (e) {
         dc: f.dc === "" ? "" : Math.floor(+f.dc),
         st: f.st,
         dur: f.st ? f.dur : "",
+        from: fxNum(f.from) > 1 ? fxNum(f.from) : "",
+        last: fxNum(f.last) || "",
       });
-      ui.fx = { name: "", init: "", desc: "", vis: f.vis, dd: "", dt: "", sv: "", dc: "", st: "", dur: "" };
-      ui.msg = "Added " + nm + " at initiative " + iv + ".";
+      ui.fx = Object.assign(fxBlank(), { vis: f.vis });
+      ui.msg = "Added " + nm + " at initiative " + iv + (fxNum(f.from) > 1 ? ", from round " + fxNum(f.from) : "") + ".";
     }
   }
   save();
@@ -1502,6 +1504,8 @@ dr.addEventListener("input", function (e) {
     ui.qty[t.dataset.m] = t.value;
   } else if (t.id === "fxname") ui.fx.name = t.value;
   else if (t.id === "fxinit") ui.fx.init = t.value;
+  else if (t.id === "fxfrom") ui.fx.from = t.value;
+  else if (t.id === "fxlast") ui.fx.last = t.value;
   else if (t.id === "fxdesc") ui.fx.desc = t.value;
   else if (t.id === "fxdd") ui.fx.dd = t.value;
   else if (t.id === "fxdc") ui.fx.dc = t.value;
@@ -1750,3 +1754,13 @@ document.addEventListener(
 document.addEventListener("visibilitychange", function () {
   if (!document.hidden) pull();
 });
+// A stat block picture that is not there removes itself (errors do not bubble, so listen in the capture phase). This used to
+// be an onerror attribute; the security policy in index.html does not run script written inside HTML.
+document.addEventListener(
+  "error",
+  function (e) {
+    var t = e.target;
+    if (t && t.tagName === "IMG" && t.classList.contains("thumb")) t.remove();
+  },
+  true,
+);

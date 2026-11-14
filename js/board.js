@@ -17,6 +17,7 @@ function renderTurn() {
       esc(c.name) +
       '</span><span class="st"><i>EFFECT</i>init ' +
       c.init +
+      (fxWhen(c) ? " \u00B7 " + esc(fxWhen(c)) : "") +
       '</span><span class="sp"></span><button data-act="fxvis">' +
       (c.vis ? "Visible to players" : "Hidden from players") +
       '</button><button data-act="fxrm">Remove</button></div>' +
@@ -306,26 +307,20 @@ function renderTurn() {
           })
           .join("") +
         "</div>";
-    var leg = m ? m.leg || [] : [];
+    // Legendary actions are not repeated here: they are used between turns, from the bar on other creatures' turn cards
+    // (remHTML), and the full text is in the stat block.
     var more = X.filter(function (x) {
       return x.t === "t" && (x.n || x.d);
     })
       .map(function (x) {
         return [x.n || "Extra", x.d || ""];
       })
-      .concat(
-        m ? m.traits || [] : [],
-        leg.map(function (t) {
-          return ["Legendary: " + t[0], t[1]];
-        }),
-      );
+      .concat(m ? m.traits || [] : []);
     if (more.length) {
       h +=
         "<details" +
         (ui.traitsOpen ? " open" : "") +
-        "><summary>Traits" +
-        (leg.length ? " and legendary actions" : "") +
-        " (" +
+        "><summary>Traits (" +
         more.length +
         ")</summary>" +
         more
@@ -595,6 +590,7 @@ function fxRow(c) {
     '<td colspan="4"><span class="name">' +
     esc(c.name) +
     '</span><span class="tag">Effect</span>' +
+    (fxWhen(c) ? '<span class="tag">' + esc(fxWhen(c)) + "</span>" : "") +
     (c.desc ? '<div class="fx" style="margin-top:2px">' + esc(c.desc) + "</div>" : "") +
     '<div class="dsb" style="margin-top:4px"><button data-act="fxvis">' +
     (c.vis ? "Visible to players" : "Hidden from players") +

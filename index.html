@@ -1,6 +1,10 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
+<!-- Security policy (second lock behind the file checks and esc()): only this site's own script files run, so script hidden in
+     data cannot; and the page can only send or fetch data at the hosts in connect-src (Supabase for the remote session, Discord
+     for webhooks, and the hosts "Your files by link" reads). A new host must be added here and to LINKHOSTS in js/boot.js. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://discord.com https://*.discord.com https://discordapp.com https://*.discordapp.com https://www.googleapis.com https://*.googleusercontent.com https://*.dropboxusercontent.com https://gist.githubusercontent.com https://raw.githubusercontent.com; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
 <title>Encounter Tracker</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">

@@ -6,6 +6,8 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 
 **Code review and clean-up done (14 Nov 2026):** Data tab in four sections, habitat lists, shared terms, sturdier start-up and saved-state repair, parallel tests (details in `BUGS.md`). **Structure (14 Nov):** the app is now a page shell, `app.css` and twelve files in `js/`, formatted with Prettier, with a Tests workflow on every push. `DESIGN.md` explains why and lists the open design points.
 
+**Before table test 2 (14 Nov):** security policy on the page (Content-Security-Policy), timed effects (start round, number of rounds), legendary actions listed once. At the table, check: a linked Google Drive file still updates (the policy now names the hosts), and a timed effect in a real fight.
+
 **2014 / 2024 switch built (14 Nov):** player spells and Paladin / Ranger slots follow the character's edition (default in Data → Sources, override per character); a stat block's older names (`aka`) find it in the search. Monsters, conditions and budgets stay 2024. Possible follow-ups: read the edition from the D&D Beyond sheet, 2014 versions of more spells through a file of your own, 2014 conditions if ever wanted.
 
 **Play test 1 done (12 Nov 2026).** Worked well: monster cards, tap attacks with preloaded damage/statuses, target chips, HP, random HP, initiative, status and concentration tracking. Follow-ups, in order:
@@ -33,7 +35,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 1. ✅ **Controlled live table test** (12 Nov) on the iPad with the tap-to-use flow (monster turns, legendary bar, player spells, table view line). Log findings in `BUGS.md`, then fix before v1.0.
 2. ✅ **Data tab redesign** (14 Nov): four sections, one on screen at a time: *Encounters* (generator, prepared encounters), *Session* (last combat, treasure, table view and player links, combat log), *Sources* (Kanka / D&D Beyond, monster files, what is loaded), *Backup* (export / import). Earlier clean-up (6 Nov: one backup file incl. monster files, effect templates, Rules tab renamed Spells & Conditions): group into *Backup* (export / import), *Session* (combat log, table window, prepared encounters) and *Sources* (monster files, spells, Kanka / D&D Beyond), with one line of help each.
 3. 📋 **v1.0 checklist** (below).
-4. Then pick from Stage 2: character library groups, effects "after N rounds", compact stat block, 2014/2024 toggle.
+4. Then pick from Stage 2: character library groups, compact stat block (effects "after N rounds" and the 2014/2024 switch are done).
 
 ## Stage 1: table-ready tracker (alpha → v1.0)
 
@@ -46,8 +48,8 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 | Your files: own stat blocks and spells, loaded on the device (Data → Sources) | ✅ | Kept on the device and in the backup |
 | Your files by link (Dropbox, Gist, Supabase Storage; Google Drive with an API key), with Update | ✅ | 14 Nov; read once and stored, so still offline at the table |
 | File integrity check: known fields only, forced types, size limits; script in file text never runs | ✅ | 14 Nov; `cleanMon()` / `cleanSpell()` / `cleanAliases()`; test `hostile_or_broken_file_is_harmless` |
-| Tests run everywhere on a made-up book (`tests/fixtures/test-book.json`); own file only for one optional check | ✅ | 14 Nov; 86 tests on GitHub, none skipped there |
-| Content-Security-Policy on the page (second lock: even a missed escape could not run script or send data elsewhere) | 📋 | Needs the inline handlers and allowed hosts (Supabase, Discord, Drive) listed first |
+| Tests run everywhere on a made-up book (`tests/fixtures/test-book.json`); own file only for one optional check | ✅ | 14 Nov; 89 tests on GitHub, none skipped there |
+| Content-Security-Policy on the page (second lock: even a missed escape could not run script or send data elsewhere) | ✅ | 14 Nov; own scripts only, listed hosts only (Supabase, Discord, Drive API, Dropbox, GitHub raw); linked files from other hosts are refused with a message; test `security_policy_holds` |
 | Tell the user what a file check dropped or cut, per entry | 💡 | Today only the count of skipped entries is shown |
 | Encounter XP / difficulty while planning | ✅ | 2024 DMG budgets; hidden while combat runs |
 | End combat without clearing | ✅ | Keeps creatures, HP and statuses |
@@ -82,7 +84,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 | G | Crit toggle, reactions on targets (Shield, Uncanny Dodge, monster reactions), combat log, table view line, player spells | ✅ |
 
 Open follow-ups from A–G:
-- 📋 Legendary actions still also listed in the turn card's Traits fold (the between-turns bar is the tappable version).
+- ✅ (14 Nov) Legendary actions are no longer repeated in the turn card's Traits fold (the between-turns bar is the tappable version; the full text is in the stat block).
 - ✅ Player spell slots (from class levels, tap to use).
 - 💡 Clay Golem's and Aboleth's Multiattack summaries read slightly off (see BUGS.md); the full sentence is shown, so low priority.
 
@@ -90,7 +92,8 @@ Open follow-ups from A–G:
 
 ### Effects
 - ✅ Damage, save and timed status; Apply on the effect's turn.
-- 📋 Saved target lists, "after N rounds" durations.
+- ✅ (14 Nov) "After N rounds": an effect can start in a set round and last a set number of rounds, then ends by itself (README: Timed effects).
+- 📋 Saved target lists.
 
 ### Encounter difficulty extensions (💡)
 - CR / XP for effects and hazards, counted in the encounter XP.
@@ -147,7 +150,7 @@ Score 0–5 against popular trackers (D&D Beyond Encounter Builder, Improved Ini
 | Prepared encounters / reinforcements | 4 | 4 | |
 | Encounter difficulty / XP budget | 4 | 4 | No lair XP or hazard CR yet |
 | Spell / rules lookup | 4 | 4 | Spells & Conditions tab; both editions of SRD spells; more through your own files |
-| Lair actions / hazards that act | 4 | 4 | Templates + saved templates; start-of-turn damage one tap. Missing "after N rounds" |
+| Lair actions / hazards that act | 4 | 4 | Templates + saved templates; start-of-turn damage one tap; start round and number of rounds |
 | Building encounters on a phone | 4 | 4 | |
 | Party library management | 3 | 4 | Groups/tags, filter, tick a whole group, source per character |
 | Character import | 3 | 4 | Kanka + D&D Beyond; links found in Kanka descriptions import automatically (name/class checked) |

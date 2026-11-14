@@ -1297,3 +1297,18 @@ var isPcDead = function (c) {
 var isOut = function (c) {
   return isDead(c) || isPcDead(c);
 };
+// Timed effects: c.from = the round it first acts in (it waits, unseen by players, before that); c.last = how many rounds
+// it acts for; c.until = its last round, set on its first turn. One round later, at its initiative, it ends by itself.
+function fxWait(c, round) {
+  return c.kind === "fx" && +c.from > round;
+}
+function fxOver(c, round) {
+  return c.kind === "fx" && c.until != null && round > c.until;
+}
+function fxWhen(c) {
+  var p = [];
+  if (fxWait(c, S.round)) p.push("starts in round " + +c.from);
+  if (c.until != null) p.push(c.until > S.round ? "until round " + c.until : "last round");
+  else if (+c.last > 0) p.push("lasts " + +c.last + (+c.last === 1 ? " round" : " rounds"));
+  return p.join(" \u00B7 ");
+}

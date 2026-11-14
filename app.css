@@ -2759,6 +2759,14 @@ button {
 .tok.fx {
   background: color-mix(in srgb, var(--warn) 12%, var(--surface));
 }
+.tok.fx.wait {
+  opacity: 0.6;
+}
+.flt .fxn {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
 .tok.fx .in::after {
   content: " \00B7 EFFECT";
   font-size: 0.7rem;

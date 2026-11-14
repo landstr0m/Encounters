@@ -47,6 +47,7 @@ function tokHTML(c, isNext) {
     var nw = c.id === S.turnId;
     return (
       '<div class="tok fx' +
+      (fxWait(c, S.round) ? " wait" : "") +
       (nw ? " now" : "") +
       (isNext ? " next" : "") +
       '"><div class="lab">' +
@@ -57,6 +58,7 @@ function tokHTML(c, isNext) {
       esc(c.name) +
       '</div><div class="mini">' +
       (c.vis ? "" : "<span>Hidden</span>") +
+      (fxWhen(c) ? "<span>" + esc(fxWhen(c)) + "</span>" : "") +
       "</div></div>"
     );
   }

@@ -20,6 +20,15 @@ Written 14 Nov 2026 after a code review. Each point says what was chosen, why, a
 
 **5. Honest start-up messages.** Any failure used to say "Could not load monsters.json". There are now three messages (data missing, a script missing, a bug while starting), so a problem at the table can be reported accurately.
 
+**6. A security policy on the page (14 Nov, before table test 2).** `index.html` now tells the browser which scripts may run and which hosts the page may talk to (Content-Security-Policy).
+- *Why:* the app shows text from places it does not control (your files, Kanka, D&D Beyond, backups) and holds secrets (Discord webhook, Google API key). Escaping that text is the first lock; if one escape is ever missed, the policy is the second: the hidden script does not run, and it could not send anything to a host that is not listed.
+- *What it costs (flagged, can be reverted):* "Your files by link" used to accept any `https://` link. It now accepts Dropbox, Google Drive, GitHub raw / Gist and Supabase Storage only, and says so for any other host. Allowing every host would have left the "cannot send data elsewhere" half of the policy empty. A new host is two short edits (`connect-src` in `index.html`, `LINKHOSTS` in `js/boot.js`).
+- *Limits:* inline `style="…"` is still allowed (the app uses it for bar widths and spacing; styles cannot run code). GitHub Pages cannot send the policy as a header, so it is a tag in the page: enough for this, but `frame-ancestors` (who may embed the page) is not available that way.
+
+**7. Timed effects end by removing themselves.** An effect with "Rounds it lasts" is removed one round after its last turn, at its own initiative.
+- *Why there:* its "1 round (until it acts again)" statuses end at that same moment, so nothing is left behind. Undo brings it back.
+- *Open choice:* "Starts in round" is the round number shown in the top bar, not "N rounds from now". A waiting effect is hidden from players even if its name is set to visible (no spoilers). Say if either should be the other way.
+
 ## Open: needs a decision
 
 **A. A push to `main` is live at once.** GitHub Pages publishes `main` directly, so a bad push reaches the iPad even if the tests fail.

@@ -32,7 +32,7 @@ function tableSnap() {
     sess: { edit: { hp: !!E.hp, ac: !!E.ac, init: !!E.init, st: !!E.st } },
     list: S.list
       .filter(function (c) {
-        return c.kind !== "fx" || c.vis;
+        return c.kind !== "fx" || (c.vis && !fxWait(c, S.round));
       })
       .map(function (c) {
         if (c.kind === "fx") return { id: c.id, kind: "fx", name: c.name, init: c.init, vis: true, conds: [], hp: 1, max: 1 };

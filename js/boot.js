@@ -273,6 +273,9 @@ function readMonFile(file, done) {
 // the backup only. A web page may only read from hosts that allow it:
 //   Dropbox share links and "raw" links (a secret GitHub Gist, Supabase Storage) work as they are;
 //   Google Drive only answers through its API, which needs an API key (the file must be shared "anyone with the link").
+// The hosts a link may point at. The security policy in index.html (connect-src) lets the page talk to these only, so
+// any other host is refused here with a message instead of failing silently. Keep the two lists the same.
+var LINKHOSTS = /^https:\/\/(?:[\w-]+\.supabase\.co|(?:gist|raw)\.githubusercontent\.com|[\w.-]+\.dropboxusercontent\.com)\//;
 function linkUrl(u, key) {
   u = String(u || "").trim();
   var g = /^https:\/\/(?:drive|docs)\.google\.com\/.*?(?:\/d\/|[?&]id=)([\w-]{10,})/.exec(u);
@@ -282,7 +285,11 @@ function linkUrl(u, key) {
       : { err: "A Google Drive link needs a Google API key (see the README). Nothing was changed." };
   if (/^https:\/\/(?:www\.)?dropbox\.com\//.test(u))
     return { url: u.replace(/^https:\/\/(?:www\.)?dropbox\.com/, "https://dl.dropboxusercontent.com") };
-  if (/^https:\/\/\S+$/.test(u) || u.indexOf(location.origin + "/") === 0) return { url: u };
+  if (u.indexOf(location.origin + "/") === 0 || (/^https:\/\/\S+$/.test(u) && LINKHOSTS.test(u))) return { url: u };
+  if (/^https:\/\/\S+$/.test(u))
+    return {
+      err: "Links are only read from Dropbox, Google Drive, GitHub (a Gist or raw link) and Supabase Storage. Add the file itself instead. Nothing was changed.",
+    };
   return { err: "That is not a link (it should start with https://). Nothing was changed." };
 }
 function linkName(u) {

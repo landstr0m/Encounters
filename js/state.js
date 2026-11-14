@@ -146,7 +146,9 @@ function order() {
       return p[0];
     });
 }
-function stepFrom(O, i) {
+// The next creature to act after position i. round = the round at position i; an effect that still waits for its round
+// is skipped, and one whose rounds are over is skipped and collected in over (nextTurn() then ends it).
+function stepFrom(O, i, round, over) {
   var wrap = 0;
   for (var k = 0; k < O.length; k++) {
     i++;
@@ -154,7 +156,13 @@ function stepFrom(O, i) {
       i = 0;
       wrap++;
     }
-    if (!isOut(O[i])) return { i: i, wrap: wrap };
+    var c = O[i];
+    if (isOut(c) || fxWait(c, round + wrap)) continue;
+    if (fxOver(c, round + wrap)) {
+      if (over && over.indexOf(c) < 0) over.push(c);
+      continue;
+    }
+    return { i: i, wrap: wrap };
   }
   return null;
 }
@@ -166,7 +174,12 @@ function nextTurn() {
   var idx = O.findIndex(function (c) {
     return c.id === S.turnId;
   });
-  var r = stepFrom(O, idx);
+  if (idx < 0)
+    S.list.forEach(function (x) {
+      delete x.until; // a new combat: timed effects count their rounds again
+    });
+  var over = [],
+    r = stepFrom(O, idx, idx < 0 ? 1 : S.round, over);
   if (!r) return;
   if (idx < 0) S.round = 1;
   else S.round += r.wrap;
@@ -198,7 +211,18 @@ function nextTurn() {
   nx.ray = {};
   nx.mrep = {};
   nx.msp = {};
+  if (nx.kind === "fx" && +nx.last > 0 && nx.until == null) nx.until = S.round + +nx.last - 1;
   var gone = expTick(E, S.turnId);
+  // Effects whose rounds are over end where they would have acted again: their "1 round" statuses end with them
+  over.forEach(function (f) {
+    gone = gone.concat(expTick(null, f.id));
+    gone.push(f.name);
+    S.list = S.list.filter(function (x) {
+      return x.id !== f.id;
+    });
+    logAdd(f.name + " ended");
+  });
+  if (over.length) pruneSel();
   if (gone.length) toast("Ended: " + esc(gone.join(", ")));
   logAdd("\u2014 Round " + S.round + ": " + nx.name + "\u2019s turn");
 }
@@ -209,7 +233,7 @@ function nextId() {
   });
   if (idx < 0) return null;
   for (var k = 0; k < O.length; k++) {
-    var r = stepFrom(O, idx);
+    var r = stepFrom(O, idx, S.round);
     if (!r) return null;
     var c = O[r.i];
     if (c.id === S.turnId) return null;
@@ -497,7 +521,7 @@ function incSync(c, added) {
   }
 }
 function shown(c) {
-  return c.kind !== "fx" || c.vis || !ui.present;
+  return c.kind !== "fx" || !ui.present || (c.vis && !fxWait(c, S.round));
 }
 function rmComb(c) {
   if (c.id === S.turnId) S.turnId = nextIdExcluding([c]);

@@ -108,7 +108,7 @@ After an update, open the app once while online, then close and reopen it to get
 - ✎ Edit per creature: name, AC, HP, initiative, extra actions/traits/notes (can be copied to every creature of that type), or a custom group.
 - **Data → Sources → Your files:** import your own monster JSON files; they stay on this device and override built-in entries with the same name. The card tells you what happened: **Loaded** or **Not loaded** with the reason and the time, then the list of files on this device (picked or linked, when read). A picked file is a copy; add it again after you change it. Only linked files have an **Update** button.
 - **Or add it by link** (same card): paste a link to the file and press **Add link**. The app reads it once and stores it like a picked file, so the table still works offline; **Update** reads the link again after you change the file. This saves copying the file to each device by hand. The link stays on the device and in your backup, never in the repository or on players' devices.
-  - A web page can only read from hosts that allow it. **Works as it is:** a Dropbox share link, the *Raw* link of a secret GitHub Gist, a Supabase Storage link.
+  - Links are read from these hosts only (the page's security policy allows no others, see *Security* below). **Works as it is:** a Dropbox share link, the *Raw* link of a secret GitHub Gist (or another raw GitHub link), a Supabase Storage link. A file anywhere else: download it and add the file itself.
   - **Google Drive** only answers through its API: share the file as *Anyone with the link: Viewer*, then create a free API key once (Google Cloud Console → new project → enable **Google Drive API** → Credentials → **Create API key**; restrict it to the Drive API and to the website `landstr0m.io/*`) and paste it in the key box.
 - **Files are checked on the way in.** Only the known fields are kept, each forced to its expected type; unknown fields are dropped, very long text is cut, and a file over 20 MB is refused. Text from a file is always shown as text, never run as code. A file can only change what is stored in the app on the device that loaded it; players on the table or player links receive names, never the file.
   - Whoever has the link can read the file, so treat the link like a password: do not post it, and do not put a file there that you may not share that way.
@@ -295,6 +295,19 @@ Four sections, one on screen at a time (the app remembers the last one):
 - **Session:** the last combat summary, treasure and the Discord post, the table window and remote session links, and the combat log.
 - **Sources:** *Update from* Kanka and D&D Beyond, your monster files, and what is loaded now (monster and spell counts).
 - **Backup:** *Export everything* writes one file with the tracker, saved encounters, characters, effect templates, combat logs, settings and (ticked by default) your monster files. *Import* restores all of it on any device.
+
+## Timed effects (after N rounds)
+In Add → Effects, two optional numbers set when an effect acts:
+- **Starts in round:** the effect waits until that round. Until then it is skipped in the turn order, shown faded to you ("starts in round 3") and not shown to players at all, even when its name is set to visible. Example: Reinforcements, round 3.
+- **Rounds it lasts:** the effect acts for that many rounds, counted from its first turn ("until round 4" on its token and turn card). One round later, at its initiative, it ends by itself and is removed; statuses it gave with the *1 round* duration end with it. **Undo** brings it back.
+
+Leave both blank for an effect that acts every round until you remove it. Both numbers are kept in saved encounters and templates; a new combat starts the count again.
+
+## Security
+- **Files are not trusted:** see *Files are checked on the way in* above.
+- **Security policy:** the page carries a Content-Security-Policy (in `index.html`). Only the app's own script files run, so script hidden in a file, a character sheet or a link cannot run even if a check missed it. The page can only exchange data with this site, Supabase (remote session), Discord (webhook posts) and the hosts for linked files (Google Drive API, Dropbox, GitHub raw / Gist, Supabase Storage).
+- A new host (another file host, a new service) must be added in two places: `connect-src` in `index.html` and `LINKHOSTS` in `js/boot.js`. The test `security_policy_holds` runs the app with the policy on.
+- Secrets (Discord webhook, Google API key, file links) stay on the device and in your backup file; they are never in the repository or sent to players' devices.
 
 ## Effect templates
 In Add → Effects, tap a template (Lair action, Collapsing ceiling, Poison gas, Spreading fire, Reinforcements) to fill the form, check the numbers, then Add effect. **Save as template** keeps your own (★, × to delete); they are in the backup file.

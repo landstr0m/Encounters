@@ -180,7 +180,7 @@ function statHTML() {
     cx +
     '<img class="thumb" src="img/' +
     esc(m.srcId || m.id) +
-    '.webp" alt="" onerror="this.remove()"><h2>' +
+    '.webp" alt=""><h2>' +
     esc(m.name) +
     '</h2><div class="type">' +
     esc(m.type) +
@@ -349,10 +349,15 @@ var FXT = [
     dc: "12",
     st: "Burning",
   },
-  { name: "Reinforcements", init: "0", desc: "Arrive at the end of round 3", vis: false },
+  { name: "Reinforcements", init: "0", desc: "Arrive now, at the end of the round", vis: false, from: "3", last: "1" },
 ];
+// A round count typed in the effect form: a whole number from 1 to 99, or 0 for blank / nonsense
+function fxNum(v) {
+  var n = Math.floor(+v);
+  return n >= 1 && n <= 99 ? n : 0;
+}
 function fxBlank() {
-  return { name: "", init: "", desc: "", vis: true, dd: "", dt: "", sv: "", dc: "", st: "", dur: "" };
+  return { name: "", init: "", desc: "", vis: true, dd: "", dt: "", sv: "", dc: "", st: "", dur: "", from: "", last: "" };
 }
 function fxTplHTML() {
   var L = S.fxLib || [];
@@ -394,6 +399,12 @@ function fxPanelHTML() {
     '<input class="search" id="fxinit" type="number" inputmode="numeric" placeholder="Initiative number, e.g. 20" value="' +
     esc(f.init) +
     '" aria-label="Effect initiative">' +
+    '<div class="flt"><input class="search fxn" id="fxfrom" type="number" inputmode="numeric" min="1" max="99" placeholder="Starts in round" value="' +
+    esc(f.from) +
+    '" aria-label="Starts in round (blank = at once)" title="Blank = at once">' +
+    '<input class="search fxn" id="fxlast" type="number" inputmode="numeric" min="1" max="99" placeholder="Rounds it lasts" value="' +
+    esc(f.last) +
+    '" aria-label="Lasts how many rounds (blank = until removed)" title="Blank = until you remove it"></div>' +
     '<input class="search" id="fxdesc" type="text" maxlength="200" placeholder="Note for you (players never see it)" value="' +
     esc(f.desc) +
     '" aria-label="Note for the DM">' +
@@ -788,6 +799,7 @@ function encLoad(e, add) {
   });
   clone(e.list).forEach(function (c) {
     c.id = S.next++;
+    delete c.until;
     if (c.grp && c.grp.indexOf("g") === 0) {
       gmap[c.grp] = gmap[c.grp] || "g" + c.id;
       c.grp = gmap[c.grp];
