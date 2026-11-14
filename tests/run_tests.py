@@ -1970,6 +1970,9 @@ def your_file_by_link(b):
             return route.fulfill(status=200, content_type="application/json", headers={"access-control-allow-origin": "*"}, body='{"name":"drive-book.json"}')
         if "denied" in u:
             return route.fulfill(status=403, headers={"access-control-allow-origin": "*"}, body="no")
+        if "BADKEY" in u:
+            return route.fulfill(status=400, content_type="application/json", headers={"access-control-allow-origin": "*"},
+                                 body='{"error":{"code":400,"message":"API key not valid. Please pass a valid API key."}}')
         route.fulfill(status=200, content_type="application/json", headers={"access-control-allow-origin": "*"}, body=json.dumps(body))
 
     def open_src(a):
@@ -1987,6 +1990,12 @@ def your_file_by_link(b):
     a.pg.wait_for_function("window.__e('String(FNOTE && FNOTE.t)').indexOf('Could not read') === 0")
     a.errors.clear()                                       # the 403 above is the point of that step
     eq(a.e("CUSTOM.length"), 0, "a refused link changes nothing")
+    a.pg.fill("#monurl", "https://drive.google.com/file/d/1AbCdEfGhIjKlMnOp/view?usp=sharing"); a.pg.fill("#mongkey", "BADKEY")
+    a.click('[data-act="addmonlink"]')
+    a.pg.wait_for_function("window.__e('String(FNOTE && FNOTE.t)').indexOf('400') > 0")
+    note = a.e("FNOTE.t")
+    check("not valid" in note and "Google says" in note and "API key not valid" in note, "a bad key is named, with Google's own words: " + note)
+    a.errors.clear(); a.pg.fill("#mongkey", "")
     a.pg.fill("#monurl", "https://files.example/my/book.json")
     with a.pg.expect_navigation():
         a.click('[data-act="addmonlink"]')

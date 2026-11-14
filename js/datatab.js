@@ -1220,10 +1220,10 @@ function dataSrcHTML() {
       "Your files",
       "Stat blocks and spells of your own. A matching name replaces the built-in entry. Kept on this device and in the backup, never uploaded. A picked file is a copy: add it again after you change it. A link is read once and stored the same way; its <b>Update</b> button reads it again.",
       '<div class="row"><button data-act="addmonfile">Add file…</button></div>' +
-        '<div class="row"><input id="monurl" class="grow" type="url" placeholder="or paste a link (https://…)" aria-label="Link to your file" value="' +
+        '<div class="row"><input id="monurl" class="grow" type="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="or paste a link (https://…)" aria-label="Link to your file" value="' +
         esc(ui.monurl || "") +
         '"><button data-act="addmonlink">Add link</button></div>' +
-        '<div class="row"><input id="mongkey" class="grow" type="text" autocomplete="off" placeholder="Google API key (only for Google Drive links)" aria-label="Google API key" value="' +
+        '<div class="row"><input id="mongkey" class="grow" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Google API key (only for Google Drive links)" aria-label="Google API key" value="' +
         esc(
           ui.mongkey != null
             ? ui.mongkey

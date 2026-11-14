@@ -11,6 +11,7 @@ Newest first. Run `python tests/run_tests.py` after every change (see the README
 | L3 | "Could not read that link" did not say why | One message for every failure | Separate reasons: no readable answer, Google refused the key (400 / 403), not shared (401 / 403 / 404), too large |
 | L4 | No way to see whether a file is stored | Only a count per file | "No files on this device" when empty; each file shows picked / linked and when it was read; "Loaded now" shows storage used |
 | L5 | A typed link or key vanished when the tab was redrawn | Not kept in `ui` | Kept in `ui.monurl` / `ui.mongkey` |
+| L7 | A refused Google key gave no detail, and the key box allowed autocorrect | Only the status code was kept | The note separates 400 (key not valid: copy it again) from 403 (API or website restriction) and quotes Google's own message; link and key boxes have autocorrect and capitals off |
 | L6 | Checked, no change needed: the real book file (503 stat blocks, 51 spells) loads, merges (323 replace, 180 new) and uses 0.67 of the 2.5 million characters an iPad allows | | `real_book_file_loads` |
 
 ## 2026-11-14 — Files are not trusted

@@ -1,6 +1,6 @@
 // Offline cache. Serves saved files instantly, then refreshes them in the background,
 // so a new version you publish shows up the next time you open the app (online once).
-var CACHE = "encounter-tracker-v87";
+var CACHE = "encounter-tracker-v88";
 var FILES = [
   "./",
   "index.html",

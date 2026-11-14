@@ -296,7 +296,20 @@ function readMonLink(url, key, done, name) {
   var L = linkUrl(url, key),
     get = function (u) {
       return fetch(u, { cache: "no-store" }).then(function (r) {
-        if (!r.ok) throw r.status;
+        // Google explains a refusal in the answer ("API key not valid", "referer blocked"...): keep that text
+        if (!r.ok)
+          return r.text().then(
+            function (t) {
+              var m = "";
+              try {
+                m = JSON.parse(t).error.message || "";
+              } catch (x) {}
+              throw { s: r.status, m: String(m).slice(0, 200) };
+            },
+            function () {
+              throw { s: r.status, m: "" };
+            },
+          );
         if (+r.headers.get("content-length") > FMAX.bytes) throw 0;
         return r.text();
       });
@@ -317,17 +330,22 @@ function readMonLink(url, key, done, name) {
         readMonText(n, text, done, link);
       });
     })
-    .catch(function (e) {
+    .catch(function (x) {
+      var e = x && typeof x.s === "number" ? x.s : x,
+        said = x && x.m ? ' Google says: "' + x.m + '"' : "";
       var why =
         typeof e !== "number"
           ? "no answer the app may read: you are offline, or the host does not let web apps read the file (see the README)"
           : e === 0
             ? "the file is over 20 MB"
             : L.drive && (e === 400 || e === 403)
-              ? "Google answered " +
-                e +
-                ": the API key was refused. Check that the key is typed in full, that the Google Drive API is enabled for it, and that its website restriction (if any) allows " +
-                location.origin
+              ? e === 400
+                ? "Google answered 400: the key itself is not valid. Copy it again with the copy button in the Google Cloud Console (39 characters, starting AIza)." +
+                  said
+                : "Google answered 403: the key exists but may not be used here. Check that the Google Drive API is enabled and allowed for the key, and that its website restriction includes " +
+                  location.origin +
+                  "/*" +
+                  said
               : e === 404 || e === 401 || e === 403
                 ? "the host answered " + e + ": share the file so anyone with the link can view it, and check the link"
                 : "the host answered " + e;
