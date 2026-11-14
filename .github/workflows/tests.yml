@@ -27,7 +27,7 @@ jobs:
       - run: python tools/check_monsters.py
       - name: Formatting (Prettier)
         run: npx --yes prettier@3.10.1 --check .
-      - name: Collect the site (the app only: no tests, tools or notes)
+      - name: "Collect the site (the app only: no tests, tools or notes)"
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         run: rsync -a --exclude '.*' --exclude tests --exclude tools --exclude local --exclude node_modules --exclude '*.md' --exclude _site ./ _site/
       - uses: actions/upload-pages-artifact@v3
