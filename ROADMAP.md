@@ -6,7 +6,16 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 
 **Code review and clean-up done (14 Nov 2026):** Data tab in four sections, habitat lists, shared terms, sturdier start-up and saved-state repair, parallel tests (details in `BUGS.md`). **Structure (14 Nov):** the app is now a page shell, `app.css` and twelve files in `js/`, formatted with Prettier, with a Tests workflow on every push. `DESIGN.md` explains why and lists the open design points.
 
-**Before table test 2 (14 Nov):** security policy on the page (Content-Security-Policy), timed effects (start round, number of rounds), legendary actions listed once. At the table, check: a linked Google Drive file still updates (the policy now names the hosts), and a timed effect in a real fight.
+**Open items (reviewed 14 Nov 2026, in order):**
+1. 📋 **Table test 2**, app as the only tracker. Before it, on the real devices: press Update on the linked Google Drive file, open a remote session on two devices, send one Discord post (all three now run under the security policy). During it: a timed effect in a real fight, combat sizing on the iPad.
+2. 🔨 **D&D Beyond items:** check with a real sheet after the next workflow run.
+3. 📋 **v1.0 checklist:** not written yet; write it from the findings of table test 2.
+4. 📋 **Player link: temp HP.**
+5. 📋 **Dungeon Master's Vault import:** waiting for the sheet link.
+6. 📋 Saved target lists for effects; local monster images.
+7. Decisions waiting for Andrew (`DESIGN.md`): A publish only after tests pass (a repository setting), B storage beyond `localStorage`, C leave the Discord webhook out of the backup unless ticked.
+
+✅ **Closed 14 Nov (before table test 2):** security policy on the page (Content-Security-Policy) with the host list agreed (file hosts for links; D&D Beyond, Kanka, Open5e, D&D 5e API and Dungeon Master's Vault listed ahead of use), timed effects (start round, number of rounds), legendary actions listed once.
 
 **2014 / 2024 switch built (14 Nov):** player spells and Paladin / Ranger slots follow the character's edition (default in Data → Sources, override per character); a stat block's older names (`aka`) find it in the search. Monsters, conditions and budgets stay 2024. Possible follow-ups: read the edition from the D&D Beyond sheet, 2014 versions of more spells through a file of your own, 2014 conditions if ever wanted.
 
@@ -49,7 +58,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 | Your files by link (Dropbox, Gist, Supabase Storage; Google Drive with an API key), with Update | ✅ | 14 Nov; read once and stored, so still offline at the table |
 | File integrity check: known fields only, forced types, size limits; script in file text never runs | ✅ | 14 Nov; `cleanMon()` / `cleanSpell()` / `cleanAliases()`; test `hostile_or_broken_file_is_harmless` |
 | Tests run everywhere on a made-up book (`tests/fixtures/test-book.json`); own file only for one optional check | ✅ | 14 Nov; 89 tests on GitHub, none skipped there |
-| Content-Security-Policy on the page (second lock: even a missed escape could not run script or send data elsewhere) | ✅ | 14 Nov; own scripts only, listed hosts only (Supabase, Discord, Drive API, Dropbox, GitHub raw); linked files from other hosts are refused with a message; test `security_policy_holds` |
+| Content-Security-Policy on the page (second lock: even a missed escape could not run script or send data elsewhere) | ✅ | 14 Nov; own scripts only, listed hosts only (Supabase, Discord, Drive API, Dropbox, GitHub raw); linked files from other hosts are refused with a message; D&D sources listed ahead of use; host list agreed by Andrew; test `security_policy_holds` |
 | Tell the user what a file check dropped or cut, per entry | 💡 | Today only the count of skipped entries is shown |
 | Encounter XP / difficulty while planning | ✅ | 2024 DMG budgets; hidden while combat runs |
 | End combat without clearing | ✅ | Keeps creatures, HP and statuses |
