@@ -7,7 +7,7 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 **Code review and clean-up done (14 Nov 2026):** Data tab in four sections, habitat lists, shared terms, sturdier start-up and saved-state repair, parallel tests (details in `BUGS.md`). **Structure (14 Nov):** the app is now a page shell, `app.css` and twelve files in `js/`, formatted with Prettier, with a Tests workflow on every push. `DESIGN.md` explains why and lists the open design points.
 
 **Open items (reviewed 14 Nov 2026, in order):**
-1. 📋 **Table test 2**, app as the only tracker. Before it, on the real devices: press Update on the linked Google Drive file, open a remote session on two devices, send one Discord post (all three now run under the security policy). During it: a timed effect in a real fight, combat sizing on the iPad.
+1. 📋 **Table test 2**, app as the only tracker. Before it, on the iPad: press **Update** on the linked Google Drive file (Data → Sources → Your files) to confirm it still reads under the security policy. ✅ Confirmed by Andrew under the policy (14 Nov): two-device remote session, Discord post. During it: a timed effect in a real fight, combat sizing on the iPad.
 2. 🔨 **D&D Beyond items:** check with a real sheet after the next workflow run.
 3. 📋 **v1.0 checklist:** not written yet; write it from the findings of table test 2.
 4. 📋 **Player link: temp HP.**
