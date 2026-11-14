@@ -22,7 +22,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install playwright && playwright install --with-deps chromium
+      - run: pip install playwright pyyaml && playwright install --with-deps chromium
+      - run: python tools/check_workflows.py # also checks the player workflows; this file itself is checked before push (.githooks/pre-push)
       - run: python tests/run_tests.py
       - run: python tools/check_monsters.py
       - name: Formatting (Prettier)

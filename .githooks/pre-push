@@ -1,0 +1,7 @@
+#!/bin/sh
+# Runs before every git push once the hooks are switched on (one time per clone):
+#   git config core.hooksPath .githooks
+# Stops the push if a workflow file is invalid, because GitHub would not run it at all.
+# Skip once with: git push --no-verify
+PY=$(command -v python3 || command -v python)
+exec "$PY" tools/check_workflows.py

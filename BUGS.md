@@ -2,6 +2,12 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-14 — Tests workflow did not start
+
+| # | Finding | Cause | Fix / status |
+|---|---------|-------|--------------|
+| W1 | Run #9 failed with "Invalid workflow file … line 30" and no jobs ran, so the site was not published (the last good version stayed live) | An unquoted step name contained `: ` ("the app only: no tests"), which YAML reads as a second key | Name quoted (305813b). New `tools/check_workflows.py` runs from the pre-push hook `.githooks/pre-push` (switch on once: `git config core.hooksPath .githooks`) and in the Tests workflow for the other workflow files |
+
 ## 2026-11-14 — Your files did not seem to load
 
 | # | Finding | Cause | Fix / status |

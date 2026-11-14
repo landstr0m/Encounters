@@ -218,10 +218,17 @@ Run locally (needed so the JSON files load):
 python -m http.server 8000      # then open http://localhost:8000
 ```
 
+Once per clone, switch on the pre-push check (it stops a push when a workflow file is invalid YAML, which GitHub would not run at all):
+
+```bash
+git config core.hooksPath .githooks
+```
+
 Before pushing:
 
 ```bash
-pip install playwright && playwright install chromium
+pip install playwright pyyaml && playwright install chromium
+python tools/check_workflows.py      # workflow files are valid (also run by the pre-push hook)
 python tests/run_tests.py            # full browser test battery (phone to desktop), run in parallel workers
 python tests/run_tests.py typed undo # only tests whose names contain these words
 python tests/run_tests.py -j1        # one at a time, in order (use this if a failure is hard to read)
@@ -255,6 +262,7 @@ Then bump `CACHE` in `sw.js` so installed apps pick up the change. Log bugs and 
 | `tools/check_monsters.py` | Checks every monster entry (stats, dice, text, spelling); `--fix` normalises dice symbols |
 | `.github/workflows/kanka-players.yml`, `dndbeyond-players.yml` | GitHub Actions for the Kanka sync (manual) and the D&D Beyond import (runs when `dndbeyond.txt` changes) |
 | `tests/run_tests.py` | Browser test battery (Playwright) |
+| `tools/check_workflows.py`, `.githooks/pre-push` | Workflow file check, run before every push once `git config core.hooksPath .githooks` is set |
 | `ROADMAP.md`, `BUGS.md`, `CLAUDE.md` | Goals and plans; bug and data-check log; project conventions |
 | `sw.js`, `manifest.webmanifest`, `icon-*.png`, `fonts.css` | Offline cache, install metadata, icons, fonts |
 
