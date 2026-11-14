@@ -274,7 +274,8 @@ function readMonFile(file, done) {
 //   Dropbox share links and "raw" links (a secret GitHub Gist, Supabase Storage) work as they are;
 //   Google Drive only answers through its API, which needs an API key (the file must be shared "anyone with the link").
 // The hosts a link may point at. The security policy in index.html (connect-src) lets the page talk to these only, so
-// any other host is refused here with a message instead of failing silently. Keep the two lists the same.
+// any other host is refused here with a message instead of failing silently. Every host here must also be in connect-src
+// (which lists more: Supabase, Discord and the D&D sources are not file hosts).
 var LINKHOSTS = /^https:\/\/(?:[\w-]+\.supabase\.co|(?:gist|raw)\.githubusercontent\.com|[\w.-]+\.dropboxusercontent\.com)\//;
 function linkUrl(u, key) {
   u = String(u || "").trim();

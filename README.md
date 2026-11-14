@@ -305,8 +305,8 @@ Leave both blank for an effect that acts every round until you remove it. Both n
 
 ## Security
 - **Files are not trusted:** see *Files are checked on the way in* above.
-- **Security policy:** the page carries a Content-Security-Policy (in `index.html`). Only the app's own script files run, so script hidden in a file, a character sheet or a link cannot run even if a check missed it. The page can only exchange data with this site, Supabase (remote session), Discord (webhook posts) and the hosts for linked files (Google Drive API, Dropbox, GitHub raw / Gist, Supabase Storage).
-- A new host (another file host, a new service) must be added in two places: `connect-src` in `index.html` and `LINKHOSTS` in `js/boot.js`. The test `security_policy_holds` runs the app with the policy on.
+- **Security policy:** the page carries a Content-Security-Policy (in `index.html`). Only the app's own script files run, so script hidden in a file, a character sheet or a link cannot run even if a check missed it. The page can only exchange data with this site, Supabase (remote session), Discord (webhook posts) the hosts for linked files (Google Drive API, Dropbox, GitHub raw / Gist, Supabase Storage), and D&D sources kept ready for later in-app imports (D&D Beyond, Kanka, Open5e, D&D 5e API, Dungeon Master's Vault). Being on the list only means the browser may try: a site must also allow other websites to read it, which D&D Beyond's character service does not today (hence the GitHub Action).
+- A new host goes into `connect-src` in `index.html`; a new host for linked files also into `LINKHOSTS` in `js/boot.js`. The test `security_policy_holds` runs the app with the policy on.
 - Secrets (Discord webhook, Google API key, file links) stay on the device and in your backup file; they are never in the repository or sent to players' devices.
 
 ## Effect templates
