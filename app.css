@@ -2547,6 +2547,21 @@ td.empty p {
 .row input {
   flex: 1;
 }
+.fnote {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--muted);
+  font-size: 0.9rem;
+}
+.fnote.ok {
+  border-left-color: var(--ok);
+}
+.fnote.bad {
+  border-left-color: var(--bad);
+}
+.fhead {
+  margin: 12px 0 0;
+}
 .msg {
   margin-top: 8px;
   font-size: 0.9rem;

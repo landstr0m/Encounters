@@ -2,6 +2,17 @@
 
 Newest first. Run `python tests/run_tests.py` after every change (see the README).
 
+## 2026-11-14 — Your files did not seem to load
+
+| # | Finding | Cause | Fix / status |
+|---|---------|-------|--------------|
+| L1 | A file picked under Data → Sources could be lost without any message | The hidden file picker was part of the Data tab, which is redrawn when you come back to the app (or when a remote session reconnects); the chosen file then arrived at a control that no longer existed. The same held for Backup → Import | Both pickers now live outside the drawer; test `file_status_is_visible` redraws while the picker is open |
+| L2 | A link or file that failed looked like nothing happened | The message was written at the very bottom of the Data tab, below "Loaded now" | The result (loaded or not, with the reason and the time) is shown inside the "Your files" card, also as a toast, and stays after the reload |
+| L3 | "Could not read that link" did not say why | One message for every failure | Separate reasons: no readable answer, Google refused the key (400 / 403), not shared (401 / 403 / 404), too large |
+| L4 | No way to see whether a file is stored | Only a count per file | "No files on this device" when empty; each file shows picked / linked and when it was read; "Loaded now" shows storage used |
+| L5 | A typed link or key vanished when the tab was redrawn | Not kept in `ui` | Kept in `ui.monurl` / `ui.mongkey` |
+| L6 | Checked, no change needed: the real book file (503 stat blocks, 51 spells) loads, merges (323 replace, 180 new) and uses 0.67 of the 2.5 million characters an iPad allows | | `real_book_file_loads` |
+
 ## 2026-11-14 — Files are not trusted
 
 | # | Finding | Cause | Fix / status |

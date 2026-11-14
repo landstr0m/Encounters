@@ -61,6 +61,7 @@ function okFiles(L) {
         aliases: cleanAliases(f.aliases),
       };
       if (typeof f.url === "string") o.url = f.url.slice(0, 2000); // a linked file: where Update reads it again
+      if (isFinite(+f.at) && +f.at > 0) o.at = +f.at; // when it was last read (shown in the list)
       if (typeof f.key === "string") o.key = f.key.slice(0, 200);
       return o;
     });
@@ -72,6 +73,34 @@ function saveCustom() {
   } catch (e) {
     return false;
   }
+}
+// The result of the last attempt to add or update a file (text, ok, when). It is drawn inside the "Your files" card and
+// survives the reload after a successful load, so there is always an answer to "did that work?".
+var FNKEY = CKEY + "-note",
+  FNOTE = null;
+try {
+  FNOTE = JSON.parse(localStorage.getItem(FNKEY) || "null");
+  if (!FNOTE || typeof FNOTE.t !== "string") FNOTE = null;
+} catch (e) {
+  FNOTE = null;
+}
+function fileNote(t, ok) {
+  FNOTE = t ? { t: String(t).slice(0, 600), ok: !!ok, at: Date.now() } : null;
+  try {
+    if (FNOTE) localStorage.setItem(FNKEY, JSON.stringify(FNOTE));
+    else localStorage.removeItem(FNKEY);
+  } catch (e) {}
+}
+// Characters stored by this site on this device. An iPad allows about 2.5 million.
+function storeUsed() {
+  var n = 0;
+  try {
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      n += k.length + (localStorage.getItem(k) || "").length;
+    }
+  } catch (e) {}
+  return n;
 }
 var nkey = function (n) {
   return String(n)
@@ -289,11 +318,20 @@ function readMonLink(url, key, done, name) {
       });
     })
     .catch(function (e) {
-      done(
-        "Could not read that link" +
-          (typeof e === "number" ? " (the host answered " + e + ")" : "") +
-          ". Check that you are online, that the file is shared so anyone with the link can view it, and that the host lets web apps read it (see the README). Nothing was changed.",
-      );
+      var why =
+        typeof e !== "number"
+          ? "no answer the app may read: you are offline, or the host does not let web apps read the file (see the README)"
+          : e === 0
+            ? "the file is over 20 MB"
+            : L.drive && (e === 400 || e === 403)
+              ? "Google answered " +
+                e +
+                ": the API key was refused. Check that the key is typed in full, that the Google Drive API is enabled for it, and that its website restriction (if any) allows " +
+                location.origin
+              : e === 404 || e === 401 || e === 403
+                ? "the host answered " + e + ": share the file so anyone with the link can view it, and check the link"
+                : "the host answered " + e;
+      done("Could not read that link (" + why + "). Nothing was changed.");
     });
 }
 function readMonText(fname, text, done, link) {
@@ -328,11 +366,19 @@ function readMonText(fname, text, done, link) {
         keep = CUSTOM.filter(function (f) {
           return f.name !== file.name;
         });
-      CUSTOM = keep.concat([Object.assign({ name: file.name, monsters: good, spells: spells, aliases: AL }, link || {})]);
+      CUSTOM = keep.concat([Object.assign({ name: file.name, monsters: good, spells: spells, aliases: AL, at: Date.now() }, link || {})]);
       if (!saveCustom()) {
         CUSTOM = before;
         saveCustom();
-        done("File too large for this device storage. Nothing was changed.");
+        done(
+          "The file was read (" +
+            good.length +
+            " stat blocks, " +
+            spells.length +
+            " spells) but this device has no room to store it (" +
+            Math.round(storeUsed() / 1000) +
+            " thousand characters already used). Remove a file you no longer need or clear old combat logs, then try again. Nothing was changed.",
+        );
         return;
       }
       var bk = {};
@@ -342,22 +388,22 @@ function readMonText(fname, text, done, link) {
       var rep = good.filter(function (m) {
         return bk[nkey(m.name)];
       }).length;
-      alert(
+      var sum =
         "Loaded from " +
-          file.name +
-          ":\n" +
-          good.length +
-          " stat blocks (" +
-          rep +
-          " replace built-in monsters, " +
-          (good.length - rep) +
-          " are new)\n" +
-          spells.length +
-          " spells" +
-          (dup ? "\n" + dup + " stat blocks are also in another of your files (this newest file wins)" : "") +
-          (bad ? "\n" + bad + " entries skipped (a stat block needs name, id, AC, HP and abilities; a spell needs a name and text)" : "") +
-          "\n\nThe app will now reload.",
-      );
+        file.name +
+        ":\n" +
+        good.length +
+        " stat blocks (" +
+        rep +
+        " replace built-in monsters, " +
+        (good.length - rep) +
+        " are new)\n" +
+        spells.length +
+        " spells" +
+        (dup ? "\n" + dup + " stat blocks are also in another of your files (this newest file wins)" : "") +
+        (bad ? "\n" + bad + " entries skipped (a stat block needs name, id, AC, HP and abilities; a spell needs a name and text)" : "");
+      fileNote(sum.replace(/\n/g, " "), true); // shown in the card after the reload
+      alert(sum + "\n\nThe app will now reload.");
       location.reload();
     } catch (e) {
       done("That file is not a valid monster or spell file. Nothing was changed.");

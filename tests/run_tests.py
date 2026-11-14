@@ -1984,7 +1984,7 @@ def your_file_by_link(b):
     a.pg.fill("#monurl", "https://drive.google.com/file/d/1AbCdEfGhIjKlMnOp/view?usp=sharing"); a.click('[data-act="addmonlink"]')
     check("needs a Google API key" in a.pg.inner_text("#drawer"), "a Drive link without a key says what is missing")
     a.pg.fill("#monurl", "https://files.example/denied/book.json"); a.click('[data-act="addmonlink"]')
-    a.pg.wait_for_function("window.__e('ui.msg').indexOf('Could not read') === 0")
+    a.pg.wait_for_function("window.__e('String(FNOTE && FNOTE.t)').indexOf('Could not read') === 0")
     a.errors.clear()                                       # the 403 above is the point of that step
     eq(a.e("CUSTOM.length"), 0, "a refused link changes nothing")
     a.pg.fill("#monurl", "https://files.example/my/book.json")
@@ -2075,7 +2075,7 @@ def hostile_or_broken_file_is_harmless(b):
     with open(big, "w") as fh:
         fh.write('{"monsters":[],"pad":"' + "x" * 20_000_100 + '"}')
     a.e("S.tab='data';S.dsec='src';renderDrawer()"); a.pg.set_input_files('#monfile', big)
-    a.pg.wait_for_function("window.__e('String(ui.msg)').indexOf('too large') > 0")
+    a.pg.wait_for_function("window.__e('String(FNOTE && FNOTE.t)').indexOf('too large') > 0")
     eq(a.e("CUSTOM.length"), 1, "an oversized file changes nothing")
 
 
@@ -2131,6 +2131,39 @@ def own_file_end_to_end(b):
     a.e("S.tab='data';S.dsec='src';renderDrawer()"); a.click('#drawer [data-act="rmmonfile"]')   # 6. removing it is safe too
     a.pg.wait_for_function("window.STARTED === true && window.__e('CUSTOM.length') === 0")
     a.e("renderAll()"); eq(a.errors, [], "no errors after removing the file:")
+
+
+@test
+def file_status_is_visible(b):
+    # The outcome of adding a file is shown inside the "Your files" card (not below the fold), survives the reload,
+    # and a redraw while the file picker is open (coming back to the app on an iPad) does not lose the chosen file.
+    a = App(b)
+    def open_src(a):
+        a.e("ui.drawer=true;S.tab='data';S.dsec='src';renderAll()")
+    open_src(a)
+    check("No files on this device" in a.pg.inner_text("#drawer"), "an empty list says only built-in data is loaded")
+    a.pg.fill("#monurl", "https://files.example/my/book.json"); a.e("renderAll()")
+    eq(a.pg.input_value("#monurl"), "https://files.example/my/book.json", "a typed link survives a redraw")
+    a.pg.fill("#monurl", "not a link"); a.click('[data-act="addmonlink"]')
+    note = a.pg.inner_text("#drawer .fnote.bad")
+    check("Not loaded" in note and "not a link" in note, "a failure is reported inside the card: " + note)
+    tmp = os.path.join(tempfile.mkdtemp(), "empty.json")
+    open(tmp, "w").write('{"monsters": []}')
+    a.pg.set_input_files("#monfile", tmp); a.pg.wait_for_timeout(200)
+    check("No valid stat blocks" in a.pg.inner_text("#drawer .fnote.bad"), "a file with nothing usable is reported in the card")
+    n = a.e("MON.length")
+    a.click('[data-act="addmonfile"]'); a.e("renderAll()")              # the Data tab is redrawn while the picker is open
+    with a.pg.expect_navigation():
+        a.pg.set_input_files("#monfile", OWN_FILE)
+    a.pg.wait_for_function("window.STARTED === true")
+    check(a.e("CUSTOM.length") == 1 and a.e("MON.length") > n, "the file is stored and merged after a redraw")
+    open_src(a)
+    note = a.pg.inner_text("#drawer .fnote.ok")
+    check("Loaded" in note and "test-book.json" in note and "stat blocks" in note, "the result is still shown after the reload: " + note)
+    row = a.pg.inner_text("#drawer .lib")
+    check("picked file" in row and "read today" in row, "the list says how and when the file was read: " + row)
+    check("Storage used" in a.pg.inner_text("#drawer"), "storage use is shown")
+    eq(a.errors, [], "no errors:")
 
 
 @test

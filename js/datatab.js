@@ -1200,6 +1200,14 @@ function dataSessHTML() {
     )
   );
 }
+// "today 11:20" or "14 Nov 11:20" for a stored time
+function whenTxt(at) {
+  var d = new Date(at),
+    hm = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+  return (
+    (d.toDateString() === new Date().toDateString() ? "today" : d.getDate() + " " + d.toLocaleString("en", { month: "short" })) + " " + hm
+  );
+}
 function dataSrcHTML() {
   var ns = REF && REF.spells ? REF.spells.length : 0;
   return (
@@ -1210,18 +1218,38 @@ function dataSrcHTML() {
     ) +
     dcard(
       "Your files",
-      "Stat blocks and spells of your own. A matching name replaces the built-in entry. Kept on this device and in the backup, never uploaded. A link is read once and stored the same way; Update reads it again.",
-      '<div class="row"><button data-act="addmonfile">Add file…</button><input id="monfile" type="file" accept=".json,application/json" hidden></div>' +
-        '<div class="row"><input id="monurl" class="grow" type="url" placeholder="or paste a link (https://…)" aria-label="Link to your file"><button data-act="addmonlink">Add link</button></div>' +
+      "Stat blocks and spells of your own. A matching name replaces the built-in entry. Kept on this device and in the backup, never uploaded. A picked file is a copy: add it again after you change it. A link is read once and stored the same way; its <b>Update</b> button reads it again.",
+      '<div class="row"><button data-act="addmonfile">Add file…</button></div>' +
+        '<div class="row"><input id="monurl" class="grow" type="url" placeholder="or paste a link (https://…)" aria-label="Link to your file" value="' +
+        esc(ui.monurl || "") +
+        '"><button data-act="addmonlink">Add link</button></div>' +
         '<div class="row"><input id="mongkey" class="grow" type="text" autocomplete="off" placeholder="Google API key (only for Google Drive links)" aria-label="Google API key" value="' +
         esc(
-          (
-            CUSTOM.filter(function (f) {
-              return f.key;
-            })[0] || {}
-          ).key || "",
+          ui.mongkey != null
+            ? ui.mongkey
+            : (
+                CUSTOM.filter(function (f) {
+                  return f.key;
+                })[0] || {}
+              ).key || "",
         ) +
         '"></div>' +
+        (ui.fbusy
+          ? '<div class="fnote" role="status">Reading…</div>'
+          : FNOTE
+            ? '<div class="fnote ' +
+              (FNOTE.ok ? "ok" : "bad") +
+              '" role="status"><b>' +
+              (FNOTE.ok ? "Loaded" : "Not loaded") +
+              "</b> (" +
+              esc(whenTxt(FNOTE.at)) +
+              "): " +
+              esc(FNOTE.t.replace(/^Loaded from /, "")) +
+              "</div>"
+            : "") +
+        (CUSTOM.length
+          ? '<p class="muted fhead">On this device now:</p>'
+          : '<p class="muted fhead">No files on this device: only the built-in SRD data is loaded.</p>') +
         CUSTOM.map(function (f, i) {
           return (
             '<div class="lib"><span class="grow"><b>' +
@@ -1230,7 +1258,8 @@ function dataSrcHTML() {
             f.monsters.length +
             " stat blocks" +
             ((f.spells || []).length ? ", " + f.spells.length + " spells" : "") +
-            (f.url ? ", linked" : "") +
+            (f.url ? ", linked" : ", picked file") +
+            (f.at ? " · read " + esc(whenTxt(f.at)) : "") +
             "</span></span>" +
             (f.url ? '<button data-act="updmonlink" data-i="' + i + '">Update</button>' : "") +
             '<button class="x" data-act="rmmonfile" data-i="' +
@@ -1271,7 +1300,9 @@ function dataSrcHTML() {
         (REF && REF.by14 && Object.keys(REF.by14).length
           ? "; " + Object.keys(REF.by14).length + " in their SRD 5.1 version for 2014 rules"
           : "") +
-        ").<br>Everything works offline.</p>",
+        ").<br>Storage used on this device: " +
+        Math.round(storeUsed() / 1000) +
+        " thousand characters (an iPad allows about 2,500 thousand).<br>Everything works offline.</p>",
     )
   );
 }
@@ -1291,7 +1322,7 @@ function dataBakHTML() {
         nm +
         " stat blocks)</span></label></div>"
       : "") +
-      '<div class="row"><button class="add" data-act="export">Export everything</button><button data-act="import">Import file…</button><input id="impfile" type="file" accept=".json,application/json" hidden></div>',
+      '<div class="row"><button class="add" data-act="export">Export everything</button><button data-act="import">Import file…</button></div>',
   );
 }
 function dataHTML() {

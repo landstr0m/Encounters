@@ -1121,17 +1121,9 @@ dr.addEventListener("click", function (e) {
     var lf = act === "updmonlink" ? CUSTOM[+b.dataset.i] : null,
       lu = lf ? lf.url : ($("#monurl") || {}).value,
       lk = (lf && lf.key) || ($("#mongkey") || {}).value;
-    ui.msg = "Reading the link…";
+    ui.fbusy = true;
     renderDrawer();
-    readMonLink(
-      lu,
-      lk,
-      function (msg) {
-        ui.msg = msg;
-        renderDrawer();
-      },
-      lf && lf.name,
-    );
+    readMonLink(lu, lk, fileFail, lf && lf.name);
     return;
   }
   if (act === "rmmonfile") {
@@ -1490,7 +1482,9 @@ dr.addEventListener("keydown", function (e) {
 });
 dr.addEventListener("input", function (e) {
   var t = e.target;
-  if (t.id === "search") {
+  if (t.id === "monurl" || t.id === "mongkey")
+    ui[t.id] = t.value; // typed text survives a redraw of the Data tab
+  else if (t.id === "search") {
     ui.q = t.value;
     $("#results").innerHTML = resultsHTML();
   } else if (t.id === "pq") {
@@ -1673,17 +1667,38 @@ dr.addEventListener("change", function (e) {
     ui[t.dataset.act === "ftype" ? "fType" : t.dataset.act === "fmin" ? "fMin" : "fMax"] = t.value;
     $("#results").innerHTML = resultsHTML();
   }
-  if (t.id === "impfile" && t.files && t.files[0]) {
-    doImport(t.files[0]);
-    t.value = "";
-  }
-  if (t.id === "monfile" && t.files && t.files[0]) {
-    readMonFile(t.files[0], function (msg) {
-      ui.msg = msg;
+});
+// A file or link that could not be loaded: say so inside the "Your files" card (and as a toast, in case the card is
+// scrolled away). A load that works reloads the app instead; its summary is stored by readMonText().
+function fileFail(msg) {
+  ui.fbusy = false;
+  fileNote(msg, false);
+  toast(esc(msg));
+  renderDrawer();
+}
+// The two file pickers live outside the drawer. They used to be part of the Data tab, and coming back to the app from
+// the picker (or any other redraw while it was open) replaced them, so the chosen file was never read.
+[
+  [
+    "monfile",
+    function (f) {
+      ui.fbusy = true;
       renderDrawer();
-    });
-    t.value = "";
-  }
+      readMonFile(f, fileFail);
+    },
+  ],
+  ["impfile", doImport],
+].forEach(function (p) {
+  var inp = document.createElement("input");
+  inp.type = "file";
+  inp.id = p[0];
+  inp.accept = ".json,application/json";
+  inp.hidden = true;
+  inp.addEventListener("change", function () {
+    if (inp.files && inp.files[0]) p[1](inp.files[0]);
+    inp.value = "";
+  });
+  document.body.appendChild(inp);
 });
 function pull() {
   if (NETV) return;
