@@ -41,7 +41,7 @@ Written 14 Nov 2026 after a code review. Each point says what was chosen, why, a
 - *When to move (see ROADMAP, Stage 3):* storage used passes about 3.5 MB, a save fails, or local monster images arrive.
 
 **C. The Discord webhook link is not in the backup file.** Anyone with that link can post to the channel, and it takes a minute to paste again on a new device. Export leaves it out; Import never takes one from a file (older backups still contain it) and keeps the device's own.
-- *Still in the backup, on purpose for now:* the Google API key and file links of linked files (when *your files* are ticked). The key only works for the Drive API from this website if restricted as the README says; say if these should be left out too.
+- *Still in the backup, on purpose for now:* the Google API key and file links of linked files (when *your files* are ticked). The key only works for the Drive API from this website if restricted as the README says; *Decided by Andrew, 14 Nov:* they stay in the backup. The key is restricted to localhost and this site and to the Drive API, and the Drive file has its own sharing limits, so the key alone opens little.
 
 ## Kept on purpose
 

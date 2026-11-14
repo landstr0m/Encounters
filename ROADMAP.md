@@ -12,8 +12,8 @@ Status: ✅ done · 🔨 in progress · 📋 planned · 💡 idea. Last reviewed
 3. 📋 **v1.0 checklist:** not written yet; write it from the findings of table test 2.
 4. 📋 **Player link: temp HP.**
 5. 📋 **Dungeon Master's Vault import:** waiting for the sheet link.
-6. 📋 Saved target lists for effects; local monster images.
-7. 🔨 **Publish only after tests pass:** workflow built (14 Nov); Andrew switches Settings → Pages → Source to **GitHub Actions**, then one run confirms it.
+6. 📋 Saved target lists for effects; local monster images (storage options listed under Data and edition).
+7. ✅ **Publish only after tests pass** (14 Nov): Pages source switched to GitHub Actions by Andrew; `tests` and `publish` confirmed green. Workflow files are checked before a push (`tools/check_workflows.py`).
 
 Decided 14 Nov (`DESIGN.md` A to C): publish after tests; stay with `localStorage` until size is a problem (plan in Stage 3); the Discord webhook link is left out of the backup file (done).
 
@@ -122,7 +122,14 @@ Open follow-ups from A–G:
 - ✅ Groups / tags (e.g. "Blackrock regulars", "guest players"), filter by group, tick whole group; source shown per character.
 
 ### Data and edition (📋)
-- Local monster images (kept out of the repo).
+- 📋 **Local monster images** (kept out of the repo, like book data). Images do not fit in `localStorage`, so this feature brings its own storage. Options, to choose when it is built:
+  1. **IndexedDB on the device** (suggested start): the browser's built-in database, no practical size limit, works offline, no account. Images are added like "Your files" (a zip or a folder pick). Cost: per device, and lost if the browser data is cleared, so the source files stay the backup.
+  2. **Thumbnails only:** shrink each image on the way in (about 200 px WebP, 10 to 20 KB), so 500 monsters take 5 to 10 MB. Combines with any option below and keeps the iPad fast.
+  3. **Origin Private File System:** real files inside the browser's own storage; good for very large sets, but newer and harder to inspect than IndexedDB. Only if option 1 proves too slow.
+  4. **Read from a link at the table** (your Google Drive / Dropbox folder, cached by the service worker after the first view): nothing to copy per device, but needs the internet once per image, a host in the security policy, and the Drive API allowance.
+  5. **Supabase Storage (private bucket):** one upload, every device; needs a login so the images stay private, which is a new security surface (accounts, access rules). Fits together with the cloud backup in Stage 3, not before.
+  - Not an option: images in the repository or on GitHub Pages (not open content).
+  - In all cases the images stay out of the backup file (too large); the backup notes which image set was loaded.
 - ✅ 2014 / 2024 rules switch (14 Nov): SRD 5.1 spells for 2014 characters, half-caster slots, 2014 monster names.
 - 💡 Data files (reviewed 6 Nov 2026): Kanka and D&D Beyond exports share one character shape. Monster actions stay as stat-block text parsed in the app (your own files use the same format and need no build step). Possible later: monster saves / resistances / immunities as fields in `monsters.json` to drop about 15 lines of text matching in `defs()` / `saveOf()`.
 
@@ -137,7 +144,7 @@ Open follow-ups from A–G:
   1. A warning in the app when storage used passes 70 %.
   2. Monster files (the largest part) into IndexedDB: no practical size limit, same offline behaviour; state stays where it is.
   3. Ask the browser to keep the data (`navigator.storage.persist()`), so iOS does not clear it after a week unused.
-  4. Images in IndexedDB as well (they do not fit in `localStorage` at all).
+  4. Images: see *Local monster images* under Data and edition for the storage options.
   5. Cloud backup (above), which also covers a lost or replaced device.
 
 ## Later ideas (from the original plan)
