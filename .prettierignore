@@ -1,0 +1,9 @@
+# Data files and third-party files keep their own layout
+*.json
+supabase.js
+fonts.css
+statuses.js
+*.md
+*.html
+.github
+local/

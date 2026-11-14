@@ -1,0 +1,1372 @@
+[
+ {
+  "id": 10017493,
+  "name": "Aeliana the Eloquent",
+  "title": null,
+  "race": "Tiefling (Mephistopheles)",
+  "classes": "Bard - 2",
+  "parsed": [
+   {
+    "class": "bard",
+    "subclass": "",
+    "level": 2
+   }
+  ],
+  "level": 2,
+  "notes": [],
+  "abilities": {
+   "str": 8,
+   "dex": 15,
+   "con": 12,
+   "int": 12,
+   "wis": 10,
+   "cha": 17
+  },
+  "mods": {
+   "str": -1,
+   "dex": 2,
+   "con": 1,
+   "int": 1,
+   "wis": 0,
+   "cha": 3
+  },
+  "initMod": 2,
+  "passivePerception": 10,
+  "saves": {
+   "str": -1,
+   "dex": 4,
+   "con": 1,
+   "int": 1,
+   "wis": 0,
+   "cha": 5
+  },
+  "saveProf": [
+   "dex",
+   "cha"
+  ],
+  "resist": [
+   "fire"
+  ],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Hellish Resistance",
+    "text": "Resistance to fire.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 15,
+  "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
+  "url": "https://app.kanka.io/w/227292/entities/10017493",
+  "ddb": [
+   {
+    "id": 172192009,
+    "from": "description"
+   }
+  ]
+ },
+ {
+  "id": 9864074,
+  "name": "Aer Prismray",
+  "title": "Luminary (Lum.)",
+  "race": "Gnome (Forest)",
+  "classes": "Illusion Wizard - 3",
+  "parsed": [
+   {
+    "class": "wizard",
+    "subclass": "illusion",
+    "level": 3
+   }
+  ],
+  "level": 3,
+  "notes": [],
+  "abilities": {
+   "str": 8,
+   "dex": 16,
+   "con": 10,
+   "int": 16,
+   "wis": 14,
+   "cha": 10
+  },
+  "mods": {
+   "str": -1,
+   "dex": 3,
+   "con": 0,
+   "int": 3,
+   "wis": 2,
+   "cha": 0
+  },
+  "initMod": 3,
+  "passivePerception": 14,
+  "saves": {
+   "str": -1,
+   "dex": 3,
+   "con": 0,
+   "int": 5,
+   "wis": 4,
+   "cha": 0
+  },
+  "saveProf": [
+   "int",
+   "wis"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [
+   "cha",
+   "int",
+   "wis"
+  ],
+  "traits": [
+   {
+    "name": "Gnomish Cunning",
+    "text": "Advantage on Int, Wis and Cha saves.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 14,
+  "image": "https://th.kanka.io/fpPcDPZZAjkUnJh0QGuD2py9h3g=/40x40/filters:focal(607x568:627x588)/src/campaigns/227292/01a0974e-d9ab-725d-a6cb-86b6f76aa559/1.jpg",
+  "url": "https://app.kanka.io/w/227292/entities/9864074",
+  "ddb": [
+   {
+    "id": 172192516,
+    "from": "description"
+   }
+  ]
+ },
+ {
+  "id": 9850236,
+  "name": "Alystra Arabana",
+  "title": null,
+  "race": "Half-Elf (Drow)",
+  "classes": "College of Glamour Bard - 3",
+  "parsed": [
+   {
+    "class": "bard",
+    "subclass": "glamour",
+    "level": 3
+   }
+  ],
+  "level": 3,
+  "notes": [],
+  "abilities": {
+   "str": 10,
+   "dex": 14,
+   "con": 13,
+   "int": 10,
+   "wis": 13,
+   "cha": 17
+  },
+  "mods": {
+   "str": 0,
+   "dex": 2,
+   "con": 1,
+   "int": 0,
+   "wis": 1,
+   "cha": 3
+  },
+  "initMod": 2,
+  "passivePerception": 13,
+  "saves": {
+   "str": 0,
+   "dex": 4,
+   "con": 1,
+   "int": 0,
+   "wis": 1,
+   "cha": 5
+  },
+  "saveProf": [
+   "dex",
+   "cha"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Fey Ancestry",
+    "text": "Advantage on saves to avoid or end Charmed; magic can't put it to sleep.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 21,
+  "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
+  "url": "https://app.kanka.io/w/227292/entities/9850236",
+  "ddb": []
+ },
+ {
+  "id": 9810697,
+  "name": "Cromsuns Blacknose",
+  "title": "Blacksmith",
+  "race": "Dwarf (Hill)",
+  "classes": "Cleric, Forge Domain - 2",
+  "parsed": [
+   {
+    "class": "cleric",
+    "subclass": "forge",
+    "level": 2
+   }
+  ],
+  "level": 2,
+  "notes": [],
+  "abilities": {
+   "str": 13,
+   "dex": 8,
+   "con": 16,
+   "int": 12,
+   "wis": 16,
+   "cha": 10
+  },
+  "mods": {
+   "str": 1,
+   "dex": -1,
+   "con": 3,
+   "int": 1,
+   "wis": 3,
+   "cha": 0
+  },
+  "initMod": -1,
+  "passivePerception": 13,
+  "saves": {
+   "str": 1,
+   "dex": -1,
+   "con": 3,
+   "int": 1,
+   "wis": 4,
+   "cha": 2
+  },
+  "saveProf": [
+   "wis",
+   "cha"
+  ],
+  "resist": [
+   "poison"
+  ],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Dwarven Resilience",
+    "text": "Resistance to poison; advantage on saves to avoid or end Poisoned.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 19,
+  "image": "https://th.kanka.io/xizQqgUA9j4OXhQRWwW381xhFLI=/40x40/smart/src/campaigns/227292/01a06b14-40c3-73c7-b813-196997fa7afd/1.png",
+  "url": "https://app.kanka.io/w/227292/entities/9810697",
+  "ddb": []
+ },
+ {
+  "id": 10079510,
+  "name": "Daeva Duzakh",
+  "title": "Graver Robber",
+  "race": "Dhampir with Winged Tiefling Origin",
+  "classes": "Ranger - 1",
+  "parsed": [
+   {
+    "class": "ranger",
+    "subclass": "",
+    "level": 1
+   }
+  ],
+  "level": 1,
+  "notes": [],
+  "abilities": {
+   "str": 12,
+   "dex": 14,
+   "con": 14,
+   "int": 8,
+   "wis": 17,
+   "cha": 10
+  },
+  "mods": {
+   "str": 1,
+   "dex": 2,
+   "con": 2,
+   "int": -1,
+   "wis": 3,
+   "cha": 0
+  },
+  "initMod": 2,
+  "passivePerception": 15,
+  "saves": {
+   "str": 3,
+   "dex": 4,
+   "con": 2,
+   "int": -1,
+   "wis": 3,
+   "cha": 0
+  },
+  "saveProf": [
+   "str",
+   "dex",
+   "con",
+   "int",
+   "wis",
+   "cha"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [],
+  "hpEst": 12,
+  "image": "https://th.kanka.io/zC6PxCBk8DayL7raG_xQ1JQFsyU=/40x40/filters:focal(231x136:251x156)/src/campaigns/227292/01a172e6-bde1-73a6-a3d1-cb839f954f9d/1.png",
+  "url": "https://app.kanka.io/w/227292/entities/10079510",
+  "ddb": []
+ },
+ {
+  "id": 10023006,
+  "name": "Darlock Flintberg",
+  "title": null,
+  "race": "Dwarf (Mark of Warding)",
+  "classes": "Artificer - 2",
+  "parsed": [
+   {
+    "class": "artificer",
+    "subclass": "",
+    "level": 2
+   }
+  ],
+  "level": 2,
+  "notes": [],
+  "abilities": {
+   "str": 10,
+   "dex": 14,
+   "con": 16,
+   "int": 16,
+   "wis": 10,
+   "cha": 8
+  },
+  "mods": {
+   "str": 0,
+   "dex": 2,
+   "con": 3,
+   "int": 3,
+   "wis": 0,
+   "cha": -1
+  },
+  "initMod": 2,
+  "passivePerception": 10,
+  "saves": {
+   "str": 0,
+   "dex": 2,
+   "con": 5,
+   "int": 5,
+   "wis": 0,
+   "cha": -1
+  },
+  "saveProf": [
+   "con",
+   "int"
+  ],
+  "resist": [
+   "poison"
+  ],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Dwarven Resilience",
+    "text": "Resistance to poison; advantage on saves to avoid or end Poisoned.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 19,
+  "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
+  "url": "https://app.kanka.io/w/227292/entities/10023006",
+  "ddb": []
+ },
+ {
+  "id": 9854904,
+  "name": "Dora Maira",
+  "title": "Dr.",
+  "race": "Gnome (Rock)",
+  "classes": "Knowledge Cleric - 2",
+  "parsed": [
+   {
+    "class": "cleric",
+    "subclass": "knowledge",
+    "level": 2
+   }
+  ],
+  "level": 2,
+  "notes": [],
+  "abilities": {
+   "str": 8,
+   "dex": 10,
+   "con": 14,
+   "int": 16,
+   "wis": 15,
+   "cha": 12
+  },
+  "mods": {
+   "str": -1,
+   "dex": 0,
+   "con": 2,
+   "int": 3,
+   "wis": 2,
+   "cha": 1
+  },
+  "initMod": 0,
+  "passivePerception": 12,
+  "saves": {
+   "str": -1,
+   "dex": 0,
+   "con": 2,
+   "int": 3,
+   "wis": 4,
+   "cha": 3
+  },
+  "saveProf": [
+   "wis",
+   "cha"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [
+   "cha",
+   "int",
+   "wis"
+  ],
+  "traits": [
+   {
+    "name": "Gnomish Cunning",
+    "text": "Advantage on Int, Wis and Cha saves.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 17,
+  "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
+  "url": "https://app.kanka.io/w/227292/entities/9854904",
+  "ddb": []
+ },
+ {
+  "id": 9888695,
+  "name": "Enya Anahita",
+  "title": null,
+  "race": "Genasi (Water)",
+  "classes": "Storm Sorcerer - 2",
+  "parsed": [
+   {
+    "class": "sorcerer",
+    "subclass": "storm",
+    "level": 2
+   }
+  ],
+  "level": 2,
+  "notes": [],
+  "abilities": {
+   "str": 8,
+   "dex": 13,
+   "con": 16,
+   "int": 12,
+   "wis": 11,
+   "cha": 15
+  },
+  "mods": {
+   "str": -1,
+   "dex": 1,
+   "con": 3,
+   "int": 1,
+   "wis": 0,
+   "cha": 2
+  },
+  "initMod": 1,
+  "passivePerception": 10,
+  "saves": {
+   "str": -1,
+   "dex": 1,
+   "con": 5,
+   "int": 1,
+   "wis": 0,
+   "cha": 4
+  },
+  "saveProf": [
+   "con",
+   "cha"
+  ],
+  "resist": [
+   "acid"
+  ],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Acid Resistance",
+    "text": "Resistance to acid.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 16,
+  "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
+  "url": "https://app.kanka.io/w/227292/entities/9888695",
+  "ddb": []
+ },
+ {
+  "id": 10056489,
+  "name": "Fritjof Små",
+  "title": "Criminal Playboy",
+  "race": "Halfling",
+  "classes": "Rogue - 2",
+  "parsed": [
+   {
+    "class": "rogue",
+    "subclass": "",
+    "level": 2
+   }
+  ],
+  "level": 2,
+  "notes": [],
+  "abilities": {
+   "str": 8,
+   "dex": 17,
+   "con": 12,
+   "int": 14,
+   "wis": 10,
+   "cha": 14
+  },
+  "mods": {
+   "str": -1,
+   "dex": 3,
+   "con": 1,
+   "int": 2,
+   "wis": 0,
+   "cha": 2
+  },
+  "initMod": 3,
+  "passivePerception": 12,
+  "saves": {
+   "str": -1,
+   "dex": 4,
+   "con": 1,
+   "int": 3,
+   "wis": 0,
+   "cha": 2
+  },
+  "saveProf": [
+   "dex",
+   "int"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Brave",
+    "text": "Advantage on saves to avoid or end Frightened.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 15,
+  "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
+  "url": "https://app.kanka.io/w/227292/entities/10056489",
+  "ddb": [
+   {
+    "id": 172556030,
+    "from": "description"
+   }
+  ]
+ },
+ {
+  "id": 9815497,
+  "name": "Gidion Monkshood",
+  "title": "Tree Gardener",
+  "race": "Elf (Wood)",
+  "classes": "Shepherd Druid - 3",
+  "parsed": [
+   {
+    "class": "druid",
+    "subclass": "shepherd",
+    "level": 3
+   }
+  ],
+  "level": 3,
+  "notes": [],
+  "abilities": {
+   "str": 10,
+   "dex": 16,
+   "con": 14,
+   "int": 10,
+   "wis": 16,
+   "cha": 8
+  },
+  "mods": {
+   "str": 0,
+   "dex": 3,
+   "con": 2,
+   "int": 0,
+   "wis": 3,
+   "cha": -1
+  },
+  "initMod": 3,
+  "passivePerception": 15,
+  "saves": {
+   "str": 0,
+   "dex": 3,
+   "con": 2,
+   "int": 2,
+   "wis": 5,
+   "cha": -1
+  },
+  "saveProf": [
+   "int",
+   "wis"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Fey Ancestry",
+    "text": "Advantage on saves to avoid or end Charmed; magic can't put it to sleep.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 24,
+  "image": "https://th.kanka.io/v6rRZ3ksVCe9Q1WaU_jjsiW-oEI=/40x40/filters:focal(1086x1350:1106x1370)/src/campaigns/227292/01a0a167-53d4-71a0-ac96-85e22c8e38d7/1.jpg",
+  "url": "https://app.kanka.io/w/227292/entities/9815497",
+  "ddb": []
+ },
+ {
+  "id": 9899034,
+  "name": "Gunther Murdock",
+  "title": "The Duke",
+  "race": "Giff",
+  "classes": "Rogue - 2",
+  "parsed": [
+   {
+    "class": "rogue",
+    "subclass": "",
+    "level": 2
+   }
+  ],
+  "level": 2,
+  "notes": [],
+  "abilities": {
+   "str": 10,
+   "dex": 16,
+   "con": 12,
+   "int": 14,
+   "wis": 15,
+   "cha": 8
+  },
+  "mods": {
+   "str": 0,
+   "dex": 3,
+   "con": 1,
+   "int": 2,
+   "wis": 2,
+   "cha": -1
+  },
+  "initMod": 3,
+  "passivePerception": 14,
+  "saves": {
+   "str": 0,
+   "dex": 5,
+   "con": 1,
+   "int": 4,
+   "wis": 2,
+   "cha": -1
+  },
+  "saveProf": [
+   "dex",
+   "int"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [],
+  "hpEst": 15,
+  "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
+  "url": "https://app.kanka.io/w/227292/entities/9899034",
+  "ddb": []
+ },
+ {
+  "id": 9815472,
+  "name": "Harold 'Hal' Sorofield",
+  "title": null,
+  "race": "Half-Elf",
+  "classes": "Barbarian - 1",
+  "parsed": [
+   {
+    "class": "barbarian",
+    "subclass": "",
+    "level": 1
+   }
+  ],
+  "level": 1,
+  "notes": [],
+  "abilities": {
+   "str": 16,
+   "dex": 8,
+   "con": 16,
+   "int": 10,
+   "wis": 8,
+   "cha": 16
+  },
+  "mods": {
+   "str": 3,
+   "dex": -1,
+   "con": 3,
+   "int": 0,
+   "wis": -1,
+   "cha": 3
+  },
+  "initMod": -1,
+  "passivePerception": 9,
+  "saves": {
+   "str": 5,
+   "dex": -1,
+   "con": 5,
+   "int": 0,
+   "wis": -1,
+   "cha": 3
+  },
+  "saveProf": [
+   "str",
+   "con"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Fey Ancestry",
+    "text": "Advantage on saves to avoid or end Charmed; magic can't put it to sleep.",
+    "src": "species"
+   },
+   {
+    "name": "Rage",
+    "text": "While raging: resistance to bludgeoning, piercing and slashing; advantage on Str checks and saves.",
+    "src": "barbarian"
+   }
+  ],
+  "hpEst": 15,
+  "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
+  "url": "https://app.kanka.io/w/227292/entities/9815472",
+  "ddb": []
+ },
+ {
+  "id": 9815460,
+  "name": "Isis",
+  "title": null,
+  "race": "Human",
+  "classes": "Wizard - 1",
+  "parsed": [
+   {
+    "class": "wizard",
+    "subclass": "",
+    "level": 1
+   }
+  ],
+  "level": 1,
+  "notes": [],
+  "abilities": {
+   "str": 8,
+   "dex": 10,
+   "con": 14,
+   "int": 16,
+   "wis": 14,
+   "cha": 12
+  },
+  "mods": {
+   "str": -1,
+   "dex": 0,
+   "con": 2,
+   "int": 3,
+   "wis": 2,
+   "cha": 1
+  },
+  "initMod": 0,
+  "passivePerception": 12,
+  "saves": {
+   "str": -1,
+   "dex": 0,
+   "con": 2,
+   "int": 5,
+   "wis": 4,
+   "cha": 1
+  },
+  "saveProf": [
+   "int",
+   "wis"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [],
+  "hpEst": 8,
+  "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
+  "url": "https://app.kanka.io/w/227292/entities/9815460",
+  "ddb": []
+ },
+ {
+  "id": 9850209,
+  "name": "Lorenz Ravencrest",
+  "title": null,
+  "race": "Human (Variant)",
+  "classes": "Paladin - 2",
+  "parsed": [
+   {
+    "class": "paladin",
+    "subclass": "",
+    "level": 2
+   }
+  ],
+  "level": 2,
+  "notes": [],
+  "abilities": {
+   "str": 16,
+   "dex": 10,
+   "con": 14,
+   "int": 8,
+   "wis": 8,
+   "cha": 16
+  },
+  "mods": {
+   "str": 3,
+   "dex": 0,
+   "con": 2,
+   "int": -1,
+   "wis": -1,
+   "cha": 3
+  },
+  "initMod": 0,
+  "passivePerception": 9,
+  "saves": {
+   "str": 3,
+   "dex": 0,
+   "con": 2,
+   "int": -1,
+   "wis": 1,
+   "cha": 5
+  },
+  "saveProf": [
+   "wis",
+   "cha"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [],
+  "hpEst": 20,
+  "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
+  "url": "https://app.kanka.io/w/227292/entities/9850209",
+  "ddb": []
+ },
+ {
+  "id": 10022982,
+  "name": "Malenka Mudclaw",
+  "title": "Shaman",
+  "race": "Goblin",
+  "classes": "Druid - 2",
+  "parsed": [
+   {
+    "class": "druid",
+    "subclass": "",
+    "level": 2
+   }
+  ],
+  "level": 2,
+  "notes": [],
+  "abilities": {
+   "str": 10,
+   "dex": 16,
+   "con": 14,
+   "int": 12,
+   "wis": 15,
+   "cha": 8
+  },
+  "mods": {
+   "str": 0,
+   "dex": 3,
+   "con": 2,
+   "int": 1,
+   "wis": 2,
+   "cha": -1
+  },
+  "initMod": 3,
+  "passivePerception": 14,
+  "saves": {
+   "str": 0,
+   "dex": 3,
+   "con": 2,
+   "int": 3,
+   "wis": 4,
+   "cha": -1
+  },
+  "saveProf": [
+   "int",
+   "wis"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Fey Ancestry",
+    "text": "Advantage on saves to avoid or end Charmed.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 17,
+  "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
+  "url": "https://app.kanka.io/w/227292/entities/10022982",
+  "ddb": []
+ },
+ {
+  "id": 10056511,
+  "name": "Miria Ashfall",
+  "title": null,
+  "race": "Tiefling (Zariel)",
+  "classes": "Warlock - 2",
+  "parsed": [
+   {
+    "class": "warlock",
+    "subclass": "",
+    "level": 2
+   }
+  ],
+  "level": 2,
+  "notes": [],
+  "abilities": {
+   "str": 9,
+   "dex": 14,
+   "con": 14,
+   "int": 12,
+   "wis": 10,
+   "cha": 16
+  },
+  "mods": {
+   "str": -1,
+   "dex": 2,
+   "con": 2,
+   "int": 1,
+   "wis": 0,
+   "cha": 3
+  },
+  "initMod": 2,
+  "passivePerception": 10,
+  "saves": {
+   "str": -1,
+   "dex": 2,
+   "con": 2,
+   "int": 1,
+   "wis": 2,
+   "cha": 5
+  },
+  "saveProf": [
+   "wis",
+   "cha"
+  ],
+  "resist": [
+   "fire"
+  ],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Hellish Resistance",
+    "text": "Resistance to fire.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 17,
+  "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
+  "url": "https://app.kanka.io/w/227292/entities/10056511",
+  "ddb": []
+ },
+ {
+  "id": 9799958,
+  "name": "Mortimer Blackwell",
+  "title": "Occult Consultant | Fortune Teller | Prize Fighter",
+  "race": "Kalashtar (Half-Elf Origin)",
+  "classes": "Fighter, Rune Knight - 3",
+  "parsed": [
+   {
+    "class": "fighter",
+    "subclass": "rune",
+    "level": 3
+   }
+  ],
+  "level": 3,
+  "notes": [],
+  "abilities": {
+   "str": 16,
+   "dex": 13,
+   "con": 14,
+   "int": 14,
+   "wis": 10,
+   "cha": 8
+  },
+  "mods": {
+   "str": 3,
+   "dex": 1,
+   "con": 2,
+   "int": 2,
+   "wis": 0,
+   "cha": -1
+  },
+  "initMod": 1,
+  "passivePerception": 12,
+  "saves": {
+   "str": 5,
+   "dex": 1,
+   "con": 4,
+   "int": 2,
+   "wis": 0,
+   "cha": -1
+  },
+  "saveProf": [
+   "str",
+   "con"
+  ],
+  "resist": [
+   "psychic"
+  ],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [
+   "wis"
+  ],
+  "traits": [
+   {
+    "name": "Dual Mind",
+    "text": "Advantage on all Wis saves; resistance to psychic.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 28,
+  "image": "https://th.kanka.io/hVpeZacQnWVYO67fxWrlK9_nd0E=/40x40/filters:focal(250x167:270x187)/src/campaigns/227292/01a16902-df12-73aa-8470-332e41a576a2/1.png",
+  "url": "https://app.kanka.io/w/227292/entities/9799958",
+  "ddb": []
+ },
+ {
+  "id": 9938950,
+  "name": "Petris Elderdew",
+  "title": null,
+  "race": "Firbolg",
+  "classes": "Ranger - 2",
+  "parsed": [
+   {
+    "class": "ranger",
+    "subclass": "",
+    "level": 2
+   }
+  ],
+  "level": 2,
+  "notes": [],
+  "abilities": {
+   "str": 10,
+   "dex": 16,
+   "con": 13,
+   "int": 8,
+   "wis": 16,
+   "cha": 12
+  },
+  "mods": {
+   "str": 0,
+   "dex": 3,
+   "con": 1,
+   "int": -1,
+   "wis": 3,
+   "cha": 1
+  },
+  "initMod": 3,
+  "passivePerception": 15,
+  "saves": {
+   "str": 2,
+   "dex": 5,
+   "con": 1,
+   "int": -1,
+   "wis": 3,
+   "cha": 1
+  },
+  "saveProf": [
+   "str",
+   "dex"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [],
+  "hpEst": 18,
+  "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
+  "url": "https://app.kanka.io/w/227292/entities/9938950",
+  "ddb": []
+ },
+ {
+  "id": 9888842,
+  "name": "Phaeanna Nyx",
+  "title": null,
+  "race": "Genasi (Fire)",
+  "classes": "Artificer - 2",
+  "parsed": [
+   {
+    "class": "artificer",
+    "subclass": "",
+    "level": 2
+   }
+  ],
+  "level": 2,
+  "notes": [],
+  "abilities": {
+   "str": 10,
+   "dex": 14,
+   "con": 15,
+   "int": 16,
+   "wis": 8,
+   "cha": 12
+  },
+  "mods": {
+   "str": 0,
+   "dex": 2,
+   "con": 2,
+   "int": 3,
+   "wis": -1,
+   "cha": 1
+  },
+  "initMod": 2,
+  "passivePerception": 9,
+  "saves": {
+   "str": 0,
+   "dex": 2,
+   "con": 4,
+   "int": 5,
+   "wis": -1,
+   "cha": 1
+  },
+  "saveProf": [
+   "con",
+   "int"
+  ],
+  "resist": [
+   "fire"
+  ],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Fire Resistance",
+    "text": "Resistance to fire.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 17,
+  "image": "https://th.kanka.io/pIrDX7ABFgw16t31Sk8oX8R5gGk=/40x40/filters:focal(823x476:843x496)/src/campaigns/227292/01a0a613-d240-7151-8106-135df706749b/1.png",
+  "url": "https://app.kanka.io/w/227292/entities/9888842",
+  "ddb": []
+ },
+ {
+  "id": 9996654,
+  "name": "Scent of the Moon",
+  "title": null,
+  "race": "Tabaxi",
+  "classes": "Ranger - 2",
+  "parsed": [
+   {
+    "class": "ranger",
+    "subclass": "",
+    "level": 2
+   }
+  ],
+  "level": 2,
+  "notes": [],
+  "abilities": {
+   "str": 10,
+   "dex": 16,
+   "con": 13,
+   "int": 12,
+   "wis": 15,
+   "cha": 9
+  },
+  "mods": {
+   "str": 0,
+   "dex": 3,
+   "con": 1,
+   "int": 1,
+   "wis": 2,
+   "cha": -1
+  },
+  "initMod": 3,
+  "passivePerception": 14,
+  "saves": {
+   "str": 2,
+   "dex": 5,
+   "con": 1,
+   "int": 1,
+   "wis": 2,
+   "cha": -1
+  },
+  "saveProf": [
+   "str",
+   "dex"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [],
+  "hpEst": 18,
+  "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
+  "url": "https://app.kanka.io/w/227292/entities/9996654",
+  "ddb": []
+ },
+ {
+  "id": 9815450,
+  "name": "Se Untrum",
+  "title": null,
+  "race": "Changeling",
+  "classes": "Rogue - 3",
+  "parsed": [
+   {
+    "class": "rogue",
+    "subclass": "",
+    "level": 3
+   }
+  ],
+  "level": 3,
+  "notes": [],
+  "abilities": {
+   "str": 8,
+   "dex": 14,
+   "con": 13,
+   "int": 10,
+   "wis": 16,
+   "cha": 14
+  },
+  "mods": {
+   "str": -1,
+   "dex": 2,
+   "con": 1,
+   "int": 0,
+   "wis": 3,
+   "cha": 2
+  },
+  "initMod": 2,
+  "passivePerception": 15,
+  "saves": {
+   "str": -1,
+   "dex": 4,
+   "con": 1,
+   "int": 2,
+   "wis": 3,
+   "cha": 2
+  },
+  "saveProf": [
+   "dex",
+   "int"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [],
+  "hpEst": 21,
+  "image": "https://th.kanka.io/uv-4nLmZ5gGuKM3TifrCDkytb1I=/40x40/smart/src/campaigns/227292/01a06b12-c948-7295-a774-4a4e26d679d1/1.png",
+  "url": "https://app.kanka.io/w/227292/entities/9815450",
+  "ddb": []
+ },
+ {
+  "id": 9824051,
+  "name": "Trash",
+  "title": "Son of Chicken Jr.",
+  "race": "Hobgoblin",
+  "classes": "Monk - 2",
+  "parsed": [
+   {
+    "class": "monk",
+    "subclass": "",
+    "level": 2
+   }
+  ],
+  "level": 2,
+  "notes": [],
+  "abilities": {
+   "str": 10,
+   "dex": 16,
+   "con": 14,
+   "int": 8,
+   "wis": 14,
+   "cha": 8
+  },
+  "mods": {
+   "str": 0,
+   "dex": 3,
+   "con": 2,
+   "int": -1,
+   "wis": 2,
+   "cha": -1
+  },
+  "initMod": 3,
+  "passivePerception": 12,
+  "saves": {
+   "str": 2,
+   "dex": 5,
+   "con": 2,
+   "int": -1,
+   "wis": 2,
+   "cha": -1
+  },
+  "saveProf": [
+   "str",
+   "dex"
+  ],
+  "resist": [],
+  "immune": [],
+  "vulnerable": [],
+  "condImmune": [],
+  "advSaves": [],
+  "traits": [
+   {
+    "name": "Fey Ancestry",
+    "text": "Advantage on saves to avoid or end Charmed.",
+    "src": "species"
+   }
+  ],
+  "hpEst": 17,
+  "image": "https://cdn-app.kanka.io/images/defaults/subscribers/characters.jpeg",
+  "url": "https://app.kanka.io/w/227292/entities/9824051",
+  "ddb": []
+ }
+]

@@ -1,0 +1,2 @@
+# D&D Beyond characters to import (one link or id per line). Sheets must be set to Public.
+https://www.dndbeyond.com/characters/172192516  # Aer Prismray

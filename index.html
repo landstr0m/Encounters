@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Encounter Tracker</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Encounters">
+<meta name="theme-color" content="#7a3b2e" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#121418" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="app.css">
+<link rel="preload" as="script" href="js/rules.js">
+<link rel="preload" as="script" href="js/state.js">
+<link rel="preload" as="script" href="js/bar.js">
+<link rel="preload" as="script" href="js/actions.js">
+<link rel="preload" as="script" href="js/board.js">
+<link rel="preload" as="script" href="js/drawer.js">
+<link rel="preload" as="script" href="js/datatab.js">
+<link rel="preload" as="script" href="js/sheet.js">
+<link rel="preload" as="script" href="js/parser.js">
+<link rel="preload" as="script" href="js/events.js">
+<link rel="preload" as="script" href="js/session.js">
+</head>
+<body>
+<div class="head">
+  <div class="bar" id="bar"></div>
+  <div class="strip" id="strip" aria-label="Initiative order"></div>
+  <div class="turn dmonly" id="turn" hidden></div>
+</div>
+<div class="big" id="big"></div>
+<div class="env dmonly" id="env" hidden></div>
+<div class="xpb dmonly" id="xpb" hidden></div>
+<div class="tw dmonly"><table id="tbl" aria-label="Combatants"></table></div>
+<div class="pad dmonly" id="pad" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-label="Add combatants and stat blocks"></aside>
+
+<script src="statuses.js"></script>
+<!-- The program: js/boot.js loads monsters.json, then the parts in js/ (see the code map at the top of js/boot.js). -->
+<script src="js/boot.js"></script>
+</body></html>
